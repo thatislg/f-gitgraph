@@ -2,12 +2,15 @@ import { useRef, useState } from "preact/hooks";
 
 import type { GitCommitNode, GitRef } from "@/backend/types";
 import { abbrevCommit } from "@/backend/utils/string";
+import type { ZoomedAvatarInfo } from "@/webview/components/commit/AvatarZoomPreview";
+import { getCommitNodeType } from "@/webview/components/commit/HexagonNode";
 import { RefLabel } from "@/webview/components/commit/RefLabel";
 import { UNCOMMITTED_CHANGES } from "@/webview/constants";
 import { openContextMenu } from "@/webview/lib/actions";
 import type { CommitMessages } from "@/webview/lib/menus";
 import { commitMenu, commitMenuSource } from "@/webview/lib/menus";
 import { activeSource, uncommittedChanges } from "@/webview/lib/stores";
+import { getGitAccountAvatarUrl } from "@/webview/utils/avatar";
 import { getCommitDate } from "@/webview/utils/date";
 import { format } from "@/webview/utils/format";
 
@@ -31,6 +34,12 @@ type CommitRowProps = {
   onHoverDwell?: ((commit: GitCommitNode, rect: DOMRect) => void) | undefined;
   /** Callback fired when hover ends */
   onHoverLeave?: (() => void) | undefined;
+  /** Callback fired when clicking directly on the avatar node in the graph cell */
+  onAvatarClick?: ((info: ZoomedAvatarInfo) => void) | undefined;
+  /** Callback fired when hovering directly over the avatar node in the graph cell */
+  onAvatarHover?:
+    | ((info: { author: string; x: number; y: number; colour: string } | null) => void)
+    | undefined;
 };
 
 const CELL_CLASS = "h-6 overflow-hidden text-ellipsis whitespace-nowrap px-1 leading-6";
@@ -77,7 +86,9 @@ export function CommitRow({
   onHover,
   avatarRightX,
   onHoverDwell,
-  onHoverLeave
+  onHoverLeave,
+  onAvatarClick,
+  onAvatarHover
 }: CommitRowProps) {
   const rowRef = useRef<HTMLTableRowElement>(null);
   const dwellTimer = useRef<number | null>(null);
@@ -93,6 +104,8 @@ export function CommitRow({
   const refs = orderRefs(commit.refs, headBranch);
 
   const branchColourVal = colour ?? "var(--color-graph, #0085d9)";
+  const avatarCx = avatarRightX !== undefined ? avatarRightX - 10 : undefined;
+
   // Flameshot neon purple glowing border around the selected commit row
   const rowStyleString = [
     colour !== undefined ? `--color-graph: ${colour}` : "",
@@ -135,11 +148,53 @@ export function CommitRow({
   const handleMouseLeave = () => {
     setIsRowHovered(false);
     onHover?.(false);
+    onAvatarHover?.(null);
     if (dwellTimer.current !== null) {
       window.clearTimeout(dwellTimer.current);
       dwellTimer.current = null;
     }
     onHoverLeave?.();
+  };
+
+  const handleGraphCellClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (avatarCx !== undefined && !uncommitted) {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      if (Math.abs(clickX - avatarCx) <= 14) {
+        onAvatarClick?.({
+          commit,
+          anchorRect: new DOMRect(rect.left + avatarCx - 10, rect.top + 2, 20, 20),
+          colour: branchColourVal,
+          author: commit.author,
+          avatarUrl: commit.email ? getGitAccountAvatarUrl(commit.email) : undefined,
+          nodeType: getCommitNodeType(commit, { isCurrent: isHead, isCommitted: !uncommitted })
+        });
+        return;
+      }
+    }
+    onSelect?.();
+  };
+
+  const handleGraphCellMouseMove = (e: MouseEvent) => {
+    if (avatarCx !== undefined && !uncommitted && commit.author) {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      if (Math.abs(mouseX - avatarCx) <= 14) {
+        onAvatarHover?.({
+          author: commit.author,
+          x: rect.left + avatarCx,
+          y: rect.bottom + 2,
+          colour: branchColourVal
+        });
+        return;
+      }
+    }
+    onAvatarHover?.(null);
+  };
+
+  const handleGraphCellMouseLeave = () => {
+    onAvatarHover?.(null);
   };
 
   return (
@@ -156,7 +211,13 @@ export function CommitRow({
           : (event) => openContextMenu(event, source, commitMenu(commit, messages))
       }
     >
-      <td class={`${CELL_CLASS} pointer-events-none`} style={graphCellStyle} />
+      <td
+        class={CELL_CLASS}
+        style={graphCellStyle}
+        onClick={handleGraphCellClick}
+        onMouseMove={handleGraphCellMouseMove}
+        onMouseLeave={handleGraphCellMouseLeave}
+      />
       <td class={`${CELL_CLASS} w-full max-w-0 pl-2.5 ${isHead ? "shadow-head" : ""}`}>
         <div class="flex min-w-0 items-center">
           {isHead && (
@@ -178,15 +239,9 @@ export function CommitRow({
           </span>
         </div>
       </td>
-      <td class={CELL_CLASS} title={date.title}>
-        {date.value}
-      </td>
-      <td class={`${CELL_CLASS} max-w-31`} title={`${commit.author} <${commit.email}>`}>
-        {commit.author}
-      </td>
-      <td class={`${CELL_CLASS} font-mono`} title={commit.hash}>
-        {abbrevCommit(commit.hash)}
-      </td>
+      <td class={CELL_CLASS}>{date.value}</td>
+      <td class={`${CELL_CLASS} max-w-31`}>{commit.author}</td>
+      <td class={`${CELL_CLASS} font-mono`}>{abbrevCommit(commit.hash)}</td>
     </tr>
   );
 }

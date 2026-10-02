@@ -177,8 +177,9 @@ describe("HexagonNode rendering", () => {
     );
     expect(image?.getAttribute("clip-path")).toContain("url(#hex-avatar-");
 
+    // Verify native white tooltip <title> tag is eliminated
     const title = container.querySelector("title");
-    expect(title?.textContent).toBe("Alice");
+    expect(title).toBeNull();
   });
 
   it("applies micro-interaction scale(1.15) on hover or selection", () => {

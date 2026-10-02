@@ -52,7 +52,7 @@ describe("CommitRow", () => {
     const messageRegion = description?.querySelector(":scope > div > span:last-child");
 
     expect(refRegion?.classList.contains("max-w-1/2")).toBe(true);
-    expect(refRegion?.querySelector("[title]")?.getAttribute("title")).toBe(branch);
+    expect(refRegion?.querySelector("[data-ref-name]")?.getAttribute("data-ref-name")).toBe(branch);
     expect(messageRegion?.classList.contains("flex-1")).toBe(true);
     expect(messageRegion?.textContent).toBe(message);
   });

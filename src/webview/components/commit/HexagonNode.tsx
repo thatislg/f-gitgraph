@@ -219,7 +219,6 @@ export function HexagonNode({
       }}
       onClick={handleClick}
     >
-      {author && <title>{author}</title>}
 
       {/* Background mask: hides branch line underneath node */}
       <polygon

@@ -53,7 +53,7 @@ export function CommitHoverPanel({
   }, [anchorRect]);
 
   const avatarUrl = getGitAccountAvatarUrl(commit.email, 40);
-  const relativeDate = getCommitDate(commit.date);
+  const relativeDate = getCommitDate(commit.date).value;
   const fullDate = getFullDate(commit.date);
 
   return (
@@ -91,9 +91,9 @@ export function CommitHoverPanel({
           </div>
 
           <div class="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-editor-fg/70">
-            <span title={commit.email}>{commit.email}</span>
+            <span>{commit.email}</span>
             <span>•</span>
-            <span title={fullDate}>{relativeDate}</span>
+            <span>{relativeDate} ({fullDate})</span>
           </div>
 
           {commit.refs.length > 0 && (
