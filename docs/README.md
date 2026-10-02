@@ -19,3 +19,14 @@ Tài liệu kỹ thuật và kiến trúc cho dự án Neo Git Graph.
 - [12. Highlight Màu cho Tag/Release Pill & Custom Author Tooltip](12_RefPillHighlightAndCustomAuthorTooltip.md): Xóa bỏ toàn bộ tooltip mặc định nền trắng, highlight màu rực rỡ cho Tag/Release và Remote branch, duy trì hover scale trên cột graph.
 - [13. Tinh chỉnh Tương tác Hover Cột Graph & Vùng Kích hoạt Commit Message Panel](13_GraphColumnHoverBehaviorAndMessagePanelTrigger.md): Không hiện nhãn tên khi hover trong cột graph, giữ nguyên tên khi click icon 5x, chỉ kích hoạt Commit Message Panel từ cột mô tả trở sang phải.
 - [14. Khóa Commit Message Panel Khi Đang Chọn Dòng Commit](14_SuppressCommitMessagePanelWhenCommitSelected.md): Khóa và chặn hiển thị commit message panel trên toàn bộ các dòng khi đang có 1 commit mở xem chi tiết, tự động mở khóa khi unselect.
+
+---
+
+## Nghiên cứu & Thiết kế Nhân Core Git Engine (F#)
+
+Thư mục [`docs/core_git/`](core_git/README.md) tập trung nghiên cứu, tổng hợp các lỗi thao tác Git và thiết kế chuyển đổi tầng nhân (Core Engine) từ TypeScript sang **F# (.NET / Native AOT)** để xử lý các repository quy mô lớn (20.000 - 100.000+ commits).
+
+- **[Core Git Overview & Architecture Comparison](core_git/README.md)**: Tổng quan, động lực chuyển đổi và bảng so sánh hiệu năng giữa TypeScript và F#.
+- **[01. Phân tích Các Điểm Nghẽn Hiệu Năng trong TypeScript](core_git/01_TypeScript_Performance_Bottlenecks.md)**: Mổ xẻ chi tiết overhead spawn process trên Windows, V8 GC thrashing, nghẽn IPC JSON và layout đơn luồng.
+- **[02. Phân loại & Bảng Tổng hợp Lỗi Thao tác Git](core_git/02_Git_Operation_Errors_Taxonomy.md)**: Danh mục các lỗi git thực tế (file locks, in-flight states, shallow clones, detached HEAD, path length, UTF-8 encoding).
+- **[03. Thiết kế Kiến trúc Nhân Core Git bằng F#](core_git/03_FSharp_Core_Architecture_Design.md)**: Thiết kế kiểu dữ liệu F# Domain-Driven, tích hợp LibGit2 / Native AOT, thuật toán tính lane song song và giao thức streaming IPC.
