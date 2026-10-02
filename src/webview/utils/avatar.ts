@@ -21,6 +21,15 @@ function rol(num: number, cnt: number): number {
   return (num << cnt) | (num >>> (32 - cnt));
 }
 
+function wordToHex(val: number): string {
+  let out = "";
+  for (let j = 0; j < 4; j++) {
+    const byte = (val >>> (j * 8)) & 0xff;
+    out += byte.toString(16).padStart(2, "0");
+  }
+  return out;
+}
+
 export function md5(str: string): string {
   // 1. Convert string to UTF-8 byte array
   const bytes: number[] = [];
@@ -90,8 +99,8 @@ export function md5(str: string): string {
     let dd = d;
 
     for (let i = 0; i < 64; i++) {
-      let f = 0;
-      let g = 0;
+      let f: number;
+      let g: number;
       if (i < 16) {
         f = (bb & cc) | (~bb & dd);
         g = i;
@@ -123,17 +132,7 @@ export function md5(str: string): string {
     d = (d + dd) | 0;
   }
 
-  // 6. Format to 32-character little-endian hex string
-  const toHex = (val: number): string => {
-    let out = "";
-    for (let j = 0; j < 4; j++) {
-      const byte = (val >>> (j * 8)) & 0xff;
-      out += byte.toString(16).padStart(2, "0");
-    }
-    return out;
-  };
-
-  return toHex(a) + toHex(b) + toHex(c) + toHex(d);
+  return wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d);
 }
 
 const gitHubNoReplyRegex = /^(?:(\d+)\+)?([a-zA-Z\d-]{1,39})@users\.noreply\.(.*)$/i;

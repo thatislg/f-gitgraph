@@ -31,7 +31,9 @@ export function CommitHoverPanel({
   });
 
   useLayoutEffect(() => {
-    if (!panelRef.current) return;
+    if (!panelRef.current) {
+      return;
+    }
     const panel = panelRef.current;
     const panelRect = panel.getBoundingClientRect();
     const windowWidth = window.innerWidth;

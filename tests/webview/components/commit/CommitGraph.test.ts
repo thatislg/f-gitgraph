@@ -5,6 +5,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import type { GitCommitNode } from "@/backend/types";
 import type { GraphLayout } from "@/webview/graph/types";
+
 import { setupWebviewTest } from "@tests/webview/test-utils";
 
 let CommitGraph: typeof import("@/webview/components/commit/CommitGraph").CommitGraph;

@@ -4,6 +4,7 @@ import { h, render } from "preact";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import type { GitCommitNode } from "@/backend/types";
+
 import { setupWebviewTest } from "@tests/webview/test-utils";
 
 let HexagonNode: typeof import("@/webview/components/commit/HexagonNode").HexagonNode;
