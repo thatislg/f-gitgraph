@@ -57,4 +57,37 @@ describe("CommitRow", () => {
     expect(messageRegion?.getAttribute("title")).toBe(message);
     expect(messageRegion?.textContent).toBe(message);
   });
+
+  it("applies ambient gradient highlight when expanded (selected)", () => {
+    const commit: GitCommitNode = {
+      hash: "def456",
+      parentHashes: [],
+      author: "Author",
+      email: "author@example.com",
+      date: 0,
+      message: "Test message",
+      refs: []
+    };
+    container = document.createElement("tbody");
+
+    render(
+      h(CommitRow, {
+        commit,
+        isHead: false,
+        headBranch: null,
+        messages: new Map(),
+        colour: "#ff5500",
+        expanded: true,
+        onSelect: () => {}
+      }),
+      container
+    );
+
+    const row = container.querySelector("tr");
+    expect(row).not.toBeNull();
+    const style = row?.getAttribute("style") ?? "";
+    expect(style).toContain("--color-graph: #ff5500");
+    expect(style).toContain("background-image: linear-gradient");
+    expect(style).toContain("#ff5500");
+  });
 });

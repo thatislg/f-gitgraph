@@ -42,7 +42,7 @@ export function CommitGraph({
 
   return (
     <svg
-      class="block"
+      class="block overflow-visible"
       width={graphWidth(layout)}
       height={graphHeight(layout, expansion)}
       aria-hidden="true"

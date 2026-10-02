@@ -19,7 +19,7 @@ export function rowY(y: number): number {
 }
 
 export function graphWidth(layout: GraphLayout): number {
-  return layout.lanes * LANE_WIDTH;
+  return Math.max(0, layout.lanes - 1) * LANE_WIDTH + LANE_OFFSET * 2;
 }
 
 export function graphHeight(layout: GraphLayout, expansion: GraphExpansion | null): number {

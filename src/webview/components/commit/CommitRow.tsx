@@ -77,10 +77,20 @@ export function CommitRow({
   const menuOpen = activeSource.value === source;
   const refs = orderRefs(commit.refs, headBranch);
 
+  const branchColourVal = colour ?? "var(--color-graph, #0085d9)";
+  const rowStyleString = [
+    colour !== undefined ? `--color-graph: ${colour}` : "",
+    expanded
+      ? `background-image: linear-gradient(to right, color-mix(in srgb, ${branchColourVal} 18%, transparent) 0%, color-mix(in srgb, ${branchColourVal} 10%, transparent) 160px, color-mix(in srgb, ${branchColourVal} 3%, transparent) 360px, transparent 600px)`
+      : ""
+  ]
+    .filter(Boolean)
+    .join("; ");
+
   return (
     <tr
       class={rowClass(isHead, expanded, onSelect !== undefined, menuOpen)}
-      style={colour === undefined ? undefined : `--color-graph: ${colour}`}
+      style={rowStyleString.length > 0 ? rowStyleString : undefined}
       onClick={onSelect}
       onMouseEnter={() => onHover?.(true)}
       onMouseLeave={() => onHover?.(false)}

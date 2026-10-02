@@ -9,3 +9,4 @@ Tài liệu kỹ thuật và kiến trúc cho dự án Neo Git Graph.
 - [02. Thiết kế Tích hợp Git Account Avatar vào Hexagon Node](02_CommitAvatarDesign.md): Cơ chế băm MD5 chuẩn Gravatar và trích xuất GitHub avatar cho commit author.
 - [03. Tối ưu kích thước Hexagon Node & Khắc phục khoảng đen Avatar](03_HexagonSizeAndAvatarFit.md): Khắc phục khoảng đen ở các góc bằng Hexagon ClipPath và mở rộng kích thước Hexagon xấp xỉ chiều cao 1 dòng (24px).
 - [04. Chuẩn hóa SVG Clipping Lục giác & Micro-interaction Hover Scale](04_HexagonClippingAndMicroInteractions.md): Ẩn hoàn toàn phần thừa của ảnh avatar bằng chuẩn SVG clip-path và thêm hiệu ứng micro-interaction hover/selected scale(1.15) mượt mà.
+- [05. Ambient Gradient Highlight & Tối ưu Khoảng đệm Graph Node](05_AmbientHighlightAndGraphMargins.md): Hiệu ứng hửng sáng gradient theo màu nhánh khi chọn commit và mở rộng khoảng đệm lề trái/phải để bảo vệ node khi phóng to.
