@@ -58,7 +58,7 @@ describe("CommitRow", () => {
     expect(messageRegion?.textContent).toBe(message);
   });
 
-  it("applies ambient gradient highlight when expanded (selected)", () => {
+  it("applies Flameshot purple glowing border and neon ambient gradient when selected", () => {
     const commit: GitCommitNode = {
       hash: "def456",
       parentHashes: [],
@@ -78,6 +78,7 @@ describe("CommitRow", () => {
         messages: new Map(),
         colour: "#ff5500",
         expanded: true,
+        avatarRightX: 27,
         onSelect: () => {}
       }),
       container
@@ -87,7 +88,15 @@ describe("CommitRow", () => {
     expect(row).not.toBeNull();
     const style = row?.getAttribute("style") ?? "";
     expect(style).toContain("--color-graph: #ff5500");
-    expect(style).toContain("background-image: linear-gradient");
-    expect(style).toContain("#ff5500");
+    // Flameshot glowing purple border
+    expect(style).toContain("outline: 1.5px solid #a855f7");
+    expect(style).toContain("box-shadow: 0 0 10px rgba(168, 85, 247, 0.45)");
+
+    // Neon gradient on graph cell starting from avatar right edge (27px)
+    const graphCell = container.querySelector("td:first-child");
+    const graphCellStyle = graphCell?.getAttribute("style") ?? "";
+    expect(graphCellStyle).toContain("linear-gradient");
+    expect(graphCellStyle).toContain("transparent 27px");
+    expect(graphCellStyle).toMatch(/(#ff5500|255, 85, 0)/);
   });
 });

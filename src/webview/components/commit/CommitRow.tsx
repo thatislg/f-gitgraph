@@ -23,6 +23,8 @@ type CommitRowProps = {
   onSelect: (() => void) | undefined;
   /** Callback fired when the row is hovered or unhovered */
   onHover?: ((hovered: boolean) => void) | undefined;
+  /** X coordinate of the right edge of this row's commit avatar in the graph column */
+  avatarRightX?: number | undefined;
 };
 
 const CELL_CLASS = "h-6 overflow-hidden text-ellipsis whitespace-nowrap px-1 leading-6";
@@ -66,7 +68,8 @@ export function CommitRow({
   colour,
   expanded,
   onSelect,
-  onHover
+  onHover,
+  avatarRightX
 }: CommitRowProps) {
   const uncommitted = commit.hash === UNCOMMITTED_CHANGES;
   const message = uncommitted
@@ -78,14 +81,25 @@ export function CommitRow({
   const refs = orderRefs(commit.refs, headBranch);
 
   const branchColourVal = colour ?? "var(--color-graph, #0085d9)";
+  // Flameshot neon purple glowing border around the selected commit row
   const rowStyleString = [
     colour !== undefined ? `--color-graph: ${colour}` : "",
     expanded
-      ? `background-image: linear-gradient(to right, color-mix(in srgb, ${branchColourVal} 18%, transparent) 0%, color-mix(in srgb, ${branchColourVal} 10%, transparent) 160px, color-mix(in srgb, ${branchColourVal} 3%, transparent) 360px, transparent 600px)`
+      ? "outline: 1.5px solid #a855f7; outline-offset: -1.5px; box-shadow: 0 0 10px rgba(168, 85, 247, 0.45), inset 0 0 6px rgba(168, 85, 247, 0.2); position: relative; z-index: 5;"
       : ""
   ]
     .filter(Boolean)
     .join("; ");
+
+  // Neon ambient light on the graph column: transparent up to avatar right edge, then shimmering neon gradient
+  const graphCellStyle =
+    expanded && avatarRightX !== undefined
+      ? `background: linear-gradient(to right, transparent 0px, transparent ${avatarRightX}px, color-mix(in srgb, ${branchColourVal} 45%, #ffffff 15%) ${avatarRightX}px, color-mix(in srgb, ${branchColourVal} 22%, transparent) ${
+          avatarRightX + 25
+        }px, color-mix(in srgb, ${branchColourVal} 6%, transparent) ${
+          avatarRightX + 60
+        }px, transparent 100%);`
+      : undefined;
 
   return (
     <tr
@@ -100,7 +114,7 @@ export function CommitRow({
           : (event) => openContextMenu(event, source, commitMenu(commit, messages))
       }
     >
-      <td class={CELL_CLASS} />
+      <td class={CELL_CLASS} style={graphCellStyle} />
       <td class={`${CELL_CLASS} w-full max-w-0 pl-2.5 ${isHead ? "shadow-head" : ""}`}>
         <div class="flex min-w-0 items-center">
           {isHead && (

@@ -17,7 +17,7 @@ import { GRAPH_PADDING } from "@/webview/graph/constants";
 import { computeGraphLayout } from "@/webview/graph/layout";
 import { branchColour } from "@/webview/graph/palette";
 import type { GraphExpansion } from "@/webview/graph/types";
-import { graphWidth } from "@/webview/graph/utils";
+import { graphWidth, laneX } from "@/webview/graph/utils";
 import { toggleCommitDetails } from "@/webview/lib/actions";
 import { columnWidths, commitDetails, expandedCommit } from "@/webview/lib/stores";
 
@@ -130,27 +130,33 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
           </tr>
         </thead>
         <tbody>
-          {commits.map((commit, index) => (
-            <Fragment key={commit.hash}>
-              <CommitRow
-                commit={commit}
-                isHead={commit.hash === head}
-                headBranch={headBranch}
-                messages={messages}
-                colour={branchColour(layout.vertices[index]?.colour ?? 0)}
-                expanded={index === expandedRow}
-                onHover={(hovered) => {
-                  hoveredRow.value = hovered ? index : null;
-                }}
-                onSelect={
-                  commit.hash === UNCOMMITTED_CHANGES
-                    ? undefined
-                    : () => toggleCommitDetails(commit.hash)
-                }
-              />
-              {index === expandedRow && <CommitDetails details={commitDetails.value} />}
-            </Fragment>
-          ))}
+          {commits.map((commit, index) => {
+            const vertex = layout.vertices[index];
+            const avatarRightX = vertex ? laneX(vertex.x) + 11 : undefined;
+
+            return (
+              <Fragment key={commit.hash}>
+                <CommitRow
+                  commit={commit}
+                  isHead={commit.hash === head}
+                  headBranch={headBranch}
+                  messages={messages}
+                  colour={branchColour(vertex?.colour ?? 0)}
+                  expanded={index === expandedRow}
+                  avatarRightX={avatarRightX}
+                  onHover={(hovered) => {
+                    hoveredRow.value = hovered ? index : null;
+                  }}
+                  onSelect={
+                    commit.hash === UNCOMMITTED_CHANGES
+                      ? undefined
+                      : () => toggleCommitDetails(commit.hash)
+                  }
+                />
+                {index === expandedRow && <CommitDetails details={commitDetails.value} />}
+              </Fragment>
+            );
+          })}
         </tbody>
       </table>
     </div>

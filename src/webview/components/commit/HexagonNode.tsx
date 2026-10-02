@@ -180,8 +180,9 @@ export function HexagonNode({
       data-scaled={isScaled ? "true" : undefined}
       style={{
         transformOrigin: `${cx}px ${cy}px`,
-        transition: "transform 0.15s ease-out",
-        transform: isScaled ? "scale(1.15)" : "scale(1)"
+        transition: "transform 0.15s ease-out, filter 0.15s ease-out",
+        transform: isScaled ? "scale(1.15)" : "scale(1)",
+        filter: isScaled ? `drop-shadow(0 0 5px ${colour}) drop-shadow(0 0 2px ${colour})` : undefined
       }}
     >
       {author && <title>{author}</title>}
