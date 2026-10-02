@@ -127,14 +127,20 @@ export type HexagonNodeProps = {
   isCurrent?: boolean | undefined;
   isCommitted?: boolean | undefined;
   nodeType?: CommitNodeType | undefined;
-  /** Custom icon or element to insert inside the hexagon. If omitted, uses nodeType icon. */
+  /** URL of the commit author's git avatar */
+  avatarUrl?: string | undefined;
+  /** Name of the commit author for tooltip */
+  author?: string | undefined;
+  /** Unique ID for SVG clipping paths */
+  id?: string | number | undefined;
+  /** Custom icon or element to insert inside the hexagon. If omitted, uses avatar or nodeType icon. */
   icon?: ComponentChildren;
   /** Whether to orient the hexagon pointy-topped (default: true). */
   pointy?: boolean | undefined;
 };
 
 /**
- * A GitLens-inspired hexagonal graph node with an inner icon.
+ * A GitLens-inspired hexagonal graph node with an inner git avatar / icon.
  * Includes a background mask to cleanly hide branch lines passing behind it.
  */
 export function HexagonNode({
@@ -145,14 +151,21 @@ export function HexagonNode({
   isCurrent = false,
   isCommitted = true,
   nodeType = "commit",
+  avatarUrl,
+  author,
+  id,
   icon,
   pointy = true
 }: HexagonNodeProps) {
   const iconSize = HEXAGON_ICON_SIZE;
   const iconOffset = iconSize / 2;
+  const avatarRadius = radius - 1.8;
+  const clipId = `hex-avatar-${id ?? `${cx}-${cy}`}`;
 
   return (
     <g class="graph-node-hexagon" data-node-type={nodeType}>
+      {author && <title>{author}</title>}
+
       {/* Background mask: hides branch line underneath node */}
       <polygon
         points={hexagonPoints(cx, cy, radius + 1, pointy)}
@@ -171,9 +184,27 @@ export function HexagonNode({
         strokeLinejoin="round"
       />
 
-      {/* Inner Icon: custom icon or built-in GitLens-style node icon */}
+      {/* Inner Icon: custom icon > commit account avatar > default semantic icon */}
       {icon !== undefined ? (
         <g transform={`translate(${cx}, ${cy})`}>{icon}</g>
+      ) : avatarUrl && isCommitted ? (
+        <g class="graph-node-avatar">
+          <defs>
+            <clipPath id={clipId}>
+              <circle cx={cx} cy={cy} r={avatarRadius} />
+            </clipPath>
+          </defs>
+          <circle cx={cx} cy={cy} r={avatarRadius} fill={colour} opacity="0.25" />
+          <image
+            href={avatarUrl}
+            x={cx - avatarRadius}
+            y={cy - avatarRadius}
+            width={avatarRadius * 2}
+            height={avatarRadius * 2}
+            clipPath={`url(#${clipId})`}
+            preserveAspectRatio="xMidYMid slice"
+          />
+        </g>
       ) : (
         <svg
           x={cx - iconOffset}

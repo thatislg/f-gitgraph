@@ -7,6 +7,7 @@ import { branchStrokes } from "@/webview/graph/strokes";
 import type { GraphExpansion, GraphLayout, GraphVertex } from "@/webview/graph/types";
 import { expandOffset, graphHeight, graphWidth, laneX, rowY } from "@/webview/graph/utils";
 import { getWebviewConfig } from "@/webview/lib/webview-config";
+import { getGitAccountAvatarUrl } from "@/webview/utils/avatar";
 
 const SHADOW_CLASS = "fill-none stroke-editor/75 stroke-4";
 const LINE_CLASS = "fill-none stroke-2";
@@ -56,17 +57,21 @@ export function CommitGraph({
         const colour = vertex.isCommitted ? branchColour(vertex.colour) : UNCOMMITTED_COLOUR;
         const commit = commits?.[vertex.y];
         const nodeType = getCommitNodeType(commit, vertex);
+        const avatarUrl = commit?.email ? getGitAccountAvatarUrl(commit.email) : undefined;
         const customIcon = renderNodeIcon?.(commit, vertex);
 
         return (
           <HexagonNode
             key={vertex.y}
+            id={commit?.hash ?? vertex.y}
             cx={laneX(vertex.x)}
             cy={rowY(vertex.y) + expandOffset(vertex.y, expansion)}
             colour={colour}
             isCurrent={vertex.isCurrent}
             isCommitted={vertex.isCommitted}
             nodeType={nodeType}
+            avatarUrl={avatarUrl}
+            author={commit?.author}
             icon={customIcon}
           />
         );

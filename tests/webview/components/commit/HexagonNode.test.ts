@@ -146,4 +146,32 @@ describe("HexagonNode rendering", () => {
     expect(customIcon).not.toBeNull();
     expect(customIcon?.getAttribute("fill")).toBe("gold");
   });
+
+  it("renders git account avatar image when avatarUrl is provided", () => {
+    container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+    render(
+      h(HexagonNode, {
+        cx: 8,
+        cy: 12,
+        colour: "#0085d9",
+        nodeType: "commit",
+        author: "Alice",
+        avatarUrl: "https://avatars.githubusercontent.com/u/12345?size=32"
+      }),
+      container
+    );
+
+    const avatarGroup = container.querySelector(".graph-node-avatar");
+    expect(avatarGroup).not.toBeNull();
+
+    const image = avatarGroup?.querySelector("image");
+    expect(image).not.toBeNull();
+    expect(image?.getAttribute("href")).toBe(
+      "https://avatars.githubusercontent.com/u/12345?size=32"
+    );
+
+    const title = container.querySelector("title");
+    expect(title?.textContent).toBe("Alice");
+  });
 });

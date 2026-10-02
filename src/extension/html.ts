@@ -17,7 +17,7 @@ export function createWevbviewHtml(ctx: vscode.ExtensionContext, webview: vscode
     <head>
       <meta charset="UTF-8">
       <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline';
-      script-src ${webview.cspSource} 'nonce-${nonce}'; img-src data:; connect-src ${webview.cspSource};">
+      script-src ${webview.cspSource} 'nonce-${nonce}'; img-src ${webview.cspSource} https: data:; connect-src ${webview.cspSource};">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="stylesheet" href="${toOutputUri("web.min.css")}">
       <title>${EXTENSION_NAME}</title>
