@@ -9,3 +9,6 @@
 /.direnv/
 /result
 /result-*
+
+# Reference repos
+/vscode-gitlens/

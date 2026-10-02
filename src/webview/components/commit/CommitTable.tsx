@@ -94,7 +94,7 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   return (
     <div class="relative" ref={resize.containerRef}>
       <div class="pointer-events-none absolute left-0 overflow-hidden" style={GRAPH_CLIP}>
-        <CommitGraph layout={layout} expansion={expansion} />
+        <CommitGraph layout={layout} commits={commits} expansion={expansion} />
       </div>
       <table
         class={`w-full cursor-default border-collapse text-ui select-none ${

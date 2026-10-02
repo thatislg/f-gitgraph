@@ -159,7 +159,8 @@ function toGraphVertex(vertex: Vertex): GraphVertex {
     y: vertex.y,
     colour: vertex.branch?.colour ?? 0,
     isCommitted: vertex.isCommitted,
-    isCurrent: vertex.isCurrent
+    isCurrent: vertex.isCurrent,
+    isMerge: vertex.parents.length > 1
   };
 }
 

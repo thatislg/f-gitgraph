@@ -25,6 +25,8 @@ export type GraphVertex = {
   isCommitted: boolean;
   /** The commit HEAD points at, drawn as an open circle. */
   isCurrent: boolean;
+  /** Whether this commit is a merge of multiple parents. */
+  isMerge?: boolean;
 };
 
 export type GraphLayout = {

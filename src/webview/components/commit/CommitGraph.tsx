@@ -1,26 +1,36 @@
-import { VERTEX_RADIUS } from "@/webview/graph/constants";
+import type { ComponentChildren } from "preact";
+
+import type { GitCommitNode } from "@/backend/types";
+import { getCommitNodeType, HexagonNode } from "@/webview/components/commit/HexagonNode";
 import { branchColour, UNCOMMITTED_COLOUR } from "@/webview/graph/palette";
 import { branchStrokes } from "@/webview/graph/strokes";
-import type { GraphExpansion, GraphLayout } from "@/webview/graph/types";
+import type { GraphExpansion, GraphLayout, GraphVertex } from "@/webview/graph/types";
 import { expandOffset, graphHeight, graphWidth, laneX, rowY } from "@/webview/graph/utils";
 import { getWebviewConfig } from "@/webview/lib/webview-config";
 
 const SHADOW_CLASS = "fill-none stroke-editor/75 stroke-4";
 const LINE_CLASS = "fill-none stroke-2";
-const HEAD_DOT_CLASS = "fill-editor stroke-2";
-const DOT_CLASS = "stroke-editor/75 stroke-1";
 
 /**
- * The branch lines and commit dots, drawn behind the first column of the commit
- * table. The table rows set the scale: a row is `ROW_HEIGHT` high. The caller
- * places the graph, and cuts it off when the column is too narrow for it.
+ * The branch lines and commit nodes, drawn behind the first column of the commit
+ * table. The table rows set the scale: a row is `ROW_HEIGHT` high.
+ * The commit nodes are drawn as hexagons with GitLens-style semantic icons
+ * (merge, head, uncommitted, tag, commit).
  */
 export function CommitGraph({
   layout,
-  expansion
+  commits,
+  expansion,
+  renderNodeIcon
 }: {
   layout: GraphLayout;
+  commits?: Array<GitCommitNode>;
   expansion: GraphExpansion | null;
+  /** Optional custom icon renderer to insert any icon into a commit node */
+  renderNodeIcon?: (
+    commit: GitCommitNode | undefined,
+    vertex: GraphVertex
+  ) => ComponentChildren;
 }) {
   const angular = getWebviewConfig().graphStyle === "angular";
   const strokes = layout.branches.flatMap((branch) => branchStrokes(branch, angular, expansion));
@@ -44,16 +54,20 @@ export function CommitGraph({
       ))}
       {layout.vertices.map((vertex) => {
         const colour = vertex.isCommitted ? branchColour(vertex.colour) : UNCOMMITTED_COLOUR;
+        const commit = commits?.[vertex.y];
+        const nodeType = getCommitNodeType(commit, vertex);
+        const customIcon = renderNodeIcon?.(commit, vertex);
 
         return (
-          <circle
+          <HexagonNode
             key={vertex.y}
             cx={laneX(vertex.x)}
             cy={rowY(vertex.y) + expandOffset(vertex.y, expansion)}
-            r={VERTEX_RADIUS}
-            class={vertex.isCurrent ? HEAD_DOT_CLASS : DOT_CLASS}
-            stroke={vertex.isCurrent ? colour : undefined}
-            fill={vertex.isCurrent ? undefined : colour}
+            colour={colour}
+            isCurrent={vertex.isCurrent}
+            isCommitted={vertex.isCommitted}
+            nodeType={nodeType}
+            icon={customIcon}
           />
         );
       })}
