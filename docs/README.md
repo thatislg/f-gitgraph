@@ -33,3 +33,12 @@ Thư mục [`docs/core_git/`](core_git/README.md) tập trung nghiên cứu, t�
 - **[01. Phân tích Các Điểm Nghẽn Hiệu Năng trong TypeScript](core_git/01_TypeScript_Performance_Bottlenecks.md)**: Mổ xẻ chi tiết overhead spawn process trên Windows, V8 GC thrashing, nghẽn IPC JSON và layout đơn luồng.
 - **[02. Phân loại & Bảng Tổng hợp Lỗi Thao tác Git](core_git/02_Git_Operation_Errors_Taxonomy.md)**: Danh mục các lỗi git thực tế (file locks, in-flight states, shallow clones, detached HEAD, path length, UTF-8 encoding).
 - **[03. Thiết kế Kiến trúc Nhân Core Git bằng F#](core_git/03_FSharp_Core_Architecture_Design.md)**: Thiết kế kiểu dữ liệu F# Domain-Driven, tích hợp LibGit2 / Native AOT, thuật toán tính lane song song và giao thức streaming IPC.
+
+---
+
+### 🔬 Phase 2: Investigation & F# Migration Blueprint
+Thư mục [`docs/phase2_Investigation/`](phase2_Investigation/README.md) chứa các bản điều tra chi tiết và kế hoạch tái thiết kế Neo Git Graph với nhân F#:
+
+- **[001. Tổng Quan & Phân Rã Đầu Việc Tái Thiết Kế (Overview)](phase2_Investigation/001_Overview.md)**:
+  Phân tích triết lý Read (F# Engine) vs Write (Native Git CLI), ranh giới giữ lại vs đập đi xây lại, đảm bảo an toàn cho commit/push, và bảng phân rã 7 mục đầu việc cần triển khai.
+
