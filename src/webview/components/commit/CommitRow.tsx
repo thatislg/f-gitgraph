@@ -36,10 +36,6 @@ type CommitRowProps = {
   onHoverLeave?: (() => void) | undefined;
   /** Callback fired when clicking directly on the avatar node in the graph cell */
   onAvatarClick?: ((info: ZoomedAvatarInfo) => void) | undefined;
-  /** Callback fired when hovering directly over the avatar node in the graph cell */
-  onAvatarHover?:
-    | ((info: { author: string; x: number; y: number; colour: string } | null) => void)
-    | undefined;
 };
 
 const CELL_CLASS = "h-6 overflow-hidden text-ellipsis whitespace-nowrap px-1 leading-6";
@@ -87,11 +83,11 @@ export function CommitRow({
   avatarRightX,
   onHoverDwell,
   onHoverLeave,
-  onAvatarClick,
-  onAvatarHover
+  onAvatarClick
 }: CommitRowProps) {
   const rowRef = useRef<HTMLTableRowElement>(null);
   const dwellTimer = useRef<number | null>(null);
+  const isContentHovered = useRef(false);
   const [isRowHovered, setIsRowHovered] = useState(false);
 
   const uncommitted = commit.hash === UNCOMMITTED_CHANGES;
@@ -132,23 +128,39 @@ export function CommitRow({
         }px, transparent 100%); transition: background 0.15s ease-out;`
     : "transition: background 0.15s ease-out;";
 
+  const startDwellTimer = () => {
+    if (!isContentHovered.current) {
+      isContentHovered.current = true;
+      if (dwellTimer.current !== null) {
+        window.clearTimeout(dwellTimer.current);
+      }
+      dwellTimer.current = window.setTimeout(() => {
+        if (rowRef.current && !uncommitted) {
+          onHoverDwell?.(commit, rowRef.current.getBoundingClientRect());
+        }
+      }, 550);
+    }
+  };
+
+  const handleGraphCellMouseEnter = () => {
+    // Inside the graph column: do NOT show commit message panel
+    isContentHovered.current = false;
+    if (dwellTimer.current !== null) {
+      window.clearTimeout(dwellTimer.current);
+      dwellTimer.current = null;
+    }
+    onHoverLeave?.();
+  };
+
   const handleMouseEnter = () => {
     setIsRowHovered(true);
     onHover?.(true);
-    if (dwellTimer.current !== null) {
-      window.clearTimeout(dwellTimer.current);
-    }
-    dwellTimer.current = window.setTimeout(() => {
-      if (rowRef.current && !uncommitted) {
-        onHoverDwell?.(commit, rowRef.current.getBoundingClientRect());
-      }
-    }, 550);
   };
 
   const handleMouseLeave = () => {
     setIsRowHovered(false);
     onHover?.(false);
-    onAvatarHover?.(null);
+    isContentHovered.current = false;
     if (dwellTimer.current !== null) {
       window.clearTimeout(dwellTimer.current);
       dwellTimer.current = null;
@@ -176,27 +188,6 @@ export function CommitRow({
     onSelect?.();
   };
 
-  const handleGraphCellMouseMove = (e: MouseEvent) => {
-    if (avatarCx !== undefined && !uncommitted && commit.author) {
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      if (Math.abs(mouseX - avatarCx) <= 14) {
-        onAvatarHover?.({
-          author: commit.author,
-          x: rect.left + avatarCx,
-          y: rect.bottom + 2,
-          colour: branchColourVal
-        });
-        return;
-      }
-    }
-    onAvatarHover?.(null);
-  };
-
-  const handleGraphCellMouseLeave = () => {
-    onAvatarHover?.(null);
-  };
-
   return (
     <tr
       ref={rowRef}
@@ -215,10 +206,12 @@ export function CommitRow({
         class={CELL_CLASS}
         style={graphCellStyle}
         onClick={handleGraphCellClick}
-        onMouseMove={handleGraphCellMouseMove}
-        onMouseLeave={handleGraphCellMouseLeave}
+        onMouseEnter={handleGraphCellMouseEnter}
       />
-      <td class={`${CELL_CLASS} w-full max-w-0 pl-2.5 ${isHead ? "shadow-head" : ""}`}>
+      <td
+        class={`${CELL_CLASS} w-full max-w-0 pl-2.5 ${isHead ? "shadow-head" : ""}`}
+        onMouseEnter={startDwellTimer}
+      >
         <div class="flex min-w-0 items-center">
           {isHead && (
             <span class="mr-1.25 size-1.5 shrink-0 box-content rounded-full border-2 border-graph" />
@@ -239,9 +232,15 @@ export function CommitRow({
           </span>
         </div>
       </td>
-      <td class={CELL_CLASS}>{date.value}</td>
-      <td class={`${CELL_CLASS} max-w-31`}>{commit.author}</td>
-      <td class={`${CELL_CLASS} font-mono`}>{abbrevCommit(commit.hash)}</td>
+      <td class={CELL_CLASS} onMouseEnter={startDwellTimer}>
+        {date.value}
+      </td>
+      <td class={`${CELL_CLASS} max-w-31`} onMouseEnter={startDwellTimer}>
+        {commit.author}
+      </td>
+      <td class={`${CELL_CLASS} font-mono`} onMouseEnter={startDwellTimer}>
+        {abbrevCommit(commit.hash)}
+      </td>
     </tr>
   );
 }

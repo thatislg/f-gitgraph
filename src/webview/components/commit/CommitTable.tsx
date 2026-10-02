@@ -94,12 +94,6 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   const hoverHideTimer = useRef<number | null>(null);
 
   const zoomedAvatar = useSignal<ZoomedAvatarInfo | null>(null);
-  const hoveredAvatar = useSignal<{
-    author: string;
-    x: number;
-    y: number;
-    colour: string;
-  } | null>(null);
 
   const handleHoverDwell = (commit: GitCommitNode, rect: DOMRect) => {
     // If zoomed avatar is active, don't show text hover panel to avoid overlap
@@ -134,7 +128,6 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   };
 
   const handleAvatarClick = (info: ZoomedAvatarInfo) => {
-    hoveredAvatar.value = null;
     if (zoomedAvatar.value?.commit.hash === info.commit.hash) {
       zoomedAvatar.value = null;
     } else {
@@ -209,9 +202,6 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
                   onHoverDwell={handleHoverDwell}
                   onHoverLeave={handleHoverLeave}
                   onAvatarClick={handleAvatarClick}
-                  onAvatarHover={(info) => {
-                    hoveredAvatar.value = info;
-                  }}
                   onSelect={
                     commit.hash === UNCOMMITTED_CHANGES
                       ? undefined
@@ -233,25 +223,6 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
           onMouseEnter={handlePanelMouseEnter}
           onMouseLeave={handlePanelMouseLeave}
         />
-      )}
-
-      {/* Floating custom Author Badge on avatar hover (replacing native white tooltip) */}
-      {hoveredAvatar.value && !zoomedAvatar.value && (
-        <div
-          class="pointer-events-none fixed z-40 flex items-center rounded-full px-2 py-[2px] text-[8.5px] font-semibold leading-none text-menu-fg shadow-lg select-none"
-          style={{
-            left: `${Math.max(35, hoveredAvatar.value.x)}px`,
-            top: `${hoveredAvatar.value.y}px`,
-            transform: "translate(-50%, 0)",
-            backgroundColor: "rgba(15, 23, 42, 0.95)",
-            border: `1px solid ${hoveredAvatar.value.colour}`,
-            boxShadow: `0 0 8px ${hoveredAvatar.value.colour}50, 0 3px 8px rgba(0, 0, 0, 0.75)`,
-            backdropFilter: "blur(6px)",
-            whiteSpace: "nowrap"
-          }}
-        >
-          <span>{hoveredAvatar.value.author}</span>
-        </div>
       )}
 
       {/* Top-layer Floating 5x Avatar Deep Zoom Preview (Click Deep Zoom) */}

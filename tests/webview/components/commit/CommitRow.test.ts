@@ -147,4 +147,56 @@ describe("CommitRow", () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(graphCell?.getAttribute("style") ?? "").not.toContain("linear-gradient");
   });
+
+  it("does not trigger onHoverDwell in graph cell, only triggers on content cells", async () => {
+    let dwellCalled = false;
+    let leaveCalled = false;
+    const commit: GitCommitNode = {
+      hash: "jkl012",
+      parentHashes: [],
+      author: "Test Author",
+      email: "author@test.com",
+      date: 0,
+      message: "Dwell test",
+      refs: []
+    };
+    container = document.createElement("tbody");
+
+    render(
+      h(CommitRow, {
+        commit,
+        isHead: false,
+        headBranch: null,
+        messages: new Map(),
+        colour: "#10b981",
+        expanded: false,
+        avatarRightX: 25,
+        onHoverDwell: () => {
+          dwellCalled = true;
+        },
+        onHoverLeave: () => {
+          leaveCalled = true;
+        },
+        onSelect: () => {}
+      }),
+      container
+    );
+
+    const graphCell = container.querySelector("td:first-child");
+    const descCell = container.querySelector("td:nth-child(2)");
+
+    // Mouse enters graph cell: onHoverDwell should NOT be called even after 600ms
+    graphCell?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    expect(dwellCalled).toBe(false);
+
+    // Mouse enters description cell: onHoverDwell should be called after 550ms
+    descCell?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    expect(dwellCalled).toBe(true);
+
+    // Mouse moves back into graph cell: onHoverLeave should be triggered
+    graphCell?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    expect(leaveCalled).toBe(true);
+  });
 });
