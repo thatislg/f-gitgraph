@@ -1,3 +1,4 @@
+import { useSignal } from "@preact/signals";
 import { Fragment } from "preact";
 import { useMemo } from "preact/hooks";
 
@@ -82,6 +83,7 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   const expandedRow = commits.findIndex((commit) => commit.hash === expandedHash);
   const expansion: GraphExpansion | null =
     expandedRow === -1 ? null : { row: expandedRow, height: COMMIT_DETAILS_HEIGHT };
+  const hoveredRow = useSignal<number | null>(null);
 
   const titles = [
     window.l10n.graph,
@@ -94,7 +96,13 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   return (
     <div class="relative" ref={resize.containerRef}>
       <div class="pointer-events-none absolute left-0 overflow-hidden" style={GRAPH_CLIP}>
-        <CommitGraph layout={layout} commits={commits} expansion={expansion} />
+        <CommitGraph
+          layout={layout}
+          commits={commits}
+          expansion={expansion}
+          hoveredRow={hoveredRow.value}
+          selectedRow={expandedRow}
+        />
       </div>
       <table
         class={`w-full cursor-default border-collapse text-ui select-none ${
@@ -131,6 +139,9 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
                 messages={messages}
                 colour={branchColour(layout.vertices[index]?.colour ?? 0)}
                 expanded={index === expandedRow}
+                onHover={(hovered) => {
+                  hoveredRow.value = hovered ? index : null;
+                }}
                 onSelect={
                   commit.hash === UNCOMMITTED_CHANGES
                     ? undefined

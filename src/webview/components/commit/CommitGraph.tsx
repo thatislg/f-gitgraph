@@ -22,11 +22,15 @@ export function CommitGraph({
   layout,
   commits,
   expansion,
+  hoveredRow,
+  selectedRow,
   renderNodeIcon
 }: {
   layout: GraphLayout;
   commits?: Array<GitCommitNode>;
   expansion: GraphExpansion | null;
+  hoveredRow?: number | null;
+  selectedRow?: number | null;
   /** Optional custom icon renderer to insert any icon into a commit node */
   renderNodeIcon?: (
     commit: GitCommitNode | undefined,
@@ -59,6 +63,8 @@ export function CommitGraph({
         const nodeType = getCommitNodeType(commit, vertex);
         const avatarUrl = commit?.email ? getGitAccountAvatarUrl(commit.email) : undefined;
         const customIcon = renderNodeIcon?.(commit, vertex);
+        const isHovered = hoveredRow === vertex.y;
+        const isSelected = selectedRow === vertex.y;
 
         return (
           <HexagonNode
@@ -72,6 +78,8 @@ export function CommitGraph({
             nodeType={nodeType}
             avatarUrl={avatarUrl}
             author={commit?.author}
+            isHovered={isHovered}
+            isSelected={isSelected}
             icon={customIcon}
           />
         );

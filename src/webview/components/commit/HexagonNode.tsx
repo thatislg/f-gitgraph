@@ -133,6 +133,10 @@ export type HexagonNodeProps = {
   author?: string | undefined;
   /** Unique ID for SVG clipping paths */
   id?: string | number | undefined;
+  /** Whether the row corresponding to this node is hovered */
+  isHovered?: boolean | undefined;
+  /** Whether the row corresponding to this node is selected */
+  isSelected?: boolean | undefined;
   /** Custom icon or element to insert inside the hexagon. If omitted, uses avatar or nodeType icon. */
   icon?: ComponentChildren;
   /** Whether to orient the hexagon pointy-topped (default: true). */
@@ -142,6 +146,7 @@ export type HexagonNodeProps = {
 /**
  * A GitLens-inspired hexagonal graph node with an inner git avatar / icon.
  * Includes a background mask to cleanly hide branch lines passing behind it.
+ * Features a smooth micro-interaction hover/selected scale(1.15) effect.
  */
 export function HexagonNode({
   cx,
@@ -154,15 +159,31 @@ export function HexagonNode({
   avatarUrl,
   author,
   id,
+  isHovered = false,
+  isSelected = false,
   icon,
   pointy = true
 }: HexagonNodeProps) {
   const iconSize = HEXAGON_ICON_SIZE;
   const iconOffset = iconSize / 2;
-  const clipId = `hex-avatar-${id ?? `${cx}-${cy}`}`;
+  // Sanitize ID for valid CSS/SVG url(#...) selector syntax
+  const safeId = String(id ?? `${cx}-${cy}`).replace(/[^a-zA-Z0-9_-]/g, "_");
+  const clipId = `hex-avatar-${safeId}`;
+  const isScaled = isHovered || isSelected;
 
   return (
-    <g class="graph-node-hexagon" data-node-type={nodeType}>
+    <g
+      class={`graph-node-hexagon cursor-pointer transition-transform duration-150 ease-out ${
+        isScaled ? "is-active" : ""
+      }`}
+      data-node-type={nodeType}
+      data-scaled={isScaled ? "true" : undefined}
+      style={{
+        transformOrigin: `${cx}px ${cy}px`,
+        transition: "transform 0.15s ease-out",
+        transform: isScaled ? "scale(1.15)" : "scale(1)"
+      }}
+    >
       {author && <title>{author}</title>}
 
       {/* Background mask: hides branch line underneath node */}
@@ -201,7 +222,9 @@ export function HexagonNode({
             y={cy - radius}
             width={radius * 2}
             height={radius * 2}
+            clip-path={`url(#${clipId})`}
             clipPath={`url(#${clipId})`}
+            style={{ clipPath: `url(#${clipId})` }}
             preserveAspectRatio="xMidYMid slice"
           />
         </g>

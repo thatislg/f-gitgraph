@@ -175,8 +175,56 @@ describe("HexagonNode rendering", () => {
     expect(image?.getAttribute("href")).toBe(
       "https://avatars.githubusercontent.com/u/12345?size=32"
     );
+    expect(image?.getAttribute("clip-path")).toContain("url(#hex-avatar-");
 
     const title = container.querySelector("title");
     expect(title?.textContent).toBe("Alice");
+  });
+
+  it("applies micro-interaction scale(1.15) on hover or selection", () => {
+    container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+    // Normal state
+    render(
+      h(HexagonNode, {
+        cx: 10,
+        cy: 12,
+        isHovered: false,
+        isSelected: false
+      }),
+      container
+    );
+    let group = container.querySelector(".graph-node-hexagon") as SVGGElement | null;
+    expect(group?.style.transform).toBe("scale(1)");
+    expect(group?.style.transformOrigin).toBe("10px 12px");
+    expect(group?.style.transition).toBe("transform 0.15s ease-out");
+
+    // Hovered state
+    render(
+      h(HexagonNode, {
+        cx: 10,
+        cy: 12,
+        isHovered: true,
+        isSelected: false
+      }),
+      container
+    );
+    group = container.querySelector(".graph-node-hexagon") as SVGGElement | null;
+    expect(group?.style.transform).toBe("scale(1.15)");
+    expect(group?.classList.contains("is-active")).toBe(true);
+
+    // Selected state
+    render(
+      h(HexagonNode, {
+        cx: 10,
+        cy: 12,
+        isHovered: false,
+        isSelected: true
+      }),
+      container
+    );
+    group = container.querySelector(".graph-node-hexagon") as SVGGElement | null;
+    expect(group?.style.transform).toBe("scale(1.15)");
+    expect(group?.classList.contains("is-active")).toBe(true);
   });
 });

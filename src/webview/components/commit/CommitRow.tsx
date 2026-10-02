@@ -21,6 +21,8 @@ type CommitRowProps = {
   expanded: boolean;
   /** Open or close the details view. Absent for the uncommitted changes row. */
   onSelect: (() => void) | undefined;
+  /** Callback fired when the row is hovered or unhovered */
+  onHover?: ((hovered: boolean) => void) | undefined;
 };
 
 const CELL_CLASS = "h-6 overflow-hidden text-ellipsis whitespace-nowrap px-1 leading-6";
@@ -63,7 +65,8 @@ export function CommitRow({
   messages,
   colour,
   expanded,
-  onSelect
+  onSelect,
+  onHover
 }: CommitRowProps) {
   const uncommitted = commit.hash === UNCOMMITTED_CHANGES;
   const message = uncommitted
@@ -79,6 +82,8 @@ export function CommitRow({
       class={rowClass(isHead, expanded, onSelect !== undefined, menuOpen)}
       style={colour === undefined ? undefined : `--color-graph: ${colour}`}
       onClick={onSelect}
+      onMouseEnter={() => onHover?.(true)}
+      onMouseLeave={() => onHover?.(false)}
       onContextMenu={
         uncommitted
           ? undefined
