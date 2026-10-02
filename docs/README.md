@@ -43,5 +43,8 @@ Thư mục [`docs/phase2_Investigation/`](phase2_Investigation/README.md) chứa
   Phân tích triết lý Read (F# Engine) vs Write (Native Git CLI), ranh giới giữ lại vs đập đi xây lại, đảm bảo an toàn cho commit/push, và bảng phân rã 7 mục đầu việc cần triển khai.
 - **[002. Bản Điều Tra Kiến Trúc Đa Nền Tảng (Cross-Platform)](phase2_Investigation/002_Multiplatform.md)**:
   Cấu trúc ứng dụng và chiến lược chạy đa nền tảng (Windows 10/11, Linux Ubuntu/Fedora, macOS Apple Silicon/Intel) với F# Native AOT và Universal VSIX.
+- **[003. Lộ Trình Phát Triển Đa Nền Tảng (Windows -> Linux -> macOS)](phase2_Investigation/003_Roadmap.md)**:
+  Chiến lược ưu tiên thực thi dứt điểm Windows trước, kế thừa sang Linux và hoàn thiện trên macOS; phân rã 4 giai đoạn và tiêu chuẩn nghiệm thu (DoD).
+
 
 

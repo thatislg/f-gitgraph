@@ -19,3 +19,9 @@ Thư mục này tập trung vào việc khảo sát kiến trúc, phân rã côn
   - Giải quyết phân quyền thực thi `chmod +x`, macOS Gatekeeper codesign, glibc compatibility.
   - Phương án đóng gói VSIX (Universal vs Platform-Specific) và CI/CD GitHub Actions matrix.
 
+- **[003. Lộ Trình Phát Triển Đa Nền Tảng (Windows -> Linux -> macOS)](003_Roadmap.md)**:
+  - Chiến lược ưu tiên thực thi dứt điểm: Windows trước $\rightarrow$ Linux thứ hai $\rightarrow$ macOS hoàn thiện cuối cùng.
+  - Kế hoạch chi tiết 4 giai đoạn phát triển và chuyển giao.
+  - Tiêu chí nghiệm thu (DoD) và biện pháp phòng ngừa rủi ro cho từng nền tảng.
+
+
