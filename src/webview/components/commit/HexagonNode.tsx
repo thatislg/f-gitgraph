@@ -159,7 +159,6 @@ export function HexagonNode({
 }: HexagonNodeProps) {
   const iconSize = HEXAGON_ICON_SIZE;
   const iconOffset = iconSize / 2;
-  const avatarRadius = radius - 1.8;
   const clipId = `hex-avatar-${id ?? `${cx}-${cy}`}`;
 
   return (
@@ -174,33 +173,34 @@ export function HexagonNode({
         strokeLinejoin="round"
       />
 
-      {/* Hexagon border and background fill */}
+      {/* Hexagon background fill */}
       <polygon
         points={hexagonPoints(cx, cy, radius, pointy)}
         class={isCurrent ? "fill-editor/40" : "fill-editor"}
-        stroke={colour}
-        strokeWidth={isCurrent ? "2" : "1.5"}
-        strokeDasharray={isCommitted ? undefined : "2.5 1.5"}
         strokeLinejoin="round"
       />
 
-      {/* Inner Icon: custom icon > commit account avatar > default semantic icon */}
+      {/* Inner Content: custom icon > commit account avatar > default semantic icon */}
       {icon !== undefined ? (
         <g transform={`translate(${cx}, ${cy})`}>{icon}</g>
       ) : avatarUrl && isCommitted ? (
         <g class="graph-node-avatar">
           <defs>
             <clipPath id={clipId}>
-              <circle cx={cx} cy={cy} r={avatarRadius} />
+              <polygon points={hexagonPoints(cx, cy, radius - 0.5, pointy)} />
             </clipPath>
           </defs>
-          <circle cx={cx} cy={cy} r={avatarRadius} fill={colour} opacity="0.25" />
+          <polygon
+            points={hexagonPoints(cx, cy, radius - 0.5, pointy)}
+            fill={colour}
+            opacity="0.25"
+          />
           <image
             href={avatarUrl}
-            x={cx - avatarRadius}
-            y={cy - avatarRadius}
-            width={avatarRadius * 2}
-            height={avatarRadius * 2}
+            x={cx - radius}
+            y={cy - radius}
+            width={radius * 2}
+            height={radius * 2}
             clipPath={`url(#${clipId})`}
             preserveAspectRatio="xMidYMid slice"
           />
@@ -218,6 +218,16 @@ export function HexagonNode({
           {renderDefaultIcon(nodeType)}
         </svg>
       )}
+
+      {/* Hexagon border stroke on top for crisp edge without black gaps */}
+      <polygon
+        points={hexagonPoints(cx, cy, radius, pointy)}
+        fill="none"
+        stroke={colour}
+        strokeWidth={isCurrent ? "2" : "1.5"}
+        strokeDasharray={isCommitted ? undefined : "2.5 1.5"}
+        strokeLinejoin="round"
+      />
     </g>
   );
 }

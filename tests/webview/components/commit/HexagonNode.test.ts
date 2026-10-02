@@ -118,8 +118,9 @@ describe("HexagonNode rendering", () => {
     expect(group?.getAttribute("data-node-type")).toBe("merge");
 
     const polygons = group?.querySelectorAll("polygon");
-    expect(polygons?.length).toBe(2); // mask + foreground hexagon
-    expect(polygons?.[1]?.getAttribute("stroke")).toBe("#0085d9");
+    // mask + background fill + top stroke
+    expect(polygons?.length).toBe(3);
+    expect(polygons?.[2]?.getAttribute("stroke")).toBe("#0085d9");
 
     const iconSvg = group?.querySelector("svg");
     expect(iconSvg).not.toBeNull();
@@ -164,6 +165,10 @@ describe("HexagonNode rendering", () => {
 
     const avatarGroup = container.querySelector(".graph-node-avatar");
     expect(avatarGroup).not.toBeNull();
+
+    // Check hexagon clipPath
+    const clipPolygon = avatarGroup?.querySelector("clipPath polygon");
+    expect(clipPolygon).not.toBeNull();
 
     const image = avatarGroup?.querySelector("image");
     expect(image).not.toBeNull();
