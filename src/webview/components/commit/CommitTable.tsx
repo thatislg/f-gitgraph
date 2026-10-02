@@ -1,10 +1,11 @@
 import { useSignal } from "@preact/signals";
 import { Fragment } from "preact";
-import { useMemo } from "preact/hooks";
+import { useMemo, useRef } from "preact/hooks";
 
 import type { GitCommitNode } from "@/backend/types";
 import { CommitDetails } from "@/webview/components/commit/CommitDetails";
 import { CommitGraph } from "@/webview/components/commit/CommitGraph";
+import { CommitHoverPanel } from "@/webview/components/commit/CommitHoverPanel";
 import { CommitRow } from "@/webview/components/commit/CommitRow";
 import type { ColumnResize } from "@/webview/components/commit/useColumnResize";
 import { useColumnResize } from "@/webview/components/commit/useColumnResize";
@@ -85,6 +86,40 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
     expandedRow === -1 ? null : { row: expandedRow, height: COMMIT_DETAILS_HEIGHT };
   const hoveredRow = useSignal<number | null>(null);
 
+  const hoverPopover = useSignal<{
+    commit: GitCommitNode;
+    anchorRect: DOMRect;
+  } | null>(null);
+  const hoverHideTimer = useRef<number | null>(null);
+
+  const handleHoverDwell = (commit: GitCommitNode, rect: DOMRect) => {
+    if (hoverHideTimer.current !== null) {
+      window.clearTimeout(hoverHideTimer.current);
+      hoverHideTimer.current = null;
+    }
+    hoverPopover.value = { commit, anchorRect: rect };
+  };
+
+  const handleHoverLeave = () => {
+    if (hoverHideTimer.current !== null) {
+      window.clearTimeout(hoverHideTimer.current);
+    }
+    hoverHideTimer.current = window.setTimeout(() => {
+      hoverPopover.value = null;
+    }, 180);
+  };
+
+  const handlePanelMouseEnter = () => {
+    if (hoverHideTimer.current !== null) {
+      window.clearTimeout(hoverHideTimer.current);
+      hoverHideTimer.current = null;
+    }
+  };
+
+  const handlePanelMouseLeave = () => {
+    hoverPopover.value = null;
+  };
+
   const titles = [
     window.l10n.graph,
     window.l10n.description,
@@ -147,6 +182,8 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
                   onHover={(hovered) => {
                     hoveredRow.value = hovered ? index : null;
                   }}
+                  onHoverDwell={handleHoverDwell}
+                  onHoverLeave={handleHoverLeave}
                   onSelect={
                     commit.hash === UNCOMMITTED_CHANGES
                       ? undefined
@@ -159,6 +196,16 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
           })}
         </tbody>
       </table>
+
+      {/* Floating rich commit hover panel */}
+      {hoverPopover.value && (
+        <CommitHoverPanel
+          commit={hoverPopover.value.commit}
+          anchorRect={hoverPopover.value.anchorRect}
+          onMouseEnter={handlePanelMouseEnter}
+          onMouseLeave={handlePanelMouseLeave}
+        />
+      )}
     </div>
   );
 }

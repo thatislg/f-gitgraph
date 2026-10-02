@@ -1,3 +1,5 @@
+import { useRef } from "preact/hooks";
+
 import type { GitCommitNode, GitRef } from "@/backend/types";
 import { abbrevCommit } from "@/backend/utils/string";
 import { RefLabel } from "@/webview/components/commit/RefLabel";
@@ -25,6 +27,10 @@ type CommitRowProps = {
   onHover?: ((hovered: boolean) => void) | undefined;
   /** X coordinate of the right edge of this row's commit avatar in the graph column */
   avatarRightX?: number | undefined;
+  /** Callback fired after hovering for a dwell duration (550ms) */
+  onHoverDwell?: ((commit: GitCommitNode, rect: DOMRect) => void) | undefined;
+  /** Callback fired when hover ends */
+  onHoverLeave?: (() => void) | undefined;
 };
 
 const CELL_CLASS = "h-6 overflow-hidden text-ellipsis whitespace-nowrap px-1 leading-6";
@@ -69,8 +75,13 @@ export function CommitRow({
   expanded,
   onSelect,
   onHover,
-  avatarRightX
+  avatarRightX,
+  onHoverDwell,
+  onHoverLeave
 }: CommitRowProps) {
+  const rowRef = useRef<HTMLTableRowElement>(null);
+  const dwellTimer = useRef<number | null>(null);
+
   const uncommitted = commit.hash === UNCOMMITTED_CHANGES;
   const message = uncommitted
     ? format(window.l10n.uncommittedChanges, uncommittedChanges.value)
@@ -101,13 +112,35 @@ export function CommitRow({
         }px, transparent 100%);`
       : undefined;
 
+  const handleMouseEnter = () => {
+    onHover?.(true);
+    if (dwellTimer.current !== null) {
+      window.clearTimeout(dwellTimer.current);
+    }
+    dwellTimer.current = window.setTimeout(() => {
+      if (rowRef.current && !uncommitted) {
+        onHoverDwell?.(commit, rowRef.current.getBoundingClientRect());
+      }
+    }, 550);
+  };
+
+  const handleMouseLeave = () => {
+    onHover?.(false);
+    if (dwellTimer.current !== null) {
+      window.clearTimeout(dwellTimer.current);
+      dwellTimer.current = null;
+    }
+    onHoverLeave?.();
+  };
+
   return (
     <tr
+      ref={rowRef}
       class={rowClass(isHead, expanded, onSelect !== undefined, menuOpen)}
       style={rowStyleString.length > 0 ? rowStyleString : undefined}
       onClick={onSelect}
-      onMouseEnter={() => onHover?.(true)}
-      onMouseLeave={() => onHover?.(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onContextMenu={
         uncommitted
           ? undefined
@@ -131,10 +164,7 @@ export function CommitRow({
               ))}
             </span>
           )}
-          <span
-            class="min-w-0 flex-1 truncate"
-            title={typeof message === "string" ? message : message.join("")}
-          >
+          <span class="min-w-0 flex-1 truncate">
             {isHead || uncommitted ? <b>{message}</b> : message}
           </span>
         </div>

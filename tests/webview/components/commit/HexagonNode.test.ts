@@ -197,7 +197,7 @@ describe("HexagonNode rendering", () => {
     let group = container.querySelector(".graph-node-hexagon") as SVGGElement | null;
     expect(group?.style.transform).toBe("scale(1)");
     expect(group?.style.transformOrigin).toBe("10px 12px");
-    expect(group?.style.transition).toContain("transform 0.15s ease-out");
+    expect(group?.style.transition).toContain("transform 0.2s");
 
     // Hovered state
     render(

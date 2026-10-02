@@ -54,7 +54,6 @@ describe("CommitRow", () => {
     expect(refRegion?.classList.contains("max-w-1/2")).toBe(true);
     expect(refRegion?.querySelector("[title]")?.getAttribute("title")).toBe(branch);
     expect(messageRegion?.classList.contains("flex-1")).toBe(true);
-    expect(messageRegion?.getAttribute("title")).toBe(message);
     expect(messageRegion?.textContent).toBe(message);
   });
 
