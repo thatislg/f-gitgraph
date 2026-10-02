@@ -94,7 +94,6 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   const hoverHideTimer = useRef<number | null>(null);
 
   const zoomedAvatar = useSignal<ZoomedAvatarInfo | null>(null);
-  const avatarHideTimer = useRef<number | null>(null);
 
   const handleHoverDwell = (commit: GitCommitNode, rect: DOMRect) => {
     // If zoomed avatar is active, don't show text hover panel to avoid overlap
@@ -128,34 +127,13 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
     hoverPopover.value = null;
   };
 
-  const handleAvatarDwell = (info: ZoomedAvatarInfo) => {
-    if (avatarHideTimer.current !== null) {
-      window.clearTimeout(avatarHideTimer.current);
-      avatarHideTimer.current = null;
-    }
-    // Suppress text hover panel while zoomed avatar is active
-    hoverPopover.value = null;
-    zoomedAvatar.value = info;
-  };
-
-  const handleAvatarLeave = () => {
-    if (avatarHideTimer.current !== null) {
-      window.clearTimeout(avatarHideTimer.current);
-    }
-    avatarHideTimer.current = window.setTimeout(() => {
+  const handleAvatarClick = (info: ZoomedAvatarInfo) => {
+    if (zoomedAvatar.value?.commit.hash === info.commit.hash) {
       zoomedAvatar.value = null;
-    }, 200);
-  };
-
-  const handleZoomPreviewMouseEnter = () => {
-    if (avatarHideTimer.current !== null) {
-      window.clearTimeout(avatarHideTimer.current);
-      avatarHideTimer.current = null;
+    } else {
+      hoverPopover.value = null;
+      zoomedAvatar.value = info;
     }
-  };
-
-  const handleZoomPreviewMouseLeave = () => {
-    zoomedAvatar.value = null;
   };
 
   const titles = [
@@ -175,8 +153,7 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
           expansion={expansion}
           hoveredRow={hoveredRow.value}
           selectedRow={expandedRow}
-          onAvatarDwell={handleAvatarDwell}
-          onAvatarLeave={handleAvatarLeave}
+          onAvatarClick={handleAvatarClick}
         />
       </div>
       <table
@@ -247,12 +224,13 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
         />
       )}
 
-      {/* Top-layer Floating 5x Avatar Deep Zoom Preview */}
+      {/* Top-layer Floating 5x Avatar Deep Zoom Preview (Click Deep Zoom) */}
       {zoomedAvatar.value && (
         <AvatarZoomPreview
           info={zoomedAvatar.value}
-          onMouseEnter={handleZoomPreviewMouseEnter}
-          onMouseLeave={handleZoomPreviewMouseLeave}
+          onClose={() => {
+            zoomedAvatar.value = null;
+          }}
         />
       )}
     </div>

@@ -91,4 +91,28 @@ describe("AvatarZoomPreview", () => {
     const svg = container.querySelector("svg");
     expect(svg).not.toBeNull();
   });
+
+  it("calls onClose when clicked", () => {
+    let closed = false;
+    container = document.createElement("div");
+    render(
+      h(AvatarZoomPreview, {
+        info: {
+          commit: dummyCommit,
+          anchorRect: dummyRect,
+          colour: "#0085d9",
+          author: "Ada Lovelace",
+          nodeType: "commit"
+        },
+        onClose: () => {
+          closed = true;
+        }
+      }),
+      container
+    );
+
+    const wrapper = container.firstElementChild as HTMLElement;
+    wrapper.click();
+    expect(closed).toBe(true);
+  });
 });

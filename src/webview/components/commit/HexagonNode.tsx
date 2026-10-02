@@ -142,8 +142,8 @@ export type HexagonNodeProps = {
   icon?: ComponentChildren;
   /** Whether to orient the hexagon pointy-topped (default: true). */
   pointy?: boolean | undefined;
-  /** Callback fired when dwelling on avatar for >= 500ms */
-  onAvatarDwell?:
+  /** Callback fired when clicking directly on avatar */
+  onAvatarClick?:
     | ((info: {
         rect: DOMRect;
         colour: string;
@@ -152,8 +152,6 @@ export type HexagonNodeProps = {
         avatarUrl?: string | undefined;
       }) => void)
     | undefined;
-  /** Callback fired when leaving avatar */
-  onAvatarLeave?: (() => void) | undefined;
 };
 
 /**
@@ -176,8 +174,7 @@ export function HexagonNode({
   isSelected = false,
   icon,
   pointy = true,
-  onAvatarDwell,
-  onAvatarLeave
+  onAvatarClick
 }: HexagonNodeProps) {
   const nodeRef = useRef<SVGGElement>(null);
   const iconSize = HEXAGON_ICON_SIZE;
@@ -187,32 +184,18 @@ export function HexagonNode({
   const clipId = `hex-avatar-${safeId}`;
   const isScaled = isHovered || isSelected;
 
-  const deepZoomTimer = useRef<number | null>(null);
-
-  const handleMouseEnter = () => {
-    if (deepZoomTimer.current !== null) {
-      window.clearTimeout(deepZoomTimer.current);
+  const handleClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (nodeRef.current && onAvatarClick) {
+      const rect = nodeRef.current.getBoundingClientRect();
+      onAvatarClick({
+        rect,
+        colour,
+        author,
+        nodeType,
+        avatarUrl
+      });
     }
-    deepZoomTimer.current = window.setTimeout(() => {
-      if (nodeRef.current && onAvatarDwell) {
-        const rect = nodeRef.current.getBoundingClientRect();
-        onAvatarDwell({
-          rect,
-          colour,
-          author,
-          nodeType,
-          avatarUrl
-        });
-      }
-    }, 500);
-  };
-
-  const handleMouseLeave = () => {
-    if (deepZoomTimer.current !== null) {
-      window.clearTimeout(deepZoomTimer.current);
-      deepZoomTimer.current = null;
-    }
-    onAvatarLeave?.();
   };
 
   const currentScale = isScaled ? 1.15 : 1;
@@ -234,8 +217,7 @@ export function HexagonNode({
         transform: `scale(${currentScale})`,
         filter: currentFilter
       }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
     >
       {author && <title>{author}</title>}
 

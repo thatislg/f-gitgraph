@@ -1,4 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 import type { GitCommitNode } from "@/backend/types";
 import {
@@ -19,8 +19,7 @@ export type ZoomedAvatarInfo = {
 
 export type AvatarZoomPreviewProps = {
   info: ZoomedAvatarInfo;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
+  onClose?: (() => void) | undefined;
 };
 
 const ZOOM_RADIUS = 50; // 5x scale of 10px
@@ -31,7 +30,8 @@ const CENTER = SVG_SIZE / 2;
  * Top-layer floating 5x Avatar Zoom preview with neon glow and crisp author badge.
  * Placed in fixed positioning to bypass all container clipping and table stacking contexts.
  */
-export function AvatarZoomPreview({ info, onMouseEnter, onMouseLeave }: AvatarZoomPreviewProps) {
+export function AvatarZoomPreview({ info, onClose }: AvatarZoomPreviewProps) {
+  const previewRef = useRef<HTMLDivElement>(null);
   const { commit, anchorRect, colour, author, nodeType = "commit" } = info;
   // High-resolution avatar: size=256 ensures crystal clear quality when zoomed 5x
   const highResAvatarUrl = commit.email ? getGitAccountAvatarUrl(commit.email, 256) : info.avatarUrl;
@@ -52,19 +52,43 @@ export function AvatarZoomPreview({ info, onMouseEnter, onMouseLeave }: AvatarZo
     setCoords({ left: clampedX, top: clampedY });
   }, [anchorRect]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose?.();
+      }
+    };
+    const handleClickOutside = (e: MouseEvent) => {
+      if (previewRef.current && !previewRef.current.contains(e.target as Node)) {
+        onClose?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    const timer = setTimeout(() => {
+      window.addEventListener("click", handleClickOutside);
+    }, 50);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [onClose]);
+
   const clipId = `zoomed-avatar-clip-${commit.hash.slice(0, 10)}`;
 
   return (
     <div
-      class="fixed z-[60] flex flex-col items-center select-none pointer-events-auto transition-transform duration-200 ease-out"
+      ref={previewRef}
+      class="fixed z-[60] flex flex-col items-center select-none pointer-events-auto cursor-pointer transition-transform duration-200 ease-out"
       style={{
         left: `${coords.left}px`,
         top: `${coords.top}px`,
         transform: "translate(-50%, -50%)",
         animation: "avatarZoomIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards"
       }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onClick={() => onClose?.()}
     >
       {/* 5x Hexagon SVG with Neon Glow */}
       <svg

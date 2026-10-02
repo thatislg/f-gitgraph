@@ -26,8 +26,7 @@ export function CommitGraph({
   hoveredRow,
   selectedRow,
   renderNodeIcon,
-  onAvatarDwell,
-  onAvatarLeave
+  onAvatarClick
 }: {
   layout: GraphLayout;
   commits?: Array<GitCommitNode> | undefined;
@@ -39,8 +38,7 @@ export function CommitGraph({
     commit: GitCommitNode | undefined,
     vertex: GraphVertex
   ) => ComponentChildren;
-  onAvatarDwell?: ((info: ZoomedAvatarInfo) => void) | undefined;
-  onAvatarLeave?: (() => void) | undefined;
+  onAvatarClick?: ((info: ZoomedAvatarInfo) => void) | undefined;
 }) {
   const angular = getWebviewConfig().graphStyle === "angular";
   const strokes = layout.branches.flatMap((branch) => branchStrokes(branch, angular, expansion));
@@ -86,9 +84,9 @@ export function CommitGraph({
             isHovered={isHovered}
             isSelected={isSelected}
             icon={customIcon}
-            onAvatarDwell={(info) => {
+            onAvatarClick={(info) => {
               if (commit) {
-                onAvatarDwell?.({
+                onAvatarClick?.({
                   commit,
                   anchorRect: info.rect,
                   colour: info.colour,
@@ -98,7 +96,6 @@ export function CommitGraph({
                 });
               }
             }}
-            onAvatarLeave={onAvatarLeave}
           />
         );
       })}
