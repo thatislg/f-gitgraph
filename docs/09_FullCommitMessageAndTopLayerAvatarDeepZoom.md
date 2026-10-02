@@ -68,10 +68,11 @@ Sau khi trải nghiệm hai tính năng mới (Rich Commit Hover Panel và Avata
    - Truy vấn `getGitAccountAvatarUrl(commit.email, 256)`.
    - Ảnh gốc chất lượng 256px hiển thị trong khuôn khổ 100px sẽ đảm bảo cực kỳ mịn màng trên cả màn hình thông thường lẫn Retina / 4K.
 3. **Nhãn tác giả (Author Badge)**:
-   - Đặt ngay bên dưới đỉnh dưới cùng của lục giác ($cy + 50\text{px} + 6\text{px}$).
-   - Kích thước badge: chiều cao $24\text{px}$, padding `px-3 py-0.5`, viền mỏng $1\text{px}$ màu nhánh kèm ánh sáng neon mờ.
+   - Bám sát ngay dưới đỉnh chân lục giác (offset chỉ $3\text{px}$ từ đỉnh nhọn phía dưới, khắc phục khoảng trống SVG bằng `marginTop: -17px`).
+   - Kích thước chữ thu gọn bằng 2/3 phiên bản ban đầu: `text-[8.5px] font-semibold leading-tight text-menu-fg`.
+   - Kích thước badge: padding tinh gọn `px-2 py-[2px]`, viền mỏng $1\text{px}$ màu nhánh kèm viền sáng neon mờ.
    - Nền kính mờ: `rgba(15, 23, 42, 0.95)`, `backdrop-filter: blur(8px)`.
-   - Font chữ: `text-[12px] font-semibold tracking-wide text-menu-fg`, nhỏ gọn và cân đối hoàn hảo với khối ảnh $100\text{px}$.
+   - Cân đối thanh lịch và bám sát hoàn hảo vào khối lục giác $100\text{px}$.
 4. **Không bị che lề trái/phải (`Viewport Edge Clamping`)**:
    - Tọa độ tâm `X` được giới hạn:
      ```typescript

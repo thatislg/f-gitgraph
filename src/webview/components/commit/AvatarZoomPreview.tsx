@@ -132,11 +132,12 @@ export function AvatarZoomPreview({ info, onMouseEnter, onMouseLeave }: AvatarZo
       {/* Author Name Badge tightly attached below hexagon */}
       {author && (
         <div
-          class="mt-1 flex max-w-[240px] items-center gap-1.5 rounded-full px-3 py-0.5 text-[12px] font-semibold tracking-wide text-menu-fg"
+          class="flex max-w-[200px] items-center gap-1 rounded-full px-2 py-[2px] text-[8.5px] font-semibold leading-none text-menu-fg"
           style={{
+            marginTop: "-16px",
             backgroundColor: "rgba(15, 23, 42, 0.95)",
-            border: `1.5px solid ${colour}`,
-            boxShadow: `0 0 10px ${colour}60, 0 4px 12px rgba(0, 0, 0, 0.8)`,
+            border: `1px solid ${colour}`,
+            boxShadow: `0 0 8px ${colour}50, 0 3px 8px rgba(0, 0, 0, 0.75)`,
             backdropFilter: "blur(8px)"
           }}
         >
