@@ -15,3 +15,4 @@ Tài liệu kỹ thuật và kiến trúc cho dự án Neo Git Graph.
 - [08. Rich Commit Hover Panel & Avatar Deep Zoom Preview](08_RichCommitHoverAndAvatarDeepZoom.md): Panel nổi hiển thị toàn bộ commit message màu nền chìm hệ thống và phóng to avatar 2.2x kèm tên tác giả khi giữ chuột.
 - [09. Full Commit Message & Top-Layer Avatar Deep Zoom (5x)](09_FullCommitMessageAndTopLayerAvatarDeepZoom.md): Tải toàn bộ message commit (Subject + Body) và hiển thị Avatar Deep Zoom 5x trên Top Layer tuyệt đối kèm ảnh độ nét cao và nhãn tên tác giả hài hòa.
 - [10. Chuẩn hóa Tên gọi Tương tác Avatar & Click Deep Zoom](10_AvatarInteractionNamingAndClickDeepZoom.md): Chuẩn hóa tên gọi Micro Hover Zoom (1.15x) và Click Deep Zoom (5.0x), chuyển sự kiện kích hoạt 5x sang click chuột vào icon avatar.
+- [11. Hover Neon Ambient Highlight trên Cột Graph](11_HoverNeonAmbientHighlight.md): Mở rộng hiệu ứng Neon Ambient sang các dòng khi rê chuột (mouse move over) chưa chọn.

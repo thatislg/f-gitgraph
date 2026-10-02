@@ -98,4 +98,53 @@ describe("CommitRow", () => {
     expect(graphCellStyle).toContain("transparent 27px");
     expect(graphCellStyle).toMatch(/(#ff5500|255, 85, 0)/);
   });
+
+  it("applies neon ambient gradient when hovered even if unselected", async () => {
+    const commit: GitCommitNode = {
+      hash: "ghi789",
+      parentHashes: [],
+      author: "Hover Author",
+      email: "hover@example.com",
+      date: 0,
+      message: "Hover message",
+      refs: []
+    };
+    container = document.createElement("tbody");
+
+    render(
+      h(CommitRow, {
+        commit,
+        isHead: false,
+        headBranch: null,
+        messages: new Map(),
+        colour: "#10b981",
+        expanded: false,
+        avatarRightX: 35,
+        onSelect: () => {}
+      }),
+      container
+    );
+
+    const row = container.querySelector("tr");
+    const graphCell = container.querySelector("td:first-child");
+    expect(row).not.toBeNull();
+
+    // Before hover: no gradient
+    expect(graphCell?.getAttribute("style") ?? "").not.toContain("linear-gradient");
+
+    // Trigger mouseenter
+    row?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // After hover: neon gradient appears starting from avatarRightX (35px)
+    const hoveredStyle = graphCell?.getAttribute("style") ?? "";
+    expect(hoveredStyle).toContain("linear-gradient");
+    expect(hoveredStyle).toContain("transparent 35px");
+    expect(hoveredStyle).toMatch(/(#10b981|16, 185, 129)/);
+
+    // Trigger mouseleave
+    row?.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(graphCell?.getAttribute("style") ?? "").not.toContain("linear-gradient");
+  });
 });

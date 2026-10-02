@@ -1,4 +1,4 @@
-import { useRef } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
 
 import type { GitCommitNode, GitRef } from "@/backend/types";
 import { abbrevCommit } from "@/backend/utils/string";
@@ -81,6 +81,7 @@ export function CommitRow({
 }: CommitRowProps) {
   const rowRef = useRef<HTMLTableRowElement>(null);
   const dwellTimer = useRef<number | null>(null);
+  const [isRowHovered, setIsRowHovered] = useState(false);
 
   const uncommitted = commit.hash === UNCOMMITTED_CHANGES;
   const message = uncommitted
@@ -103,16 +104,23 @@ export function CommitRow({
     .join("; ");
 
   // Neon ambient light on the graph column: transparent up to avatar right edge, then shimmering neon gradient
-  const graphCellStyle =
-    expanded && avatarRightX !== undefined
+  const isNeonActive = (expanded || isRowHovered) && avatarRightX !== undefined;
+  const graphCellStyle = isNeonActive
+    ? expanded
       ? `background: linear-gradient(to right, transparent 0px, transparent ${avatarRightX}px, color-mix(in srgb, ${branchColourVal} 45%, #ffffff 15%) ${avatarRightX}px, color-mix(in srgb, ${branchColourVal} 22%, transparent) ${
           avatarRightX + 25
         }px, color-mix(in srgb, ${branchColourVal} 6%, transparent) ${
           avatarRightX + 60
-        }px, transparent 100%);`
-      : undefined;
+        }px, transparent 100%); transition: background 0.15s ease-out;`
+      : `background: linear-gradient(to right, transparent 0px, transparent ${avatarRightX}px, color-mix(in srgb, ${branchColourVal} 35%, #ffffff 10%) ${avatarRightX}px, color-mix(in srgb, ${branchColourVal} 18%, transparent) ${
+          avatarRightX + 25
+        }px, color-mix(in srgb, ${branchColourVal} 5%, transparent) ${
+          avatarRightX + 60
+        }px, transparent 100%); transition: background 0.15s ease-out;`
+    : "transition: background 0.15s ease-out;";
 
   const handleMouseEnter = () => {
+    setIsRowHovered(true);
     onHover?.(true);
     if (dwellTimer.current !== null) {
       window.clearTimeout(dwellTimer.current);
@@ -125,6 +133,7 @@ export function CommitRow({
   };
 
   const handleMouseLeave = () => {
+    setIsRowHovered(false);
     onHover?.(false);
     if (dwellTimer.current !== null) {
       window.clearTimeout(dwellTimer.current);
