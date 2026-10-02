@@ -132,7 +132,7 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
         <tbody>
           {commits.map((commit, index) => {
             const vertex = layout.vertices[index];
-            const avatarRightX = vertex ? laneX(vertex.x) + 11 : undefined;
+            const avatarRightX = vertex ? laneX(vertex.x) + 10 : undefined;
 
             return (
               <Fragment key={commit.hash}>
