@@ -50,8 +50,10 @@ Thư mục [`docs/phase2_Investigation/`](phase2_Investigation/README.md) chứa
 
 ### 📐 Thiết Kế Kỹ Thuật & Nhật Ký Tiến Độ
 
-- **[02. Thiết Kế Kỹ Thuật (Design Specifications)](02_design/README.md)**: Thư mục chứa các bản thiết kế kiến trúc chi tiết, đặc tả giao thức IPC, thuật toán đồ thị và mô hình dữ liệu.
-- **[03. Nhật Ký Tiến Độ (Progress & Worklogs)](03_progess/README.md)**: Thư mục theo dõi tiến độ phát triển, báo cáo benchmark và biên bản nghiệm thu từng giai đoạn.
+- **[02. Thiết Kế Kỹ Thuật (Design Specifications)](02_design/README.md)**:
+  - **[001_windows](02_design/001_windows/README.md)**: Hệ thống 7 bản thiết kế chi tiết cho Phase 1 Windows (Cấu trúc & Native AOT, Domain Model & Bảng mã lỗi, Fast Reader, Parallel Layout, Stdio IPC, Webview & Mutator, Benchmark Plan).
+- **[03. Nhật Ký Tiến Độ (Progress & Worklogs)](03_progess/README.md)**: Thư mục theo dõi tiến độ phát triển, báo cáo benchmark và biên bản nghiệm thu từng giai đoạn (Windows -> Linux -> macOS -> Release).
+
 
 
 

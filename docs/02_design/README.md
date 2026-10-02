@@ -6,5 +6,10 @@ Thư mục này lưu trữ các bản thiết kế chi tiết (Design Specificat
 - Đặc tả giao thức truyền thông liên tiến trình (IPC Protocol Specification).
 - Thiết kế thuật toán tính toán đồ thị song song (Parallel Graph Topology Design).
 
-> [!NOTE]
-> Mọi tài liệu thiết kế trong thư mục này tuân thủ nguyên tắc: mô tả bằng ngôn ngữ tự nhiên, tập trung vào kiến trúc và luồng xử lý, không sử dụng mã nguồn mẫu khi chưa bước vào giai đoạn cài đặt thực tế.
+---
+
+## Danh Mục Các Giai Đoạn Thiết Kế
+
+- **[001_windows: Thiết Kế Chi Tiết Phase 1 Windows Milestone](001_windows/README.md)**:
+  Hệ thống 7 bản thiết kế chi tiết bao gồm: Cấu trúc dự án & Native AOT, Domain Model & Bảng mã lỗi, Fast Git Storage Reader, Parallel DAG Layout Solver, Giao thức IPC Stdio Streaming, Tích hợp Webview & Git Mutator, và Kế hoạch kiểm thử nghiệm thu.
+
