@@ -11,3 +11,11 @@ Thư mục này tập trung vào việc khảo sát kiến trúc, phân rã côn
   - Phân tích những gì tận dụng được từ Phase 1 và những gì cần đập đi xây lại.
   - Các nguyên tắc an toàn dữ liệu để bảo vệ commit, push, merge, rebase.
   - Danh mục chi tiết 7 mục đầu việc cần triển khai.
+
+- **[002. Bản Điều Tra Kiến Trúc Đa Nền Tảng (Cross-Platform)](002_Multiplatform.md)**:
+  - Hỗ trợ Windows 10/11+, Linux (Ubuntu, Fedora), macOS (Apple Silicon M-series & Intel).
+  - Cấu trúc thư mục ứng dụng và module `PlatformResolver.ts`.
+  - Chiến lược biên dịch .NET Native AOT (RIDs: `win-x64`, `linux-x64`, `osx-arm64`...).
+  - Giải quyết phân quyền thực thi `chmod +x`, macOS Gatekeeper codesign, glibc compatibility.
+  - Phương án đóng gói VSIX (Universal vs Platform-Specific) và CI/CD GitHub Actions matrix.
+
