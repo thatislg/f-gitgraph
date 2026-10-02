@@ -46,5 +46,13 @@ Thư mục [`docs/phase2_Investigation/`](phase2_Investigation/README.md) chứa
 - **[003. Lộ Trình Phát Triển Đa Nền Tảng (Windows -> Linux -> macOS)](phase2_Investigation/003_Roadmap.md)**:
   Chiến lược ưu tiên thực thi dứt điểm Windows trước, kế thừa sang Linux và hoàn thiện trên macOS; phân rã 4 giai đoạn và tiêu chuẩn nghiệm thu (DoD).
 
+---
+
+### 📐 Thiết Kế Kỹ Thuật & Nhật Ký Tiến Độ
+
+- **[02. Thiết Kế Kỹ Thuật (Design Specifications)](02_design/README.md)**: Thư mục chứa các bản thiết kế kiến trúc chi tiết, đặc tả giao thức IPC, thuật toán đồ thị và mô hình dữ liệu.
+- **[03. Nhật Ký Tiến Độ (Progress & Worklogs)](03_progess/README.md)**: Thư mục theo dõi tiến độ phát triển, báo cáo benchmark và biên bản nghiệm thu từng giai đoạn.
+
+
 
 
