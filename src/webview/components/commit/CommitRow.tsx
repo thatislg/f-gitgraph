@@ -1,4 +1,4 @@
-import { useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 import type { GitCommitNode, GitRef } from "@/backend/types";
 import { abbrevCommit } from "@/backend/utils/string";
@@ -24,6 +24,8 @@ type CommitRowProps = {
   colour: string | undefined;
   /** The details view of this commit is open. */
   expanded: boolean;
+  /** Whether any commit details view is currently open in the table. */
+  isAnyExpanded?: boolean | undefined;
   /** Open or close the details view. Absent for the uncommitted changes row. */
   onSelect: (() => void) | undefined;
   /** Callback fired when the row is hovered or unhovered */
@@ -78,6 +80,7 @@ export function CommitRow({
   messages,
   colour,
   expanded,
+  isAnyExpanded = false,
   onSelect,
   onHover,
   avatarRightX,
@@ -89,6 +92,13 @@ export function CommitRow({
   const dwellTimer = useRef<number | null>(null);
   const isContentHovered = useRef(false);
   const [isRowHovered, setIsRowHovered] = useState(false);
+
+  useEffect(() => {
+    if (isAnyExpanded && dwellTimer.current !== null) {
+      window.clearTimeout(dwellTimer.current);
+      dwellTimer.current = null;
+    }
+  }, [isAnyExpanded]);
 
   const uncommitted = commit.hash === UNCOMMITTED_CHANGES;
   const message = uncommitted
@@ -129,6 +139,10 @@ export function CommitRow({
     : "transition: background 0.15s ease-out;";
 
   const startDwellTimer = () => {
+    // If any commit details view is currently open, suppress all hover panels
+    if (isAnyExpanded) {
+      return;
+    }
     if (!isContentHovered.current) {
       isContentHovered.current = true;
       if (dwellTimer.current !== null) {

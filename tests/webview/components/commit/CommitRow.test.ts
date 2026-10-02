@@ -199,4 +199,42 @@ describe("CommitRow", () => {
     graphCell?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     expect(leaveCalled).toBe(true);
   });
+
+  it("suppresses onHoverDwell when isAnyExpanded is true", async () => {
+    let dwellCalled = false;
+    const commit: GitCommitNode = {
+      hash: "mno345",
+      parentHashes: [],
+      author: "Test Author",
+      email: "author@test.com",
+      date: 0,
+      message: "Suppressed dwell test",
+      refs: []
+    };
+    container = document.createElement("tbody");
+
+    render(
+      h(CommitRow, {
+        commit,
+        isHead: false,
+        headBranch: null,
+        messages: new Map(),
+        colour: "#10b981",
+        expanded: false,
+        isAnyExpanded: true,
+        avatarRightX: 25,
+        onHoverDwell: () => {
+          dwellCalled = true;
+        },
+        onSelect: () => {}
+      }),
+      container
+    );
+
+    const descCell = container.querySelector("td:nth-child(2)");
+    descCell?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    expect(dwellCalled).toBe(false);
+  });
 });

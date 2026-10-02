@@ -1,6 +1,6 @@
 import { useSignal } from "@preact/signals";
 import { Fragment } from "preact";
-import { useMemo, useRef } from "preact/hooks";
+import { useEffect, useMemo, useRef } from "preact/hooks";
 
 import type { GitCommitNode } from "@/backend/types";
 import { AvatarZoomPreview, type ZoomedAvatarInfo } from "@/webview/components/commit/AvatarZoomPreview";
@@ -85,6 +85,7 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   const expandedRow = commits.findIndex((commit) => commit.hash === expandedHash);
   const expansion: GraphExpansion | null =
     expandedRow === -1 ? null : { row: expandedRow, height: COMMIT_DETAILS_HEIGHT };
+  const isAnyExpanded = expandedCommit.value !== null;
   const hoveredRow = useSignal<number | null>(null);
 
   const hoverPopover = useSignal<{
@@ -93,11 +94,18 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   } | null>(null);
   const hoverHideTimer = useRef<number | null>(null);
 
+  // If any commit is selected/expanded, immediately close and suppress hoverPopover
+  useEffect(() => {
+    if (isAnyExpanded) {
+      hoverPopover.value = null;
+    }
+  }, [isAnyExpanded]);
+
   const zoomedAvatar = useSignal<ZoomedAvatarInfo | null>(null);
 
   const handleHoverDwell = (commit: GitCommitNode, rect: DOMRect) => {
-    // If zoomed avatar is active, don't show text hover panel to avoid overlap
-    if (zoomedAvatar.value !== null) {
+    // If zoomed avatar is active or any commit details is open, don't show text hover panel
+    if (zoomedAvatar.value !== null || isAnyExpanded) {
       return;
     }
     if (hoverHideTimer.current !== null) {
@@ -195,6 +203,7 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
                   messages={messages}
                   colour={branchColour(vertex?.colour ?? 0)}
                   expanded={index === expandedRow}
+                  isAnyExpanded={isAnyExpanded}
                   avatarRightX={avatarRightX}
                   onHover={(hovered) => {
                     hoveredRow.value = hovered ? index : null;
@@ -215,8 +224,8 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
         </tbody>
       </table>
 
-      {/* Floating rich commit hover panel */}
-      {hoverPopover.value && !zoomedAvatar.value && (
+      {/* Floating rich commit hover panel: completely suppressed when any commit details view is open */}
+      {hoverPopover.value && !zoomedAvatar.value && !isAnyExpanded && (
         <CommitHoverPanel
           commit={hoverPopover.value.commit}
           anchorRect={hoverPopover.value.anchorRect}
