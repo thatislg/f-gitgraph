@@ -10,6 +10,7 @@ import type {
 
 const eolRegex = /\r\n|\r|\n/g;
 const gitLogSeparator = "XX7Nal-YARtTpjCikii9nJxER19D6diSyk-AWkPb";
+const gitCommitSeparator = "YY9Commit-ZBpUq8vT7wL2kM4nE3xR1d-S5hJa";
 
 type LoadCommitsInput = {
   branchName: string;
@@ -65,7 +66,8 @@ async function getLog(
   dateType: DateType
 ): Promise<GitLogEntry[]> {
   const dateField = dateType === "Author Date" ? "%at" : "%ct";
-  const format = ["%H", "%P", "%an", "%ae", dateField, "%s"].join(gitLogSeparator);
+  const format =
+    ["%H", "%P", "%an", "%ae", dateField, "%s", "%b"].join(gitLogSeparator) + gitCommitSeparator;
   const args = ["log", `--max-count=${maxCommits}`, `--format=${format}`, "--date-order"];
   if (branch !== "") {
     args.push(branch);
@@ -77,29 +79,37 @@ async function getLog(
   }
   try {
     const stdout = await git.raw(args);
-    const lines = stdout.split(eolRegex);
+    const chunks = stdout.split(gitCommitSeparator);
     const commits: GitLogEntry[] = [];
-    for (const line of lines.slice(0, -1)) {
-      const [hash, parents, author, email, date, message, ...extraFields] =
-        line.split(gitLogSeparator);
+    for (const chunk of chunks) {
+      const trimmed = chunk.trim();
+      if (!trimmed) {
+        continue;
+      }
+      const parts = trimmed.split(gitLogSeparator);
+      if (parts.length < 6) {
+        continue;
+      }
+      const [hash, parents, author, email, date, message, ...bodyParts] = parts;
       if (
         hash === undefined ||
         parents === undefined ||
         author === undefined ||
         email === undefined ||
         date === undefined ||
-        message === undefined ||
-        extraFields.length > 0
+        message === undefined
       ) {
-        break;
+        continue;
       }
+      const body = bodyParts.join(gitLogSeparator).trim();
       commits.push({
         hash,
-        parentHashes: parents.split(" "),
+        parentHashes: parents ? parents.split(" ") : [],
         author,
         email,
         date: parseInt(date),
-        message
+        message,
+        body: body || undefined
       });
     }
     return commits;
@@ -170,6 +180,7 @@ export async function loadCommits(
       email: commit.email,
       date: commit.date,
       message: commit.message,
+      body: commit.body,
       refs: []
     });
   }

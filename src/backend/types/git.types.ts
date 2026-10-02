@@ -18,6 +18,7 @@ export type GitCommitNode = {
   email: string;
   date: number;
   message: string;
+  body?: string | undefined;
   refs: GitRef[];
 };
 
@@ -28,6 +29,7 @@ export type GitLogEntry = {
   email: string;
   date: number;
   message: string;
+  body?: string | undefined;
 };
 
 export type GitFileChange = {

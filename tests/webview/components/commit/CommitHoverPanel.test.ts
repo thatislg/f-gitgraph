@@ -59,4 +59,42 @@ describe("CommitHoverPanel", () => {
     expect(container.textContent).toContain("This is a multiline commit message body.");
     expect(container.textContent).toContain("main");
   });
+
+  it("renders both subject and multiline body cleanly", () => {
+    container = document.createElement("div");
+    const commit: GitCommitNode = {
+      hash: "abcdef1234567890abcdef1234567890abcdef12",
+      parentHashes: [],
+      author: "Grace Hopper",
+      email: "hopper@navy.mil",
+      date: 1700000000,
+      message: "feat: add compiler support",
+      body: "- Support A-0 system\n- Optimize arithmetic operations",
+      refs: []
+    };
+
+    const dummyRect = {
+      top: 100,
+      bottom: 124,
+      left: 100,
+      right: 500,
+      width: 400,
+      height: 24,
+      x: 100,
+      y: 100,
+      toJSON: () => {}
+    } as DOMRect;
+
+    render(
+      h(CommitHoverPanel, {
+        commit,
+        anchorRect: dummyRect
+      }),
+      container
+    );
+
+    expect(container.textContent).toContain("feat: add compiler support");
+    expect(container.textContent).toContain("- Support A-0 system");
+    expect(container.textContent).toContain("- Optimize arithmetic operations");
+  });
 });

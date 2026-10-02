@@ -1,5 +1,5 @@
 import type { ComponentChildren } from "preact";
-import { useRef, useState } from "preact/hooks";
+import { useRef } from "preact/hooks";
 
 import type { GitCommitNode } from "@/backend/types";
 import { UNCOMMITTED_CHANGES } from "@/webview/constants";
@@ -102,7 +102,7 @@ export function StashIconPath() {
   return <path d="M2 3h12v2H2V3zm1 3h10v7H3V6zm2 2v1h6V8H5z" />;
 }
 
-function renderDefaultIcon(type: CommitNodeType) {
+export function renderDefaultIcon(type: CommitNodeType) {
   switch (type) {
     case "merge":
       return <MergeIconPath />;
@@ -142,6 +142,18 @@ export type HexagonNodeProps = {
   icon?: ComponentChildren;
   /** Whether to orient the hexagon pointy-topped (default: true). */
   pointy?: boolean | undefined;
+  /** Callback fired when dwelling on avatar for >= 500ms */
+  onAvatarDwell?:
+    | ((info: {
+        rect: DOMRect;
+        colour: string;
+        author?: string | undefined;
+        nodeType: CommitNodeType;
+        avatarUrl?: string | undefined;
+      }) => void)
+    | undefined;
+  /** Callback fired when leaving avatar */
+  onAvatarLeave?: (() => void) | undefined;
 };
 
 /**
@@ -163,8 +175,11 @@ export function HexagonNode({
   isHovered = false,
   isSelected = false,
   icon,
-  pointy = true
+  pointy = true,
+  onAvatarDwell,
+  onAvatarLeave
 }: HexagonNodeProps) {
+  const nodeRef = useRef<SVGGElement>(null);
   const iconSize = HEXAGON_ICON_SIZE;
   const iconOffset = iconSize / 2;
   // Sanitize ID for valid CSS/SVG url(#...) selector syntax
@@ -172,7 +187,6 @@ export function HexagonNode({
   const clipId = `hex-avatar-${safeId}`;
   const isScaled = isHovered || isSelected;
 
-  const [isDeepZoom, setIsDeepZoom] = useState(false);
   const deepZoomTimer = useRef<number | null>(null);
 
   const handleMouseEnter = () => {
@@ -180,8 +194,17 @@ export function HexagonNode({
       window.clearTimeout(deepZoomTimer.current);
     }
     deepZoomTimer.current = window.setTimeout(() => {
-      setIsDeepZoom(true);
-    }, 600);
+      if (nodeRef.current && onAvatarDwell) {
+        const rect = nodeRef.current.getBoundingClientRect();
+        onAvatarDwell({
+          rect,
+          colour,
+          author,
+          nodeType,
+          avatarUrl
+        });
+      }
+    }, 500);
   };
 
   const handleMouseLeave = () => {
@@ -189,26 +212,22 @@ export function HexagonNode({
       window.clearTimeout(deepZoomTimer.current);
       deepZoomTimer.current = null;
     }
-    setIsDeepZoom(false);
+    onAvatarLeave?.();
   };
 
-  const currentScale = isDeepZoom ? 2.2 : isScaled ? 1.15 : 1;
-  const currentFilter = isDeepZoom
-    ? `drop-shadow(0 0 10px ${colour}) drop-shadow(0 0 4px #ffffff)`
-    : isScaled
-      ? `drop-shadow(0 0 5px ${colour}) drop-shadow(0 0 2px ${colour})`
-      : undefined;
-
-  const badgeWidth = author ? Math.max(54, author.length * 7.5 + 16) : 0;
+  const currentScale = isScaled ? 1.15 : 1;
+  const currentFilter = isScaled
+    ? `drop-shadow(0 0 5px ${colour}) drop-shadow(0 0 2px ${colour})`
+    : undefined;
 
   return (
     <g
+      ref={nodeRef}
       class={`graph-node-hexagon pointer-events-auto cursor-pointer transition-transform duration-200 ease-out ${
-        isDeepZoom ? "is-deep-zoom z-50" : isScaled ? "is-active" : ""
+        isScaled ? "is-active" : ""
       }`}
       data-node-type={nodeType}
-      data-scaled={isScaled || isDeepZoom ? "true" : undefined}
-      data-deep-zoom={isDeepZoom ? "true" : undefined}
+      data-scaled={isScaled ? "true" : undefined}
       style={{
         transformOrigin: `${cx}px ${cy}px`,
         transition: "transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease-out",
@@ -285,34 +304,6 @@ export function HexagonNode({
         strokeDasharray={isCommitted ? undefined : "2.5 1.5"}
         strokeLinejoin="round"
       />
-
-      {/* Author Name Badge when deep zoomed */}
-      {isDeepZoom && author && (
-        <g
-          transform={`translate(${cx}, ${cy + radius * 2.2 + 13})`}
-          class="pointer-events-none select-none"
-        >
-          <rect
-            x={-badgeWidth / 2}
-            y={-10}
-            width={badgeWidth}
-            height={20}
-            rx={4}
-            class="fill-menu stroke-line"
-            stroke={colour}
-            strokeWidth="1.5"
-            filter="drop-shadow(0 4px 8px rgba(0,0,0,0.6))"
-          />
-          <text
-            x="0"
-            y="3.5"
-            textAnchor="middle"
-            class="fill-menu-fg font-sans text-[11px] font-semibold tracking-wide"
-          >
-            {author}
-          </text>
-        </g>
-      )}
     </g>
   );
 }

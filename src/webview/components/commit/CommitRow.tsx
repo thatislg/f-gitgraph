@@ -147,7 +147,7 @@ export function CommitRow({
           : (event) => openContextMenu(event, source, commitMenu(commit, messages))
       }
     >
-      <td class={CELL_CLASS} style={graphCellStyle} />
+      <td class={`${CELL_CLASS} pointer-events-none`} style={graphCellStyle} />
       <td class={`${CELL_CLASS} w-full max-w-0 pl-2.5 ${isHead ? "shadow-head" : ""}`}>
         <div class="flex min-w-0 items-center">
           {isHead && (

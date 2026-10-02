@@ -3,6 +3,7 @@ import { Fragment } from "preact";
 import { useMemo, useRef } from "preact/hooks";
 
 import type { GitCommitNode } from "@/backend/types";
+import { AvatarZoomPreview, type ZoomedAvatarInfo } from "@/webview/components/commit/AvatarZoomPreview";
 import { CommitDetails } from "@/webview/components/commit/CommitDetails";
 import { CommitGraph } from "@/webview/components/commit/CommitGraph";
 import { CommitHoverPanel } from "@/webview/components/commit/CommitHoverPanel";
@@ -92,7 +93,14 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   } | null>(null);
   const hoverHideTimer = useRef<number | null>(null);
 
+  const zoomedAvatar = useSignal<ZoomedAvatarInfo | null>(null);
+  const avatarHideTimer = useRef<number | null>(null);
+
   const handleHoverDwell = (commit: GitCommitNode, rect: DOMRect) => {
+    // If zoomed avatar is active, don't show text hover panel to avoid overlap
+    if (zoomedAvatar.value !== null) {
+      return;
+    }
     if (hoverHideTimer.current !== null) {
       window.clearTimeout(hoverHideTimer.current);
       hoverHideTimer.current = null;
@@ -120,6 +128,36 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
     hoverPopover.value = null;
   };
 
+  const handleAvatarDwell = (info: ZoomedAvatarInfo) => {
+    if (avatarHideTimer.current !== null) {
+      window.clearTimeout(avatarHideTimer.current);
+      avatarHideTimer.current = null;
+    }
+    // Suppress text hover panel while zoomed avatar is active
+    hoverPopover.value = null;
+    zoomedAvatar.value = info;
+  };
+
+  const handleAvatarLeave = () => {
+    if (avatarHideTimer.current !== null) {
+      window.clearTimeout(avatarHideTimer.current);
+    }
+    avatarHideTimer.current = window.setTimeout(() => {
+      zoomedAvatar.value = null;
+    }, 200);
+  };
+
+  const handleZoomPreviewMouseEnter = () => {
+    if (avatarHideTimer.current !== null) {
+      window.clearTimeout(avatarHideTimer.current);
+      avatarHideTimer.current = null;
+    }
+  };
+
+  const handleZoomPreviewMouseLeave = () => {
+    zoomedAvatar.value = null;
+  };
+
   const titles = [
     window.l10n.graph,
     window.l10n.description,
@@ -137,6 +175,8 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
           expansion={expansion}
           hoveredRow={hoveredRow.value}
           selectedRow={expandedRow}
+          onAvatarDwell={handleAvatarDwell}
+          onAvatarLeave={handleAvatarLeave}
         />
       </div>
       <table
@@ -198,12 +238,21 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
       </table>
 
       {/* Floating rich commit hover panel */}
-      {hoverPopover.value && (
+      {hoverPopover.value && !zoomedAvatar.value && (
         <CommitHoverPanel
           commit={hoverPopover.value.commit}
           anchorRect={hoverPopover.value.anchorRect}
           onMouseEnter={handlePanelMouseEnter}
           onMouseLeave={handlePanelMouseLeave}
+        />
+      )}
+
+      {/* Top-layer Floating 5x Avatar Deep Zoom Preview */}
+      {zoomedAvatar.value && (
+        <AvatarZoomPreview
+          info={zoomedAvatar.value}
+          onMouseEnter={handleZoomPreviewMouseEnter}
+          onMouseLeave={handleZoomPreviewMouseLeave}
         />
       )}
     </div>

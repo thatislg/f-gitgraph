@@ -106,11 +106,16 @@ export function CommitHoverPanel({
         </div>
       </div>
 
-      {/* Message Body: Full commit message with formatting */}
-      <div class="max-h-72 overflow-y-auto p-3.5 select-text">
-        <p class="whitespace-pre-wrap font-sans text-xs/relaxed text-editor-fg">
+      {/* Message Body: Full commit message with subject and detailed body */}
+      <div class="max-h-80 overflow-y-auto p-3.5 select-text">
+        <div class="font-sans text-[13px] font-semibold leading-snug text-editor-fg">
           {commit.message}
-        </p>
+        </div>
+        {commit.body && (
+          <div class="mt-2.5 whitespace-pre-wrap font-sans text-xs/relaxed text-editor-fg/90 border-t border-line/40 pt-2.5">
+            {commit.body}
+          </div>
+        )}
       </div>
     </div>
   );

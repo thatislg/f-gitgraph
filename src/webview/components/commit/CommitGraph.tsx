@@ -1,6 +1,7 @@
 import type { ComponentChildren } from "preact";
 
 import type { GitCommitNode } from "@/backend/types";
+import type { ZoomedAvatarInfo } from "@/webview/components/commit/AvatarZoomPreview";
 import { getCommitNodeType, HexagonNode } from "@/webview/components/commit/HexagonNode";
 import { branchColour, UNCOMMITTED_COLOUR } from "@/webview/graph/palette";
 import { branchStrokes } from "@/webview/graph/strokes";
@@ -24,18 +25,22 @@ export function CommitGraph({
   expansion,
   hoveredRow,
   selectedRow,
-  renderNodeIcon
+  renderNodeIcon,
+  onAvatarDwell,
+  onAvatarLeave
 }: {
   layout: GraphLayout;
-  commits?: Array<GitCommitNode>;
+  commits?: Array<GitCommitNode> | undefined;
   expansion: GraphExpansion | null;
-  hoveredRow?: number | null;
-  selectedRow?: number | null;
+  hoveredRow?: number | null | undefined;
+  selectedRow?: number | null | undefined;
   /** Optional custom icon renderer to insert any icon into a commit node */
   renderNodeIcon?: (
     commit: GitCommitNode | undefined,
     vertex: GraphVertex
   ) => ComponentChildren;
+  onAvatarDwell?: ((info: ZoomedAvatarInfo) => void) | undefined;
+  onAvatarLeave?: (() => void) | undefined;
 }) {
   const angular = getWebviewConfig().graphStyle === "angular";
   const strokes = layout.branches.flatMap((branch) => branchStrokes(branch, angular, expansion));
@@ -81,6 +86,19 @@ export function CommitGraph({
             isHovered={isHovered}
             isSelected={isSelected}
             icon={customIcon}
+            onAvatarDwell={(info) => {
+              if (commit) {
+                onAvatarDwell?.({
+                  commit,
+                  anchorRect: info.rect,
+                  colour: info.colour,
+                  author: info.author,
+                  nodeType: info.nodeType,
+                  avatarUrl: info.avatarUrl
+                });
+              }
+            }}
+            onAvatarLeave={onAvatarLeave}
           />
         );
       })}
