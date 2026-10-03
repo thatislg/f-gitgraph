@@ -18,8 +18,8 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
   - Bảo đảm an toàn tuyệt đối 100% cho các thao tác ghi (commit, push, pull, rebase...) bằng cách tiếp tục định tuyến qua Git gốc (`git.exe`).
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
-- **Trạng thái**: Đang triển khai — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT), Nhóm Việc 2 (Domain Model), Nhóm Việc 3 (Fast Git Reader), Nhóm Việc 4 (Parallel DAG Solver) và Nhóm Việc 5 (IPC Daemon & Streaming) đã hoàn thành.
-- **Tiến độ tổng thể**: 5/7 nhóm việc hoàn thành (71%).
+- **Trạng thái**: Đang triển khai — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT), Nhóm Việc 2 (Domain Model), Nhóm Việc 3 (Fast Git Reader), Nhóm Việc 4 (Parallel DAG Solver), Nhóm Việc 5 (IPC Daemon & Streaming) và Nhóm Việc 6 (Webview & Git Mutator) đã hoàn thành.
+- **Tiến độ tổng thể**: 6/7 nhóm việc hoàn thành (86%).
 
 ---
 
@@ -162,16 +162,16 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 > 
 > *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để tích hợp dữ liệu hình học phẳng vào các component Preact Phase 1 (CommitTable, CommitGraph, HexagonNode, RefLabel, CommitHoverPanel, AvatarZoomPreview), Mục 2 để xây dựng module `GitCliMutator.ts` ủy thác 100% lệnh ghi cho `git.exe` gốc để bảo toàn GPG/SSH và Git Credential Manager, và Mục 3 để cài đặt File Watcher cập nhật vi sai (Debounce 150ms).
 
-- [ ] **Nhiệm vụ 6.1: Ghép nối dữ liệu hình học vào tầng Webview Preact (Phase 1)**
+- [x] **Nhiệm vụ 6.1: Ghép nối dữ liệu hình học vào tầng Webview Preact (Phase 1)**
   - Cập nhật module tiếp nhận dữ liệu trong Webview để giải mã các gói tin nhị phân và truyền trực tiếp tọa độ hình học vào bảng commit.
   - Bảo toàn 100% các thành phần giao diện đã hoàn thiện trong Phase 1: vẽ nút lục giác chuẩn SVG clip-path, hiệu ứng vầng sáng neon ambient khi rê chuột hoặc chọn dòng, tương tác nhấp icon avatar hiển thị xem trước 5x kèm tên tác giả, panel hiển thị đầy đủ tiêu đề và nội dung commit.
 
-- [ ] **Nhiệm vụ 6.2: Module thực thi thao tác ghi an toàn qua Git gốc (`GitCliMutator.ts`)**
+- [x] **Nhiệm vụ 6.2: Module thực thi thao tác ghi an toàn qua Git gốc (`GitCliMutator.ts`)**
   - Tách bạch ranh giới tuyệt đối: F# Engine chỉ phụ trách việc đọc và tính toán (Read Pipeline), toàn bộ các thao tác ghi (Write Pipeline) được chuyển giao cho Git CLI gốc.
   - Các thao tác: tạo commit, tạo nhánh mới, xóa nhánh (xóa an toàn `-d` và ép xóa `-D`), chuyển nhánh (checkout), sáp nhập nhánh (merge), tái cơ cấu (rebase), chọn lọc commit (cherry-pick), gắn thẻ phiên bản (tag), đẩy code (push) và kéo code (pull) đều được thực hiện qua tiến trình `git.exe` của người dùng.
   - Bảo toàn trọn vẹn chữ ký số commit (GPG/SSH Commit Signing) và cơ chế đăng nhập, xác thực tài khoản doanh nghiệp (Git Credential Manager / SSO).
 
-- [ ] **Nhiệm vụ 6.3: Cơ chế cập nhật vi sai khi kho mã nguồn thay đổi (Incremental Update)**
+- [x] **Nhiệm vụ 6.3: Cơ chế cập nhật vi sai khi kho mã nguồn thay đổi (Incremental Update)**
   - Thiết lập bộ theo dõi tệp (File Watcher) lắng nghe các biến động trong thư mục `.git/refs/` và tệp `.git/HEAD`.
   - Khi người dùng thực hiện commit mới hoặc chuyển đổi nhánh, engine F# chỉ tính toán lại phần thay đổi vi sai trên đồ thị và stream ngay lập tức cho Webview mà không cần quét lại toàn bộ kho mã nguồn từ đầu.
 
@@ -218,3 +218,5 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 - **2026-10-03**: Kiểm chứng Nhóm Việc 4 bằng 7 test case xUnit (`GraphTests`) trên đồ thị tổng hợp — tổng bộ test 34/34 pass; biên dịch Native AOT thành công.
 - **2026-10-03**: Hoàn thành Nhóm Việc 5 — Giao thức giao tiếp nội bộ: phía F# xây dựng `src/core-engine/Transport/Transport.fs` (MessagePack codec tự viết không thư viện + AOT-safe, khung gói tin `[độ dài u32 LE][opcode][seq][payload]`, bảng opcode 9 lệnh gồm Ready/Init/Query Range/Heartbeat/Error, và vòng lặp daemon `runWith` tích hợp Storage + Graph); `Program.fs` thêm chế độ `serve`. Phía TypeScript xây dựng `src/extension/sidecar/` (`msgpack.ts` đồng bộ byte với F#, `protocol.ts`, `sidecar-manager.ts` quản lý vòng đời: khởi động, heartbeat 10s, tự phục hồi khi thoát, thu hồi tài nguyên). Mở rộng `Geometry.Layout` thêm `Edges` để lọc đường nối theo cửa sổ ảo.
 - **2026-10-03**: Kiểm chứng Nhóm Việc 5 bằng 16 test xUnit (`TransportTests`) + 17 test vitest (`msgpack.test.ts`, `protocol.test.ts`) với vector byte chia sẻ hai bên — tổng F# 50/50 pass, TS 17/17 pass; typecheck/lint/format sạch; smoke test daemon trên bản AOT (Ready + Pong) thành công.
+- **2026-10-03**: Hoàn thành Nhóm Việc 6 — Ghép nối Webview & lệnh ghi an toàn: phía TypeScript xây dựng `graph-merge.ts` + `graph-data-bridge.ts` (cầu nối hình học F# với metadata commit, `mergeGraphWindow`/`GraphDataBridge`), `gitCliMutator.ts` (module `GitCliMutator` ủy thác 100% lệnh ghi cho `git.exe` qua `spawn`, kiểm tra `check-ref-format`, đầy đủ commit/branch/checkout/merge/rebase/cherry-pick/tag/push/pull/fetch), `git-ref.watcher.ts` (theo dõi `.git/HEAD` + `.git/refs/**`) và `coalescer.ts` (gom sự kiện debounce 150ms).
+- **2026-10-03**: Kiểm chứng Nhóm Việc 6 bằng 28 test vitest (`gitCliMutator` trên kho Git thật, `graph-merge`, `coalescer` fake timers) — tổng backend 28/28 pass; typecheck/lint/format sạch.
