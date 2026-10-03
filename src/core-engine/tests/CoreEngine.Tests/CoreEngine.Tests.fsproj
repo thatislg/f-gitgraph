@@ -33,6 +33,8 @@
     <Compile Include="CommitNodeTests.fs" />
     <Compile Include="InFlightStateTests.fs" />
     <Compile Include="GitErrorTests.fs" />
+    <Compile Include="Utf8Tests.fs" />
+    <Compile Include="CommitGraphTests.fs" />
   </ItemGroup>
 
 </Project>
