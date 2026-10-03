@@ -18,8 +18,8 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
   - Bảo đảm an toàn tuyệt đối 100% cho các thao tác ghi (commit, push, pull, rebase...) bằng cách tiếp tục định tuyến qua Git gốc (`git.exe`).
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
-- **Trạng thái**: Đang triển khai — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT), Nhóm Việc 2 (Domain Model) và Nhóm Việc 3 (Fast Git Reader) đã hoàn thành.
-- **Tiến độ tổng thể**: 3/7 nhóm việc hoàn thành (43%).
+- **Trạng thái**: Đang triển khai — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT), Nhóm Việc 2 (Domain Model), Nhóm Việc 3 (Fast Git Reader) và Nhóm Việc 4 (Parallel DAG Solver) đã hoàn thành.
+- **Tiến độ tổng thể**: 4/7 nhóm việc hoàn thành (57%).
 
 ---
 
@@ -118,16 +118,16 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 > 
 > *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để áp dụng thuật toán sắp xếp Topo xử lý các trường hợp đặc biệt (bản sao nông, nhánh mồ côi, kho đa gốc), Mục 2 để hiện thực thuật toán phân bổ làn thu gọn bên trái (Lane Pool) và cơ chế bảo toàn màu sắc nhánh, và Mục 3 để phân chia khối tính toán song song đa luồng CPU sinh mảng tọa độ hình học SVG.
 
-- [ ] **Nhiệm vụ 4.1: Chuyển đổi và tinh gọn thuật toán sắp xếp Topo (Topological Sort)**
+- [x] **Nhiệm vụ 4.1: Chuyển đổi và tinh gọn thuật toán sắp xếp Topo (Topological Sort)**
   - Hiện thực thuật toán sắp xếp topo dựa trên phả hệ cha-con và thứ tự thời gian tạo commit, đảm bảo commit con luôn xuất hiện phía trên commit cha.
   - Xử lý các tình huống đồ thị đặc biệt: bản sao nông (`--depth`) bị thiếu commit cha ở đáy, nhánh mồ côi (orphan branch), và kho mã nguồn có nhiều gốc độc lập (Multi-root DAG Forest).
 
-- [ ] **Nhiệm vụ 4.2: Thuật toán phân bổ làn đồ thị thu gọn về bên trái (Left-compact Lane Allocation)**
+- [x] **Nhiệm vụ 4.2: Thuật toán phân bổ làn đồ thị thu gọn về bên trái (Left-compact Lane Allocation)**
   - Xây dựng cơ chế bể làn hoạt động (Lane Pool): khi duyệt qua từng commit, tìm kiếm làn đang trỏ tới commit đó để tiếp tục kéo dài làn.
   - Khi một nhánh mới được tách ra, engine tìm kiếm làn trống đầu tiên nằm ở bên trái để tái sử dụng, giúp đồ thị luôn thu gọn sát mép trái và không bị giãn rộng vô tận ra màn hình.
   - Gán chỉ số màu sắc cố định cho từng nhánh theo thuật toán modulo luân phiên, bảo đảm màu sắc của một nhánh giữ nguyên tính nhất quán trong suốt quá trình cuộn trang.
 
-- [ ] **Nhiệm vụ 4.3: Tính toán song song đa luồng tọa độ hình học SVG**
+- [x] **Nhiệm vụ 4.3: Tính toán song song đa luồng tọa độ hình học SVG**
   - Phân chia danh sách commit thành các khối (batches) và phân bổ tính toán song song trên nhiều lõi CPU của máy tính.
   - Tính toán sẵn toàn bộ tọa độ tâm nút lục giác (tọa độ x, y), các điểm nút giao nhau, đường cong bezier nối giữa commit cha và commit con, đường rẽ nhánh và đường sáp nhập.
   - Đóng gói dữ liệu hình học thành cấu trúc mảng phẳng, sẵn sàng để giao diện Webview chỉ việc vẽ trực tiếp (Dumb Renderer) mà không cần tính toán thêm bất kỳ phép topo nào.
@@ -214,3 +214,5 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 - **2026-10-03**: Dựng dự án kiểm thử đơn vị chuẩn hóa `src/core-engine/tests/CoreEngine.Tests/` dùng xUnit (tương thích `dotnet test`), gồm 19 test case phủ toàn bộ tầng Domain (GitHash, CommitNode, InFlightState, GitError). Tạo solution `src/core-engine/neo-git-core.sln` gắn dự án nhân + test để di chuyển trọn gói khi tách dự án. Xóa smoke test tạm `smoke_test.fsx`.
 - **2026-10-03**: Hoàn thành Nhóm Việc 3 — Tầng đọc Git tốc độ cao trong `src/core-engine/Storage/`: `Utf8.fs` (giải mã UTF-8 zero-allocation + hex encode/decode), `CommitGraph.fs` (đọc trực tiếp tệp nhị phân `commit-graph` bằng Memory-Mapped Files qua `SafeMemoryMappedViewHandle.AcquirePointer`, parse header/chunk/OID fanout/lookup/CDAT/EDGE), `LibGit2.fs` (P/Invoke `git2-5853918.dll` từ gói `LibGit2Sharp.NativeBinaries`: open repo, revwalk, đọc commit cha/tác giả/tiêu đề qua `git_oid_tostr`/`git_oid_fromstr` tránh vấn đề layout struct SHA-256) và `Storage.fs` (điều phối `GitReader.readGraph`: ưu tiên commit-graph, fallback LibGit2).
 - **2026-10-03**: Kiểm chứng Nhóm Việc 3 bằng 27 test case xUnit (thêm `Utf8Tests`, `CommitGraphTests` với bộ dựng commit-graph nhị phân tổng hợp) và kiểm thử tích hợp trên kho Git thật: commit-graph đọc đúng 5 commit (1 root, 1 merge), LibGit2 đọc đúng tiêu đề tiếng Việt có dấu, emoji 🚀 và merge 2 cha. Biên dịch Native AOT thành công kèm `git2-5853918.dll` (~2MB) trong bản phát hành.
+- **2026-10-03**: Hoàn thành Nhóm Việc 4 — Thuật toán xếp làn đồ thị topo song song trong `src/core-engine/Graph/Graph.fs`: `TopoSort` (sắp xếp topo Kahn cải tiến + hàng đợi ưu tiên theo thế hệ/thời gian, xử lý shallow/orphan/multi-root/octopus và dự phòng khi thiếu generation), `Lanes` (phân bổ làn thu gọn trái Left-compact với kế thừa làn + tái sử dụng làn trống + đóng làn, màu ổn định theo `lane % 8`), `Geometry` (sinh tọa độ nút + đường nối SVG bằng `Parallel.For` đa luồng, đường thẳng/Bezier) và `Layout` (điểm vào: topo → phân làn → hình học). Mở rộng `GraphSnapshot` (Storage) thêm `Generation` và `CommitTime`.
+- **2026-10-03**: Kiểm chứng Nhóm Việc 4 bằng 7 test case xUnit (`GraphTests`) trên đồ thị tổng hợp — tổng bộ test 34/34 pass; biên dịch Native AOT thành công.
