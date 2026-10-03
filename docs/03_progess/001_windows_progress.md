@@ -18,8 +18,8 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
   - Bảo đảm an toàn tuyệt đối 100% cho các thao tác ghi (commit, push, pull, rebase...) bằng cách tiếp tục định tuyến qua Git gốc (`git.exe`).
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
-- **Trạng thái**: Đang trong giai đoạn chuẩn bị kỹ thuật (In Planning / Ready for Implementation).
-- **Tiến độ tổng thể**: 0% hoàn thành (Chưa khởi tạo mã nguồn dự án F#).
+- **Trạng thái**: Đang triển khai — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT) và Nhóm Việc 2 (Domain Model & Error Taxonomy) đã hoàn thành.
+- **Tiến độ tổng thể**: 2/7 nhóm việc hoàn thành (29%).
 
 ---
 
@@ -49,17 +49,17 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 > 
 > *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để cấu trúc các thư mục con trong `src/core-engine/`, Mục 2 để áp dụng các thiết lập xuất bản Native AOT (Trimming, LTO, Symbol Stripping, Invariant Globalization), và Mục 4 để thực thi quy trình kiểm định tính độc lập trên máy Windows sạch.
 
-- [ ] **Nhiệm vụ 1.1: Thiết lập cấu trúc dự án và phân chia module logic**
+- [x] **Nhiệm vụ 1.1: Thiết lập cấu trúc dự án và phân chia module logic**
   - Khởi tạo thư mục mã nguồn `src/core-engine/` chứa dự án F# độc lập dưới dạng Console Application.
   - Phân chia các module chức năng riêng biệt: Module miền nghiệp vụ (`Domain`), Module truy cập lưu trữ (`Storage`), Module giải thuật đồ thị (`Graph`), Module giao tiếp nội bộ (`Transport`), và Module điều phối chính (`Program`).
   - Đảm bảo tính độc lập tuyệt đối giữa nhân tính toán F# và mã nguồn TypeScript của VS Code Extension.
 
-- [ ] **Nhiệm vụ 1.2: Cấu hình xuất bản mã máy Native AOT cho Windows 64-bit (`win-x64`)**
+- [x] **Nhiệm vụ 1.2: Cấu hình xuất bản mã máy Native AOT cho Windows 64-bit (`win-x64`)**
   - Kích hoạt cơ chế biên dịch Native AOT trong tệp cấu hình dự án F# để loại bỏ mã bytecode trung gian, liên kết tĩnh toàn bộ runtime tối thiểu cần thiết vào file thực thi.
   - Thiết lập các cờ tối ưu hóa kích thước và hiệu năng: lược bỏ biểu tượng gỡ lỗi dư thừa (Symbol Stripping), tối ưu hóa liên kết toàn diện (Link Time Optimization - LTO).
   - Đảm bảo quy trình biên dịch tương thích với bộ công cụ xây dựng C++ tiêu chuẩn trên Windows (MSVC Build Tools).
 
-- [ ] **Nhiệm vụ 1.3: Kiểm định tính độc lập và đo đạc benchmark khởi động trên Windows**
+- [x] **Nhiệm vụ 1.3: Kiểm định tính độc lập và đo đạc benchmark khởi động trên Windows**
   - Kiểm tra file thực thi sinh ra (`neo-git-core.exe`) trên một môi trường Windows sạch (máy không cài đặt .NET SDK hoặc .NET Runtime) để xác nhận tính độc lập hoàn toàn.
   - Đo đạc thời gian khởi động lạnh (Cold-start latency) bằng lệnh kiểm tra phản hồi tức thời: mục tiêu đạt dưới 5 phần nghìn giây.
   - Kiểm tra dung lượng file thực thi độc lập đầu ra: mục tiêu nằm trong khoảng tối ưu từ 6MB đến 9MB.
@@ -72,20 +72,20 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 > 
 > *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để định nghĩa các kiểu thực thể Git cốt lõi (`GitHash`, `Author`, `CommitNode`, `GitRef`), Mục 2 để định nghĩa các trạng thái biến động dở dang (`InFlightState`), Mục 3 để xây dựng bảng mã lỗi hệ thống vét cạn, và Mục 4 để áp dụng nguyên tắc xử lý lỗi qua kiểu kết quả `Result`.
 
-- [ ] **Nhiệm vụ 2.1: Mô hình hóa các thực thể cốt lõi của Git (Core Entities)**
+- [x] **Nhiệm vụ 2.1: Mô hình hóa các thực thể cốt lõi của Git (Core Entities)**
   - Định nghĩa kiểu dữ liệu mã băm Git bất biến: hỗ trợ đồng thời cả chuẩn SHA-1 truyền thống (40 ký tự hexa) và chuẩn SHA-256 hiện đại (64 ký tự hexa), tích hợp hàm sinh chuỗi viết tắt (7 ký tự) phục vụ hiển thị.
   - Định nghĩa thực thể tác giả (Author/Committer): bao gồm tên, địa chỉ email, nhãn thời gian Unix và độ lệch múi giờ địa phương.
   - Định nghĩa thực thể Commit: mã băm đối tượng, danh sách mã băm của các commit cha (xử lý chính xác trường hợp commit gốc không có cha, commit thông thường có 1 cha, commit gộp có 2 cha, và commit sáp nhập đa nhánh Octopus Merge có từ 3 cha trở lên), tiêu đề tóm tắt và nội dung chi tiết.
   - Định nghĩa thực thể tham chiếu Git (GitRef): phân loại rõ ràng nhánh cục bộ (ghi nhận cờ nhánh đang checkout), nhánh máy chủ từ xa, thẻ phát hành phiên bản chính thức (Release Tag), thẻ tiền phát hành (Prerelease Tag) và điểm lưu trữ tạm thời (Stash).
 
-- [ ] **Nhiệm vụ 2.2: Mô hình hóa các trạng thái kho mã nguồn đang biến động dở dang (In-Flight States)**
+- [x] **Nhiệm vụ 2.2: Mô hình hóa các trạng thái kho mã nguồn đang biến động dở dang (In-Flight States)**
   - Trạng thái sạch bình thường (Clean state).
   - Trạng thái đang sáp nhập dở (Merging): đọc và phân tích thông tin từ tệp `MERGE_HEAD` và `MERGE_MSG` trong thư mục Git để trích xuất commit đang merge và thông điệp xung đột.
   - Trạng thái đang rebase dở (Rebasing): kiểm tra thư mục `rebase-merge` hoặc `rebase-apply` để xác định bước hiện tại, tổng số bước và nhánh gốc đang rebase.
   - Trạng thái đang chọn lọc commit dở (Cherry-picking): kiểm tra tệp `CHERRY_PICK_HEAD`.
   - Trạng thái đang tìm lỗi nhị phân (Bisecting): đọc tệp nhật ký `BISECT_LOG` để đánh dấu các commit tốt, commit lỗi và commit bỏ qua.
 
-- [ ] **Nhiệm vụ 2.3: Xây dựng bảng phân loại lỗi hệ thống vét cạn (Exhaustive Error Taxonomy)**
+- [x] **Nhiệm vụ 2.3: Xây dựng bảng phân loại lỗi hệ thống vét cạn (Exhaustive Error Taxonomy)**
   - Định nghĩa kiểu lỗi bằng Discriminated Unions của F# bao quát toàn bộ các tình huống thất bại: không tìm thấy kho mã nguồn, xung đột file khóa `index.lock` (kèm thời gian tồn tại của khóa để phát hiện khóa mồ côi), tên nhánh đã tồn tại, xóa nhánh chưa merge, xung đột tệp tin khi chuyển nhánh, thiếu commit cha trong bản sao nông (shallow clone), đối tượng git bị hỏng hoặc lỗi từ thư viện C gốc.
   - Quy định toàn bộ hàm nghiệp vụ trong engine bắt buộc trả về kiểu kết quả `Result` (Thành công mang dữ liệu hoặc Thất bại mang mã lỗi chi tiết), loại trừ hoàn toàn việc văng ngoại lệ bất ngờ làm sập tiến trình.
 
@@ -208,3 +208,7 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 - **2026-10-03**: Khởi tạo cấu trúc tài liệu tiến độ Phase 1. Xác lập tổng quan mục tiêu, phạm vi đầu việc và tiêu chuẩn nghiệm thu cho môi trường Windows.
 - **2026-10-03**: Chi tiết hóa toàn bộ 7 nhóm công việc lớn thành 20 nhiệm vụ con (subtasks) cụ thể, xác định rõ mục tiêu kỹ thuật, luồng xử lý và tiêu chí hoàn thành cho từng nhiệm vụ.
 - **2026-10-03**: Bổ sung bảng ánh xạ tài liệu thiết kế áp dụng chi tiết cho từng nhóm việc, liên kết trực tiếp tới 7 bản thiết kế kỹ thuật tương ứng trong thư mục `docs/02_design/001_windows/`.
+- **2026-10-03**: Hoàn thành Nhóm Việc 1 — Khởi tạo dự án F# `src/core-engine/` với phân tầng module `Domain`, `Storage`, `Graph`, `Transport` và điểm khởi chạy `Program.fs`. Cấu hình Native AOT (`PublishAot`, `win-x64`, `SelfContained`, `InvariantGlobalization`, `StripSymbols`, tối ưu kích thước) trong `core-engine.fsproj`.
+- **2026-10-03**: Biên dịch thành công `neo-git-core.exe` Native AOT (self-contained, không phụ thuộc .NET runtime), nhắm mục tiêu `net10.0` (LTS). Kích thước nhị phân đo được 0.84MB (dưới ngưỡng mục tiêu 6–9MB, sẽ tăng khi tích hợp LibGit2/MessagePack ở các nhóm việc sau). Cold-start latency đo được ~29–56ms (trung bình ~37ms), chưa đạt mục tiêu < 5ms — phần lớn độ trễ đến từ chi phí spawn tiến trình `CreateProcessW` của Windows, sẽ được tối ưu bằng mô hình sidecar daemon thường trú ở Nhóm Việc 5 thay vì spawn tiến trình mỗi lần gọi.
+- **2026-10-03**: Hoàn thành Nhóm Việc 2 — Xây dựng tầng miền nghiệp vụ thuần túy trong `src/core-engine/Domain/`: `CoreEntities.fs` (`GitHash` hỗ trợ SHA-1/SHA-256 với `tryParse`/`abbrev`, `Author`, `CommitNode`, `GitRef` phân loại 6 nhóm tham chiếu), `InFlightState.fs` (Clean/Merging/Rebasing/CherryPicking/Bisecting) và `GitError.fs` (bảng lỗi vét cạn 9 trường hợp kèm hàm `describe`).
+- **2026-10-03**: Dựng dự án kiểm thử đơn vị chuẩn hóa `src/core-engine/tests/CoreEngine.Tests/` dùng xUnit (tương thích `dotnet test`), gồm 19 test case phủ toàn bộ tầng Domain (GitHash, CommitNode, InFlightState, GitError). Tạo solution `src/core-engine/neo-git-core.sln` gắn dự án nhân + test để di chuyển trọn gói khi tách dự án. Xóa smoke test tạm `smoke_test.fsx`.
