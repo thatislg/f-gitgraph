@@ -12,6 +12,7 @@ Tài liệu này đặc tả chi tiết kiến trúc tầng miền nghiệp vụ
 Thay vì sử dụng các kiểu chuỗi ký tự tự do (Stringly-Typed) hay các đối tượng lỏng lẻo dễ gây lỗi lúc chạy, tầng miền nghiệp vụ của F# định nghĩa các thực thể Git bằng các kiểu dữ liệu có cấu trúc bất biến:
 
 ### 1.1. Thực Thể Định Danh Mã Băm Git (GitHash)
+
 - **Đặc điểm & Cấu trúc**:
   - Là kiểu dữ liệu giá trị bất biến, đại diện cho mã băm đối tượng của Git.
   - Hỗ trợ đồng thời cả hai chuẩn định dạng: chuẩn SHA-1 truyền thống gồm 40 ký tự thập lục phân và chuẩn SHA-256 hiện đại gồm 64 ký tự thập lục phân.
@@ -21,12 +22,14 @@ Thay vì sử dụng các kiểu chuỗi ký tự tự do (Stringly-Typed) hay c
   - Hỗ trợ so sánh bằng trực tiếp và hàm băm tốc độ cao, cho phép sử dụng làm khóa tìm kiếm trong các bảng tra cứu với độ phức tạp tìm kiếm tức thời.
 
 ### 1.2. Thực Thể Tác Giả & Người Thực Hiện (Author & Committer)
+
 - Đại diện cho thông tin người tạo ra sự thay đổi mã nguồn và người tạo commit:
   - **Tên tác giả**: Chuỗi văn bản đã được chuẩn hóa bảng mã UTF-8.
   - **Địa chỉ email**: Địa chỉ email của tác giả, dùng để băm mã MD5 lấy ảnh đại diện Gravatar.
   - **Thời điểm thực hiện**: Thời gian Unix nguyên bản kết hợp với độ lệch múi giờ địa phương, giúp hiển thị chính xác thời gian theo múi giờ của người xem hoặc múi giờ của người commit.
 
 ### 1.3. Thực Thể Nút Commit Trên Đồ Thị (CommitNode)
+
 - Là đơn vị dữ liệu trung tâm của toàn bộ hệ thống đồ thị:
   - **Mã băm commit**: Định danh duy nhất của commit (`GitHash`).
   - **Danh sách commit cha (Parents)**: Một danh sách chứa các mã băm của commit cha trực tiếp. Cấu trúc danh sách này phản ánh chính xác cấu trúc phả hệ:
@@ -39,6 +42,7 @@ Thay vì sử dụng các kiểu chuỗi ký tự tự do (Stringly-Typed) hay c
   - **Danh sách tham chiếu gắn kèm**: Tập hợp các nhánh và thẻ tag đang trỏ trực tiếp vào commit này.
 
 ### 1.4. Phân Loại Tham Chiếu & Nhánh (GitRef)
+
 - Một commit có thể được gắn một hoặc nhiều tham chiếu. Tầng Domain phân loại các tham chiếu thành các nhóm nghiệp vụ rõ ràng:
   - **Nhánh cục bộ (Local Branch)**: Mang tên nhánh và cờ đánh dấu nhánh này có đang được người dùng checkout làm việc hiện tại hay không.
   - **Nhánh máy chủ từ xa (Remote Branch)**: Mang tên máy chủ (như `origin`, `upstream`) và tên nhánh tương ứng trên máy chủ.
@@ -76,17 +80,17 @@ Trong thực tế làm việc hàng ngày, kho mã nguồn của lập trình vi
 
 Toàn bộ các sự cố kỹ thuật có thể xảy ra trong quá trình tương tác với hệ thống tệp và cơ sở dữ liệu Git được quy hoạch thành một bảng mã lỗi duy nhất:
 
-| Định Danh Lỗi | Hoàn Cảnh Phát Sinh | Dữ Liệu Ngữ Cảnh Đi Kèm | Hướng Xử Lý Khuyến Nghị |
-| :--- | :--- | :--- | :--- |
-| **Kho Không Tồn Tại** | Người dùng mở một thư mục không chứa dữ liệu Git hợp lệ. | Đường dẫn thư mục được yêu cầu. | Thông báo giao diện yêu cầu khởi tạo kho mới hoặc chọn đúng thư mục. |
-| **Xung Đột File Khóa** | Tệp `.git/index.lock` đang tồn tại do một tiến trình Git khác đang ghi dữ liệu hoặc tiến trình cũ bị chết bất đắc kỳ tử. | Tên tệp khóa, thời gian tồn tại tính bằng giây, mã tiến trình giữ khóa (nếu đọc được). | Nếu thời gian tồn tại dưới 5 giây: tự động thử lại sau khoảng nghỉ ngắn. Nếu trên 5 giây (khóa mồ côi): hiển thị nút cho phép người dùng xóa an toàn. |
-| **Xung Đột Khóa Nhánh** | Tệp khóa tham chiếu nhánh (ví dụ `.git/refs/heads/main.lock`) đang tồn tại. | Tên nhánh bị khóa. | Hàng đợi hóa thao tác ghi bằng cơ chế xử lý tuần tự (Actor Model) trong engine. |
-| **Tên Nhánh Đã Tồn Tại** | Người dùng cố gắng tạo hoặc đổi tên sang một nhánh đã có sẵn trong danh sách. | Tên nhánh bị trùng lặp. | Báo lỗi ngay từ tầng Domain trước khi gọi tiến trình Git, đề xuất người dùng chọn tên khác. |
-| **Nhánh Chưa Được Sáp Nhập** | Người dùng yêu cầu xóa nhánh thường (`git branch -d`) nhưng nhánh này còn chứa các commit chưa được merge vào nhánh chính. | Tên nhánh, số lượng commit đi trước chưa được merge. | Hiển thị hộp thoại cảnh báo kèm số lượng commit sẽ bị mất, cung cấp tùy chọn xác nhận ép xóa (`git branch -D`). |
-| **Xung Đột Tệp Khi Checkout** | Chuyển nhánh khi đang có các thay đổi chưa commit xung đột với nhánh đích. | Danh sách đường dẫn các tệp tin đang bị xung đột cục bộ. | Hiển thị bảng danh sách tệp xung đột, cung cấp tùy chọn cất giữ tạm (Stash changes) hoặc hủy bỏ thay đổi (Discard). |
-| **Điểm Cắt Bản Sao Nông** | Kho mã nguồn được clone với tùy chọn giới hạn độ sâu (`--depth`), commit ở đáy không tìm thấy commit cha trong dữ liệu. | Mã băm của commit cha bị thiếu. | Xem đây là biên giới bản sao hợp lệ, hiển thị ký hiệu ngắt đoạn trực quan trên đồ thị thay vì báo lỗi hỏng đồ thị. |
-| **Đối Tượng Git Bị Hỏng** | File nén trong thư mục object bị lỗi ổ đĩa hoặc hỏng checksum. | Mã băm đối tượng bị lỗi, thông báo lỗi kỹ thuật. | Báo lỗi dữ liệu bị hỏng và đề xuất người dùng chạy lệnh kiểm tra toàn vẹn (`git fsck`). |
-| **Lỗi Thư Viện C Gốc** | Thư viện LibGit2 trả về mã lỗi native. | Mã số lỗi nguyên bản và chuỗi mô tả từ thư viện C. | Đóng gói thông báo chi tiết để phục vụ công tác điều tra nhật ký hệ thống. |
+| Định Danh Lỗi                          | Hoàn Cảnh Phát Sinh                                                                                                                             | Dữ Liệu Ngữ Cảnh Đi Kèm                                                                              | Hướng Xử Lý Khuyến Nghị                                                                                                                                                       |
+| :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Kho Không Tồn Tại**            | Người dùng mở một thư mục không chứa dữ liệu Git hợp lệ.                                                                              | Đường dẫn thư mục được yêu cầu.                                                                 | Thông báo giao diện yêu cầu khởi tạo kho mới hoặc chọn đúng thư mục.                                                                                                  |
+| **Xung Đột File Khóa**           | Tệp`.git/index.lock` đang tồn tại do một tiến trình Git khác đang ghi dữ liệu hoặc tiến trình cũ bị chết bất đắc kỳ tử.    | Tên tệp khóa, thời gian tồn tại tính bằng giây, mã tiến trình giữ khóa (nếu đọc được). | Nếu thời gian tồn tại dưới 5 giây: tự động thử lại sau khoảng nghỉ ngắn. Nếu trên 5 giây (khóa mồ côi): hiển thị nút cho phép người dùng xóa an toàn. |
+| **Xung Đột Khóa Nhánh**         | Tệp khóa tham chiếu nhánh (ví dụ`.git/refs/heads/main.lock`) đang tồn tại.                                                              | Tên nhánh bị khóa.                                                                                     | Hàng đợi hóa thao tác ghi bằng cơ chế xử lý tuần tự (Actor Model) trong engine.                                                                                         |
+| **Tên Nhánh Đã Tồn Tại**      | Người dùng cố gắng tạo hoặc đổi tên sang một nhánh đã có sẵn trong danh sách.                                                     | Tên nhánh bị trùng lặp.                                                                               | Báo lỗi ngay từ tầng Domain trước khi gọi tiến trình Git, đề xuất người dùng chọn tên khác.                                                                       |
+| **Nhánh Chưa Được Sáp Nhập** | Người dùng yêu cầu xóa nhánh thường (`git branch -d`) nhưng nhánh này còn chứa các commit chưa được merge vào nhánh chính. | Tên nhánh, số lượng commit đi trước chưa được merge.                                           | Hiển thị hộp thoại cảnh báo kèm số lượng commit sẽ bị mất, cung cấp tùy chọn xác nhận ép xóa (`git branch -D`).                                               |
+| **Xung Đột Tệp Khi Checkout**    | Chuyển nhánh khi đang có các thay đổi chưa commit xung đột với nhánh đích.                                                           | Danh sách đường dẫn các tệp tin đang bị xung đột cục bộ.                                      | Hiển thị bảng danh sách tệp xung đột, cung cấp tùy chọn cất giữ tạm (Stash changes) hoặc hủy bỏ thay đổi (Discard).                                               |
+| **Điểm Cắt Bản Sao Nông**      | Kho mã nguồn được clone với tùy chọn giới hạn độ sâu (`--depth`), commit ở đáy không tìm thấy commit cha trong dữ liệu.     | Mã băm của commit cha bị thiếu.                                                                       | Xem đây là biên giới bản sao hợp lệ, hiển thị ký hiệu ngắt đoạn trực quan trên đồ thị thay vì báo lỗi hỏng đồ thị.                                       |
+| **Đối Tượng Git Bị Hỏng**     | File nén trong thư mục object bị lỗi ổ đĩa hoặc hỏng checksum.                                                                           | Mã băm đối tượng bị lỗi, thông báo lỗi kỹ thuật.                                              | Báo lỗi dữ liệu bị hỏng và đề xuất người dùng chạy lệnh kiểm tra toàn vẹn (`git fsck`).                                                                         |
+| **Lỗi Thư Viện C Gốc**          | Thư viện LibGit2 trả về mã lỗi native.                                                                                                       | Mã số lỗi nguyên bản và chuỗi mô tả từ thư viện C.                                             | Đóng gói thông báo chi tiết để phục vụ công tác điều tra nhật ký hệ thống.                                                                                        |
 
 ---
 
