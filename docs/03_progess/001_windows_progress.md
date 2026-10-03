@@ -18,8 +18,8 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
   - Bảo đảm an toàn tuyệt đối 100% cho các thao tác ghi (commit, push, pull, rebase...) bằng cách tiếp tục định tuyến qua Git gốc (`git.exe`).
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
-- **Trạng thái**: Đang triển khai — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT), Nhóm Việc 2 (Domain Model), Nhóm Việc 3 (Fast Git Reader) và Nhóm Việc 4 (Parallel DAG Solver) đã hoàn thành.
-- **Tiến độ tổng thể**: 4/7 nhóm việc hoàn thành (57%).
+- **Trạng thái**: Đang triển khai — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT), Nhóm Việc 2 (Domain Model), Nhóm Việc 3 (Fast Git Reader), Nhóm Việc 4 (Parallel DAG Solver) và Nhóm Việc 5 (IPC Daemon & Streaming) đã hoàn thành.
+- **Tiến độ tổng thể**: 5/7 nhóm việc hoàn thành (71%).
 
 ---
 
@@ -140,17 +140,17 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 > 
 > *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để xây dựng module quản lý vòng đời tiến trình F# sidecar trong TypeScript (khởi động ngầm, heartbeat ping-pong, tự phục hồi khi crash, thu hồi tài nguyên an toàn), Mục 2 để đặc tả cấu trúc khung gói tin nhị phân Stdio RPC và bảng mã Opcode MessagePack, và Mục 3 để hiện thực cơ chế phân trang cửa sổ ảo (Virtual Scrolling Window Streaming).
 
-- [ ] **Nhiệm vụ 5.1: Xây dựng cơ chế quản lý vòng đời tiến trình F# Sidecar**
+- [x] **Nhiệm vụ 5.1: Xây dựng cơ chế quản lý vòng đời tiến trình F# Sidecar**
   - Viết module điều phối trong TypeScript: tự động khởi chạy tiến trình `neo-git-core.exe` ở chế độ chạy nền khi người dùng mở bảng Git Graph.
   - Thiết lập cơ chế giám sát nhịp tim (Heartbeat) và tự phục hồi: nếu tiến trình native gặp sự cố bất ngờ, tự động khởi động lại và khôi phục trạng thái gần nhất.
   - Tự động hủy tiến trình con một cách an toàn khi người dùng đóng tab Git Graph để giải phóng toàn bộ tài nguyên CPU và RAM.
 
-- [ ] **Nhiệm vụ 5.2: Giao thức truyền thông nhị phân siêu nén qua Stdio RPC**
+- [x] **Nhiệm vụ 5.2: Giao thức truyền thông nhị phân siêu nén qua Stdio RPC**
   - Thiết lập kênh trao đổi thông điệp qua hai đường ống xuất nhập chuẩn (`stdin`/`stdout`).
   - Ứng dụng định dạng nhị phân MessagePack với tiêu đề gói tin cố định (bao gồm độ dài gói tin, mã định danh yêu cầu và nội dung dữ liệu nhị phân).
   - Triệt tiêu hoàn toàn chi phí tuần tự hóa chuỗi khổng lồ (`JSON.stringify`) và giải nén chuỗi (`JSON.parse`), giảm độ trễ đóng gói dữ liệu từ vài giây xuống dưới 50 phần nghìn giây.
 
-- [ ] **Nhiệm vụ 5.3: Cơ chế phân trang cửa sổ ảo (Virtual Scrolling Window Streaming)**
+- [x] **Nhiệm vụ 5.3: Cơ chế phân trang cửa sổ ảo (Virtual Scrolling Window Streaming)**
   - Thiết lập luồng truyền dữ liệu theo khung nhìn hiển thị: Webview chỉ gửi yêu cầu dải chỉ số dòng đang nhìn thấy (ví dụ từ dòng 100 đến dòng 300) kèm một vùng đệm an toàn phía trên và phía dưới.
   - Engine F# truy xuất bộ nhớ đệm và stream trả về đúng phạm vi commit kèm tọa độ đồ thị tương ứng trong thời gian dưới 5 phần nghìn giây.
 
@@ -216,3 +216,5 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 - **2026-10-03**: Kiểm chứng Nhóm Việc 3 bằng 27 test case xUnit (thêm `Utf8Tests`, `CommitGraphTests` với bộ dựng commit-graph nhị phân tổng hợp) và kiểm thử tích hợp trên kho Git thật: commit-graph đọc đúng 5 commit (1 root, 1 merge), LibGit2 đọc đúng tiêu đề tiếng Việt có dấu, emoji 🚀 và merge 2 cha. Biên dịch Native AOT thành công kèm `git2-5853918.dll` (~2MB) trong bản phát hành.
 - **2026-10-03**: Hoàn thành Nhóm Việc 4 — Thuật toán xếp làn đồ thị topo song song trong `src/core-engine/Graph/Graph.fs`: `TopoSort` (sắp xếp topo Kahn cải tiến + hàng đợi ưu tiên theo thế hệ/thời gian, xử lý shallow/orphan/multi-root/octopus và dự phòng khi thiếu generation), `Lanes` (phân bổ làn thu gọn trái Left-compact với kế thừa làn + tái sử dụng làn trống + đóng làn, màu ổn định theo `lane % 8`), `Geometry` (sinh tọa độ nút + đường nối SVG bằng `Parallel.For` đa luồng, đường thẳng/Bezier) và `Layout` (điểm vào: topo → phân làn → hình học). Mở rộng `GraphSnapshot` (Storage) thêm `Generation` và `CommitTime`.
 - **2026-10-03**: Kiểm chứng Nhóm Việc 4 bằng 7 test case xUnit (`GraphTests`) trên đồ thị tổng hợp — tổng bộ test 34/34 pass; biên dịch Native AOT thành công.
+- **2026-10-03**: Hoàn thành Nhóm Việc 5 — Giao thức giao tiếp nội bộ: phía F# xây dựng `src/core-engine/Transport/Transport.fs` (MessagePack codec tự viết không thư viện + AOT-safe, khung gói tin `[độ dài u32 LE][opcode][seq][payload]`, bảng opcode 9 lệnh gồm Ready/Init/Query Range/Heartbeat/Error, và vòng lặp daemon `runWith` tích hợp Storage + Graph); `Program.fs` thêm chế độ `serve`. Phía TypeScript xây dựng `src/extension/sidecar/` (`msgpack.ts` đồng bộ byte với F#, `protocol.ts`, `sidecar-manager.ts` quản lý vòng đời: khởi động, heartbeat 10s, tự phục hồi khi thoát, thu hồi tài nguyên). Mở rộng `Geometry.Layout` thêm `Edges` để lọc đường nối theo cửa sổ ảo.
+- **2026-10-03**: Kiểm chứng Nhóm Việc 5 bằng 16 test xUnit (`TransportTests`) + 17 test vitest (`msgpack.test.ts`, `protocol.test.ts`) với vector byte chia sẻ hai bên — tổng F# 50/50 pass, TS 17/17 pass; typecheck/lint/format sạch; smoke test daemon trên bản AOT (Ready + Pong) thành công.
