@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <!-- F-GitGraph Status Bar Micro Icon (16x16 px) -->
+  <!-- Trunk line -->
+  <line x1="4.5" y1="3.5" x2="4.5" y2="12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+  <!-- Upper feature branch -->
+  <path d="M 4.5 5 C 4.5 4.3 5 4 6 4 L 11.5 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Lower feature branch -->
+  <path d="M 4.5 9.5 C 4.5 8.9 5 8.5 6 8.5 L 9.5 8.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Base Trunk Hexagon Node -->
+  <polygon points="4.5,10.9 5.9,11.7 5.9,13.3 4.5,14.1 3.1,13.3 3.1,11.7" fill="none" stroke="currentColor" stroke-width="0.9" />
+
+  <!-- Lower Branch Hexagon Node -->
+  <polygon points="9.5,6.9 10.9,7.7 10.9,9.3 9.5,10.1 8.1,9.3 8.1,7.7" fill="none" stroke="currentColor" stroke-width="0.9" />
+
+  <!-- Upper Branch Hexagon Node -->
+  <polygon points="11.5,2.4 12.9,3.2 12.9,4.8 11.5,5.6 10.1,4.8 10.1,3.2" fill="none" stroke="currentColor" stroke-width="0.9" />
+
+  <!-- Top Trunk Hexagon Node -->
+  <polygon points="4.5,1.9 5.9,2.7 5.9,4.3 4.5,5.1 3.1,4.3 3.1,2.7" fill="none" stroke="currentColor" stroke-width="0.9" />
+</svg>
