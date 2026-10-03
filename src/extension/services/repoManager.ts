@@ -1,7 +1,7 @@
 import { isGitRepository } from "@/backend/utils/git";
 import { evalPromises } from "@/backend/utils/promise";
-import type { Config } from "@/old-extension/config";
-import { ExtensionState } from "@/old-extension/extensionState";
+import type { Config } from "@/extension/config";
+import { ExtensionState } from "@/extension/services/extensionState";
 import type { GitRepoSet, GitRepoState } from "@/types";
 
 function sortRepos(repos: GitRepoSet) {

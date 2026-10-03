@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { webviewBridgeFactory } from "@/old-extension/webviewBridge";
+import { webviewBridgeFactory } from "@/extension/services/webviewBridge";
 import type { RequestMessage } from "@/types";
 
 function createBridge() {

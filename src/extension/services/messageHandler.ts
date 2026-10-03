@@ -14,11 +14,11 @@ import { commitDetails } from "@/backend/queries/commitDetails";
 import { loadBranches } from "@/backend/queries/loadBranches";
 import { loadCommits } from "@/backend/queries/loadCommits";
 import { abbrevCommit } from "@/backend/utils/string";
+import type { Config } from "@/extension/config";
 import { AvatarManager } from "@/extension/services/avatarManager";
 import { encodeDiffDocUri } from "@/extension/services/diffDocProvider";
+import { ExtensionState } from "@/extension/services/extensionState";
 import { selectWatchedRepo } from "@/extension/watchers/git-repo.watcher";
-import type { Config } from "@/old-extension/config";
-import { ExtensionState } from "@/old-extension/extensionState";
 import type { GitFileChangeType, RequestMessage, ResponseMessage } from "@/types";
 
 import type { RepoManager } from "./repoManager";

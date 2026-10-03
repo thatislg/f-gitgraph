@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 
 /**
- * Localized strings for the webview (main.ts, dropdown.ts).
+ * Localized strings for the webview.
  * The webview cannot access vscode.l10n directly, so the strings are resolved
- * here in the extension host and injected into the page as the global `l10n`
- * object (see webviewHtml.ts). Every user-facing webview string must be
+ * here in the extension host and delivered to the webview via the
+ * `webviewInitialize` RPC handler. Every user-facing webview string must be
  * declared here — `@vscode/l10n-dev export` extracts them from this file.
  */
 export function getWebviewLocalizedStrings() {

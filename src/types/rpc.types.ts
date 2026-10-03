@@ -1,4 +1,4 @@
-import type { LocalizedStrings } from "@/old-extension/l10n/webviewL10n";
+import type { LocalizedStrings } from "@/extension/l10n/webviewL10n";
 import type { GitRepo, RepoChange, RepoUpdate, WebviewConfig } from "@/types";
 
 export type WebviewInitialize = {

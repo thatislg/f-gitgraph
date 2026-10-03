@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { extConfig } from "./config";
+import { config } from "./config";
 import { EXTENSION_NAME } from "./constants";
 import { createWevbviewHtml } from "./html";
 import { createMessageProtocol } from "./legacy";
@@ -36,7 +36,7 @@ export function createViewCommand(ctx: vscode.ExtensionContext) {
       }
     );
     webPanel.iconPath =
-      extConfig.tabIconColourTheme() === "colour"
+      config.tabIconColourTheme() === "colour"
         ? vscode.Uri.joinPath(ctx.extensionUri, "resources", "webview-icon.svg")
         : {
             light: vscode.Uri.joinPath(ctx.extensionUri, "resources", "webview-icon-light.svg"),

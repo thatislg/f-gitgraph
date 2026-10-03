@@ -39,7 +39,7 @@ Tái cấu trúc `src/types/` thành nguồn chân lý duy nhất (Single Source
 | `src/types/queries.ts` | `QueryRequest`, `QueryResponse`, `QueryResult` (giao thức message legacy) |
 | `src/types/repo.ts`    | `GitRepo`, `RepoChange`, `RepoUpdate` (đổi tên từ `git.types.ts`) |
 
-- Cập nhật toàn bộ **35** câu lệnh import trong `src/`, `tests/`, `tests-ext/` từ `@/backend/types` → `@/types`.
+- Cập nhật toàn bộ **35** câu lệnh import trong `src/`, `tests/`, `tests-e2e/` từ `@/backend/types` → `@/types`.
 - Xóa hoàn toàn thư mục `src/backend/types/`; tầng giao diện không còn phụ thuộc vào nó.
 
 ---
@@ -70,6 +70,14 @@ Tái cấu trúc `src/types/` thành nguồn chân lý duy nhất (Single Source
 | `src/backend/gitCliMutator.ts`  | `src/extension/mutator/gitCliMutator.ts`   |
 | `src/old-extension/avatarManager.ts` | `src/extension/services/avatarManager.ts` |
 | `src/old-extension/diffDocProvider.ts` | `src/extension/services/diffDocProvider.ts` |
+| `src/old-extension/config.ts` | gộp vào `src/extension/config.ts` (thống nhất `extConfig` cũ + `config` cũ) |
+| `src/old-extension/extensionState.ts` | `src/extension/services/extensionState.ts` |
+| `src/old-extension/messageHandler.ts` | `src/extension/services/messageHandler.ts` |
+| `src/old-extension/repoManager.ts` | `src/extension/services/repoManager.ts` |
+| `src/old-extension/webviewBridge.ts` | `src/extension/services/webviewBridge.ts` |
+| `src/old-extension/l10n/webviewL10n.ts` | `src/extension/l10n/webviewL10n.ts` |
+
+Đồng thời xóa `src/old-extension/utils/logger.ts` (`legacyLogger` đã chết — chỉ `.init` được gọi, không `.log` nào) và `src/old-extension/tsconfig.json` (cấu hình rỗng cũ).
 
 ---
 
@@ -85,16 +93,17 @@ Tái cấu trúc `src/types/` thành nguồn chân lý duy nhất (Single Source
 
 > Ghi chú: hai file `repoSearch.test.ts` (backend/utils và backend/queries) thất bại sẵn từ trước — nay được xóa cùng với dead code tương ứng, bộ test hiện 100% xanh.
 
+Đồng thời chuẩn hóa tên thư mục kiểm thử: `tests/old-extension/` → `tests/extension/` (unit test + mock `vscode`), `tests-ext/` → `tests-e2e/` (integration test chạy trên VS Code thật), kèm cập nhật `vitest.config.ts`, `.vscode-test.mjs`, `.oxlintrc.json`, `package.json` và `tests/tsconfig.json`.
+
 ---
 
 ## 6. Hạn Chế & Ghi Chú (Quan Trọng)
 
-Kế hoạch thiết kế Nhóm Việc 9 kỳ vọng xóa toàn bộ tầng truy vấn TS cũ và thư mục `src/old-extension/`. Tuy nhiên, ở trạng thái hiện tại:
+Thư mục `src/old-extension/` nay đã được loại bỏ hoàn toàn: toàn bộ dịch vụ còn hoạt động đã chuyển sang `src/extension/` (xem Mục 4.3), phần dead code và logger trùng lặp bị xóa. Điểm còn tồn đọng duy nhất:
 
-- **`src/backend/queries/loadCommits.ts`, `loadBranches.ts`, `commitDetails.ts` vẫn đang được dùng** bởi `src/old-extension/messageHandler.ts` → `src/extension/legacy.ts` → `view-command.ts` → `src/main.ts` (điểm vào thật). Sidecar F# hiện chỉ cung cấp hình học đồ thị (`graph.load`/`graph.window`), **chưa** cung cấp metadata commit / danh sách nhánh / chi tiết commit — nên việc xóa ba module này sẽ làm hỏng extension.
-- **`src/old-extension/` chưa thể xóa hoàn toàn**: các dịch vụ `config.ts`, `extensionState.ts`, `messageHandler.ts`, `repoManager.ts`, `webviewBridge.ts`, `l10n/webviewL10n.ts`, `utils/logger.ts` vẫn hoạt động (được `legacy.ts` sử dụng).
+- **`src/backend/queries/loadCommits.ts`, `loadBranches.ts`, `commitDetails.ts` vẫn đang được dùng** bởi `src/extension/services/messageHandler.ts` → `src/extension/legacy.ts` → `view-command.ts` → `src/main.ts` (điểm vào thật). Sidecar F# hiện chỉ cung cấp hình học đồ thị (`graph.load`/`graph.window`), **chưa** cung cấp metadata commit / danh sách nhánh / chi tiết commit — nên việc xóa ba module này sẽ làm hỏng extension.
 
-**Bước tiếp theo**: hoàn tất di trú Webview sang nguồn dữ liệu RPC (`graph.load` mở rộng trả metadata, `commitDetails`/`loadBranches` qua RPC), sau đó mới thanh lý triệt để các module truy vấn TS và thư mục `old-extension` còn lại.
+**Bước tiếp theo**: hoàn tất di trú Webview sang nguồn dữ liệu RPC (`graph.load` mở rộng trả metadata, `commitDetails`/`loadBranches` qua RPC), sau đó mới thanh lý triệt để ba module truy vấn TS còn lại.
 
 ---
 
@@ -107,4 +116,5 @@ Kế hoạch thiết kế Nhóm Việc 9 kỳ vọng xóa toàn bộ tầng truy
 | Loại bỏ dead code (khung kích hoạt cũ, repoSearch) |   ✅ Đạt   |
 | Chuyển giao `GitCliMutator` / avatar / diffDoc     |   ✅ Đạt   |
 | Zero-regression (typecheck/lint/test/build)        |   ✅ Đạt   |
-| Xóa triệt để `old-extension` + truy vấn TS còn lại | ⏳ Phụ thuộc di trú RPC |
+| Xóa triệt để `old-extension` (chuyển sang `extension/`) |   ✅ Đạt   |
+| Xóa truy vấn TS còn lại (`loadCommits`/`loadBranches`/`commitDetails`) | ⏳ Phụ thuộc di trú RPC |

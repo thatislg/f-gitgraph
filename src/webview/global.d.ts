@@ -7,5 +7,5 @@ declare function acquireVsCodeApi(): {
 };
 
 interface Window {
-  l10n: import("@/old-extension/l10n/webviewL10n").LocalizedStrings;
+  l10n: import("@/extension/l10n/webviewL10n").LocalizedStrings;
 }

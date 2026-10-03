@@ -1,14 +1,14 @@
 import * as vscode from "vscode";
 
 import { gitClientFactory } from "@/backend/gitClient";
+import { config } from "@/extension/config";
 import { AvatarManager } from "@/extension/services/avatarManager";
 import { DiffDocProvider } from "@/extension/services/diffDocProvider";
-import { config } from "@/old-extension/config";
-import { ExtensionState } from "@/old-extension/extensionState";
-import { registerMessageHandlers } from "@/old-extension/messageHandler";
-import { createRepoManager } from "@/old-extension/repoManager";
-import { webviewBridgeFactory } from "@/old-extension/webviewBridge";
-import type { WebviewBridge } from "@/old-extension/webviewBridge";
+import { ExtensionState } from "@/extension/services/extensionState";
+import { registerMessageHandlers } from "@/extension/services/messageHandler";
+import { createRepoManager } from "@/extension/services/repoManager";
+import { webviewBridgeFactory } from "@/extension/services/webviewBridge";
+import type { WebviewBridge } from "@/extension/services/webviewBridge";
 
 export function createMessageProtocol(ctx: vscode.ExtensionContext) {
   const extensionState = new ExtensionState(ctx);
