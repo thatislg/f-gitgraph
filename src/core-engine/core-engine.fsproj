@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Nhân tính toán F# "neo-git-core" — độc lập hoàn toàn với hệ sinh thái Node.js
+    của VS Code Extension. Tham khảo tài liệu thiết kế:
+    docs/02_design/001_windows/01_Project_Structure_And_NativeAOT.md
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Tên file thực thi đầu ra: neo-git-core.exe -->
+    <AssemblyName>neo-git-core</AssemblyName>
+    <RootNamespace>NeoGitCore</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!--
+    Cấu hình biên dịch Native AOT (Ahead-Of-Time) cho Windows 64-bit:
+    - PublishAot: biên dịch trước toàn bộ mã máy, loại bỏ bytecode trung gian (CIL) và JIT.
+    - RuntimeIdentifier / SelfContained: nhắm win-x64, tự chứa toàn bộ runtime tối thiểu.
+    - PublishTrimmed: kích hoạt cắt tỉa mã nguồn tích cực (Aggressive Trimming).
+    - InvariantGlobalization: cắt bỏ bảng tra cứu văn hóa quốc gia (tiết kiệm 3–5MB).
+    - StripSymbols: lược bỏ biểu tượng gỡ lỗi (PDB) khỏi nhị phân phát hành.
+    - IlcOptimizationPreference=Size: tối ưu hóa kích thước để đạt mục tiêu 6–9MB.
+      LTO (Link Time Optimization) do MSVC Linker thực hiện mặc định ở chế độ Release.
+  -->
+  <PropertyGroup>
+    <PublishAot>true</PublishAot>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishTrimmed>true</PublishTrimmed>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <StripSymbols>true</StripSymbols>
+    <OptimizationPreference>Size</OptimizationPreference>
+    <IlcOptimizationPreference>Size</IlcOptimizationPreference>
+    <!-- Không phát sinh dữ liệu stack trace để giảm kích thước nhị phân. -->
+    <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+    <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+  </PropertyGroup>
+
+  <!-- Thứ tự biên dịch F# phải tuân theo chiều phụ thuộc: Domain -> Storage -> Graph -> Transport -> Program -->
+  <ItemGroup>
+    <Compile Include="Domain/Domain.fs" />
+    <Compile Include="Domain/CoreEntities.fs" />
+    <Compile Include="Domain/InFlightState.fs" />
+    <Compile Include="Domain/GitError.fs" />
+    <Compile Include="Storage/Storage.fs" />
+    <Compile Include="Graph/Graph.fs" />
+    <Compile Include="Transport/Transport.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+</Project>
