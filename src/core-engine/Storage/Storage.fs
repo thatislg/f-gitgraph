@@ -14,6 +14,10 @@ type GraphSnapshot = {
     Commits: GitHash[]
     /// Với mỗi commit, vị trí (index trong Commits) của các commit cha.
     Parents: int[][]
+    /// Thế hệ topo của từng commit (0 = chưa biết, từ đường dẫn fallback LibGit2).
+    Generation: uint32[]
+    /// Thời gian tạo commit (giây kể từ epoch), dùng làm khóa sắp xếp phụ.
+    CommitTime: int64[]
 }
 
 [<RequireQualifiedAccess>]
@@ -31,7 +35,9 @@ module GitReader =
         | Some data ->
             Ok
                 { Commits = data.Commits
-                  Parents = data.Parents }
+                  Parents = data.Parents
+                  Generation = data.Generation
+                  CommitTime = data.CommitTime |> Array.map int64 }
         | None ->
             match LibGit2.openRepository repoPath with
             | Error e -> Error e
@@ -45,18 +51,25 @@ module GitReader =
                     hashes |> List.iteri (fun i h -> indexMap[h] <- i)
 
                     let commits = List.toArray hashes
-                    let parents =
-                        commits
-                        |> Array.map (fun h ->
-                            match repo.ReadCommit h with
-                            | Ok node ->
-                                // Bỏ qua commit cha không nằm trong phạm vi duyệt (biên giới bản sao nông).
+                    let parents = Array.zeroCreate<int[]> commits.Length
+                    let commitTime = Array.zeroCreate<int64> commits.Length
+                    for i in 0 .. commits.Length - 1 do
+                        match repo.ReadCommit commits[i] with
+                        | Ok node ->
+                            commitTime[i] <- node.Author.Timestamp
+                            // Bỏ qua commit cha không nằm trong phạm vi duyệt (biên giới bản sao nông).
+                            parents[i] <-
                                 node.Parents
                                 |> List.choose (fun p ->
                                     match indexMap.TryGetValue p with
-                                    | true, i -> Some i
+                                    | true, j -> Some j
                                     | false, _ -> None)
                                 |> List.toArray
-                            | Error _ -> [||])
+                        | Error _ ->
+                            parents[i] <- [||]
 
-                    Ok { Commits = commits; Parents = parents }
+                    Ok
+                        { Commits = commits
+                          Parents = parents
+                          Generation = Array.zeroCreate commits.Length
+                          CommitTime = commitTime }
