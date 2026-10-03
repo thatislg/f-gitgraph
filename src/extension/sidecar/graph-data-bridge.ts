@@ -1,4 +1,5 @@
 import { mergeGraphWindow, type GraphWindow, type MetadataProvider } from "./graph-merge";
+import type { InitSuccess } from "./protocol";
 import { SidecarManager } from "./sidecar-manager";
 
 // Cầu nối dữ liệu: kết hợp hình học đồ thị từ engine F# (qua sidecar) với metadata
@@ -14,16 +15,16 @@ export class GraphDataBridge {
     private readonly metadataProvider: MetadataProvider
   ) {}
 
-  async initialize(repoPath: string): Promise<number> {
+  async initialize(repoPath: string): Promise<InitSuccess> {
     const init = await this.sidecar.initialize(repoPath);
     this.commitList = init.commits;
-    return init.commitCount;
+    return init;
   }
 
-  async invalidate(): Promise<number> {
+  async invalidate(): Promise<InitSuccess> {
     const init = await this.sidecar.invalidate();
     this.commitList = init.commits;
-    return init.commitCount;
+    return init;
   }
 
   async loadWindow(from: number, to: number): Promise<GraphWindow> {

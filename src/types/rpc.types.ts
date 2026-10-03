@@ -1,5 +1,5 @@
 import type { LocalizedStrings } from "@/extension/l10n/webviewL10n";
-import type { GitRepo, RepoChange, RepoUpdate, WebviewConfig } from "@/types";
+import type { GitCommitNode, GitRepo, RepoChange, RepoUpdate, WebviewConfig } from "@/types";
 
 export type WebviewInitialize = {
   l10n: LocalizedStrings;
@@ -32,8 +32,21 @@ export type GraphLoadResult = {
   commits: string[];
 };
 
+/** Một dòng đồ thị đã gộp hình học F# với metadata commit, sẵn sàng cho Webview vẽ. */
+export type GraphRow = {
+  hash: string;
+  metadata: GitCommitNode | undefined;
+  x: number;
+  y: number;
+  lane: number;
+  color: number;
+  isMerge: boolean;
+  isRoot: boolean;
+};
+
 export type GraphWindowResult = {
-  nodes: GraphNode[];
+  from: number;
+  rows: GraphRow[];
   paths: GraphPath[];
 };
 

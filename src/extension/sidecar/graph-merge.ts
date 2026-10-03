@@ -1,20 +1,9 @@
-import type { GitCommitNode } from "@/types";
+import type { GitCommitNode, GraphRow } from "@/types";
 
 import type { NodeGeometry, PathGeometry } from "./protocol";
 
 // Gộp hình học đồ thị từ engine F# với metadata commit. Tách riêng để kiểm thử
 // thuần túy không phụ thuộc vscode.
-
-export type GraphRow = {
-  hash: string;
-  metadata: GitCommitNode | undefined;
-  x: number;
-  y: number;
-  lane: number;
-  color: number;
-  isMerge: boolean;
-  isRoot: boolean;
-};
 
 export type GraphWindow = {
   from: number;
