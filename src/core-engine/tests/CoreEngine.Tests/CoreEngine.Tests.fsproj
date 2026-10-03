@@ -35,6 +35,7 @@
     <Compile Include="GitErrorTests.fs" />
     <Compile Include="Utf8Tests.fs" />
     <Compile Include="CommitGraphTests.fs" />
+    <Compile Include="GraphTests.fs" />
   </ItemGroup>
 
 </Project>
