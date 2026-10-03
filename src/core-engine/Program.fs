@@ -3,6 +3,7 @@ module Program
 open System
 open NeoGitCore.Domain
 open NeoGitCore.Transport
+open NeoGitCore.Benchmark
 
 [<EntryPoint>]
 let main argv =
@@ -17,6 +18,19 @@ let main argv =
         // Phản hồi tức thời dùng để đo lường cold-start latency (mục tiêu < 5ms).
         Console.WriteLine("ready")
         0
+    | [| "bench" |] ->
+        // Đo đạc hiệu năng (Nhóm Việc 7) với 50.000 commit mặc định.
+        Bench.run 50000
+        0
+    | [| "bench"; "--commits"; n |] ->
+        // Đo đạc hiệu năng với số commit tùy chỉnh.
+        match Int32.TryParse n with
+        | true, count ->
+            Bench.run count
+            0
+        | false, _ ->
+            Console.Error.WriteLine("Số commit không hợp lệ: " + n)
+            2
     | [| "serve" |]
     | [| "--serve" |]
     | [||] ->

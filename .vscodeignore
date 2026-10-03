@@ -9,6 +9,9 @@
 !out/
 !l10n/
 
+# Nhân F# Native AOT và thư viện C gốc LibGit2 (Nhóm Việc 7.3).
+!bin/win-x64/
+
 !resources/icon.png
 !resources/webview-icon.svg
 !resources/webview-icon-dark.svg

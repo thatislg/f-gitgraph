@@ -36,6 +36,7 @@
     <Compile Include="Utf8Tests.fs" />
     <Compile Include="CommitGraphTests.fs" />
     <Compile Include="GraphTests.fs" />
+    <Compile Include="EquivalenceTests.fs" />
     <Compile Include="TransportTests.fs" />
   </ItemGroup>
 

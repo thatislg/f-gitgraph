@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Nhân tính toán F# "neo-git-core" — độc lập hoàn toàn với hệ sinh thái Node.js
+    Nhân tính toán F# "f-gitgraph-core" — độc lập hoàn toàn với hệ sinh thái Node.js
     của VS Code Extension. Tham khảo tài liệu thiết kế:
     docs/02_design/001_windows/01_Project_Structure_And_NativeAOT.md
   -->
@@ -9,8 +9,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <!-- Tên file thực thi đầu ra: neo-git-core.exe -->
-    <AssemblyName>neo-git-core</AssemblyName>
+    <!-- Tên file thực thi đầu ra: f-gitgraph-core.exe -->
+    <AssemblyName>f-gitgraph-core</AssemblyName>
     <RootNamespace>NeoGitCore</RootNamespace>
     <Nullable>enable</Nullable>
     <!-- Cần unsafe để tạo ReadOnlySpan trực tiếp từ Memory-Mapped View (Zero-Allocation). -->
@@ -41,7 +41,7 @@
     <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
   </PropertyGroup>
 
-  <!-- Thứ tự biên dịch F# phải tuân theo chiều phụ thuộc: Domain -> Storage -> Graph -> Transport -> Program -->
+  <!-- Thứ tự biên dịch F# phải tuân theo chiều phụ thuộc: Domain -> Storage -> Graph -> Transport -> Benchmark -> Program -->
   <ItemGroup>
     <Compile Include="Domain/Domain.fs" />
     <Compile Include="Domain/CoreEntities.fs" />
@@ -53,6 +53,7 @@
     <Compile Include="Storage/Storage.fs" />
     <Compile Include="Graph/Graph.fs" />
     <Compile Include="Transport/Transport.fs" />
+    <Compile Include="Benchmark.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

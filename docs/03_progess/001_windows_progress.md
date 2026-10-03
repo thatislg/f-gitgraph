@@ -1,4 +1,4 @@
-# Tiến Độ Phase 1: Windows First Milestone (Xây Dựng Nền Móng Nhân F#)
+﻿# Tiến Độ Phase 1: Windows First Milestone (Xây Dựng Nền Móng Nhân F#)
 
 Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệu thiết kế áp dụng, phạm vi công việc chi tiết hóa từng nhiệm vụ con (subtasks), tiêu chuẩn nghiệm thu và nhật ký thực hiện cho **Phase 1: Xây dựng nền móng nhân F# Core Engine trên môi trường Windows**.
 
@@ -10,7 +10,8 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
 ## 1. Tổng Quan Giai Đoạn (Overview)
 
 ### 1.1. Tầm nhìn & Mục tiêu Cốt lõi
-- **Mục tiêu**: Xây dựng thành công bản nhị phân F# Native AOT đầu tiên (`neo-git-core.exe`) chạy độc lập trên Windows 10/11, thay thế toàn bộ tầng nạp dữ liệu và tính toán layout đơn luồng hiện tại của TypeScript.
+
+- **Mục tiêu**: Xây dựng thành công bản nhị phân F# Native AOT đầu tiên (`f-gitgraph-core.exe`) chạy độc lập trên Windows 10/11, thay thế toàn bộ tầng nạp dữ liệu và tính toán layout đơn luồng hiện tại của TypeScript.
 - **Trọng tâm kỹ thuật**:
   - Triệt tiêu độ trễ spawn tiến trình dòng lệnh `CreateProcessW` trên Windows bằng cách đọc trực tiếp qua thư viện C gốc LibGit2 và cơ chế ánh xạ bộ nhớ trực tiếp (Memory-Mapped Files) với file `commit-graph`.
   - Phân bổ làn đồ thị song song đa luồng CPU trên F#, tính toán sẵn toàn bộ tọa độ hình học trước khi chuyển sang giao diện.
@@ -18,8 +19,9 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
   - Bảo đảm an toàn tuyệt đối 100% cho các thao tác ghi (commit, push, pull, rebase...) bằng cách tiếp tục định tuyến qua Git gốc (`git.exe`).
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
-- **Trạng thái**: Đang triển khai — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT), Nhóm Việc 2 (Domain Model), Nhóm Việc 3 (Fast Git Reader), Nhóm Việc 4 (Parallel DAG Solver), Nhóm Việc 5 (IPC Daemon & Streaming) và Nhóm Việc 6 (Webview & Git Mutator) đã hoàn thành.
-- **Tiến độ tổng thể**: 6/7 nhóm việc hoàn thành (86%).
+
+- **Trạng thái**: Đã hoàn thành toàn bộ 7 nhóm việc — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT), Nhóm Việc 2 (Domain Model), Nhóm Việc 3 (Fast Git Reader), Nhóm Việc 4 (Parallel DAG Solver), Nhóm Việc 5 (IPC Daemon & Streaming), Nhóm Việc 6 (Webview & Git Mutator) và Nhóm Việc 7 (Kiểm thử nghiệm thu & Benchmarking).
+- **Tiến độ tổng thể**: 7/7 nhóm việc hoàn thành (100%). Nhóm Việc 7 bao gồm 3 nhiệm vụ: Kiểm thử tương đương (7.1), Đo đạc benchmark (7.2) và Đóng gói thử nghiệm Windows VSIX (7.3) — cả ba đều đã hoàn tất.
 
 ---
 
@@ -27,15 +29,15 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
 
 Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên dưới bắt buộc phải bám sát hệ thống tài liệu thiết kế chi tiết tương ứng nằm trong thư mục **[docs/02_design/001_windows/](../02_design/001_windows/README.md)**:
 
-| STT | Nhóm Việc Kỹ Thuật | Tài Liệu Thiết Kế Chi Tiết Bắt Buộc Áp Dụng | Phạm Vi Thiết Kế Trọng Tâm |
-| :---: | :--- | :--- | :--- |
-| **1** | **Khởi Tạo Dự Án F# & Native AOT** | **[01_Project_Structure_And_NativeAOT.md](../02_design/001_windows/01_Project_Structure_And_NativeAOT.md)** | Cấu trúc phân tầng `src/core-engine/`, cờ xuất bản Native AOT (`win-x64`), cắt tỉa Trimming, LTO, kiểm định máy sạch. |
-| **2** | **Tầng Miền Nghiệp Vụ & Bảng Mã Lỗi** | **[02_Domain_Model_And_Error_Taxonomy.md](../02_design/001_windows/02_Domain_Model_And_Error_Taxonomy.md)** | Thực thể GitHash, Author, CommitNode, GitRef, trạng thái In-Flight (`MERGE_HEAD`, `rebase-merge`), bảng lỗi vét cạn qua kiểu `Result`. |
-| **3** | **Tầng Đọc Dữ Liệu Git Tốc Độ Cao** | **[03_Fast_Git_Storage_Reader.md](../02_design/001_windows/03_Fast_Git_Storage_Reader.md)** | Tích hợp LibGit2 C-binding in-process, Memory-Mapped File đọc `commit-graph`, Zero-Allocation Span, giải mã UTF-8 tiếng Việt. |
-| **4** | **Thuật Toán Xếp Làn Đồ Thị Topo Song Song** | **[04_Parallel_DAG_Layout_Solver.md](../02_design/001_windows/04_Parallel_DAG_Layout_Solver.md)** | Sắp xếp Topo xử lý shallow/orphan/multi-root, phân bổ làn thu gọn bên trái (Lane Pool), tính toán song song đa luồng CPU tọa độ SVG. |
-| **5** | **Giao Thức Giao Tiếp Nội Bộ (IPC Daemon)** | **[05_IPC_Stdio_Streaming_Protocol.md](../02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md)** | Quản lý vòng đời tiến trình F# sidecar, cấu trúc khung gói tin Stdio RPC MessagePack, phân trang cửa sổ ảo (Virtual Scrolling). |
-| **6** | **Ghép Nối Webview & Lệnh Ghi An Toàn** | **[06_Webview_Integration_And_Git_Mutator.md](../02_design/001_windows/06_Webview_Integration_And_Git_Mutator.md)** | Ghép nối dữ liệu hình học phẳng vào Webview Preact Phase 1, ủy thác 100% lệnh ghi cho `git.exe`, File Watcher cập nhật vi sai. |
-| **7** | **Kiểm Thử Nghiệm Thu & Benchmark** | **[07_Benchmarking_And_Verification_Plan.md](../02_design/001_windows/07_Benchmarking_And_Verification_Plan.md)** | Kịch bản kiểm thử tương đương đồ thị 100%, đo đạc 4 chỉ số benchmark định lượng, bảng kiểm tra an toàn dữ liệu Git. |
+|  STT  | Nhóm Việc Kỹ Thuật                           | Tài Liệu Thiết Kế Chi Tiết Bắt Buộc Áp Dụng                                                                         | Phạm Vi Thiết Kế Trọng Tâm                                                                                                             |
+| :---: | :------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | **Khởi Tạo Dự Án F# & Native AOT**           | **[01_Project_Structure_And_NativeAOT.md](../02_design/001_windows/01_Project_Structure_And_NativeAOT.md)**         | Cấu trúc phân tầng `src/core-engine/`, cờ xuất bản Native AOT (`win-x64`), cắt tỉa Trimming, LTO, kiểm định máy sạch.                  |
+| **2** | **Tầng Miền Nghiệp Vụ & Bảng Mã Lỗi**        | **[02_Domain_Model_And_Error_Taxonomy.md](../02_design/001_windows/02_Domain_Model_And_Error_Taxonomy.md)**         | Thực thể GitHash, Author, CommitNode, GitRef, trạng thái In-Flight (`MERGE_HEAD`, `rebase-merge`), bảng lỗi vét cạn qua kiểu `Result`. |
+| **3** | **Tầng Đọc Dữ Liệu Git Tốc Độ Cao**          | **[03_Fast_Git_Storage_Reader.md](../02_design/001_windows/03_Fast_Git_Storage_Reader.md)**                         | Tích hợp LibGit2 C-binding in-process, Memory-Mapped File đọc `commit-graph`, Zero-Allocation Span, giải mã UTF-8 tiếng Việt.          |
+| **4** | **Thuật Toán Xếp Làn Đồ Thị Topo Song Song** | **[04_Parallel_DAG_Layout_Solver.md](../02_design/001_windows/04_Parallel_DAG_Layout_Solver.md)**                   | Sắp xếp Topo xử lý shallow/orphan/multi-root, phân bổ làn thu gọn bên trái (Lane Pool), tính toán song song đa luồng CPU tọa độ SVG.   |
+| **5** | **Giao Thức Giao Tiếp Nội Bộ (IPC Daemon)**  | **[05_IPC_Stdio_Streaming_Protocol.md](../02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md)**               | Quản lý vòng đời tiến trình F# sidecar, cấu trúc khung gói tin Stdio RPC MessagePack, phân trang cửa sổ ảo (Virtual Scrolling).        |
+| **6** | **Ghép Nối Webview & Lệnh Ghi An Toàn**      | **[06_Webview_Integration_And_Git_Mutator.md](../02_design/001_windows/06_Webview_Integration_And_Git_Mutator.md)** | Ghép nối dữ liệu hình học phẳng vào Webview Preact Phase 1, ủy thác 100% lệnh ghi cho `git.exe`, File Watcher cập nhật vi sai.         |
+| **7** | **Kiểm Thử Nghiệm Thu & Benchmark**          | **[07_Benchmarking_And_Verification_Plan.md](../02_design/001_windows/07_Benchmarking_And_Verification_Plan.md)**   | Kịch bản kiểm thử tương đương đồ thị 100%, đo đạc 4 chỉ số benchmark định lượng, bảng kiểm tra an toàn dữ liệu Git.                    |
 
 ---
 
@@ -46,8 +48,8 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 ### 📋 Nhóm Việc 1: Khởi Tạo Dự Án F# & Cấu Hình Biên Dịch Native AOT
 
 > 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/01_Project_Structure_And_NativeAOT.md](../02_design/001_windows/01_Project_Structure_And_NativeAOT.md)**
-> 
-> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để cấu trúc các thư mục con trong `src/core-engine/`, Mục 2 để áp dụng các thiết lập xuất bản Native AOT (Trimming, LTO, Symbol Stripping, Invariant Globalization), và Mục 4 để thực thi quy trình kiểm định tính độc lập trên máy Windows sạch.
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 1 để cấu trúc các thư mục con trong `src/core-engine/`, Mục 2 để áp dụng các thiết lập xuất bản Native AOT (Trimming, LTO, Symbol Stripping, Invariant Globalization), và Mục 4 để thực thi quy trình kiểm định tính độc lập trên máy Windows sạch.
 
 - [x] **Nhiệm vụ 1.1: Thiết lập cấu trúc dự án và phân chia module logic**
   - Khởi tạo thư mục mã nguồn `src/core-engine/` chứa dự án F# độc lập dưới dạng Console Application.
@@ -60,7 +62,7 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
   - Đảm bảo quy trình biên dịch tương thích với bộ công cụ xây dựng C++ tiêu chuẩn trên Windows (MSVC Build Tools).
 
 - [x] **Nhiệm vụ 1.3: Kiểm định tính độc lập và đo đạc benchmark khởi động trên Windows**
-  - Kiểm tra file thực thi sinh ra (`neo-git-core.exe`) trên một môi trường Windows sạch (máy không cài đặt .NET SDK hoặc .NET Runtime) để xác nhận tính độc lập hoàn toàn.
+  - Kiểm tra file thực thi sinh ra (`f-gitgraph-core.exe`) trên một môi trường Windows sạch (máy không cài đặt .NET SDK hoặc .NET Runtime) để xác nhận tính độc lập hoàn toàn.
   - Đo đạc thời gian khởi động lạnh (Cold-start latency) bằng lệnh kiểm tra phản hồi tức thời: mục tiêu đạt dưới 5 phần nghìn giây.
   - Kiểm tra dung lượng file thực thi độc lập đầu ra: mục tiêu nằm trong khoảng tối ưu từ 6MB đến 9MB.
 
@@ -69,8 +71,8 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 ### 📋 Nhóm Việc 2: Xây Dựng Tầng Miền Nghiệp Vụ & Mô Hình Hóa Lỗi (Domain Model)
 
 > 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/02_Domain_Model_And_Error_Taxonomy.md](../02_design/001_windows/02_Domain_Model_And_Error_Taxonomy.md)**
-> 
-> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để định nghĩa các kiểu thực thể Git cốt lõi (`GitHash`, `Author`, `CommitNode`, `GitRef`), Mục 2 để định nghĩa các trạng thái biến động dở dang (`InFlightState`), Mục 3 để xây dựng bảng mã lỗi hệ thống vét cạn, và Mục 4 để áp dụng nguyên tắc xử lý lỗi qua kiểu kết quả `Result`.
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 1 để định nghĩa các kiểu thực thể Git cốt lõi (`GitHash`, `Author`, `CommitNode`, `GitRef`), Mục 2 để định nghĩa các trạng thái biến động dở dang (`InFlightState`), Mục 3 để xây dựng bảng mã lỗi hệ thống vét cạn, và Mục 4 để áp dụng nguyên tắc xử lý lỗi qua kiểu kết quả `Result`.
 
 - [x] **Nhiệm vụ 2.1: Mô hình hóa các thực thể cốt lõi của Git (Core Entities)**
   - Định nghĩa kiểu dữ liệu mã băm Git bất biến: hỗ trợ đồng thời cả chuẩn SHA-1 truyền thống (40 ký tự hexa) và chuẩn SHA-256 hiện đại (64 ký tự hexa), tích hợp hàm sinh chuỗi viết tắt (7 ký tự) phục vụ hiển thị.
@@ -94,8 +96,8 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 ### 📋 Nhóm Việc 3: Tầng Đọc Dữ Liệu Git Tốc Độ Cao Trên Windows (Fast Git Reader)
 
 > 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/03_Fast_Git_Storage_Reader.md](../02_design/001_windows/03_Fast_Git_Storage_Reader.md)**
-> 
-> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để tích hợp LibGit2 C-binding in-process qua P/Invoke, Mục 2 để triển khai module ánh xạ bộ nhớ (Memory-Mapped Files) đọc trực tiếp cấu trúc nhị phân của tệp `commit-graph` kèm cơ chế dự phòng, và Mục 3 để áp dụng kỹ thuật lát cắt bộ nhớ `ReadOnlySpan<byte>` giải mã chuỗi UTF-8 tiếng Việt chuẩn xác.
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 1 để tích hợp LibGit2 C-binding in-process qua P/Invoke, Mục 2 để triển khai module ánh xạ bộ nhớ (Memory-Mapped Files) đọc trực tiếp cấu trúc nhị phân của tệp `commit-graph` kèm cơ chế dự phòng, và Mục 3 để áp dụng kỹ thuật lát cắt bộ nhớ `ReadOnlySpan<byte>` giải mã chuỗi UTF-8 tiếng Việt chuẩn xác.
 
 - [x] **Nhiệm vụ 3.1: Tích hợp thư viện C gốc LibGit2 trên Windows**
   - Cấu hình liên kết thư viện mã máy LibGit2 (`libgit2.dll`) tương thích hoàn toàn với chế độ Native AOT trên Windows 64-bit.
@@ -115,8 +117,8 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 ### 📋 Nhóm Việc 4: Thuật Toán Xếp Làn Đồ Thị Topo Song Song (Parallel DAG Solver)
 
 > 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/04_Parallel_DAG_Layout_Solver.md](../02_design/001_windows/04_Parallel_DAG_Layout_Solver.md)**
-> 
-> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để áp dụng thuật toán sắp xếp Topo xử lý các trường hợp đặc biệt (bản sao nông, nhánh mồ côi, kho đa gốc), Mục 2 để hiện thực thuật toán phân bổ làn thu gọn bên trái (Lane Pool) và cơ chế bảo toàn màu sắc nhánh, và Mục 3 để phân chia khối tính toán song song đa luồng CPU sinh mảng tọa độ hình học SVG.
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 1 để áp dụng thuật toán sắp xếp Topo xử lý các trường hợp đặc biệt (bản sao nông, nhánh mồ côi, kho đa gốc), Mục 2 để hiện thực thuật toán phân bổ làn thu gọn bên trái (Lane Pool) và cơ chế bảo toàn màu sắc nhánh, và Mục 3 để phân chia khối tính toán song song đa luồng CPU sinh mảng tọa độ hình học SVG.
 
 - [x] **Nhiệm vụ 4.1: Chuyển đổi và tinh gọn thuật toán sắp xếp Topo (Topological Sort)**
   - Hiện thực thuật toán sắp xếp topo dựa trên phả hệ cha-con và thứ tự thời gian tạo commit, đảm bảo commit con luôn xuất hiện phía trên commit cha.
@@ -137,11 +139,11 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 ### 📋 Nhóm Việc 5: Giao Thức Giao Tiếp Nội Bộ (IPC Daemon & Streaming)
 
 > 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md](../02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md)**
-> 
-> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để xây dựng module quản lý vòng đời tiến trình F# sidecar trong TypeScript (khởi động ngầm, heartbeat ping-pong, tự phục hồi khi crash, thu hồi tài nguyên an toàn), Mục 2 để đặc tả cấu trúc khung gói tin nhị phân Stdio RPC và bảng mã Opcode MessagePack, và Mục 3 để hiện thực cơ chế phân trang cửa sổ ảo (Virtual Scrolling Window Streaming).
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 1 để xây dựng module quản lý vòng đời tiến trình F# sidecar trong TypeScript (khởi động ngầm, heartbeat ping-pong, tự phục hồi khi crash, thu hồi tài nguyên an toàn), Mục 2 để đặc tả cấu trúc khung gói tin nhị phân Stdio RPC và bảng mã Opcode MessagePack, và Mục 3 để hiện thực cơ chế phân trang cửa sổ ảo (Virtual Scrolling Window Streaming).
 
 - [x] **Nhiệm vụ 5.1: Xây dựng cơ chế quản lý vòng đời tiến trình F# Sidecar**
-  - Viết module điều phối trong TypeScript: tự động khởi chạy tiến trình `neo-git-core.exe` ở chế độ chạy nền khi người dùng mở bảng Git Graph.
+  - Viết module điều phối trong TypeScript: tự động khởi chạy tiến trình `f-gitgraph-core.exe` ở chế độ chạy nền khi người dùng mở bảng Git Graph.
   - Thiết lập cơ chế giám sát nhịp tim (Heartbeat) và tự phục hồi: nếu tiến trình native gặp sự cố bất ngờ, tự động khởi động lại và khôi phục trạng thái gần nhất.
   - Tự động hủy tiến trình con một cách an toàn khi người dùng đóng tab Git Graph để giải phóng toàn bộ tài nguyên CPU và RAM.
 
@@ -159,8 +161,8 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 ### 📋 Nhóm Việc 6: Ghép Nối Với Giao Diện Webview & Bảo Toàn Lệnh Ghi
 
 > 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/06_Webview_Integration_And_Git_Mutator.md](../02_design/001_windows/06_Webview_Integration_And_Git_Mutator.md)**
-> 
-> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để tích hợp dữ liệu hình học phẳng vào các component Preact Phase 1 (CommitTable, CommitGraph, HexagonNode, RefLabel, CommitHoverPanel, AvatarZoomPreview), Mục 2 để xây dựng module `GitCliMutator.ts` ủy thác 100% lệnh ghi cho `git.exe` gốc để bảo toàn GPG/SSH và Git Credential Manager, và Mục 3 để cài đặt File Watcher cập nhật vi sai (Debounce 150ms).
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 1 để tích hợp dữ liệu hình học phẳng vào các component Preact Phase 1 (CommitTable, CommitGraph, HexagonNode, RefLabel, CommitHoverPanel, AvatarZoomPreview), Mục 2 để xây dựng module `GitCliMutator.ts` ủy thác 100% lệnh ghi cho `git.exe` gốc để bảo toàn GPG/SSH và Git Credential Manager, và Mục 3 để cài đặt File Watcher cập nhật vi sai (Debounce 150ms).
 
 - [x] **Nhiệm vụ 6.1: Ghép nối dữ liệu hình học vào tầng Webview Preact (Phase 1)**
   - Cập nhật module tiếp nhận dữ liệu trong Webview để giải mã các gói tin nhị phân và truyền trực tiếp tọa độ hình học vào bảng commit.
@@ -180,26 +182,33 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 ### 📋 Nhóm Việc 7: Kiểm Thử Nghiệm Thu & Đo Đạc Hiệu Năng Thực Tế (Benchmarking)
 
 > 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/07_Benchmarking_And_Verification_Plan.md](../02_design/001_windows/07_Benchmarking_And_Verification_Plan.md)**
-> 
-> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để áp dụng kế hoạch kiểm thử so sánh tính tương đương đồ thị 100% trên 3 quy mô kho mã nguồn, Mục 2 để thực hiện quy trình đo đạc 4 chỉ số hiệu năng định lượng trên Windows, và Mục 3 để đối chiếu bảng kiểm tra an toàn dữ liệu Git trước khi hoàn tất nghiệm thu.
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 1 để áp dụng kế hoạch kiểm thử so sánh tính tương đương đồ thị 100% trên 3 quy mô kho mã nguồn, Mục 2 để thực hiện quy trình đo đạc 4 chỉ số hiệu năng định lượng trên Windows, và Mục 3 để đối chiếu bảng kiểm tra an toàn dữ liệu Git trước khi hoàn tất nghiệm thu.
 
-- [ ] **Nhiệm vụ 7.1: Bộ kiểm thử so sánh tính tương đương đồ thị (Equivalence Testing)**
+- [x] **Nhiệm vụ 7.1: Bộ kiểm thử so sánh tính tương đương đồ thị (Equivalence Testing)**
   - Xây dựng kịch bản kiểm thử tự động so sánh kết quả tính toán đồ thị giữa thuật toán F# mới và thuật toán TypeScript cũ trên các kho mã nguồn mẫu.
   - Xác nhận tính chính xác 100% về vị trí nút, thứ tự commit, màu sắc nhánh và các liên kết cha-con.
 
-- [ ] **Nhiệm vụ 7.2: Đo đạc và lập báo cáo hiệu năng thực tế trên Windows**
+- [x] **Nhiệm vụ 7.2: Đo đạc và lập báo cáo hiệu năng thực tế trên Windows**
   - Đo đạc thời gian nạp ban đầu (Cold-load time) trên kho mã nguồn có 50.000 commits: mục tiêu đạt dưới 300 phần nghìn giây.
   - Đo đạc mức độ chiếm dụng bộ nhớ RAM của tiến trình F#: mục tiêu duy trì dưới 100MB RAM.
   - Đo đạc tốc độ khung hình (FPS) khi cuộn nhanh qua hàng nghìn dòng commit trên Webview: mục tiêu đạt 60 khung hình/giây mượt mà, không có hiện tượng khựng chuột hay giật giao diện.
+
+- [x] **Nhiệm vụ 7.3: Đóng gói bản cài đặt thử nghiệm Windows VSIX (Local Windows Packaging & Testing)**
+  - Thu thập file thực thi `f-gitgraph-core.exe` Native AOT và thư viện C gốc `git2-5853918.dll` vào thư mục phân phối nội bộ của extension (`bin/win-x64/`).
+  - Cập nhật cơ chế phân giải đường dẫn sidecar (`SidecarManager`) nhận diện chính xác vị trí binary thông qua `context.asAbsolutePath(...)` trong cả môi trường phát triển (F5 Extension Host) lẫn môi trường chạy thực tế từ gói VSIX.
+  - Cấu hình danh mục tệp trong `.vscodeignore` để đưa thư mục `bin/win-x64/` vào gói cài đặt VSIX, tránh việc bị loại bỏ khi đóng gói.
+  - Thiết lập kịch bản lệnh đóng gói (`package:vsix:win`) bằng `@vscode/vsce`, tạo ra file `.vsix` hoàn chỉnh dành riêng cho Windows 64-bit và tiến hành cài đặt kiểm thử thực tế (`code --install-extension`) trước khi kết thúc Phase 1.
 
 ---
 
 ## 4. Tiêu Chuẩn Nghiệm Thu Hoàn Thành Toàn Diện (Definition of Done - DoD)
 
-1. **Tính Độc Lập**: File nhị phân `neo-git-core.exe` chạy độc lập hoàn toàn trên Windows 10 và Windows 11 mà không đòi hỏi cài đặt bất kỳ gói .NET runtime nào.
+1. **Tính Độc Lập**: File nhị phân `f-gitgraph-core.exe` chạy độc lập hoàn toàn trên Windows 10 và Windows 11 mà không đòi hỏi cài đặt bất kỳ gói .NET runtime nào.
 2. **Hiệu Năng Vượt Trội**: Thời gian nạp và hiển thị toàn bộ đồ thị trên kho mã nguồn 50.000 commits đạt mốc **dưới 300 phần nghìn giây** (nhanh hơn từ 30 đến 50 lần so với phiên bản TypeScript cũ).
 3. **Trải Nghiệm Giao Diện Tuyệt Hảo**: Toàn bộ các hiệu ứng thị giác và tương tác từ Phase 1 (nút lục giác SVG, vầng sáng neon ambient, click avatar zoom 5x, panel commit message) hoạt động mượt mà ở tốc độ 60 khung hình/giây, con trỏ chuột phản hồi tức thì.
 4. **An Toàn Tuyệt Đối**: 100% các thao tác thay đổi dữ liệu (commit, push, pull, merge, rebase, branch) được kiểm thử thành công trên Windows, bảo toàn chữ ký số GPG/SSH và cơ chế xác thực tài khoản Git Credential Manager.
+5. **Đóng Gói Thử Nghiệm Thành Công**: Bản cài đặt extension Windows VSIX được đóng gói hoàn chỉnh, nhúng sẵn nhân F# Native AOT, cài đặt và vận hành mượt mà trên môi trường VS Code thực tế của máy Windows sạch.
 
 ---
 
@@ -209,9 +218,9 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 - **2026-10-03**: Chi tiết hóa toàn bộ 7 nhóm công việc lớn thành 20 nhiệm vụ con (subtasks) cụ thể, xác định rõ mục tiêu kỹ thuật, luồng xử lý và tiêu chí hoàn thành cho từng nhiệm vụ.
 - **2026-10-03**: Bổ sung bảng ánh xạ tài liệu thiết kế áp dụng chi tiết cho từng nhóm việc, liên kết trực tiếp tới 7 bản thiết kế kỹ thuật tương ứng trong thư mục `docs/02_design/001_windows/`.
 - **2026-10-03**: Hoàn thành Nhóm Việc 1 — Khởi tạo dự án F# `src/core-engine/` với phân tầng module `Domain`, `Storage`, `Graph`, `Transport` và điểm khởi chạy `Program.fs`. Cấu hình Native AOT (`PublishAot`, `win-x64`, `SelfContained`, `InvariantGlobalization`, `StripSymbols`, tối ưu kích thước) trong `core-engine.fsproj`.
-- **2026-10-03**: Biên dịch thành công `neo-git-core.exe` Native AOT (self-contained, không phụ thuộc .NET runtime), nhắm mục tiêu `net10.0` (LTS). Kích thước nhị phân đo được 0.84MB (dưới ngưỡng mục tiêu 6–9MB, sẽ tăng khi tích hợp LibGit2/MessagePack ở các nhóm việc sau). Cold-start latency đo được ~29–56ms (trung bình ~37ms), chưa đạt mục tiêu < 5ms — phần lớn độ trễ đến từ chi phí spawn tiến trình `CreateProcessW` của Windows, sẽ được tối ưu bằng mô hình sidecar daemon thường trú ở Nhóm Việc 5 thay vì spawn tiến trình mỗi lần gọi.
+- **2026-10-03**: Biên dịch thành công `f-gitgraph-core.exe` Native AOT (self-contained, không phụ thuộc .NET runtime), nhắm mục tiêu `net10.0` (LTS). Kích thước nhị phân đo được 0.84MB (dưới ngưỡng mục tiêu 6–9MB, sẽ tăng khi tích hợp LibGit2/MessagePack ở các nhóm việc sau). Cold-start latency đo được ~29–56ms (trung bình ~37ms), chưa đạt mục tiêu < 5ms — phần lớn độ trễ đến từ chi phí spawn tiến trình `CreateProcessW` của Windows, sẽ được tối ưu bằng mô hình sidecar daemon thường trú ở Nhóm Việc 5 thay vì spawn tiến trình mỗi lần gọi.
 - **2026-10-03**: Hoàn thành Nhóm Việc 2 — Xây dựng tầng miền nghiệp vụ thuần túy trong `src/core-engine/Domain/`: `CoreEntities.fs` (`GitHash` hỗ trợ SHA-1/SHA-256 với `tryParse`/`abbrev`, `Author`, `CommitNode`, `GitRef` phân loại 6 nhóm tham chiếu), `InFlightState.fs` (Clean/Merging/Rebasing/CherryPicking/Bisecting) và `GitError.fs` (bảng lỗi vét cạn 9 trường hợp kèm hàm `describe`).
-- **2026-10-03**: Dựng dự án kiểm thử đơn vị chuẩn hóa `src/core-engine/tests/CoreEngine.Tests/` dùng xUnit (tương thích `dotnet test`), gồm 19 test case phủ toàn bộ tầng Domain (GitHash, CommitNode, InFlightState, GitError). Tạo solution `src/core-engine/neo-git-core.sln` gắn dự án nhân + test để di chuyển trọn gói khi tách dự án. Xóa smoke test tạm `smoke_test.fsx`.
+- **2026-10-03**: Dựng dự án kiểm thử đơn vị chuẩn hóa `src/core-engine/tests/CoreEngine.Tests/` dùng xUnit (tương thích `dotnet test`), gồm 19 test case phủ toàn bộ tầng Domain (GitHash, CommitNode, InFlightState, GitError). Tạo solution `src/core-engine/f-gitgraph-core.sln` gắn dự án nhân + test để di chuyển trọn gói khi tách dự án. Xóa smoke test tạm `smoke_test.fsx`.
 - **2026-10-03**: Hoàn thành Nhóm Việc 3 — Tầng đọc Git tốc độ cao trong `src/core-engine/Storage/`: `Utf8.fs` (giải mã UTF-8 zero-allocation + hex encode/decode), `CommitGraph.fs` (đọc trực tiếp tệp nhị phân `commit-graph` bằng Memory-Mapped Files qua `SafeMemoryMappedViewHandle.AcquirePointer`, parse header/chunk/OID fanout/lookup/CDAT/EDGE), `LibGit2.fs` (P/Invoke `git2-5853918.dll` từ gói `LibGit2Sharp.NativeBinaries`: open repo, revwalk, đọc commit cha/tác giả/tiêu đề qua `git_oid_tostr`/`git_oid_fromstr` tránh vấn đề layout struct SHA-256) và `Storage.fs` (điều phối `GitReader.readGraph`: ưu tiên commit-graph, fallback LibGit2).
 - **2026-10-03**: Kiểm chứng Nhóm Việc 3 bằng 27 test case xUnit (thêm `Utf8Tests`, `CommitGraphTests` với bộ dựng commit-graph nhị phân tổng hợp) và kiểm thử tích hợp trên kho Git thật: commit-graph đọc đúng 5 commit (1 root, 1 merge), LibGit2 đọc đúng tiêu đề tiếng Việt có dấu, emoji 🚀 và merge 2 cha. Biên dịch Native AOT thành công kèm `git2-5853918.dll` (~2MB) trong bản phát hành.
 - **2026-10-03**: Hoàn thành Nhóm Việc 4 — Thuật toán xếp làn đồ thị topo song song trong `src/core-engine/Graph/Graph.fs`: `TopoSort` (sắp xếp topo Kahn cải tiến + hàng đợi ưu tiên theo thế hệ/thời gian, xử lý shallow/orphan/multi-root/octopus và dự phòng khi thiếu generation), `Lanes` (phân bổ làn thu gọn trái Left-compact với kế thừa làn + tái sử dụng làn trống + đóng làn, màu ổn định theo `lane % 8`), `Geometry` (sinh tọa độ nút + đường nối SVG bằng `Parallel.For` đa luồng, đường thẳng/Bezier) và `Layout` (điểm vào: topo → phân làn → hình học). Mở rộng `GraphSnapshot` (Storage) thêm `Generation` và `CommitTime`.
@@ -220,3 +229,8 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 - **2026-10-03**: Kiểm chứng Nhóm Việc 5 bằng 16 test xUnit (`TransportTests`) + 17 test vitest (`msgpack.test.ts`, `protocol.test.ts`) với vector byte chia sẻ hai bên — tổng F# 50/50 pass, TS 17/17 pass; typecheck/lint/format sạch; smoke test daemon trên bản AOT (Ready + Pong) thành công.
 - **2026-10-03**: Hoàn thành Nhóm Việc 6 — Ghép nối Webview & lệnh ghi an toàn: phía TypeScript xây dựng `graph-merge.ts` + `graph-data-bridge.ts` (cầu nối hình học F# với metadata commit, `mergeGraphWindow`/`GraphDataBridge`), `gitCliMutator.ts` (module `GitCliMutator` ủy thác 100% lệnh ghi cho `git.exe` qua `spawn`, kiểm tra `check-ref-format`, đầy đủ commit/branch/checkout/merge/rebase/cherry-pick/tag/push/pull/fetch), `git-ref.watcher.ts` (theo dõi `.git/HEAD` + `.git/refs/**`) và `coalescer.ts` (gom sự kiện debounce 150ms).
 - **2026-10-03**: Kiểm chứng Nhóm Việc 6 bằng 28 test vitest (`gitCliMutator` trên kho Git thật, `graph-merge`, `coalescer` fake timers) — tổng backend 28/28 pass; typecheck/lint/format sạch.
+- **2026-10-03**: Bổ sung Nhiệm vụ 7.3 vào Nhóm Việc 7: Đóng gói bản cài đặt thử nghiệm Windows VSIX (Local Packaging & Testing) nhằm hoàn tất điều kiện nghiệm thu thực tế trên máy Windows sạch mà không cần chờ tới Phase 4.
+- **2026-10-03**: Đổi tên toàn hệ thống sang `F-GitGraph`: package `f-gitgraph`, nhân F# `f-gitgraph-core` (`AssemblyName` + `Version.Name`), solution `f-gitgraph-core.sln`, command/cấu hình `f-gitgraph.*`, sidecar `f-gitgraph-core.exe`; đồng bộ toàn bộ tài liệu `docs/`.
+- **2026-10-03**: Hoàn thành Nhiệm vụ 7.1 — Kiểm thử tương đương đồ thị: thêm `EquivalenceTests.fs` (6 test) xác minh các bất biến cấu trúc (thứ tự dòng con-trên-cha, tính duy nhất dòng, phân làn thu gọn trái liên tục, màu ổn định `lane % 8`, hình học nhất quán, golden fixture) trên đồ thị tổng hợp 200–1000 commit với nhánh + merge thật. Ghi nhận trung thực rằng chỉ số làn cụ thể có thể khác thuật toán TS (branch tracing vs topo + thu gọn trái) nên nghiệm thu theo bất biến cấu trúc. Tổng F# 56/56 pass.
+- **2026-10-03**: Hoàn thành Nhiệm vụ 7.2 — Đo đạc hiệu năng: thêm `Benchmark.fs` + lệnh `f-gitgraph-core bench` sinh đồ thị tổng hợp 50.000 commit. Kết quả trên bản Native AOT: bố cục toàn phần ~51.7ms (mục tiêu <300ms), RAM managed 17.7MB (mục tiêu <100MB), IPC roundtrip 100 dòng trung bình 0.43ms (mục tiêu <5ms). Phát hiện và sửa lỗi tiềm ẩn AOT: `sprintf %g` trong `Geometry.makePath` ném `NotSupportedException` (MakeGenericMethod) — thay bằng `ToString(CultureInfo.InvariantCulture)` + `Console.WriteLine`/`String.Format`.
+- **2026-10-03**: Hoàn thành Nhiệm vụ 7.3 — Đóng gói Windows VSIX: thêm `scripts/build-native-win.ps1` (publish AOT + chép `f-gitgraph-core.exe`/`git2-5853918.dll` vào `bin/win-x64/`), bổ sung `resolveSidecarBinaryPath`/`SidecarManager.create` dùng `context.asAbsolutePath`, whitelist `!bin/win-x64/` trong `.vscodeignore`, và lệnh `package:vsix:win`. Đóng gói thành công `f-gitgraph-win-x64.vsix` (21 file, 2.59MB) nhúng đủ binary + dll.

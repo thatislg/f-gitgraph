@@ -205,18 +205,24 @@ module Geometry =
           IsMerge = isMerge
           IsRoot = isRoot }
 
+    // Định dạng tọa độ SVG không dùng sprintf (%g) vì F# sinh MakeGenericMethod
+    // qua phản chiếu, không tương thích Native AOT. Dùng ToString invariant thay thế.
+    let private fmt (x: float) = x.ToString(System.Globalization.CultureInfo.InvariantCulture)
+
     let private makePath (child: Node) (parent: Node) : Path =
         let y0 = child.Y + NodeRadius
         let y1 = parent.Y - NodeRadius
         let d =
             if child.X = parent.X then
                 // Cùng làn: đường thẳng đứng liền mạch.
-                sprintf "M %g %g L %g %g" child.X y0 parent.X y1
+                "M " + fmt child.X + " " + fmt y0 + " L " + fmt parent.X + " " + fmt y1
             else
                 // Khác làn: đường cong Bezier bậc ba mượt mà (rẽ/sáp nhập nhánh).
                 let ymid = (y0 + y1) / 2.0
-                sprintf "M %g %g C %g %g, %g %g, %g %g"
-                    child.X y0 child.X ymid parent.X ymid parent.X y1
+                "M " + fmt child.X + " " + fmt y0
+                + " C " + fmt child.X + " " + fmt ymid + ", "
+                + fmt parent.X + " " + fmt ymid + ", "
+                + fmt parent.X + " " + fmt y1
         { D = d
           Color = child.Color
           Width = 1.5 }
