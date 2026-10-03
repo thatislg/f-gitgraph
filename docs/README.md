@@ -52,7 +52,13 @@ Thư mục [`docs/phase2_Investigation/`](phase2_Investigation/README.md) chứa
 
 - **[02. Thiết Kế Kỹ Thuật (Design Specifications)](02_design/README.md)**:
   - **[001_windows](02_design/001_windows/README.md)**: Hệ thống 7 bản thiết kế chi tiết cho Phase 1 Windows (Cấu trúc & Native AOT, Domain Model & Bảng mã lỗi, Fast Reader, Parallel Layout, Stdio IPC, Webview & Mutator, Benchmark Plan).
-- **[03. Nhật Ký Tiến Độ (Progress & Worklogs)](03_progess/README.md)**: Thư mục theo dõi tiến độ phát triển, báo cáo benchmark và biên bản nghiệm thu từng giai đoạn (Windows -> Linux -> macOS -> Release).
+- **[03. Nhật Ký Tiến Độ (Progress & Worklogs)](03_progess/README.md)**: Thư mục theo dõi tiến độ phát triển chi tiết cho 4 giai đoạn (001_windows, 002_linux, 003_macos, 004_release).
+- **[04. Báo Cáo Nghiệm Thu & Đo Đạc (Reports & Verification)](04_reports/README.md)**:
+  - **[001_windows](04_reports/001_windows/README.md)**: Báo cáo đo đạc hiệu năng, kiểm thử tương đương đồ thị và an toàn dữ liệu trên Windows.
+  - **[002_linux](04_reports/002_linux/README.md)**: Báo cáo tương thích `glibc`, kiểm thử stress-test kho Linux kernel và tự cấp quyền `chmod +x`.
+  - **[003_macos](04_reports/003_macos/README.md)**: Báo cáo tối ưu mã máy ARM64/Intel, kiểm định Gatekeeper và hiển thị Retina 120Hz.
+  - **[004_release](04_reports/004_release/README.md)**: Báo cáo tự động hóa CI/CD, kiểm định Universal VSIX và biên bản bàn giao tổng thể.
+
 
 
 
