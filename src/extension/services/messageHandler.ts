@@ -12,7 +12,6 @@ import { addTag, deleteTag, pushTag } from "@/backend/actions/tag";
 import type { GitClient } from "@/backend/gitClient";
 import { commitDetails } from "@/backend/queries/commitDetails";
 import { loadBranches } from "@/backend/queries/loadBranches";
-import { loadCommits } from "@/backend/queries/loadCommits";
 import { abbrevCommit } from "@/backend/utils/string";
 import type { Config } from "@/extension/config";
 import { AvatarManager } from "@/extension/services/avatarManager";
@@ -112,23 +111,6 @@ export function registerMessageHandlers(
   registerAction("mergeCommit", (msg) => mergeCommit(gitClient.getInstance(), msg));
 
   // --- Query handlers ---
-
-  bridge.onMessage("loadCommits", async (msg) => {
-    setCurrentRepo(msg.repo);
-    bridge.post({
-      command: "loadCommits",
-      repo: msg.repo,
-      branchName: msg.branchName,
-      ...(await loadCommits(gitClient.getInstance(), {
-        branchName: msg.branchName,
-        maxCommits: msg.maxCommits,
-        showRemoteBranches: msg.showRemoteBranches,
-        hard: msg.hard,
-        dateType: config.dateType(),
-        showUncommittedChanges: config.showUncommittedChanges()
-      }))
-    });
-  });
 
   bridge.onMessage("loadBranches", async (msg) => {
     setCurrentRepo(msg.repo);

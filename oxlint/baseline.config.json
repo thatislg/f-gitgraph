@@ -13,15 +13,6 @@
       "rules": {
         "eslint/no-undef": "off"
       }
-    },
-
-    // needs refactor
-    {
-      "files": ["src/backend/queries/loadCommits.ts"],
-      "rules": {
-        // perf
-        "eslint/no-await-in-loop": "allow"
-      }
     }
   ]
 }

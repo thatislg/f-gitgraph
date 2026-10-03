@@ -2,26 +2,20 @@ import { batch } from "@preact/signals";
 import type { ComponentChildren } from "preact";
 
 import type { ActionRequest, GitFileChange } from "@/types";
-import { SHOW_ALL_BRANCHES } from "@/webview/constants";
 import {
   branchList,
   commitDetails,
-  commitHead,
-  commitList,
   contextMenu,
   dialog,
   expandedCommit,
   headBranch,
-  maxCommits,
-  moreCommitsAvailable,
   repoStates,
   selectedBranch,
   selectedRepo,
-  showRemoteBranch,
-  uncommittedChanges
+  showRemoteBranch
 } from "@/webview/lib/stores";
+import { graphWindowStore } from "@/webview/lib/stores/graph-window.store";
 import { vscode } from "@/webview/lib/vscode";
-import { getWebviewConfig } from "@/webview/lib/webview-config";
 import type {
   ActionCommand,
   CommitBranchType,
@@ -40,26 +34,6 @@ function requestBranches(repo: string) {
   });
 }
 
-function requestCommits(repo: string, branch: CommitBranchType) {
-  vscode.postMessage({
-    command: "loadCommits",
-    repo,
-    branchName: branch === SHOW_ALL_BRANCHES ? "" : branch,
-    maxCommits: maxCommits.value,
-    showRemoteBranches: showRemoteBranch.value,
-    hard: true
-  });
-}
-
-function clearCommits() {
-  commitList.value = undefined;
-  commitHead.value = null;
-  moreCommitsAvailable.value = false;
-  uncommittedChanges.value = 0;
-  maxCommits.value = getWebviewConfig().initialLoadCommits;
-  closeCommitDetails();
-}
-
 export function selectRepo(repo: string) {
   if (repo === selectedRepo.value) {
     return;
@@ -70,11 +44,13 @@ export function selectRepo(repo: string) {
     branchList.value = undefined;
     headBranch.value = null;
     selectedBranch.value = undefined;
-    clearCommits();
+    graphWindowStore.clear();
+    closeCommitDetails();
   });
 
   vscode.postMessage({ command: "selectRepo", repo });
   requestBranches(repo);
+  void graphWindowStore.loadGraph(repo);
 }
 
 export function selectBranch(branch: CommitBranchType) {
@@ -84,12 +60,12 @@ export function selectBranch(branch: CommitBranchType) {
 
   batch(() => {
     selectedBranch.value = branch;
-    clearCommits();
+    closeCommitDetails();
   });
 
   const repo = selectedRepo.value;
   if (repo !== undefined) {
-    requestCommits(repo, branch);
+    void graphWindowStore.loadGraph(repo);
   }
 }
 
@@ -138,20 +114,7 @@ export function setShowRemoteBranch(value: boolean) {
   }
 
   requestBranches(repo);
-  const branch = selectedBranch.value;
-  if (branch !== undefined) {
-    requestCommits(repo, branch);
-  }
-}
-
-export function loadMoreCommits() {
-  maxCommits.value += getWebviewConfig().loadMoreCommits;
-
-  const repo = selectedRepo.value;
-  const branch = selectedBranch.value;
-  if (repo !== undefined && branch !== undefined) {
-    requestCommits(repo, branch);
-  }
+  void graphWindowStore.loadGraph(repo);
 }
 
 export function refresh() {
@@ -161,10 +124,7 @@ export function refresh() {
   }
 
   requestBranches(repo);
-  const branch = selectedBranch.value;
-  if (branch !== undefined) {
-    requestCommits(repo, branch);
-  }
+  void graphWindowStore.loadGraph(repo);
 }
 
 export function closeCommitDetails() {

@@ -8,11 +8,11 @@ import { refresh, selectBranch, selectRepo, setShowRemoteBranch } from "@/webvie
 import {
   branchList,
   commitHead,
-  commitList,
   selectedBranch,
   selectedRepo,
   showRemoteBranch
 } from "@/webview/lib/stores";
+import { isGraphInitialized, totalCommits } from "@/webview/lib/stores/graph-window.store";
 
 function repoOption(repo: GitRepo) {
   return { label: repo.name, value: repo.path };
@@ -23,7 +23,8 @@ function branchOption(value: string) {
 }
 
 export function MainHeader({ repos }: { repos: Array<GitRepo> }) {
-  const noCommits = commitList.value?.length === 0 && commitHead.value === null;
+  const noCommits =
+    isGraphInitialized.value && totalCommits.value === 0 && commitHead.value === null;
 
   return (
     <header class="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 border-b border-line py-4">

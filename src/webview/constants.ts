@@ -22,3 +22,18 @@ export const RESIZABLE_COLUMNS = [0, 2, 3, 4];
 
 /** Index in a commit row of the column that takes the remaining width. */
 export const DESCRIPTION_COLUMN = 1;
+
+/** Radius of a hexagon commit node, in pixels. */
+export const HEXAGON_RADIUS = 10;
+
+/** Size of the inner icon inside a hexagon node, in pixels. */
+export const HEXAGON_ICON_SIZE = 12;
+
+/** Distance between two lanes, in pixels. */
+export const LANE_WIDTH = 16;
+
+/** Distance from the left edge of the graph to the first lane, in pixels. */
+export const LANE_OFFSET = 10;
+
+/** Space kept between the widest lane and the next table column, in pixels. */
+export const GRAPH_PADDING = 20;

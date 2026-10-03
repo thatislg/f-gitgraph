@@ -1,6 +1,6 @@
 import { computed, signal } from "@preact/signals";
 
-import type { GitCommitDetails, GitCommitNode,GitRepoSet } from "@/types";
+import type { GitCommitDetails, GitCommitNode, GitRepoSet } from "@/types";
 import type { CommitBranchType, ContextMenuState, DialogState } from "@/webview/types";
 import { isColumnWidths } from "@/webview/utils/columns";
 

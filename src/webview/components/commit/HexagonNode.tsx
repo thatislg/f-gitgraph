@@ -2,8 +2,7 @@ import type { ComponentChildren } from "preact";
 import { useRef } from "preact/hooks";
 
 import type { GitCommitNode } from "@/types";
-import { UNCOMMITTED_CHANGES } from "@/webview/constants";
-import { HEXAGON_ICON_SIZE, HEXAGON_RADIUS } from "@/webview/graph/constants";
+import { HEXAGON_ICON_SIZE, HEXAGON_RADIUS, UNCOMMITTED_CHANGES } from "@/webview/constants";
 
 export type CommitNodeType = "commit" | "merge" | "head" | "uncommitted" | "tag" | "stash";
 

@@ -1,6 +1,5 @@
 export * from "./actions";
 export * from "./config";
-export * from "./deprecated";
 export * from "./git";
 export * from "./legacy";
 export * from "./queries";

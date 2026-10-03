@@ -3,8 +3,7 @@
 import { h, render } from "preact";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
-import type { GitCommitNode } from "@/types";
-import type { GraphLayout } from "@/webview/graph/types";
+import type { GraphPath, GraphRow } from "@/types";
 
 import { setupWebviewTest } from "@tests/webview/test-utils";
 
@@ -26,45 +25,52 @@ describe("CommitGraph", () => {
   it("renders hexagonal commit nodes with semantic icons", () => {
     container = document.createElement("div");
 
-    const commits: GitCommitNode[] = [
+    const rows: GraphRow[] = [
       {
         hash: "commit-1",
-        parentHashes: ["parent-1", "parent-2"], // merge
-        author: "Alice",
-        email: "alice@example.com",
-        date: 1000,
-        message: "Merge pull request",
-        refs: []
+        metadata: {
+          hash: "commit-1",
+          parentHashes: ["parent-1", "parent-2"],
+          author: "Alice",
+          email: "alice@example.com",
+          date: 1000,
+          message: "Merge pull request",
+          refs: []
+        },
+        x: 10,
+        y: 12,
+        lane: 0,
+        color: 0,
+        isMerge: true,
+        isRoot: false
       },
       {
         hash: "commit-2",
-        parentHashes: ["parent-1"], // regular
-        author: "Bob",
-        email: "bob@example.com",
-        date: 900,
-        message: "Normal commit",
-        refs: [{ hash: "commit-2", name: "v1.0", type: "tag" }]
+        metadata: {
+          hash: "commit-2",
+          parentHashes: ["parent-1"],
+          author: "Bob",
+          email: "bob@example.com",
+          date: 900,
+          message: "Normal commit",
+          refs: [{ hash: "commit-2", name: "v1.0", type: "tag" }]
+        },
+        x: 10,
+        y: 36,
+        lane: 0,
+        color: 0,
+        isMerge: false,
+        isRoot: false
       }
     ];
 
-    const layout: GraphLayout = {
-      branches: [
-        {
-          colour: 0,
-          lines: [{ p1: { x: 0, y: 0 }, p2: { x: 0, y: 1 }, isCommitted: true, lockedFirst: false }]
-        }
-      ],
-      vertices: [
-        { x: 0, y: 0, colour: 0, isCommitted: true, isCurrent: false, isMerge: true },
-        { x: 0, y: 1, colour: 0, isCommitted: true, isCurrent: false, isMerge: false }
-      ],
-      lanes: 1
-    };
+    const paths: GraphPath[] = [{ d: "M 10 18 L 10 30", color: 0 }];
 
     render(
       h(CommitGraph, {
-        layout,
-        commits,
+        rows,
+        paths,
+        maxLane: 1,
         expansion: null
       }),
       container
@@ -82,16 +88,32 @@ describe("CommitGraph", () => {
   it("supports custom icon injection via renderNodeIcon prop", () => {
     container = document.createElement("div");
 
-    const layout: GraphLayout = {
-      branches: [],
-      vertices: [{ x: 0, y: 0, colour: 1, isCommitted: true, isCurrent: true }],
-      lanes: 1
-    };
+    const rows: GraphRow[] = [
+      {
+        hash: "commit-1",
+        metadata: {
+          hash: "commit-1",
+          parentHashes: [],
+          author: "Alice",
+          email: "alice@example.com",
+          date: 1000,
+          message: "Root commit",
+          refs: [{ hash: "commit-1", name: "main", type: "head" }]
+        },
+        x: 10,
+        y: 12,
+        lane: 0,
+        color: 1,
+        isMerge: false,
+        isRoot: true
+      }
+    ];
 
     render(
       h(CommitGraph, {
-        layout,
-        commits: [],
+        rows,
+        paths: [],
+        maxLane: 1,
         expansion: null,
         renderNodeIcon: () => h("text", { id: "custom-glyph" }, "★")
       }),

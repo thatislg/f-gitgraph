@@ -1,20 +1,15 @@
 import { CommitTable } from "@/webview/components/commit/CommitTable";
-import { Button } from "@/webview/components/ui/Button";
 import { Loading } from "@/webview/components/ui/Loading";
-import { loadMoreCommits } from "@/webview/lib/actions";
+import { commitHead, headBranch } from "@/webview/lib/stores";
 import {
-  commitHead,
-  commitList,
-  headBranch,
-  maxCommits,
-  moreCommitsAvailable
-} from "@/webview/lib/stores";
+  isGraphInitialized,
+  isGraphLoading,
+  totalCommits
+} from "@/webview/lib/stores/graph-window.store";
 import { NoCommitsPage } from "@/webview/pages/NoCommitsPage";
 
 export function GraphView() {
-  const commits = commitList.value;
-
-  if (commits === undefined) {
+  if (!isGraphInitialized.value && isGraphLoading.value) {
     return (
       <main class="grid flex-1 place-items-center">
         <Loading />
@@ -22,23 +17,13 @@ export function GraphView() {
     );
   }
 
-  if (commits.length === 0 && commitHead.value === null) {
+  if (isGraphInitialized.value && totalCommits.value === 0 && commitHead.value === null) {
     return <NoCommitsPage />;
   }
 
-  const loadingMore = commits.length < maxCommits.value;
-
   return (
     <main class="relative">
-      <CommitTable commits={commits} head={commitHead.value} headBranch={headBranch.value} />
-      {moreCommitsAvailable.value &&
-        (loadingMore ? (
-          <Loading />
-        ) : (
-          <div class="flex justify-center py-4">
-            <Button onClick={loadMoreCommits}>{window.l10n.loadMore}</Button>
-          </div>
-        ))}
+      <CommitTable head={commitHead.value} headBranch={headBranch.value} />
     </main>
   );
 }

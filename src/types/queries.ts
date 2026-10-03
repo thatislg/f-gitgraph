@@ -1,4 +1,4 @@
-import type { GitCommitDetails, GitCommitNode } from "./git";
+import type { GitCommitDetails } from "./git";
 
 type QueryPayloads = {
   commitDetails: {
@@ -13,25 +13,6 @@ type QueryPayloads = {
       head: string | null;
       hard: boolean;
       isRepo: boolean;
-    };
-  };
-  loadCommits: {
-    request: {
-      repo: string;
-      branchName: string;
-      maxCommits: number;
-      showRemoteBranches: boolean;
-      hard: boolean;
-    };
-    response: {
-      repo: string;
-      branchName: string;
-      commits: GitCommitNode[];
-      head: string | null;
-      moreCommitsAvailable: boolean;
-      hard: boolean;
-      /** Number of unsaved changes. `0` when the uncommitted row is absent. */
-      uncommittedChanges: number;
     };
   };
 };

@@ -18,15 +18,15 @@ Xóa bỏ triệt để tàn dư định danh cũ (`neo-git-graph`, `neo-git-cor
 
 Thực hiện quét toàn cục chuỗi `neo-git` trên kho mã nguồn:
 
-| Thành phần                    | Trạng thái | Ghi chú                                                        |
-| :---------------------------- | :--------: | :------------------------------------------------------------- |
-| Mã nguồn TypeScript/F#        |   ✅ Sạch  | Không còn `neo-git-graph`/`neo-git-core` trong `src/`/`tests/` |
-| `package.json` (metadata)     |   ✅ Đạt   | `name`, `displayName`, command, cấu hình `f-gitgraph.*` đồng bộ |
-| `README.md`                   |   ✅ Đạt   | Đã làm mới nội dung thương hiệu F-GitGraph                      |
-| `package.nls.json`            |   ✅ Đạt   | Mô tả lệnh/cấu hình chuyển sang F-GitGraph                      |
-| `CHANGELOG.md`                |   ✅ Sửa   | Link lịch sử `asispts/neo-git-graph` → `thatislg/f-gitgraph`    |
-| Tệp nhị phân `neo-git-core.*` |   ✅ Sạch  | `src/core-engine/bin/` và `obj/` không còn artifact tên cũ      |
-| Tài liệu `docs/` (mô tả)      |   ℹ️ Giữ   | Cụm từ cũ chỉ còn trong văn bản mô tả việc dọn dẹp (có chủ đích)|
+| Thành phần                    | Trạng thái | Ghi chú                                                          |
+| :---------------------------- | :--------: | :--------------------------------------------------------------- |
+| Mã nguồn TypeScript/F#        |  ✅ Sạch   | Không còn `neo-git-graph`/`neo-git-core` trong `src/`/`tests/`   |
+| `package.json` (metadata)     |   ✅ Đạt   | `name`, `displayName`, command, cấu hình `f-gitgraph.*` đồng bộ  |
+| `README.md`                   |   ✅ Đạt   | Đã làm mới nội dung thương hiệu F-GitGraph                       |
+| `package.nls.json`            |   ✅ Đạt   | Mô tả lệnh/cấu hình chuyển sang F-GitGraph                       |
+| `CHANGELOG.md`                |   ✅ Sửa   | Link lịch sử `asispts/neo-git-graph` → `thatislg/f-gitgraph`     |
+| Tệp nhị phân `neo-git-core.*` |  ✅ Sạch   | `src/core-engine/bin/` và `obj/` không còn artifact tên cũ       |
+| Tài liệu `docs/` (mô tả)      |   ℹ️ Giữ   | Cụm từ cũ chỉ còn trong văn bản mô tả việc dọn dẹp (có chủ đích) |
 
 ---
 
@@ -48,12 +48,12 @@ Thực hiện quét toàn cục chuỗi `neo-git` trên kho mã nguồn:
 
 ## 5. Đóng Gói Kiểm Chứng (Nhiệm vụ 8.4)
 
-| Hạng mục                              | Kết quả   |
-| :------------------------------------ | :-------: |
-| `pnpm run typecheck` (5 project TS)   |  ✅ 0 lỗi |
-| `pnpm run lint` (oxlint, 160 rules)   |  ✅ 0 lỗi |
-| `pnpm run package` (esbuild production)| ✅ Đạt    |
-| `dotnet test f-gitgraph-core.sln`     | ✅ 56/56  |
+| Hạng mục                                | Kết quả  |
+| :-------------------------------------- | :------: |
+| `pnpm run typecheck` (5 project TS)     | ✅ 0 lỗi |
+| `pnpm run lint` (oxlint, 160 rules)     | ✅ 0 lỗi |
+| `pnpm run package` (esbuild production) |  ✅ Đạt  |
+| `dotnet test f-gitgraph-core.sln`       | ✅ 56/56 |
 
 > Việc đóng gói bản `.vsix` cuối cùng (`f-gitgraph-win-x64.vsix`) và kiểm tra trực quan icon/tên trên trình quản lý Extension của VS Code do người dùng thực hiện trên máy thật.
 
@@ -67,9 +67,9 @@ Thực hiện quét toàn cục chuỗi `neo-git` trên kho mã nguồn:
 
 ## 7. Kết Luận
 
-| Tiêu chí                                        | Trạng thái |
-| :---------------------------------------------- | :--------: |
-| Không còn tàn dư `neo-git-*` trong mã nguồn     |   ✅ Đạt   |
-| Metadata gói & tài liệu đồng bộ F-GitGraph      |   ✅ Đạt   |
-| Đóng gói build không lỗi                        |   ✅ Đạt   |
-| Bộ tài nguyên hình ảnh (icon/demo.gif)          |  ⏳ Nhóm 10 |
+| Tiêu chí                                    | Trạng thái |
+| :------------------------------------------ | :--------: |
+| Không còn tàn dư `neo-git-*` trong mã nguồn |   ✅ Đạt   |
+| Metadata gói & tài liệu đồng bộ F-GitGraph  |   ✅ Đạt   |
+| Đóng gói build không lỗi                    |   ✅ Đạt   |
+| Bộ tài nguyên hình ảnh (icon/demo.gif)      | ⏳ Nhóm 10 |

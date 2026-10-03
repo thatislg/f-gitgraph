@@ -15,7 +15,7 @@
 
 ## About
 
-**F-GitGraph** is a next-generation Git history visualizer built for large repositories. It combines a lightweight Preact webview with a native **F# Native AOT core engine** (`f-gitgraph-core.exe`) that reads Git data directly and computes the graph layout in parallel — no dependency on a .NET runtime, and dramatically faster than the previous single-threaded TypeScript implementation.
+**F-GitGraph** is a next-generation Git history visualizer built for large repositories, developed upon the **Neo-Git-Graph** codebase. It combines a lightweight Preact webview with a native **F# Native AOT core engine** (`f-gitgraph-core.exe`) that reads Git data directly and computes the graph layout in parallel — no dependency on a .NET runtime, and dramatically faster than previous single-threaded TypeScript implementations.
 
 Maintained and published by **LMO-LAB**.
 
@@ -40,15 +40,50 @@ Maintained and published by **LMO-LAB**.
 
 ## Architecture
 
-The original Git Graph extension parsed `git log` output with regular expressions and computed the graph layout in a single JavaScript thread — a bottleneck on large repositories. F-GitGraph replaces that entire read-and-layout pipeline with a native engine:
+Traditional implementations (including the upstream Neo-Git-Graph codebase) parsed `git log` output with regular expressions and computed the graph layout in a single JavaScript thread — creating severe performance bottlenecks on large repositories.
 
-| Concern                    | Before (TypeScript)                    | After (F# Native AOT)                              |
-| :------------------------- | :------------------------------------- | :------------------------------------------------- |
-| Read commits / refs        | `git log` + regex parsing (spawn)      | Memory-mapped `commit-graph` + LibGit2 in-process  |
-| Topological sort           | Single-threaded JS                     | Parallel Kahn sort with priority queue             |
-| Lane allocation            | Single-threaded JS                     | Left-compact lane pool, multi-threaded             |
-| Geometry generation        | JS at render time                      | Pre-computed SVG in `Parallel.For`                  |
-| Transport                  | JSON `postMessage`                     | Binary MessagePack over stdio RPC daemon            |
+F-GitGraph decouples the system into a **hybrid architecture**: a responsive TypeScript/Preact shell, a high-performance **F# Native AOT core engine** for read-heavy graph computation, and **native Git CLI delegation** for 100% signature-safe mutating operations.
+
+```mermaid
+flowchart TD
+    subgraph UI["Webview Presentation Layer (Preact + TypeScript)"]
+        WV["Webview UI / Dumb Renderer"]
+        WV --- W1["Hexagon SVG Nodes & Neon Ambient Glow"]
+        WV --- W2["Virtual Window Scrolling & 5x Avatar Zoom"]
+    end
+
+    subgraph Host["Extension Host Orchestration (Node.js + TypeScript)"]
+        RPC["RPC Server & Request Router"]
+        CFG["Settings, Watchers & Localization (l10n)"]
+        MUT["GitCliMutator (Mutation Pipeline)"]
+    end
+
+    subgraph Core["Compute Engine (F# Native AOT Binary)"]
+        MMP["Memory-Mapped commit-graph & LibGit2"]
+        DAG["Parallel DAG Layout Solver (Multi-Threaded)"]
+        IPC["Stdio IPC Daemon (Streaming MessagePack)"]
+        MMP --> DAG --> IPC
+    end
+
+    subgraph CLI["System Git Runtime (Native Git CLI)"]
+        GIT["git.exe"]
+        GIT --- G1["GPG / SSH Commit Signing"]
+        GIT --- G2["Git Credential Manager (2FA & SSO)"]
+        GIT --- G3["Git Hooks (pre-commit, husky) & LFS"]
+    end
+
+    WV <==>|"JSON RPC / postMessage"| RPC
+    RPC <==>|"[Read Pipeline] Stdio RPC Daemon"| IPC
+    MUT ==>|"[Write Pipeline] spawn git.exe"| GIT
+```
+
+| Concern             | Before (TypeScript)               | After (F# Native AOT)                             |
+| :------------------ | :-------------------------------- | :------------------------------------------------ |
+| Read commits / refs | `git log` + regex parsing (spawn) | Memory-mapped `commit-graph` + LibGit2 in-process |
+| Topological sort    | Single-threaded JS                | Parallel Kahn sort with priority queue            |
+| Lane allocation     | Single-threaded JS                | Left-compact lane pool, multi-threaded            |
+| Geometry generation | JS at render time                 | Pre-computed SVG in `Parallel.For`                |
+| Transport           | JSON `postMessage`                | Binary MessagePack over stdio RPC daemon          |
 
 Mutating operations intentionally remain on the Git CLI to guarantee signature and credential safety.
 
@@ -56,7 +91,7 @@ Mutating operations intentionally remain on the Git CLI to guarantee signature a
 
 The engine ships platform-by-platform, starting on Windows and expanding to a universal release:
 
-- **Phase 1 — Windows** *(in progress)*: F# Native AOT core, domain model, fast Git reader, parallel layout solver, stdio IPC, benchmarking, and VSIX packaging.
+- **Phase 1 — Windows** _(in progress)_: F# Native AOT core, domain model, fast Git reader, parallel layout solver, stdio IPC, benchmarking, and VSIX packaging.
 - **Phase 2 — Linux**: port the core to Ubuntu/Fedora/Debian, resolve `glibc` compatibility, and stress-test against the Linux kernel repository.
 - **Phase 3 — macOS**: Apple Silicon (M-series ARM64) and Intel x64, Gatekeeper handling, and Retina display verification.
 - **Phase 4 — Release**: multi-platform CI/CD and a universal VSIX bundling all native binaries.
@@ -95,4 +130,4 @@ Please use [Issues](https://github.com/thatislg/f-gitgraph/issues) for bug repor
 
 MIT — see [LICENSE](LICENSE).
 
-> F-GitGraph builds on the MIT-licensed Git Graph codebase (Copyright © 2019 mhutchie). It is maintained and published by LMO-LAB.
+> F-GitGraph builds upon the MIT-licensed **Neo-Git-Graph** codebase (upstream: [asispts/neo-git-graph](https://github.com/asispts/neo-git-graph)). It is maintained and published by LMO-LAB.

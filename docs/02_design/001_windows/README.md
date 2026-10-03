@@ -55,7 +55,12 @@ Thư mục này chứa toàn bộ hệ thống các bản thiết kế kỹ thu�
    - Quy trình chuyển giao dịch vụ tiện ích và kiểm thử zero-regression toàn diện.
 
 10. **[10_Extension_Iconography_Design.md](10_Extension_Iconography_Design.md)**:
+    - Ý tưởng sáng tạo nghệ thuật bộ biểu tượng F-GitGraph (F-Branch, nút lục giác neon cyberpunk).
+    - Bảng kiểm kê số lượng icon cần thiết (128x128 PNG, 512x512 Master, Webview SVG Colour/Dark/Light, Activity Bar SVG).
+    - Quy chuẩn kỹ thuật đồ họa vector/raster (vùng an toàn, micro-scale readability, tương thích đa theme).
 
-- Ý tưởng sáng tạo nghệ thuật bộ biểu tượng F-GitGraph (F-Branch, nút lục giác neon cyberpunk).
-- Bảng kiểm kê số lượng icon cần thiết (128x128 PNG, 512x512 Master, Webview SVG Colour/Dark/Light, Activity Bar SVG).
-- Quy chuẩn kỹ thuật đồ họa vector/raster (vùng an toàn, micro-scale readability, tương thích đa theme).
+11. **[11_Webview_FSharp_Core_Migration.md](11_Webview_FSharp_Core_Migration.md)**:
+    - Thiết kế di trú tầng Webview Preact sang nạp trực tiếp hình học từ nhân F# Core Engine Native AOT.
+    - Cầu nối dữ liệu `GraphDataBridge` gộp tọa độ F# với metadata commit và giao thức RPC `graph.load`/`graph.window`.
+    - Cơ chế Dumb Renderer giải phóng CPU trình duyệt và phân trang cuộn ảo (Virtual Scrolling).
+    - Thanh lý dứt điểm luồng truy vấn Git cũ bằng TypeScript (`loadCommits.ts`).

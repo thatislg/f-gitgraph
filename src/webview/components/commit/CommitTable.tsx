@@ -8,26 +8,34 @@ import {
   type ZoomedAvatarInfo
 } from "@/webview/components/commit/AvatarZoomPreview";
 import { CommitDetails } from "@/webview/components/commit/CommitDetails";
-import { CommitGraph } from "@/webview/components/commit/CommitGraph";
+import { CommitGraph, type GraphExpansion } from "@/webview/components/commit/CommitGraph";
 import { CommitHoverPanel } from "@/webview/components/commit/CommitHoverPanel";
 import { CommitRow } from "@/webview/components/commit/CommitRow";
 import type { ColumnResize } from "@/webview/components/commit/useColumnResize";
 import { useColumnResize } from "@/webview/components/commit/useColumnResize";
 import {
   COMMIT_DETAILS_HEIGHT,
+  GRAPH_PADDING,
+  LANE_OFFSET,
+  LANE_WIDTH,
+  ROW_HEIGHT,
   TABLE_HEADER_HEIGHT,
   UNCOMMITTED_CHANGES
 } from "@/webview/constants";
-import { GRAPH_PADDING } from "@/webview/graph/constants";
-import { computeGraphLayout } from "@/webview/graph/layout";
-import { branchColour } from "@/webview/graph/palette";
-import type { GraphExpansion } from "@/webview/graph/types";
-import { graphWidth, laneX } from "@/webview/graph/utils";
 import { toggleCommitDetails } from "@/webview/lib/actions";
 import { columnWidths, commitDetails, expandedCommit } from "@/webview/lib/stores";
+import {
+  BUFFER_SIZE,
+  graphWindowStore,
+  maxLane,
+  totalCommits,
+  windowFrom,
+  windowPaths,
+  windowRows
+} from "@/webview/lib/stores/graph-window.store";
+import { branchColour, UNCOMMITTED_COLOUR } from "@/webview/utils/palette";
 
 type CommitTableProps = {
-  commits: Array<GitCommitNode>;
   head: string | null;
   headBranch: string | null;
 };
@@ -41,18 +49,9 @@ const HANDLE_CLASS = "absolute top-0 h-full w-1.5 cursor-col-resize";
 /** Distance over which the graph fades out, where the column cuts it off. */
 const GRAPH_FADE = 12;
 
-const GRAPH_CLIP =
-  `width: var(--col-graph); top: ${TABLE_HEADER_HEIGHT}px;` +
-  ` mask-image: linear-gradient(to right, black calc(100% - ${GRAPH_FADE}px), transparent)`;
-
 /** Keep room for the graph, and for the column title when the graph is narrow. */
 const MIN_GRAPH_COLUMN = 64;
 
-/**
- * Grip that moves the boundary after column `boundary`. Both columns of a
- * boundary hold one, because a header cuts off what leaves it. The right one
- * draws the line between the two columns, the left one only widens the grip.
- */
 function ResizeHandle({
   boundary,
   side,
@@ -74,18 +73,22 @@ function ResizeHandle({
   );
 }
 
-export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
-  const layout = useMemo(() => computeGraphLayout(commits, head), [commits, head]);
-  const messages = useMemo(
-    () => new Map(commits.map((commit) => [commit.hash, commit.message])),
-    [commits]
+export function CommitTable({ head, headBranch }: CommitTableProps) {
+  const rows = windowRows.value;
+  const paths = windowPaths.value;
+  const from = windowFrom.value;
+  const total = totalCommits.value;
+  const maxL = maxLane.value;
+
+  const graphColumn = Math.max(
+    Math.max(0, maxL) * LANE_WIDTH + LANE_OFFSET * 2 + GRAPH_PADDING,
+    MIN_GRAPH_COLUMN
   );
-  const graphColumn = Math.max(graphWidth(layout) + GRAPH_PADDING, MIN_GRAPH_COLUMN);
   const resize = useColumnResize(graphColumn);
   const sized = columnWidths.value !== null;
 
   const expandedHash = expandedCommit.value;
-  const expandedRow = commits.findIndex((commit) => commit.hash === expandedHash);
+  const expandedRow = rows.findIndex((row) => row.hash === expandedHash);
   const expansion: GraphExpansion | null =
     expandedRow === -1 ? null : { row: expandedRow, height: COMMIT_DETAILS_HEIGHT };
   const isAnyExpanded = expandedCommit.value !== null;
@@ -97,6 +100,38 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   } | null>(null);
   const hoverHideTimer = useRef<number | null>(null);
 
+  const messages = useMemo(
+    () => new Map(rows.map((row) => [row.hash, row.metadata?.message ?? ""])),
+    [rows]
+  );
+
+  // Sync scroll position with virtual window loading
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const viewportHeight = window.innerHeight;
+      const firstVisible = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT));
+      const visibleCount = Math.ceil(viewportHeight / ROW_HEIGHT);
+      const lastVisible = firstVisible + visibleCount;
+
+      const currentFrom = windowFrom.value;
+      const currentTo = currentFrom + windowRows.value.length;
+      const count = totalCommits.value;
+
+      if (
+        (firstVisible < currentFrom + 20 && currentFrom > 0) ||
+        (lastVisible > currentTo - 20 && currentTo < count)
+      ) {
+        const nextFrom = Math.max(0, firstVisible - BUFFER_SIZE);
+        const nextTo = lastVisible + BUFFER_SIZE;
+        void graphWindowStore.requestWindow(nextFrom, nextTo);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   // If any commit is selected/expanded, immediately close and suppress hoverPopover
   useEffect(() => {
     if (isAnyExpanded) {
@@ -107,7 +142,6 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
   const zoomedAvatar = useSignal<ZoomedAvatarInfo | null>(null);
 
   const handleHoverDwell = (commit: GitCommitNode, rect: DOMRect) => {
-    // If zoomed avatar is active or any commit details is open, don't show text hover panel
     if (zoomedAvatar.value !== null || isAnyExpanded) {
       return;
     }
@@ -155,12 +189,20 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
     window.l10n.commit
   ];
 
+  const topSpacer = from * ROW_HEIGHT;
+  const bottomSpacer = Math.max(0, (total - (from + rows.length)) * ROW_HEIGHT);
+
+  const graphClip =
+    `width: var(--col-graph); top: ${TABLE_HEADER_HEIGHT + topSpacer}px;` +
+    ` mask-image: linear-gradient(to right, black calc(100% - ${GRAPH_FADE}px), transparent)`;
+
   return (
     <div class="relative" ref={resize.containerRef}>
-      <div class="pointer-events-none absolute left-0 overflow-hidden" style={GRAPH_CLIP}>
+      <div class="pointer-events-none absolute left-0 overflow-hidden" style={graphClip}>
         <CommitGraph
-          layout={layout}
-          commits={commits}
+          rows={rows}
+          paths={paths}
+          maxLane={maxL}
           expansion={expansion}
           hoveredRow={hoveredRow.value}
           selectedRow={expandedRow}
@@ -193,18 +235,28 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
           </tr>
         </thead>
         <tbody>
-          {commits.map((commit, index) => {
-            const vertex = layout.vertices[index];
-            const avatarRightX = vertex ? laneX(vertex.x) + 10 : undefined;
+          {topSpacer > 0 && <tr style={{ height: `${topSpacer}px` }} aria-hidden="true" />}
+          {rows.map((row, index) => {
+            const commit: GitCommitNode = row.metadata ?? {
+              hash: row.hash,
+              parentHashes: [],
+              author: "",
+              email: "",
+              date: 0,
+              message: row.hash,
+              refs: []
+            };
+            const avatarRightX = row.x + 10;
+            const colour = branchColour(row.color) ?? UNCOMMITTED_COLOUR;
 
             return (
-              <Fragment key={commit.hash}>
+              <Fragment key={row.hash || index}>
                 <CommitRow
                   commit={commit}
-                  isHead={commit.hash === head}
+                  isHead={row.hash === head}
                   headBranch={headBranch}
                   messages={messages}
-                  colour={branchColour(vertex?.colour ?? 0)}
+                  colour={colour}
                   expanded={index === expandedRow}
                   isAnyExpanded={isAnyExpanded}
                   avatarRightX={avatarRightX}
@@ -215,19 +267,20 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
                   onHoverLeave={handleHoverLeave}
                   onAvatarClick={handleAvatarClick}
                   onSelect={
-                    commit.hash === UNCOMMITTED_CHANGES
+                    row.hash === UNCOMMITTED_CHANGES
                       ? undefined
-                      : () => toggleCommitDetails(commit.hash)
+                      : () => toggleCommitDetails(row.hash)
                   }
                 />
                 {index === expandedRow && <CommitDetails details={commitDetails.value} />}
               </Fragment>
             );
           })}
+          {bottomSpacer > 0 && <tr style={{ height: `${bottomSpacer}px` }} aria-hidden="true" />}
         </tbody>
       </table>
 
-      {/* Floating rich commit hover panel: completely suppressed when any commit details view is open */}
+      {/* Floating rich commit hover panel */}
       {hoverPopover.value && !zoomedAvatar.value && !isAnyExpanded && (
         <CommitHoverPanel
           commit={hoverPopover.value.commit}
@@ -237,7 +290,7 @@ export function CommitTable({ commits, head, headBranch }: CommitTableProps) {
         />
       )}
 
-      {/* Top-layer Floating 5x Avatar Deep Zoom Preview (Click Deep Zoom) */}
+      {/* Floating 5x Avatar Deep Zoom Preview */}
       {zoomedAvatar.value && (
         <AvatarZoomPreview
           info={zoomedAvatar.value}

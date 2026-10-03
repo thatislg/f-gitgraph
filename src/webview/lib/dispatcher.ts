@@ -3,7 +3,6 @@ import type { ResponseMessage } from "@/types";
 import { handleActionResult } from "./handler/action-result";
 import { handleCommitDetails } from "./handler/commit-details";
 import { handleLoadBranches } from "./handler/load-branches";
-import { handleLoadCommits } from "./handler/load-commits";
 import { handleRefresh } from "./handler/refresh";
 import { handleViewDiff } from "./handler/view-diff";
 
@@ -29,7 +28,6 @@ const handlers: Handlers = {
   revertCommit: handleActionResult,
   commitDetails: handleCommitDetails,
   loadBranches: handleLoadBranches,
-  loadCommits: handleLoadCommits,
   refresh: handleRefresh,
   viewDiff: handleViewDiff
 };
