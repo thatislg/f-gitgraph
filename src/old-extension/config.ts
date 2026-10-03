@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 
-import type { DateType } from "@/backend/types";
-import type { DateFormat, GraphStyle } from "@/types";
+import type { DateType,DateFormat,GraphStyle } from "@/types";
 
 type TabIconColourTheme = "colour" | "grey";
 

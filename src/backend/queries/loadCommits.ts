@@ -1,12 +1,6 @@
 import type { SimpleGit } from "simple-git";
 
-import type {
-  DateType,
-  GitCommitNode,
-  GitLogEntry,
-  GitRefData,
-  QueryResult
-} from "@/backend/types";
+import type { DateType, GitCommitNode, GitLogEntry, GitRefData, QueryResult } from "@/types";
 
 const eolRegex = /\r\n|\r|\n/g;
 const gitLogSeparator = "XX7Nal-YARtTpjCikii9nJxER19D6diSyk-AWkPb";

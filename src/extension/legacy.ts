@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 
 import { gitClientFactory } from "@/backend/gitClient";
-import { AvatarManager } from "@/old-extension/avatarManager";
+import { AvatarManager } from "@/extension/services/avatarManager";
+import { DiffDocProvider } from "@/extension/services/diffDocProvider";
 import { config } from "@/old-extension/config";
-import { DiffDocProvider } from "@/old-extension/diffDocProvider";
 import { ExtensionState } from "@/old-extension/extensionState";
 import { registerMessageHandlers } from "@/old-extension/messageHandler";
 import { createRepoManager } from "@/old-extension/repoManager";

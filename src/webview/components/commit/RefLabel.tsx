@@ -1,4 +1,4 @@
-import type { GitRef } from "@/backend/types";
+import type { GitRef } from "@/types";
 import { Icon } from "@/webview/components/ui/Icons";
 import { openContextMenu } from "@/webview/lib/actions";
 import { checkoutBranchAction, refMenu, refMenuSource } from "@/webview/lib/menus";

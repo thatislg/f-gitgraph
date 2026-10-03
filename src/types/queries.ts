@@ -1,4 +1,4 @@
-import type { GitCommitDetails, GitCommitNode } from "./git.types";
+import type { GitCommitDetails, GitCommitNode } from "./git";
 
 type QueryPayloads = {
   commitDetails: {

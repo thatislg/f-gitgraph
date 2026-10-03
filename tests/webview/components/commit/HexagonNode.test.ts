@@ -3,7 +3,7 @@
 import { h, render } from "preact";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
-import type { GitCommitNode } from "@/backend/types";
+import type { GitCommitNode } from "@/types";
 
 import { setupWebviewTest } from "@tests/webview/test-utils";
 

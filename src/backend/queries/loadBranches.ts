@@ -1,7 +1,7 @@
 import type { SimpleGit } from "simple-git";
 
-import type { QueryResult } from "@/backend/types";
 import { isGitRepository } from "@/backend/utils/git";
+import type { QueryResult } from "@/types";
 
 type LoadBranchesInput = {
   showRemoteBranches: boolean;

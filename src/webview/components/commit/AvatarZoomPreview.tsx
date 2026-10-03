@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 
-import type { GitCommitNode } from "@/backend/types";
+import type { GitCommitNode } from "@/types";
 import {
   type CommitNodeType,
   hexagonPoints,

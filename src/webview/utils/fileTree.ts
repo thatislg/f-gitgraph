@@ -1,4 +1,4 @@
-import type { GitFileChange } from "@/backend/types";
+import type { GitFileChange } from "@/types";
 
 export type FileTreeFile = {
   type: "file";

@@ -1,4 +1,4 @@
-import type { GitCommitNode } from "@/backend/types";
+import type { GitCommitNode } from "@/types";
 import { UNCOMMITTED_CHANGES } from "@/webview/constants";
 import { createBranchColours } from "@/webview/graph/branchColours";
 import type {

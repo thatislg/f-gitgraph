@@ -1,6 +1,6 @@
 import type { SimpleGit } from "simple-git";
 
-import type { ActionPayload } from "@/backend/types";
+import type { ActionPayload } from "@/types";
 
 export async function mergeBranch(
   git: SimpleGit,

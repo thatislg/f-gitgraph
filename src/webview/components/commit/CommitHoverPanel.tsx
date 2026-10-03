@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 
-import type { GitCommitNode } from "@/backend/types";
 import { abbrevCommit } from "@/backend/utils/string";
+import type { GitCommitNode } from "@/types";
 import { RefLabel } from "@/webview/components/commit/RefLabel";
 import { getGitAccountAvatarUrl } from "@/webview/utils/avatar";
 import { getCommitDate, getFullDate } from "@/webview/utils/date";

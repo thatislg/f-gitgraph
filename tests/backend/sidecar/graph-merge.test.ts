@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { GitCommitNode } from "@/backend/types";
 import { mergeGraphWindow } from "@/extension/sidecar/graph-merge";
+import type { GitCommitNode } from "@/types";
 
 const node = (overrides: Partial<{ x: number; lane: number; color: number }> = {}) => ({
   x: overrides.x ?? 10,

@@ -13,14 +13,13 @@ import type { GitClient } from "@/backend/gitClient";
 import { commitDetails } from "@/backend/queries/commitDetails";
 import { loadBranches } from "@/backend/queries/loadBranches";
 import { loadCommits } from "@/backend/queries/loadCommits";
-import type { GitFileChangeType } from "@/backend/types";
 import { abbrevCommit } from "@/backend/utils/string";
+import { AvatarManager } from "@/extension/services/avatarManager";
+import { encodeDiffDocUri } from "@/extension/services/diffDocProvider";
 import { selectWatchedRepo } from "@/extension/watchers/git-repo.watcher";
-import { AvatarManager } from "@/old-extension/avatarManager";
 import type { Config } from "@/old-extension/config";
-import { encodeDiffDocUri } from "@/old-extension/diffDocProvider";
 import { ExtensionState } from "@/old-extension/extensionState";
-import type { RequestMessage, ResponseMessage } from "@/types";
+import type { GitFileChangeType, RequestMessage, ResponseMessage } from "@/types";
 
 import type { RepoManager } from "./repoManager";
 import type { WebviewBridge } from "./webviewBridge";

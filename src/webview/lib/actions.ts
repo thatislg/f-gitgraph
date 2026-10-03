@@ -1,7 +1,7 @@
 import { batch } from "@preact/signals";
 import type { ComponentChildren } from "preact";
 
-import type { ActionRequest, GitFileChange } from "@/backend/types";
+import type { ActionRequest, GitFileChange } from "@/types";
 import { SHOW_ALL_BRANCHES } from "@/webview/constants";
 import {
   branchList,

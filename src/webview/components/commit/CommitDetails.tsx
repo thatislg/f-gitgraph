@@ -1,7 +1,7 @@
 import type { ComponentChildren, RefObject } from "preact";
 import { useEffect, useMemo, useRef } from "preact/hooks";
 
-import type { GitCommitDetails } from "@/backend/types";
+import type { GitCommitDetails } from "@/types";
 import { FileTree } from "@/webview/components/commit/FileTree";
 import { Icon } from "@/webview/components/ui/Icons";
 import { Loading } from "@/webview/components/ui/Loading";

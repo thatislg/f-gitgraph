@@ -4,7 +4,7 @@ import * as path from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { GitCliMutator } from "@/backend/gitCliMutator";
+import { GitCliMutator } from "@/extension/mutator/gitCliMutator";
 
 import { makeRepo } from "@tests/backend/helpers";
 

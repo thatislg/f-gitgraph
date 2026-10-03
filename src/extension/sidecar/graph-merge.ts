@@ -1,4 +1,4 @@
-import type { GitCommitNode } from "@/backend/types";
+import type { GitCommitNode } from "@/types";
 
 import type { NodeGeometry, PathGeometry } from "./protocol";
 

@@ -1,6 +1,6 @@
 import type { SimpleGit } from "simple-git";
 
-import type { ActionPayload } from "@/backend/types";
+import type { ActionPayload } from "@/types";
 
 export async function addTag(git: SimpleGit, input: ActionPayload<"addTag">): Promise<void> {
   const args: string[] = [];

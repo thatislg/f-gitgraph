@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 
-import type { GitCommitNode, GitRef } from "@/backend/types";
 import { abbrevCommit } from "@/backend/utils/string";
+import type { GitCommitNode, GitRef } from "@/types";
 import type { ZoomedAvatarInfo } from "@/webview/components/commit/AvatarZoomPreview";
 import { getCommitNodeType } from "@/webview/components/commit/HexagonNode";
 import { RefLabel } from "@/webview/components/commit/RefLabel";

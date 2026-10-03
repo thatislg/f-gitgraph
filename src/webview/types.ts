@@ -1,6 +1,6 @@
 import type { ComponentChildren } from "preact";
 
-import type { ActionRequest } from "@/backend/types";
+import type { ActionRequest } from "@/types";
 
 export type CommitBranchType = "*" | (string & {});
 

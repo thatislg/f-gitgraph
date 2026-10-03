@@ -2,7 +2,7 @@
 
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import type { GitCommitNode } from "@/backend/types";
+import type { GitCommitNode } from "@/types";
 
 import { vscodeApi } from "@tests/webview/setup";
 import { setupWebviewTest } from "@tests/webview/test-utils";

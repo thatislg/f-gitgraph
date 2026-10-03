@@ -1,6 +1,6 @@
 import type { ComponentChildren } from "preact";
 
-import type { GitCommitNode } from "@/backend/types";
+import type { GitCommitNode } from "@/types";
 import type { ZoomedAvatarInfo } from "@/webview/components/commit/AvatarZoomPreview";
 import { getCommitNodeType, HexagonNode } from "@/webview/components/commit/HexagonNode";
 import { branchColour, UNCOMMITTED_COLOUR } from "@/webview/graph/palette";

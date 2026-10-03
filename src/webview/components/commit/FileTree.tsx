@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 
-import type { GitFileChange } from "@/backend/types";
+import type { GitFileChange } from "@/types";
 import { Icon } from "@/webview/components/ui/Icons";
 import { viewDiff } from "@/webview/lib/actions";
 import type { FileTreeNode } from "@/webview/utils/fileTree";

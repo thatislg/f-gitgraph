@@ -4,7 +4,7 @@ import type {
   GitFileChangeType,
   QueryRequest,
   QueryResponse
-} from "@/backend/types";
+} from "@/types";
 
 export type GitRepoSet = { [repo: string]: GitRepoState };
 export type GitRepoState = {

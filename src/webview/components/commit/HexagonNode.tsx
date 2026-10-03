@@ -1,7 +1,7 @@
 import type { ComponentChildren } from "preact";
 import { useRef } from "preact/hooks";
 
-import type { GitCommitNode } from "@/backend/types";
+import type { GitCommitNode } from "@/types";
 import { UNCOMMITTED_CHANGES } from "@/webview/constants";
 import { HEXAGON_ICON_SIZE, HEXAGON_RADIUS } from "@/webview/graph/constants";
 

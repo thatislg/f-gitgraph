@@ -1,4 +1,4 @@
-import type { GitResetMode } from "./git.types";
+import type { GitResetMode } from "./git";
 
 export type GitCommandStatus = string | null;
 
