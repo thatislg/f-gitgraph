@@ -1,73 +1,72 @@
 <div align="center">
   <img src="./resources/icon.png" height="128"/>
   <samp>
-    <h1>F-GitGraph for Visual Studio Code</h1>
-    <h3>An MIT-licensed fork of Git Graph with visual history, branch actions, and devcontainer support.</h3>
+    <h1>F-GitGraph</h1>
+    <h3>High-performance Git history visualization for VS Code, powered by an F# Native AOT core.</h3>
   </samp>
 </div>
-
-<h4 align="center">
-  <a href="#why-this-fork">Why this fork</a> |
-  <a href="#features">Features</a> |
-  <a href="#installation">Installation</a> |
-  <a href="#roadmap">Roadmap</a> |
-  <a href="#configuration">Configuration</a> |
-  <a href="#contributing">Contributing</a>
-</h4>
 
 <p align="center">
   <a href="./LICENSE"><img src="https://img.shields.io/github/license/thatislg/f-gitgraph" alt="License"></a>
   <a href="https://github.com/thatislg/f-gitgraph/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/thatislg/f-gitgraph"></a>
-  <a href="https://open-vsx.org/extension/asispts/f-gitgraph"><img alt="open-vsx downloads" src="https://img.shields.io/open-vsx/dt/asispts/f-gitgraph?label=open-vsx"></a>
 </p>
-
-<!-- ![demo](resources/demo.gif) -->
 
 <p>&nbsp;</p>
 
-## Why this fork
+## About
 
-The original [Git Graph](https://github.com/mhutchie/vscode-git-graph) by mhutchie changed its license in May 2019.
-This fork is based on the last MIT-licensed commit, [`4af8583`](https://github.com/mhutchie/vscode-git-graph/commit/4af8583a42082b2c230d2c0187d4eaff4b69c665).
+**F-GitGraph** is a next-generation Git history visualizer built for large repositories. It combines a lightweight Preact webview with a native **F# Native AOT core engine** (`f-gitgraph-core.exe`) that reads Git data directly and computes the graph layout in parallel — no dependency on a .NET runtime, and dramatically faster than the previous single-threaded TypeScript implementation.
 
-Everything after that commit is no longer MIT-licensed.
+Maintained and published by **LMO-LAB**.
 
-This fork:
+## Key Highlights
 
-- Remains MIT-licensed
-- Adds devcontainer support
-- Adds internationalization support (English, zh-CN, zh-TW)
-- Improves codebase, tooling, and maintainability
+- **Dual-core architecture** — a lightweight Preact UI drives a self-contained F# Native AOT engine that runs directly on the metal.
+- **Direct Git access** — reads the binary `commit-graph` through memory-mapped files and the in-process LibGit2 C binding, 30–50× faster than shelling out to the Git CLI.
+- **Parallel DAG layout** — sorts commits and allocates graph lanes across multiple CPU threads, pre-computing SVG geometry before the UI renders.
+- **Streaming IPC** — a stdio RPC daemon with a binary MessagePack protocol answers windowed queries in under 5 ms for silky virtual scrolling.
+- **Signature-safe writes** — every mutating operation (commit, branch, merge, rebase, cherry-pick, tag, push, pull) is delegated to the native `git.exe`, preserving GPG/SSH signing and Git Credential Manager.
+- **Modern neon UI** — hexagon SVG commit nodes, ambient neon glow, 5× avatar zoom preview, and a full commit-message panel.
 
 ## Features
 
-- **Graph view**: See branches, tags, and uncommitted changes in one graph
-- **Commit details**: Click a commit to see message, files, and diffs
-- **Branch actions**: Create, checkout, rename, delete, and merge
-- **Tag actions**: Create, delete, and push tags
-- **Commit actions**: Checkout, cherry-pick, revert, and reset
-- **Avatar support (deprecated in v0.6.0)**: Optional avatars from GitHub, GitLab, or Gravatar
-- **Multi-repo**: Work with multiple repositories in one workspace
-- **Devcontainer support**: Works in remote and container environments
+- **Graph view** — branches, tags, and uncommitted changes in a single hexagonal graph.
+- **Commit details** — click a commit to inspect the message, changed files, and diffs.
+- **Branch actions** — create, checkout, rename, delete, and merge.
+- **Tag actions** — create, delete, and push tags.
+- **Commit actions** — checkout, cherry-pick, revert, and reset.
+- **Avatar preview** — hover-to-zoom avatar preview (fetching avatars is deprecated in v0.6.0).
+- **Multi-repo** — work with several repositories in one workspace.
 
-## Installation
+## Architecture
 
-Search for `f-gitgraph` in Extensions, or install from:
+The original Git Graph extension parsed `git log` output with regular expressions and computed the graph layout in a single JavaScript thread — a bottleneck on large repositories. F-GitGraph replaces that entire read-and-layout pipeline with a native engine:
 
-- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=asispts.f-gitgraph)
-- [Open VSX Registry](https://open-vsx.org/extension/asispts/f-gitgraph)
+| Concern                    | Before (TypeScript)                    | After (F# Native AOT)                              |
+| :------------------------- | :------------------------------------- | :------------------------------------------------- |
+| Read commits / refs        | `git log` + regex parsing (spawn)      | Memory-mapped `commit-graph` + LibGit2 in-process  |
+| Topological sort           | Single-threaded JS                     | Parallel Kahn sort with priority queue             |
+| Lane allocation            | Single-threaded JS                     | Left-compact lane pool, multi-threaded             |
+| Geometry generation        | JS at render time                      | Pre-computed SVG in `Parallel.For`                  |
+| Transport                  | JSON `postMessage`                     | Binary MessagePack over stdio RPC daemon            |
+
+Mutating operations intentionally remain on the Git CLI to guarantee signature and credential safety.
 
 ## Roadmap
 
-- **v0.6.0 (latest):**
-  - Migrate the legacy webview to Preact
-- **v0.7.0 (next):**
-  - Introduce RPC protocol
-  - Refine the extension and backend APIs after the webview migration
-- **v0.8.0:**
-  - Redesign the user interface and commit list
-- **v0.9.0 and later:**
-  - Close the main feature gaps with the original Git Graph
+The engine ships platform-by-platform, starting on Windows and expanding to a universal release:
+
+- **Phase 1 — Windows** *(in progress)*: F# Native AOT core, domain model, fast Git reader, parallel layout solver, stdio IPC, benchmarking, and VSIX packaging.
+- **Phase 2 — Linux**: port the core to Ubuntu/Fedora/Debian, resolve `glibc` compatibility, and stress-test against the Linux kernel repository.
+- **Phase 3 — macOS**: Apple Silicon (M-series ARM64) and Intel x64, Gatekeeper handling, and Retina display verification.
+- **Phase 4 — Release**: multi-platform CI/CD and a universal VSIX bundling all native binaries.
+
+## Installation
+
+Search for `f-gitgraph` in the Extensions view, or install from:
+
+- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=lmo-lab.f-gitgraph)
+- [Open VSX Registry](https://open-vsx.org/extension/lmo-lab/f-gitgraph)
 
 ## Configuration
 
@@ -90,21 +89,10 @@ All settings use the `f-gitgraph` prefix.
 
 ## Contributing
 
-Pull requests from external contributors are currently limited while the project undergoes heavy refactoring.
-
-Please use [Issues](https://github.com/thatislg/f-gitgraph/issues) for bug reports, feature requests, and discussion.
-
-See the [Roadmap](#roadmap) for the project's current direction.
-
-<!-- ## Sponsors
-
-If you find this extension useful, consider [sponsoring its development](https://github.com/sponsors/asispts).
-Your support helps keep it maintained and improving. -->
-
-<!-- Sponsor names and logos go here -->
+Please use [Issues](https://github.com/thatislg/f-gitgraph/issues) for bug reports, feature requests, and discussion. See the [Roadmap](#roadmap) for the current direction.
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
 
-> Not related to the original Git Graph project.
+> F-GitGraph builds on the MIT-licensed Git Graph codebase (Copyright © 2019 mhutchie). It is maintained and published by LMO-LAB.

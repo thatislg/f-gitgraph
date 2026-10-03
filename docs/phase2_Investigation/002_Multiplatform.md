@@ -11,12 +11,12 @@ Tài liệu này nghiên cứu chi tiết cấu trúc ứng dụng, cơ chế bi
 
 | Hệ Điều Hành | Phiên Bản Hỗ Trợ                        | Kiến Trúc CPU         | Mã Định Danh Runtime (.NET RID) | Tên File Nhị Phân Đầu Ra |
 | :----------- | :-------------------------------------- | :-------------------- | :------------------------------ | :----------------------- |
-| **Windows**  | Windows 10, Windows 11+                 | x64 (AMD64)           | `win-x64`                       | `f-gitgraph-core.exe`       |
-| **Windows**  | Windows 11 on ARM                       | ARM64                 | `win-arm64`                     | `f-gitgraph-core.exe`       |
-| **Linux**    | Ubuntu 20.04+, Fedora 38+, Debian 11+   | x64 (AMD64)           | `linux-x64`                     | `f-gitgraph-core`           |
-| **Linux**    | Ubuntu/Debian on ARM, Raspberry Pi 4/5  | ARM64 (aarch64)       | `linux-arm64`                   | `f-gitgraph-core`           |
-| **macOS**    | macOS 12 Monterey trở lên (M1/M2/M3/M4) | ARM64 (Apple Silicon) | `osx-arm64`                     | `f-gitgraph-core`           |
-| **macOS**    | macOS 11 Big Sur trở lên                | x64 (Intel Mac)       | `osx-x64`                       | `f-gitgraph-core`           |
+| **Windows**  | Windows 10, Windows 11+                 | x64 (AMD64)           | `win-x64`                       | `f-gitgraph-core.exe`    |
+| **Windows**  | Windows 11 on ARM                       | ARM64                 | `win-arm64`                     | `f-gitgraph-core.exe`    |
+| **Linux**    | Ubuntu 20.04+, Fedora 38+, Debian 11+   | x64 (AMD64)           | `linux-x64`                     | `f-gitgraph-core`        |
+| **Linux**    | Ubuntu/Debian on ARM, Raspberry Pi 4/5  | ARM64 (aarch64)       | `linux-arm64`                   | `f-gitgraph-core`        |
+| **macOS**    | macOS 12 Monterey trở lên (M1/M2/M3/M4) | ARM64 (Apple Silicon) | `osx-arm64`                     | `f-gitgraph-core`        |
+| **macOS**    | macOS 11 Big Sur trở lên                | x64 (Intel Mac)       | `osx-x64`                       | `f-gitgraph-core`        |
 
 ---
 

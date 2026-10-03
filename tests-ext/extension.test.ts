@@ -16,7 +16,7 @@ async function openPanel() {
 
 suite("GitGraphPanel", () => {
   suiteSetup(async () => {
-    const ext = vscode.extensions.getExtension("asispts.f-gitgraph");
+    const ext = vscode.extensions.getExtension("lmo-lab.f-gitgraph");
     await ext?.activate();
   });
 

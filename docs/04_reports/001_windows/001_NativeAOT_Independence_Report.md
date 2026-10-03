@@ -47,8 +47,8 @@ Báo cáo này ghi nhận kết quả kiểm định tính độc lập của fi
 
 ## 3. Kết Quả Đo Đạc Dung Lượng File Nhị Phân
 
-| Hạng mục                                           | Kích thước (bytes) | Kích thước (đọc được) |
-| :------------------------------------------------- | -----------------: | :-------------------- |
+| Hạng mục                                              | Kích thước (bytes) | Kích thước (đọc được) |
+| :---------------------------------------------------- | -----------------: | :-------------------- |
 | `f-gitgraph-core.exe`                                 |            862.720 | ~0,84 MB (842 KiB)    |
 | `f-gitgraph-core.pdb` (biểu tượng gỡ lỗi, tách riêng) |          5.795.840 | ~5,53 MB              |
 
@@ -93,10 +93,10 @@ Thư mục `bin/Release/net10.0/win-x64/publish/` chỉ chứa duy nhất:
 
 ### 5.2. Kiểm tra lệnh phản hồi tức thời
 
-| Lệnh                         | Kết quả đầu ra       | Mã thoát |
-| :--------------------------- | :------------------- | :------: |
+| Lệnh                            | Kết quả đầu ra          | Mã thoát |
+| :------------------------------ | :---------------------- | :------: |
 | `f-gitgraph-core.exe --version` | `f-gitgraph-core 0.1.0` |    0     |
-| `f-gitgraph-core.exe ping`      | `ready`              |    0     |
+| `f-gitgraph-core.exe ping`      | `ready`                 |    0     |
 
 ### 5.3. Hạn chế cần bổ sung
 

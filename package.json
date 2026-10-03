@@ -20,23 +20,14 @@
   },
   "license": "MIT",
   "author": {
-    "name": "Asis Pattisahusiwa",
-    "email": "asispts@gmail.com"
+    "name": "LMO-LAB",
+    "email": "lnllnl01111@gmail.com"
   },
-  "contributors": [
-    {
-      "name": "Michael Hutchison",
-      "url": "https://github.com/mhutchie"
-    }
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/thatislg/f-gitgraph.git"
   },
-  "sponsor": {
-    "url": "https://github.com/sponsors/asispts"
-  },
-  "publisher": "asispts",
+  "publisher": "lmo-lab",
   "main": "./out/extension.js",
   "scripts": {
     "typecheck": "tsc -p . && tsc -p src/webview && tsc -p tests && tsc -p tests/webview && tsc -p tests-ext --noEmit",
@@ -237,5 +228,5 @@
   "engines": {
     "vscode": "^1.107.0"
   },
-  "packageManager": "pnpm@11.15.1"
+  "packageManager": "pnpm@12.8.1"
 }

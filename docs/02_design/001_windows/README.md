@@ -1,4 +1,4 @@
-﻿# Thiết Kế Kỹ Thuật Chi Tiết: Phase 1 Windows Milestone
+# Thiết Kế Kỹ Thuật Chi Tiết: Phase 1 Windows Milestone
 
 Thư mục này chứa toàn bộ hệ thống các bản thiết kế kỹ thuật chi tiết (Design Specifications) phục vụ cho quá trình hiện thực hóa **Phase 1: Xây dựng nền móng nhân F# Core Engine trên môi trường Windows** theo kế hoạch tại [001_windows_progress.md](file:///d:/Kojin/f-gitgraph/docs/03_progess/001_windows_progress.md).
 
@@ -41,3 +41,21 @@ Thư mục này chứa toàn bộ hệ thống các bản thiết kế kỹ thu�
 7. **[07_Benchmarking_And_Verification_Plan.md](07_Benchmarking_And_Verification_Plan.md)**:
    - Kế hoạch kiểm thử so sánh tính tương đương đồ thị 100% giữa thuật toán F# và TypeScript.
    - Phương pháp đo đạc và tiêu chí nghiệm thu 3 chỉ số then chốt trên Windows (thời gian nạp ban đầu, mức chiếm RAM, độ mượt khung hình).
+
+8. **[08_Rebranding_And_Identity_Cleanup.md](08_Rebranding_And_Identity_Cleanup.md)**:
+   - Kế hoạch thiết kế lại bộ tài nguyên hình ảnh (Icon chính, Webview SVG, Dark/Light, Demo GIF).
+   - Kế hoạch làm mới toàn diện tài liệu người dùng (README, CHANGELOG, License, NLS).
+   - Kế hoạch rà soát sạch tàn dư mã nguồn & metadata gói (Publisher, Author, Sponsor, tệp rác).
+   - Quy trình đóng gói và nghiệm thu diện mạo nhận diện mới trên VS Code.
+
+9. **[09_Legacy_TS_Backend_Cleanup.md](09_Legacy_TS_Backend_Cleanup.md)**:
+   - Kế hoạch loại bỏ tài nguyên ngoài phạm vi (Nix build configs, localization tiếng Trung).
+   - Kế hoạch cách ly & chuẩn hóa hệ thống kiểu dữ liệu chia sẻ giữa Webview và Extension sang `src/types/`.
+   - Kế hoạch thanh lý dead code tầng truy vấn Git regex cũ bằng TypeScript (`src/backend/queries/`, `src/old-extension/`).
+   - Quy trình chuyển giao dịch vụ tiện ích và kiểm thử zero-regression toàn diện.
+
+10. **[10_Extension_Iconography_Design.md](10_Extension_Iconography_Design.md)**:
+
+- Ý tưởng sáng tạo nghệ thuật bộ biểu tượng F-GitGraph (F-Branch, nút lục giác neon cyberpunk).
+- Bảng kiểm kê số lượng icon cần thiết (128x128 PNG, 512x512 Master, Webview SVG Colour/Dark/Light, Activity Bar SVG).
+- Quy chuẩn kỹ thuật đồ họa vector/raster (vùng an toàn, micro-scale readability, tương thích đa theme).

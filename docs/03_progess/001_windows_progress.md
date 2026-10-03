@@ -1,4 +1,4 @@
-﻿# Tiến Độ Phase 1: Windows First Milestone (Xây Dựng Nền Móng Nhân F#)
+# Tiến Độ Phase 1: Windows First Milestone (Xây Dựng Nền Móng Nhân F#)
 
 Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệu thiết kế áp dụng, phạm vi công việc chi tiết hóa từng nhiệm vụ con (subtasks), tiêu chuẩn nghiệm thu và nhật ký thực hiện cho **Phase 1: Xây dựng nền móng nhân F# Core Engine trên môi trường Windows**.
 
@@ -20,8 +20,8 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
 
-- **Trạng thái**: Đã hoàn thành toàn bộ 7 nhóm việc — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT), Nhóm Việc 2 (Domain Model), Nhóm Việc 3 (Fast Git Reader), Nhóm Việc 4 (Parallel DAG Solver), Nhóm Việc 5 (IPC Daemon & Streaming), Nhóm Việc 6 (Webview & Git Mutator) và Nhóm Việc 7 (Kiểm thử nghiệm thu & Benchmarking).
-- **Tiến độ tổng thể**: 7/7 nhóm việc hoàn thành (100%). Nhóm Việc 7 bao gồm 3 nhiệm vụ: Kiểm thử tương đương (7.1), Đo đạc benchmark (7.2) và Đóng gói thử nghiệm Windows VSIX (7.3) — cả ba đều đã hoàn tất.
+- **Trạng thái**: Nhóm Việc 8 (Chuẩn hóa nhận diện thương hiệu) và Nhóm Việc 9 (Dọn dẹp mã nguồn Backend TS cũ) đã hoàn thành; Nhóm Việc 10 (Thiết kế hệ thống biểu tượng & icon F-GitGraph) đang triển khai.
+- **Tiến độ tổng thể**: 9/10 nhóm việc hoàn thành (90.0%). Ghi chú: việc thanh lý triệt để tầng truy vấn TS còn lại (`loadCommits`/`loadBranches`/`commitDetails`) và thư mục `src/old-extension/` phụ thuộc di trú RPC metadata (xem Báo cáo 009).
 
 ---
 
@@ -29,15 +29,18 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
 
 Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên dưới bắt buộc phải bám sát hệ thống tài liệu thiết kế chi tiết tương ứng nằm trong thư mục **[docs/02_design/001_windows/](../02_design/001_windows/README.md)**:
 
-|  STT  | Nhóm Việc Kỹ Thuật                           | Tài Liệu Thiết Kế Chi Tiết Bắt Buộc Áp Dụng                                                                         | Phạm Vi Thiết Kế Trọng Tâm                                                                                                             |
-| :---: | :------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
-| **1** | **Khởi Tạo Dự Án F# & Native AOT**           | **[01_Project_Structure_And_NativeAOT.md](../02_design/001_windows/01_Project_Structure_And_NativeAOT.md)**         | Cấu trúc phân tầng `src/core-engine/`, cờ xuất bản Native AOT (`win-x64`), cắt tỉa Trimming, LTO, kiểm định máy sạch.                  |
-| **2** | **Tầng Miền Nghiệp Vụ & Bảng Mã Lỗi**        | **[02_Domain_Model_And_Error_Taxonomy.md](../02_design/001_windows/02_Domain_Model_And_Error_Taxonomy.md)**         | Thực thể GitHash, Author, CommitNode, GitRef, trạng thái In-Flight (`MERGE_HEAD`, `rebase-merge`), bảng lỗi vét cạn qua kiểu `Result`. |
-| **3** | **Tầng Đọc Dữ Liệu Git Tốc Độ Cao**          | **[03_Fast_Git_Storage_Reader.md](../02_design/001_windows/03_Fast_Git_Storage_Reader.md)**                         | Tích hợp LibGit2 C-binding in-process, Memory-Mapped File đọc `commit-graph`, Zero-Allocation Span, giải mã UTF-8 tiếng Việt.          |
-| **4** | **Thuật Toán Xếp Làn Đồ Thị Topo Song Song** | **[04_Parallel_DAG_Layout_Solver.md](../02_design/001_windows/04_Parallel_DAG_Layout_Solver.md)**                   | Sắp xếp Topo xử lý shallow/orphan/multi-root, phân bổ làn thu gọn bên trái (Lane Pool), tính toán song song đa luồng CPU tọa độ SVG.   |
-| **5** | **Giao Thức Giao Tiếp Nội Bộ (IPC Daemon)**  | **[05_IPC_Stdio_Streaming_Protocol.md](../02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md)**               | Quản lý vòng đời tiến trình F# sidecar, cấu trúc khung gói tin Stdio RPC MessagePack, phân trang cửa sổ ảo (Virtual Scrolling).        |
-| **6** | **Ghép Nối Webview & Lệnh Ghi An Toàn**      | **[06_Webview_Integration_And_Git_Mutator.md](../02_design/001_windows/06_Webview_Integration_And_Git_Mutator.md)** | Ghép nối dữ liệu hình học phẳng vào Webview Preact Phase 1, ủy thác 100% lệnh ghi cho `git.exe`, File Watcher cập nhật vi sai.         |
-| **7** | **Kiểm Thử Nghiệm Thu & Benchmark**          | **[07_Benchmarking_And_Verification_Plan.md](../02_design/001_windows/07_Benchmarking_And_Verification_Plan.md)**   | Kịch bản kiểm thử tương đương đồ thị 100%, đo đạc 4 chỉ số benchmark định lượng, bảng kiểm tra an toàn dữ liệu Git.                    |
+|  STT   | Nhóm Việc Kỹ Thuật                                    | Tài Liệu Thiết Kế Chi Tiết Bắt Buộc Áp Dụng                                                                         | Phạm Vi Thiết Kế Trọng Tâm                                                                                                                                                  |
+| :----: | :---------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1**  | **Khởi Tạo Dự Án F# & Native AOT**                    | **[01_Project_Structure_And_NativeAOT.md](../02_design/001_windows/01_Project_Structure_And_NativeAOT.md)**         | Cấu trúc phân tầng `src/core-engine/`, cờ xuất bản Native AOT (`win-x64`), cắt tỉa Trimming, LTO, kiểm định máy sạch.                                                       |
+| **2**  | **Tầng Miền Nghiệp Vụ & Bảng Mã Lỗi**                 | **[02_Domain_Model_And_Error_Taxonomy.md](../02_design/001_windows/02_Domain_Model_And_Error_Taxonomy.md)**         | Thực thể GitHash, Author, CommitNode, GitRef, trạng thái In-Flight (`MERGE_HEAD`, `rebase-merge`), bảng lỗi vét cạn qua kiểu `Result`.                                      |
+| **3**  | **Tầng Đọc Dữ Liệu Git Tốc Độ Cao**                   | **[03_Fast_Git_Storage_Reader.md](../02_design/001_windows/03_Fast_Git_Storage_Reader.md)**                         | Tích hợp LibGit2 C-binding in-process, Memory-Mapped File đọc `commit-graph`, Zero-Allocation Span, giải mã UTF-8 tiếng Việt.                                               |
+| **4**  | **Thuật Toán Xếp Làn Đồ Thị Topo Song Song**          | **[04_Parallel_DAG_Layout_Solver.md](../02_design/001_windows/04_Parallel_DAG_Layout_Solver.md)**                   | Sắp xếp Topo xử lý shallow/orphan/multi-root, phân bổ làn thu gọn bên trái (Lane Pool), tính toán song song đa luồng CPU tọa độ SVG.                                        |
+| **5**  | **Giao Thức Giao Tiếp Nội Bộ (IPC Daemon)**           | **[05_IPC_Stdio_Streaming_Protocol.md](../02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md)**               | Quản lý vòng đời tiến trình F# sidecar, cấu trúc khung gói tin Stdio RPC MessagePack, phân trang cửa sổ ảo (Virtual Scrolling).                                             |
+| **6**  | **Ghép Nối Webview & Lệnh Ghi An Toàn**               | **[06_Webview_Integration_And_Git_Mutator.md](../02_design/001_windows/06_Webview_Integration_And_Git_Mutator.md)** | Ghép nối dữ liệu hình học phẳng vào Webview Preact Phase 1, ủy thác 100% lệnh ghi cho `git.exe`, File Watcher cập nhật vi sai.                                              |
+| **7**  | **Kiểm Thử Nghiệm Thu & Benchmark**                   | **[07_Benchmarking_And_Verification_Plan.md](../02_design/001_windows/07_Benchmarking_And_Verification_Plan.md)**   | Kịch bản kiểm thử tương đương đồ thị 100%, đo đạc 4 chỉ số benchmark định lượng, bảng kiểm tra an toàn dữ liệu Git, đóng gói VSIX Windows.                                  |
+| **8**  | **Dọn Dẹp Tàn Dư & Chuẩn Hóa Nhận Diện Thương Hiệu**  | **[08_Rebranding_And_Identity_Cleanup.md](../02_design/001_windows/08_Rebranding_And_Identity_Cleanup.md)**         | Tái thiết kế tài liệu README/CHANGELOG/NLS, dọn sạch metadata và tệp tàn dư.                                                                                                |
+| **9**  | **Dọn Dẹp Backend TS Cũ & Tinh Giản Tài Nguyên Thừa** | **[09_Legacy_TS_Backend_Cleanup.md](../02_design/001_windows/09_Legacy_TS_Backend_Cleanup.md)**                     | Xóa bỏ Nix và localization tiếng Trung; di chuyển domain types sang `src/types/`; xóa bỏ tầng truy vấn Git regex cũ bằng TS (`src/backend/queries/`, `src/old-extension/`). |
+| **10** | **Thiết Kế Hệ Thống Biểu Tượng & Icon F-GitGraph**    | **[10_Extension_Iconography_Design.md](../02_design/001_windows/10_Extension_Iconography_Design.md)**               | Ý tưởng sáng tạo F-Branch & Neon Hexagon, bảng kiểm kê 7 vị trí icon (128x128 PNG, 512x512 Master, SVG Webview Tab, Activity Bar, Status Bar).                              |
 
 ---
 
@@ -202,6 +205,86 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 
 ---
 
+### 📋 Nhóm Việc 8: Dọn Dẹp Tàn Dư & Chuẩn Hóa Nhận Diện Thương Hiệu (Rebranding & Identity Cleanup)
+
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/08_Rebranding_And_Identity_Cleanup.md](../02_design/001_windows/08_Rebranding_And_Identity_Cleanup.md)**
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 1 để nắm rõ định vị thương hiệu F-GitGraph, Mục 2 để tái thiết kế bộ tài nguyên hình ảnh (Icon chính, Webview SVG, Dark/Light, Demo GIF), Mục 3 để làm mới toàn diện tài liệu người dùng (README, CHANGELOG, NLS), Mục 4 để rà soát sạch tàn dư mã nguồn & metadata gói, và Mục 5 để nghiệm thu diện mạo nhận diện trên VS Code.
+
+- [ ] **Nhiệm vụ 8.1: Thiết kế lại bộ nhận diện hình ảnh & Biểu tượng Extension (Iconography & Brand Assets)**
+  - Thiết kế lại biểu tượng chính của extension (`resources/icon.png`, kích thước chuẩn 128x128 / 256x256) mang phong cách riêng của **F-GitGraph** (kết hợp chữ "F" hiện đại, làn đồ thị và họa tiết lục giác neon ambient).
+  - Cập nhật bộ vector SVG cho Webview Tab Icon (`resources/webview-icon.svg`, `resources/webview-icon-dark.svg`, `resources/webview-icon-light.svg`) theo phong cách lục giác phẳng, hỗ trợ hiển thị tương phản cao trên cả theme Dark và Light.
+  - Lên phương án chụp lại/tạo mới ảnh động demo (`resources/demo.gif`) phản ánh đúng các tính năng giao diện đột phá mới: nút lục giác SVG, hiệu ứng vầng sáng neon ambient, xem trước avatar zoom 5x, panel commit message.
+
+- [x] **Nhiệm vụ 8.2: Làm mới toàn diện tài liệu người dùng & Thông tin gói (Documentation & Package Metadata)**
+  - Cập nhật toàn bộ nội dung [README.md](../../../README.md): viết lại phần giới thiệu làm nổi bật kiến trúc nhân kép (TypeScript UI + F# Native AOT Core siêu tốc), loại bỏ thông tin cũ của repo tiền nhiệm, bổ sung hướng dẫn tính năng mới và bảng cấu hình `f-gitgraph.*`.
+  - Cập nhật [CHANGELOG.md](../../../CHANGELOG.md): thiết lập mốc phiên bản mới ghi nhận sự ra đời của **F-GitGraph**, tổng hợp toàn bộ các cải tiến vượt bậc về hiệu năng và giao diện.
+  - Chuẩn hóa các tệp bản địa hóa giao diện ([package.nls.json](../../../package.nls.json), `package.nls.zh-cn.json`, `package.nls.zh-tw.json`): rà soát và điều chỉnh câu từ mô tả tính năng cho chính xác với thương hiệu F-GitGraph.
+
+- [x] **Nhiệm vụ 8.3: Rà soát & Loại bỏ triệt để chuỗi nội bộ, bản quyền và metadata cũ**
+  - Rà soát thông tin `publisher`, `author`, `sponsor` trong [package.json](../../../package.json) để đảm bảo tính nhất quán với định danh phát hành `lmo-lab`.
+  - Dọn dẹp các tệp build tạm, artifact cũ mang tên `neo-git-*` trên đĩa.
+  - Kiểm tra toàn bộ mã nguồn để đảm bảo không còn chuỗi User-Agent, Scheme hay Telemetry cũ nào của neo-git-graph còn sót lại.
+
+- [x] **Nhiệm vụ 8.4: Đóng gói lại bản cài đặt VSIX với nhận diện thương hiệu hoàn chỉnh**
+  - Thực hiện build lại bản nhị phân F# Native AOT và xuất bản gói cài đặt VSIX mới (`f-gitgraph-win-x64.vsix`).
+  - Kiểm tra hiển thị icon, tên extension và tài liệu README ngay trên trình quản lý Extension của VS Code khi cài đặt file VSIX.
+
+---
+
+### 📋 Nhóm Việc 9: Dọn Dẹp Mã Nguồn Backend TypeScript Cũ & Tinh Giản Tài Nguyên Thừa
+
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/09_Legacy_TS_Backend_Cleanup.md](../02_design/001_windows/09_Legacy_TS_Backend_Cleanup.md)**
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 2.1 để thực thi thanh lý tài nguyên Nix và localization tiếng Trung, Mục 2.2 để thực hiện lộ trình di chuyển kiểu dữ liệu sang `src/types/`, Mục 2.3 để loại bỏ tầng truy vấn Git regex cũ bằng TS (`src/backend/queries/` và `src/old-extension/`), và Mục 2.4 để kiểm định toàn diện zero-regression.
+
+- [x] **Nhiệm vụ 9.1: Loại bỏ tài nguyên thừa ngoài phạm vi (Nix & Localization tiếng Trung)**
+  - Xóa bỏ triệt để các tệp cấu hình đóng gói Nix không sử dụng: `flake.nix` và `flake.lock`.
+  - Xóa bỏ các gói bản địa hóa tiếng Trung không nằm trong định hướng phát triển: `package.nls.zh-cn.json`, `package.nls.zh-tw.json`, `l10n/bundle.l10n.zh-cn.json`, `l10n/bundle.l10n.zh-tw.json`.
+  - Xác minh toàn bộ quy trình biên dịch kiểm tra kiểu tĩnh và đóng gói vẫn duy trì trạng thái 0 lỗi.
+
+- [x] **Nhiệm vụ 9.2: Di chuyển & chuẩn hóa Hệ thống Kiểu Dữ Liệu (Domain Types Migration)**
+  - Tái cấu trúc thư mục `src/types/` thành nguồn chân lý duy nhất (Single Source of Truth) cho các thực thể Git (`GitCommitNode`, `GitRef`, `GitFileChange`, `GitCommitDetails`, `GitResetMode`) và các thông điệp hành động (`ActionRequest`, `ActionResponse`).
+  - Cập nhật toàn bộ các câu lệnh import trong `src/webview/` và `src/extension/` trỏ trực tiếp vào `@/types`.
+  - Giải phóng hoàn toàn sự phụ thuộc của tầng giao diện vào thư mục `src/backend/types/`.
+
+- [x] **Nhiệm vụ 9.3: Thanh lý tầng truy vấn Git TS cũ & hợp nhất dịch vụ tiện ích**
+  - Xóa bỏ các module truy vấn Git regex bằng dòng lệnh cũ trong `src/backend/queries/` (`loadCommits.ts`, `loadBranches.ts`, `commitDetails.ts`, `repoSearch.ts`) vốn đã được thay thế hoàn toàn bởi F# Native AOT (`Storage` & `Graph`).
+  - Rà soát `src/old-extension/`: chuyển giao các dịch vụ còn cần thiết (Avatar Manager, Diff Document Provider) sang tầng `src/extension/` hiện đại và xóa bỏ các tệp dead code thừa (`initExtension.ts`, `main.ts`, `webviewHtml.ts`, `webviewPanel.ts`...).
+  - Đảm bảo `GitCliMutator` an toàn tiếp tục quản lý các thao tác ghi Git trong cấu trúc thư mục mới.
+
+- [x] **Nhiệm vụ 9.4: Kiểm định toàn diện không suy thoái (Zero-Regression Verification)**
+  - Chạy toàn bộ bộ test tự động (`pnpm run test`, `dotnet test`, `pnpm run typecheck`, `pnpm run lint`).
+  - Đóng gói thử nghiệm cục bộ và xác minh extension hoạt động trơn tru, không còn bất kỳ dấu vết nào của backend TS cũ.
+
+---
+
+### 📋 Nhóm Việc 10: Thiết Kế Hệ Thống Biểu Tượng & Icon F-GitGraph
+
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/10_Extension_Iconography_Design.md](../02_design/001_windows/10_Extension_Iconography_Design.md)**
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 2 để áp dụng ý tưởng thiết kế "Neon Hexagon & F-Branch" (Cyberpunk Modern), Mục 3 để đối chiếu bảng kiểm kê 7 vị trí icon cần thiết (128x128 PNG, 512x512 Master, SVG Webview Tab đa sắc/đơn sắc Dark-Light, Activity Bar SVG), và Mục 4 để tuân thủ quy chuẩn kỹ thuật đồ họa vector/raster.
+
+- [x] **Nhiệm vụ 10.1: Chốt ý tưởng thiết kế thị giác & cấu trúc hình học SVG gốc**
+  - Đã chốt chính thức phong cách thị giác chủ đạo: **Ý Tưởng 1 ("Neon Hexagon & F-Branch" - Cyberpunk Modern)** kết hợp chữ "F" phân nhánh Git với các nút commit hình khối lục giác phát sáng neon.
+  - Phê duyệt bảng kiểm kê 7 vị trí icon cần thiết (128x128 PNG, 512x512 Master, SVG Webview Tab đa sắc / Dark / Light, Activity Bar, Status Bar) và quy chuẩn kỹ thuật an toàn hiển thị.
+
+- [ ] **Nhiệm vụ 10.2: Xuất bản trọn bộ Icon Raster (PNG) cho Marketplace & Extension Details**
+  - Tạo `resources/icon.png` (128x128 px): Nền squircle bo góc carbon tối (`#0B0F19`), chữ F nhánh neon Cyan (`#00F0FF`) và Fuchsia (`#FF007F`), khoảng đệm an toàn 12px.
+  - Tạo `resources/icon-512.png` (512x512 px master): Bản vẽ độ phân giải cao phục vụ trang hiển thị Marketplace trên trình duyệt web và ảnh banner README.
+
+- [ ] **Nhiệm vụ 10.3: Hoàn thiện & tối ưu hóa bộ Icon Vector SVG cho VS Code Tab & Sidebar**
+  - Thiết kế `resources/webview-icon.svg` (24x24 px): Biến thể đa sắc với các nút lục giác màu neon dành cho tab editor.
+  - Thiết kế `resources/webview-icon-dark.svg` (24x24 px): Biến thể đơn sắc sáng tương phản cao (`#E0E0E0`) dành cho VS Code Dark Theme.
+  - Thiết kế `resources/webview-icon-light.svg` (24x24 px): Biến thể đơn sắc tối (`#333333`) dành cho VS Code Light Theme.
+  - Thiết kế dự phòng `resources/activitybar-icon.svg` (24x24 px): Icon đơn sắc `currentColor` cho thanh Activity Bar bên trái.
+
+- [ ] **Nhiệm vụ 10.4: Tích hợp vào hệ thống đóng gói & kiểm thử hiển thị đa Theme**
+  - Tích hợp các icon mới vào `package.json`, `view-command.ts` và quy trình đóng gói VSIX.
+  - Kiểm tra thực tế trên VS Code: hiển thị tab bar, icon trong danh sách extension, và hiển thị chuẩn xác khi chuyển đổi qua lại giữa Dark+ và Light+.
+
+---
+
 ## 4. Tiêu Chuẩn Nghiệm Thu Hoàn Thành Toàn Diện (Definition of Done - DoD)
 
 1. **Tính Độc Lập**: File nhị phân `f-gitgraph-core.exe` chạy độc lập hoàn toàn trên Windows 10 và Windows 11 mà không đòi hỏi cài đặt bất kỳ gói .NET runtime nào.
@@ -209,6 +292,9 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 3. **Trải Nghiệm Giao Diện Tuyệt Hảo**: Toàn bộ các hiệu ứng thị giác và tương tác từ Phase 1 (nút lục giác SVG, vầng sáng neon ambient, click avatar zoom 5x, panel commit message) hoạt động mượt mà ở tốc độ 60 khung hình/giây, con trỏ chuột phản hồi tức thì.
 4. **An Toàn Tuyệt Đối**: 100% các thao tác thay đổi dữ liệu (commit, push, pull, merge, rebase, branch) được kiểm thử thành công trên Windows, bảo toàn chữ ký số GPG/SSH và cơ chế xác thực tài khoản Git Credential Manager.
 5. **Đóng Gói Thử Nghiệm Thành Công**: Bản cài đặt extension Windows VSIX được đóng gói hoàn chỉnh, nhúng sẵn nhân F# Native AOT, cài đặt và vận hành mượt mà trên môi trường VS Code thực tế của máy Windows sạch.
+6. **Chuẩn Hóa Nhận Diện Thương Hiệu 100%**: Toàn bộ tài liệu giới thiệu (README, CHANGELOG, NLS), metadata gói (package.json) và chuỗi nội bộ phản ánh nhất quán, chuyên nghiệp thương hiệu **F-GitGraph**, sạch hoàn toàn các tàn dư định danh cũ.
+7. **Tinh Gọn Hệ Thống & Loại Bỏ Backend TS Cũ**: Toàn bộ dead code truy vấn Git regex cũ bằng TS (`src/backend/queries/`), cấu hình Nix và tệp localization tiếng Trung được loại bỏ sạch sẽ; hệ thống kiểu dữ liệu độc lập tại `src/types/`; duy trì 100% test pass.
+8. **Hệ Thống Biểu Tượng Nhận Diện Hoàn Chỉnh**: Bộ icon mới (128x128 PNG, 512x512 Master, SVG Webview Tab đa sắc / Dark / Light, Activity Bar) được tích hợp trọn vẹn, hiển thị sắc nét và ấn tượng trên mọi kích thước và chủ đề màu sắc của VS Code.
 
 ---
 
@@ -234,3 +320,9 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 - **2026-10-03**: Hoàn thành Nhiệm vụ 7.1 — Kiểm thử tương đương đồ thị: thêm `EquivalenceTests.fs` (6 test) xác minh các bất biến cấu trúc (thứ tự dòng con-trên-cha, tính duy nhất dòng, phân làn thu gọn trái liên tục, màu ổn định `lane % 8`, hình học nhất quán, golden fixture) trên đồ thị tổng hợp 200–1000 commit với nhánh + merge thật. Ghi nhận trung thực rằng chỉ số làn cụ thể có thể khác thuật toán TS (branch tracing vs topo + thu gọn trái) nên nghiệm thu theo bất biến cấu trúc. Tổng F# 56/56 pass.
 - **2026-10-03**: Hoàn thành Nhiệm vụ 7.2 — Đo đạc hiệu năng: thêm `Benchmark.fs` + lệnh `f-gitgraph-core bench` sinh đồ thị tổng hợp 50.000 commit. Kết quả trên bản Native AOT: bố cục toàn phần ~51.7ms (mục tiêu <300ms), RAM managed 17.7MB (mục tiêu <100MB), IPC roundtrip 100 dòng trung bình 0.43ms (mục tiêu <5ms). Phát hiện và sửa lỗi tiềm ẩn AOT: `sprintf %g` trong `Geometry.makePath` ném `NotSupportedException` (MakeGenericMethod) — thay bằng `ToString(CultureInfo.InvariantCulture)` + `Console.WriteLine`/`String.Format`.
 - **2026-10-03**: Hoàn thành Nhiệm vụ 7.3 — Đóng gói Windows VSIX: thêm `scripts/build-native-win.ps1` (publish AOT + chép `f-gitgraph-core.exe`/`git2-5853918.dll` vào `bin/win-x64/`), bổ sung `resolveSidecarBinaryPath`/`SidecarManager.create` dùng `context.asAbsolutePath`, whitelist `!bin/win-x64/` trong `.vscodeignore`, và lệnh `package:vsix:win`. Đóng gói thành công `f-gitgraph-win-x64.vsix` (21 file, 2.59MB) nhúng đủ binary + dll.
+- **2026-10-03**: Bổ sung Nhóm Việc 8: Dọn dẹp tàn dư & Chuẩn hóa nhận diện thương hiệu F-GitGraph (kế hoạch chi tiết tại [08_Rebranding_And_Identity_Cleanup.md](../02_design/001_windows/08_Rebranding_And_Identity_Cleanup.md)) nhằm xóa bỏ hoàn toàn các tàn dư định danh cũ và nâng tầm nhận diện sản phẩm chuyên nghiệp.
+- **2026-10-03**: Bổ sung Nhóm Việc 9: Dọn dẹp mã nguồn Backend TS cũ & Tinh giản tài nguyên thừa (kế hoạch chi tiết tại [09_Legacy_TS_Backend_Cleanup.md](../02_design/001_windows/09_Legacy_TS_Backend_Cleanup.md)). Hoàn thành Nhiệm vụ 9.1: Xóa bỏ toàn bộ tệp Nix (`flake.nix`, `flake.lock`) và localization tiếng Trung (`package.nls.zh-cn.json`, `package.nls.zh-tw.json`, `bundle.l10n.zh-cn.json`, `bundle.l10n.zh-tw.json`); toàn bộ các bài test, typecheck, linting và build đóng gói đạt 100% 0 cảnh báo, 0 lỗi.
+- **2026-10-03**: Bổ sung Nhóm Việc 10: Thiết kế hệ thống biểu tượng & icon F-GitGraph (kế hoạch chi tiết tại [10_Extension_Iconography_Design.md](../02_design/001_windows/10_Extension_Iconography_Design.md)), xác lập 3 ý tưởng sáng tạo nghệ thuật ("Neon Hexagon & F-Branch", "F# Monogram in Git Matrix", "Prism Convergence"), quy chuẩn kỹ thuật và kiểm kê 7 vị trí icon cần thiết cho hệ sinh thái VS Code.
+- **2026-10-03**: Hoàn thành Nhiệm vụ 10.1 — Phê duyệt chính thức hướng thiết kế **Ý Tưởng 1 ("Neon Hexagon & F-Branch" - Cyberpunk Modern)** và chốt danh mục 7 tệp icon cần thiết; sẵn sàng bước sang thiết kế đồ họa vector và xuất bản ảnh raster.
+- **2026-10-03**: Hoàn thành Nhóm Việc 8 — Chuẩn hóa nhận diện thương hiệu: quét sạch toàn bộ tàn dư `neo-git-*` khỏi mã nguồn và tài liệu người dùng (chỉ còn trong văn bản mô tả việc dọn dẹp), làm mới `CHANGELOG.md` (mốc `[Unreleased]` ghi nhận F-GitGraph + đồng bộ link `thatislg/f-gitgraph`), viết lại `README.md` theo nhận diện F-GitGraph (loại bỏ khung "fork", bổ sung kiến trúc F# và roadmap Windows → Linux → macOS → Release), xác minh `publisher`/`author`/`sponsor` thành `lmo-lab`/LMO-LAB (`lnllnl01111@gmail.com`), và đóng gói build 0 lỗi. Nhiệm vụ 8.1 (bộ tài nguyên hình ảnh) chuyển giao cho Nhóm Việc 10.
+- **2026-10-03**: Hoàn thành Nhóm Việc 9 — Dọn dẹp Backend TS cũ: (1) xóa Nix + localization tiếng Trung; (2) di chuyển toàn bộ kiểu dữ liệu sang `src/types/` (`git.ts`, `actions.ts`, `queries.ts`, `repo.ts`) và cập nhật 35 import `@/backend/types` → `@/types`, xóa `src/backend/types/`; (3) xóa dead code khung kích hoạt cũ (`old-extension/main.ts`, `initExtension.ts`, `watchForRepos.ts`, `webviewHtml.ts`, `webviewPanel.ts`, `maxDepthTracker.ts`, `statusBarItem.ts`, `constant/`) cùng `backend/queries/repoSearch.ts`, `utils/repoSearch.ts`, `utils/nonce.ts` và test tương ứng; (4) chuyển `GitCliMutator` → `src/extension/mutator/`, `avatarManager`/`diffDocProvider` → `src/extension/services/`. Kiểm định zero-regression: typecheck/lint/format 0 lỗi, vitest 174/174, F# 56/56. Ghi chú: `loadCommits`/`loadBranches`/`commitDetails` và các dịch vụ `old-extension` còn lại vẫn hoạt động (sidecar F# chưa cung cấp metadata commit/nhánh/chi tiết) — xem Báo cáo 009.

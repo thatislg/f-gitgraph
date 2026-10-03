@@ -20,14 +20,14 @@ Báo cáo này ghi nhận kết quả ba nhiệm vụ hoàn tất Phase 1 Window
 
 ## 2. Cấu Trúc Mã Nguồn
 
-| File / Thư mục                                    | Nội dung                                                        |
-| :------------------------------------------------ | :-------------------------------------------------------------- |
-| `src/core-engine/Benchmark.fs`                     | Khuôn đo đạc hiệu năng (`f-gitgraph-core.exe bench`)            |
-| `src/core-engine/tests/CoreEngine.Tests/EquivalenceTests.fs` | Bộ kiểm thử bất biến cấu trúc đồ thị quy mô lớn      |
-| `src/core-engine/Graph/Graph.fs`                   | Sửa `sprintf %g` → `ToString` invariant (tương thích AOT)       |
-| `src/extension/sidecar/sidecar-manager.ts`         | `resolveSidecarBinaryPath` + `SidecarManager.create`            |
-| `scripts/build-native-win.ps1`                     | Biên dịch AOT + thu thập binary vào `bin/win-x64/`              |
-| `.vscodeignore` / `package.json`                   | Đưa `bin/win-x64/` vào VSIX + lệnh `package:vsix:win`           |
+| File / Thư mục                                               | Nội dung                                                  |
+| :----------------------------------------------------------- | :-------------------------------------------------------- |
+| `src/core-engine/Benchmark.fs`                               | Khuôn đo đạc hiệu năng (`f-gitgraph-core.exe bench`)      |
+| `src/core-engine/tests/CoreEngine.Tests/EquivalenceTests.fs` | Bộ kiểm thử bất biến cấu trúc đồ thị quy mô lớn           |
+| `src/core-engine/Graph/Graph.fs`                             | Sửa `sprintf %g` → `ToString` invariant (tương thích AOT) |
+| `src/extension/sidecar/sidecar-manager.ts`                   | `resolveSidecarBinaryPath` + `SidecarManager.create`      |
+| `scripts/build-native-win.ps1`                               | Biên dịch AOT + thu thập binary vào `bin/win-x64/`        |
+| `.vscodeignore` / `package.json`                             | Đưa `bin/win-x64/` vào VSIX + lệnh `package:vsix:win`     |
 
 ---
 
@@ -60,15 +60,15 @@ Lệnh `f-gitgraph-core.exe bench --commits 50000` sinh đồ thị tổng hợp
 
 ### 4.2. Kết Quả Trên 50.000 Commit
 
-| Chỉ số                                  | Kết quả        | Mục tiêu     | Trạng thái |
-| :-------------------------------------- | :------------- | :----------- | :--------: |
-| Sắp xếp topo (TopoSort)                 | 6.012 ms       | —            |     —      |
-| Phân bổ làn (Lane Allocation)           | 1.809 ms       | —            |     —      |
-| Sinh hình học song song (Geometry)      | 29.930 ms      | —            |     —      |
-| **Bố cục toàn phần (Cold-load compute)**| **51.670 ms**  | < 300 ms     |   ✅ Đạt   |
-| **RAM (managed, delta)**                | **17.66 MB**   | < 100 MB     |   ✅ Đạt   |
-| **IPC roundtrip (100 dòng)** — min      | 0.182 ms       | < 5 ms       |   ✅ Đạt   |
-| **IPC roundtrip (100 dòng)** — avg      | **0.434 ms**   | < 5 ms       |   ✅ Đạt   |
+| Chỉ số                                   | Kết quả       | Mục tiêu | Trạng thái |
+| :--------------------------------------- | :------------ | :------- | :--------: |
+| Sắp xếp topo (TopoSort)                  | 6.012 ms      | —        |     —      |
+| Phân bổ làn (Lane Allocation)            | 1.809 ms      | —        |     —      |
+| Sinh hình học song song (Geometry)       | 29.930 ms     | —        |     —      |
+| **Bố cục toàn phần (Cold-load compute)** | **51.670 ms** | < 300 ms |   ✅ Đạt   |
+| **RAM (managed, delta)**                 | **17.66 MB**  | < 100 MB |   ✅ Đạt   |
+| **IPC roundtrip (100 dòng)** — min       | 0.182 ms      | < 5 ms   |   ✅ Đạt   |
+| **IPC roundtrip (100 dòng)** — avg       | **0.434 ms**  | < 5 ms   |   ✅ Đạt   |
 
 ### 4.3. Diễn Giải
 
@@ -102,14 +102,14 @@ Binary thu thập đã được smoke-test (`f-gitgraph-core --version` → `f-g
 
 ## 6. Kiểm Thử
 
-| Hạng mục                                     | Kết quả         |
-| :------------------------------------------- | :-------------- |
-| F# xUnit (`f-gitgraph-core.sln`)             | **56/56 pass**  |
-| Trong đó bộ tương đương đồ thị (7.1)         | 6/6 pass        |
-| TypeScript typecheck                         | ✅ Đạt          |
-| Lint (oxlint)                                | 0 error, 0 warn |
-| Đóng gói VSIX (`vsce package`)               | ✅ 2.59 MB      |
-| Binary smoke-test (`--version`, `bench`)     | ✅ Đạt          |
+| Hạng mục                                 | Kết quả         |
+| :--------------------------------------- | :-------------- |
+| F# xUnit (`f-gitgraph-core.sln`)         | **56/56 pass**  |
+| Trong đó bộ tương đương đồ thị (7.1)     | 6/6 pass        |
+| TypeScript typecheck                     | ✅ Đạt          |
+| Lint (oxlint)                            | 0 error, 0 warn |
+| Đóng gói VSIX (`vsce package`)           | ✅ 2.59 MB      |
+| Binary smoke-test (`--version`, `bench`) | ✅ Đạt          |
 
 Ghi chú: hai file `repoSearch.test.ts` (backend/utils và backend/queries) thất bại sẵn từ trước, không liên quan Nhóm Việc 7.
 
@@ -131,11 +131,11 @@ Ghi chú: hai file `repoSearch.test.ts` (backend/utils và backend/queries) th�
 
 ## 9. Kết Luận
 
-| Tiêu chí                                        | Trạng thái |
-| :---------------------------------------------- | :--------: |
-| Kiểm thử tương đương đồ thị (7.1)               |  ✅ 6/6    |
-| Cold-load < 300ms trên 50k commit (7.2)         |  ✅ 52ms   |
-| RAM < 100MB (7.2)                               |  ✅ 17.7MB |
-| IPC roundtrip < 5ms (7.2)                       |  ✅ 0.43ms |
-| Đóng gói Windows VSIX nhúng binary (7.3)        |  ✅ Đạt    |
-| Toàn bộ test F#                                  |  ✅ 56/56  |
+| Tiêu chí                                 | Trạng thái |
+| :--------------------------------------- | :--------: |
+| Kiểm thử tương đương đồ thị (7.1)        |   ✅ 6/6   |
+| Cold-load < 300ms trên 50k commit (7.2)  |  ✅ 52ms   |
+| RAM < 100MB (7.2)                        | ✅ 17.7MB  |
+| IPC roundtrip < 5ms (7.2)                | ✅ 0.43ms  |
+| Đóng gói Windows VSIX nhúng binary (7.3) |   ✅ Đạt   |
+| Toàn bộ test F#                          |  ✅ 56/56  |

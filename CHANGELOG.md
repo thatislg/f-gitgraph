@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- F# Native AOT core engine (`f-gitgraph-core.exe`) for high-speed graph computation
+- Memory-mapped `commit-graph` reading and in-process LibGit2 C-binding
+- Parallel DAG lane sorting with multi-threaded SVG geometry
+- Stdio RPC daemon with MessagePack streaming protocol
+- Hexagon SVG commit nodes, neon ambient glow, and 5x avatar zoom preview
+- Safe Git write operations delegated to native `git.exe` (GPG/SSH/GCM preserved)
+
 ## [0.6.0] - 2026-08-25
 
 ### Added
@@ -84,11 +93,11 @@
 
 Initial release
 
-[Unreleased]: https://github.com/asispts/neo-git-graph/compare/v0.6.0...HEAD
-[0.6.0]: https://github.com/asispts/neo-git-graph/compare/v0.5.0...v0.6.0
-[0.5.0]: https://github.com/asispts/neo-git-graph/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/asispts/neo-git-graph/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/asispts/neo-git-graph/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/asispts/neo-git-graph/compare/v0.1.1...v0.2.0
-[0.1.1]: https://github.com/asispts/neo-git-graph/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/asispts/neo-git-graph/releases/tag/v0.1.0
+[Unreleased]: https://github.com/thatislg/f-gitgraph/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/thatislg/f-gitgraph/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/thatislg/f-gitgraph/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/thatislg/f-gitgraph/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/thatislg/f-gitgraph/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/thatislg/f-gitgraph/compare/v0.1.1...v0.2.0
+[0.1.1]: https://github.com/thatislg/f-gitgraph/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/thatislg/f-gitgraph/releases/tag/v0.1.0
