@@ -13,6 +13,8 @@
     <AssemblyName>neo-git-core</AssemblyName>
     <RootNamespace>NeoGitCore</RootNamespace>
     <Nullable>enable</Nullable>
+    <!-- Cần unsafe để tạo ReadOnlySpan trực tiếp từ Memory-Mapped View (Zero-Allocation). -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <!--
@@ -45,10 +47,18 @@
     <Compile Include="Domain/CoreEntities.fs" />
     <Compile Include="Domain/InFlightState.fs" />
     <Compile Include="Domain/GitError.fs" />
+    <Compile Include="Storage/Utf8.fs" />
+    <Compile Include="Storage/CommitGraph.fs" />
+    <Compile Include="Storage/LibGit2.fs" />
     <Compile Include="Storage/Storage.fs" />
     <Compile Include="Graph/Graph.fs" />
     <Compile Include="Transport/Transport.fs" />
     <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <!-- Cung cấp thư viện C gốc LibGit2 (git2-*.dll) cho chế độ Native AOT. -->
+  <ItemGroup>
+    <PackageReference Include="LibGit2Sharp.NativeBinaries" Version="2.0.324" />
   </ItemGroup>
 
 </Project>
