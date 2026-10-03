@@ -65,7 +65,7 @@ export function selectBranch(branch: CommitBranchType) {
 
   const repo = selectedRepo.value;
   if (repo !== undefined) {
-    void graphWindowStore.loadGraph(repo);
+    void graphWindowStore.loadGraph(repo, branch);
   }
 }
 
@@ -114,7 +114,7 @@ export function setShowRemoteBranch(value: boolean) {
   }
 
   requestBranches(repo);
-  void graphWindowStore.loadGraph(repo);
+  void graphWindowStore.loadGraph(repo, selectedBranch.value);
 }
 
 export function refresh() {
@@ -124,7 +124,7 @@ export function refresh() {
   }
 
   requestBranches(repo);
-  void graphWindowStore.loadGraph(repo);
+  void graphWindowStore.loadGraph(repo, selectedBranch.value);
 }
 
 export function closeCommitDetails() {

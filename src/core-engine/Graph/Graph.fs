@@ -4,12 +4,20 @@ namespace NeoGitCore.Graph
 // tính toán song song đa luồng tọa độ hình học SVG.
 // Tham khảo thiết kế:
 // docs/02_design/001_windows/04_Parallel_DAG_Layout_Solver.md
+// docs/02_design/001_windows/12_Graph_Rendering_And_Webview_Fix_Design.md
 
 open System
 open System.Collections.Generic
 open System.Threading.Tasks
 open NeoGitCore.Domain
 open NeoGitCore.Storage
+
+/// Số màu sắc trong bảng màu nhánh (chuẩn giao diện GitLens).
+[<RequireQualifiedAccess>]
+module BranchColor =
+
+    [<Literal>]
+    let PaletteSize = 8
 
 // --- Nhiệm vụ 4.1: Sắp Xếp Topo ---
 
@@ -59,25 +67,44 @@ module TopoSort =
 
         result
 
-// --- Nhiệm vụ 4.2: Phân Bổ Làn Thu Gọn Trái (Left-compact Lane Allocation) ---
+// --- Nhiệm vụ 4.2 + 12.3: Phân Bổ Làn Thu Gọn Trái & Kế Thừa Màu Nhánh ---
 
 [<RequireQualifiedAccess>]
 module Lanes =
 
-    /// Phân bổ làn thu gọn trái cho từng commit theo thứ tự hiển thị.
-    /// Trả về laneOf: int[] (chỉ số làn của từng commit theo index).
+    /// Kết quả phân bổ làn: chỉ số làn và chỉ số màu của từng commit (theo index).
+    type Assignment = {
+        /// Chỉ số làn của từng commit theo index.
+        LaneOf: int[]
+        /// Chỉ số màu nhánh (0..PaletteSize-1) của từng commit theo index.
+        ColorOf: int[]
+    }
+
+    /// Phân bổ làn thu gọn trái kèm kế thừa màu theo dòng dõi nhánh (First-parent chain).
     ///
-    /// Nguyên tắc:
+    /// Nguyên tắc làn:
     /// 1. Kế thừa làn: commit là cha mà một làn đang chờ sẽ đặt ngay trên làn đó.
     /// 2. Thu gọn trái: nhánh mới tái sử dụng làn trống đầu tiên bên trái;
     ///    chỉ cấp làn mới ở mép phải khi toàn bộ làn bên trái đều bận.
-    /// 3. Đóng làn: commit gốc (không cha) hoặc nhánh nhập vào commit khác
-    ///    sẽ giải phóng làn để nhánh dưới tái sử dụng.
-    let assign (snapshot: GraphSnapshot) (order: int[]) : int[] =
+    /// 3. Đóng làn: commit gốc (không cha) giải phóng làn để nhánh dưới tái sử dụng.
+    ///
+    /// Nguyên tắc màu (khắc phục BUG-01):
+    /// - Mỗi dòng dõi nhánh (chuỗi commit theo cha thứ nhất) được cấp một màu cố định
+    ///   từ lúc rẽ nhánh tới lúc sáp nhập hoặc chạm gốc.
+    /// - Khi cấp làn mới cho nhánh phụ, chọn màu có khoảng cách lớn nhất trong bảng
+    ///   màu so với màu của hai làn lân cận (lane - 1, lane + 1) để chống trùng màu.
+    let private compute (snapshot: GraphSnapshot) (order: int[]) : Assignment =
         let n = snapshot.Commits.Length
         // active[l] = commit cha mà làn l đang chờ (hoặc -1 nếu làn trống).
         let active = ResizeArray<int>()
+        // laneColor[l] = màu nhánh đang chạy trên làn l (hoặc -1 nếu làn trống).
+        let laneColor = ResizeArray<int>()
         let laneOf = Array.zeroCreate<int> n
+        let colorOf = Array.zeroCreate<int> n
+        // Con trỏ xoay vòng bảng màu (round-robin) cho các nhánh mới (BUG-COLOR-01):
+        // bảo đảm mỗi nhánh con tách ra nhận một màu khác nhau, khai thác đều cả 8
+        // màu thay vì dồn về một màu duy nhất như thuật toán "khoảng cách lớn nhất".
+        let mutable colorCursor = 0
 
         let firstEmpty () =
             let mutable found = -1
@@ -87,6 +114,25 @@ module Lanes =
                 i <- i + 1
             found
 
+        // Chọn màu cho một làn mới (khắc phục BUG-COLOR-01): xoay vòng bảng màu
+        // round-robin và tránh toàn bộ màu đang được các làn song song sử dụng.
+        // Điều này bảo đảm bất biến: tại mọi thời điểm, các làn đang hoạt động
+        // luôn mang các màu phân biệt, không bao giờ có hai làn kề trùng màu.
+        let pickColor () =
+            let used = HashSet<int>()
+            for i in 0 .. laneColor.Count - 1 do
+                if laneColor[i] >= 0 then
+                    used.Add laneColor[i] |> ignore
+
+            let mutable c = colorCursor
+            let mutable attempts = 0
+            while attempts < BranchColor.PaletteSize && used.Contains c do
+                c <- (c + 1) % BranchColor.PaletteSize
+                attempts <- attempts + 1
+
+            colorCursor <- (c + 1) % BranchColor.PaletteSize
+            c
+
         for c in order do
             // Tập hợp các làn đang chờ commit c.
             let waiting = ResizeArray<int>()
@@ -95,10 +141,11 @@ module Lanes =
 
             let lane =
                 if waiting.Count > 0 then
-                    // Thừa kế làn trái nhất; các làn còn lại nhập vào c -> giải phóng.
+                    // Kế thừa làn trái nhất; các làn còn lại nhập vào c -> giải phóng.
                     let inheritLane = waiting[0]
                     for i in 1 .. waiting.Count - 1 do
                         active[waiting[i]] <- -1
+                        laneColor[waiting[i]] <- -1
                     inheritLane
                 else
                     let empty = firstEmpty ()
@@ -107,42 +154,66 @@ module Lanes =
                     else
                         let newLane = active.Count
                         active.Add(-1)
+                        laneColor.Add(-1)
                         newLane
 
             laneOf[c] <- lane
 
+            if waiting.Count > 0 then
+                // Tiếp nối dòng dõi có sẵn: kế thừa màu nhánh của làn.
+                colorOf[c] <- laneColor[lane]
+            else
+                // Nhánh mới xuất hiện: cấp màu mới tránh trùng mọi làn đang hoạt động.
+                let col = pickColor ()
+                laneColor[lane] <- col
+                colorOf[c] <- col
+
             if snapshot.Parents[c].Length = 0 then
                 // Commit gốc: giải phóng làn.
                 active[lane] <- -1
+                laneColor[lane] <- -1
             else
-                // Cha thứ nhất kế thừa làn của c.
+                // Cha thứ nhất kế thừa làn và màu của c.
                 active[lane] <- snapshot.Parents[c][0]
-                // Các cha còn lại (merge/octopus) cấp làn trống hoặc làn mới.
+                // Các cha còn lại (merge/octopus) bắt đầu nhánh phụ mới:
+                // cấp làn trống/làn mới và màu mới tránh trùng làn kề.
                 for pi in 1 .. snapshot.Parents[c].Length - 1 do
                     let p = snapshot.Parents[c][pi]
                     let empty = firstEmpty ()
-                    if empty >= 0 then active[empty] <- p
-                    else active.Add p
+                    if empty >= 0 then
+                        active[empty] <- p
+                        laneColor[empty] <- pickColor ()
+                    else
+                        active.Add p
+                        laneColor.Add(pickColor ())
 
-        laneOf
+        { LaneOf = laneOf; ColorOf = colorOf }
 
-// --- Nhiệm vụ 4.3: Tính Toán Song Song Tọa Độ Hình Học SVG ---
+    /// Chỉ số làn của từng commit (theo index), không kèm màu.
+    let assign (snapshot: GraphSnapshot) (order: int[]) : int[] =
+        (compute snapshot order).LaneOf
+
+    /// Chỉ số làn và màu nhánh của từng commit (theo index).
+    let assignWithColor (snapshot: GraphSnapshot) (order: int[]) : Assignment =
+        compute snapshot order
+
+// --- Nhiệm vụ 4.3 + 12.2/12.3/12.5: Tính Toán Song Song Tọa Độ Hình Học SVG ---
 
 [<RequireQualifiedAccess>]
 module Geometry =
 
     /// Số màu sắc trong bảng màu nhánh (chuẩn giao diện GitLens).
     [<Literal>]
-    let PaletteSize = 8
+    let PaletteSize = BranchColor.PaletteSize
 
     /// Khoảng cách ngang giữa hai làn (pixel).
-    let LaneWidth = 16.0
+    let LaneWidth = 20.0
     /// Khoảng cách dọc giữa hai dòng commit (pixel).
     let RowHeight = 24.0
     /// Bán kính nút commit (pixel).
     let NodeRadius = 6.0
     /// Khoảng đệm mép đồ thị (pixel).
-    let Margin = 10.0
+    let Margin = 16.0
 
     /// Thông tin hình học một nút commit.
     type Node = {
@@ -162,14 +233,19 @@ module Geometry =
         IsRoot: bool
     }
 
-    /// Thông tin hình học một đường nối nhánh.
+    /// Thông tin hình học một đường nối nhánh (dạng cấu trúc, chưa mã hóa chuỗi SVG).
     type Path = {
-        /// Chuỗi lệnh vẽ SVG (đường dẫn `d`).
-        D: string
+        /// Chỉ số commit con (đầu trên của đường nối).
+        Child: int
+        /// Chỉ số commit cha (đầu dưới của đường nối).
+        Parent: int
         /// Chỉ số màu nét vẽ.
         Color: int
         /// Độ dày nét vẽ.
         Width: float
+        /// Cờ chọn chỗ ngoặt cho đường vuông góc: `true` ngoặt tại hàng của con
+        /// (merge-in), `false` ngoặt tại hàng của cha (fork).
+        BendAtChildRow: bool
     }
 
     /// Kết quả bố cục hình học phẳng, sẵn sàng cho Webview vẽ trực tiếp (Dumb Renderer).
@@ -193,15 +269,12 @@ module Geometry =
     let private centerX (lane: int) = Margin + float lane * LaneWidth
     let private centerY (row: int) = Margin + float row * RowHeight
 
-    /// Màu nhánh ổn định theo làn: modulo luân phiên trong bảng 8 màu.
-    let colorOfLane (lane: int) = lane % PaletteSize
-
-    let private makeNode (isMerge: bool) (isRoot: bool) (lane: int) (row: int) : Node =
+    let private makeNode (isMerge: bool) (isRoot: bool) (lane: int) (color: int) (row: int) : Node =
         { X = centerX lane
           Y = centerY row
           Radius = NodeRadius
           Lane = lane
-          Color = colorOfLane lane
+          Color = color
           IsMerge = isMerge
           IsRoot = isRoot }
 
@@ -209,26 +282,37 @@ module Geometry =
     // qua phản chiếu, không tương thích Native AOT. Dùng ToString invariant thay thế.
     let private fmt (x: float) = x.ToString(System.Globalization.CultureInfo.InvariantCulture)
 
-    let private makePath (child: Node) (parent: Node) : Path =
+    /// Bán kính bo góc cho đường nối vuông góc (px), chuẩn giao diện GitLens.
+    let private CornerRadius = 6.0
+
+    /// Sinh chuỗi lệnh vẽ SVG `d` cho đường nối giữa hai nút (đã đặt tọa độ).
+    /// Cùng làn: đường thẳng đứng; khác làn: đường vuông góc bo tròn (orthogonal
+    /// rounded routing) như GitLens thay vì đường xiên/Bezier.
+    let renderPath (bendAtChildRow: bool) (child: Node) (parent: Node) : string =
+        let x1 = child.X
         let y0 = child.Y + NodeRadius
+        let x2 = parent.X
         let y1 = parent.Y - NodeRadius
-        let d =
-            if child.X = parent.X then
-                // Cùng làn: đường thẳng đứng liền mạch.
-                "M " + fmt child.X + " " + fmt y0 + " L " + fmt parent.X + " " + fmt y1
+        if x1 = x2 then
+            "M " + fmt x1 + " " + fmt y0 + " V " + fmt y1
+        else
+            let dir = if x2 > x1 then 1.0 else -1.0
+            let r = min CornerRadius (min (abs (x2 - x1)) ((y1 - y0) / 2.0))
+            if bendAtChildRow then
+                // Ngoặt tại hàng của con: đi ngang trước, rồi xuống thẳng theo lane cha.
+                "M " + fmt x1 + " " + fmt y0
+                + " H " + fmt (x2 - dir * r)
+                + " Q " + fmt x2 + " " + fmt y0 + ", " + fmt x2 + " " + fmt (y0 + r)
+                + " V " + fmt y1
             else
-                // Khác làn: đường cong Bezier bậc ba mượt mà (rẽ/sáp nhập nhánh).
-                let ymid = (y0 + y1) / 2.0
-                "M " + fmt child.X + " " + fmt y0
-                + " C " + fmt child.X + " " + fmt ymid + ", "
-                + fmt parent.X + " " + fmt ymid + ", "
-                + fmt parent.X + " " + fmt y1
-        { D = d
-          Color = child.Color
-          Width = 1.5 }
+                // Ngoặt tại hàng của cha: xuống thẳng theo lane con, rồi rẽ ngang vào cha.
+                "M " + fmt x1 + " " + fmt y0
+                + " V " + fmt (y1 - r)
+                + " Q " + fmt x1 + " " + fmt y1 + ", " + fmt (x1 + dir * r) + " " + fmt y1
+                + " H " + fmt x2
 
     /// Tính toán toàn bộ hình học: nút và đường nối, phân khối song song đa luồng.
-    let compute (snapshot: GraphSnapshot) (order: int[]) (laneOf: int[]) : Layout =
+    let compute (snapshot: GraphSnapshot) (order: int[]) (laneOf: int[]) (colorOf: int[]) : Layout =
         let n = snapshot.Commits.Length
         let row = Array.zeroCreate<int> n
         order |> Array.iteri (fun r c -> row[c] <- r)
@@ -241,6 +325,7 @@ module Geometry =
                     (snapshot.Parents[c].Length >= 2)
                     (snapshot.Parents[c].Length = 0)
                     laneOf[c]
+                    colorOf[c]
                     row[c])
         |> ignore
 
@@ -253,7 +338,26 @@ module Geometry =
         let paths = Array.zeroCreate<Path> edges.Count
         Parallel.For(0, edges.Count, fun k ->
             let struct (c, p) = edges[k]
-            paths[k] <- makePath nodes[c] nodes[p])
+            let child = nodes[c]
+            let parent = nodes[p]
+            // Quy tắc gán màu đường nối (khắc phục BUG-01):
+            // - Đường thẳng đứng (cùng làn): màu của làn (màu con = màu cha).
+            // - Đường sáp nhập (merge-in): con là merge và cha là cha phụ -> màu nhánh phụ (cha).
+            // - Đường rẽ nhánh (fork): còn lại -> màu nhánh con mới tạo.
+            let isMergeChild = snapshot.Parents[c].Length >= 2
+            // Chỗ ngoặt (orthogonal routing): cạnh merge sang cha phụ ngoặt tại hàng
+            // của con; cạnh tách nhánh (fork) ngoặt tại hàng của cha.
+            let bendAtChildRow = child.Lane <> parent.Lane && isMergeChild
+            let color =
+                if child.Lane <> parent.Lane && isMergeChild then parent.Color
+                else child.Color
+
+            paths[k] <-
+                { Child = c
+                  Parent = p
+                  Color = color
+                  Width = 1.5
+                  BendAtChildRow = bendAtChildRow })
         |> ignore
 
         let maxLane =
@@ -273,5 +377,5 @@ module Layout =
     /// Tính toán bố cục đồ thị (sắp xếp topo -> phân làn -> sinh hình học song song).
     let compute (snapshot: GraphSnapshot) : Geometry.Layout =
         let order = TopoSort.order snapshot
-        let laneOf = Lanes.assign snapshot order
-        Geometry.compute snapshot order laneOf
+        let assign = Lanes.assignWithColor snapshot order
+        Geometry.compute snapshot order assign.LaneOf assign.ColorOf

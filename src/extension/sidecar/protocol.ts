@@ -74,11 +74,19 @@ export function tryDecodeFrame(bytes: Uint8Array): Frame | null {
 
 // --- Lược đồ thông điệp ---
 
-export function encodeInitRequest(repoPath: string): Uint8Array {
+export function encodeInitRequest(repoPath: string, branch?: string): Uint8Array {
   const w = new MsgPackWriter();
-  encodeMapHeader(w, 1);
-  encodeString(w, "repoPath");
-  encodeString(w, repoPath);
+  if (branch === undefined) {
+    encodeMapHeader(w, 1);
+    encodeString(w, "repoPath");
+    encodeString(w, repoPath);
+  } else {
+    encodeMapHeader(w, 2);
+    encodeString(w, "repoPath");
+    encodeString(w, repoPath);
+    encodeString(w, "branch");
+    encodeString(w, branch);
+  }
   return w.toUint8Array();
 }
 

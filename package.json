@@ -28,12 +28,13 @@
     "url": "https://github.com/thatislg/f-gitgraph.git"
   },
   "publisher": "lmo-lab",
+  "icon": "resources/icon.png",
   "main": "./out/extension.js",
   "scripts": {
     "typecheck": "tsc -p . && tsc -p src/webview && tsc -p tests && tsc -p tests/webview && tsc -p tests-e2e --noEmit",
     "vscode:prepublish": "pnpm run clean && pnpm run package",
     "package": "pnpm run typecheck && pnpm run lint && node esbuild.js --production",
-    "package:vsix:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-native-win.ps1 && vsce package --no-dependencies --out f-gitgraph-win-x64.vsix",
+    "package:vsix:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-native-win.ps1 && vsce package --no-dependencies --githubBranch custom --out f-gitgraph-win-x64.vsix",
     "clean": "node -e \"require('fs').rmSync('out',{recursive:true,force:true})\"",
     "compile": "pnpm run clean && node esbuild.js",
     "test": "vitest run --project backend && vitest run --project extension && vitest run --project webview",

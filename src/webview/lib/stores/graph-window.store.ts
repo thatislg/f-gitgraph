@@ -2,6 +2,7 @@ import { batch, signal } from "@preact/signals";
 
 import type { GraphPath, GraphRow } from "@/types";
 import { rpcClient } from "@/webview/lib/rpc/rpc-client";
+import { getGitAccountAvatarUrl } from "@/webview/utils/avatar";
 
 // Quản lý cửa sổ ảo (Virtual Scrolling Window) cho đồ thị Git:
 // Lưu trữ tập hợp các dòng và đường nối SVG trong tầm nhìn hiển thị (+ buffer),
@@ -22,14 +23,36 @@ export const windowPaths = signal<GraphPath[]>([]);
 export const isGraphLoading = signal<boolean>(false);
 export const isGraphInitialized = signal<boolean>(false);
 
+// Nạp trước avatar của toàn bộ dải commit trong tầm nhìn (+ buffer) để loại bỏ
+// hiện tượng nhấp nháy hoặc không nạp avatar khi cuộn nhanh (BUG-06).
+// `getGitAccountAvatarUrl` duy trì bộ nhớ đệm URL nội bộ; việc tạo thêm <img>
+// chỉ nhằm làm ấm bộ nhớ đệm trình duyệt cho lần hiển thị tiếp theo.
+function preloadAvatars(rows: GraphRow[]): void {
+  for (const row of rows) {
+    const email = row.metadata?.email;
+    if (!email || email === "*") {
+      continue;
+    }
+    const url = getGitAccountAvatarUrl(email);
+    if (url === undefined) {
+      continue;
+    }
+    const image = new Image();
+    image.src = url;
+  }
+}
+
 let pendingWindowRequest: { from: number; to: number } | null = null;
 let isFetchingWindow = false;
 
 export const graphWindowStore = {
-  async loadGraph(repoPath: string): Promise<void> {
+  async loadGraph(repoPath: string, branch?: string): Promise<void> {
     isGraphLoading.value = true;
     try {
-      const result = await rpcClient.request("graph.load", { repoPath });
+      const result = await rpcClient.request(
+        "graph.load",
+        branch === undefined ? { repoPath } : { repoPath, branch }
+      );
       batch(() => {
         totalCommits.value = result.commitCount;
         maxLane.value = result.maxLane;
@@ -78,6 +101,8 @@ export const graphWindowStore = {
         windowRows.value = result.rows;
         windowPaths.value = result.paths;
       });
+
+      preloadAvatars(result.rows);
     } finally {
       isFetchingWindow = false;
       if (pendingWindowRequest !== null) {

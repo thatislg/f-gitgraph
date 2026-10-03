@@ -16,6 +16,7 @@ export const rpcHandlers = {
   "webview.initialize": async () => webviewInitialize(),
   "git.init": () => initializeRepo(),
   "repo.scan": () => scanRepos(),
-  "graph.load": (params: unknown) => graphLoad(params as { repoPath: string }),
+  "graph.load": (params: unknown) =>
+    graphLoad(params as { repoPath: string; branch?: string | null }),
   "graph.window": (params: unknown) => graphWindow(params as { from: number; to: number })
 } satisfies RpcHandlers;

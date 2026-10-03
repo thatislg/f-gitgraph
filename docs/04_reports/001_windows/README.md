@@ -1,4 +1,4 @@
-﻿# Báo Cáo Nghiệm Thu & Đo Đạc: Phase 1 Windows Milestone
+# Báo Cáo Nghiệm Thu & Đo Đạc: Phase 1 Windows Milestone
 
 Thư mục này lưu trữ các báo cáo kỹ thuật, biên bản đo đạc hiệu năng và kết quả kiểm thử nghiệm thu chi tiết cho **Phase 1: Windows First Milestone** theo các tiêu chuẩn thiết kế đã xác lập tại [07_Benchmarking_And_Verification_Plan.md](../../02_design/001_windows/07_Benchmarking_And_Verification_Plan.md).
 
@@ -24,3 +24,13 @@ Thư mục này lưu trữ các báo cáo kỹ thuật, biên bản đo đạc h
 4. **Biên Bản Nghiệm Thu An Toàn Dữ Liệu Git (Git Safety Audit Report)**:
    - Ghi nhận kết quả kiểm thử toàn diện các lệnh ghi qua Git gốc (`git.exe`): tạo commit kèm chữ ký số GPG/SSH, tạo/xóa nhánh, sáp nhập (merge), rebase và xác thực đẩy code (push) qua Git Credential Manager trên Windows.
    - Xác nhận không có rủi ro mất mát dữ liệu hoặc phá vỡ chính sách bảo mật doanh nghiệp.
+
+---
+
+## Danh Mục Các Báo Cáo Điều Tra & Biên Bản Sự Cố
+
+1. **[011_Webview_FSharp_Core_Migration_Investigation.md](011_Webview_FSharp_Core_Migration_Investigation.md)**:
+   - Báo cáo điều tra sự cố tập trung (`REP-WIN-011`): Ghi nhận 4 lỗi cốt lõi (BUG-01 đến BUG-04) và 2 lỗi bổ trợ về hình học và hiển thị sau khi di trú sang nhân F# Core Engine.
+2. **[012_Graph_Expansion_Defects_And_Overlay_Architecture_Issue.md](012_Graph_Expansion_Defects_And_Overlay_Architecture_Issue.md)**:
+   - Báo cáo sự cố kỹ thuật & Đề xuất cải tiến kiến trúc (`ISSUE-WIN-012`): Chi tiết lỗi vùng expand (nhạt màu, thẳng đuột, hở chân), lỗi thuật toán dồn 1-2 màu, và đề xuất chuyển đổi sang cơ chế Layer hiển thị trên (Overlay / Inspector Panel) cùng đường nối vuông góc bo tròn theo chuẩn GitLens.
+

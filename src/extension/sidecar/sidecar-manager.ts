@@ -95,8 +95,8 @@ export class SidecarManager implements vscode.Disposable {
     }, HEARTBEAT_INTERVAL_MS);
   }
 
-  async initialize(repoPath: string): Promise<InitSuccess> {
-    const response = await this.request(Opcode.InitializeRepo, encodeInitRequest(repoPath));
+  async initialize(repoPath: string, branch?: string): Promise<InitSuccess> {
+    const response = await this.request(Opcode.InitializeRepo, encodeInitRequest(repoPath, branch));
     return decodeInitSuccess(response.payload);
   }
 

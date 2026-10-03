@@ -21,7 +21,7 @@ let currentRepo: string | undefined;
 let refWatcher: vscode.Disposable | undefined;
 
 /** Nạp đồ thị cho một kho, trả về tổng số commit, số làn và danh sách hash theo thứ tự topo. */
-export async function loadGraph(repo: string): Promise<InitSuccess> {
+export async function loadGraph(repo: string, branch?: string | null): Promise<InitSuccess> {
   if (currentRepo !== repo) {
     refWatcher?.dispose();
     refWatcher = undefined;
@@ -38,7 +38,7 @@ export async function loadGraph(repo: string): Promise<InitSuccess> {
     getCommitMetadata(git, hashes, config.dateType(), true);
 
   bridge = new GraphDataBridge(getSidecar(), metadataProvider);
-  const result = await bridge.initialize(repo);
+  const result = await bridge.initialize(repo, branch ?? undefined);
 
   if (refWatcher === undefined) {
     refWatcher = watchGitRefs(repo, async () => {

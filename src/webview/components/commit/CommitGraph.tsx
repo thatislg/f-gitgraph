@@ -10,20 +10,18 @@ import { branchColour, UNCOMMITTED_COLOUR } from "@/webview/utils/palette";
 const SHADOW_CLASS = "fill-none stroke-editor/75 stroke-4";
 const LINE_CLASS = "fill-none stroke-2";
 
-export type GraphExpansion = {
-  row: number;
-  height: number;
-};
-
 /**
  * The branch lines and commit nodes, rendered directly from F# Core Engine geometry
  * (Dumb Renderer). No client-side layout math is performed.
+ *
+ * Selecting a commit opens its details in an Overlay Inspector Panel (see
+ * `CommitTable`), so this SVG is never stretched or re-routed — the geometry stays
+ * 100% intact, eliminating the faint / dangling-gap defects (BUG-EXPAND-01/02).
  */
 export function CommitGraph({
   rows,
   paths,
   maxLane = 0,
-  expansion = null,
   hoveredRow,
   selectedRow,
   head,
@@ -33,7 +31,6 @@ export function CommitGraph({
   rows: Array<GraphRow>;
   paths: Array<GraphPath>;
   maxLane?: number;
-  expansion?: GraphExpansion | null;
   hoveredRow?: number | null | undefined;
   selectedRow?: number | null | undefined;
   head?: string | null | undefined;
@@ -42,17 +39,19 @@ export function CommitGraph({
   onAvatarClick?: ((info: ZoomedAvatarInfo) => void) | undefined;
 }) {
   const width = Math.max(0, maxLane) * LANE_WIDTH + LANE_OFFSET * 2 + GRAPH_PADDING;
-  const height = rows.length * ROW_HEIGHT + (expansion?.height ?? 0);
+  const height = rows.length * ROW_HEIGHT;
 
   return (
     <svg class="block overflow-visible" width={width} height={height} aria-hidden="true">
-      {paths.map((path, index) => (
-        <g key={index}>
-          <path class={SHADOW_CLASS} d={path.d} />
+      {paths.map((path, pathIndex) => (
+        <g key={pathIndex}>
+          <path class={SHADOW_CLASS} d={path.d} stroke-linejoin="round" stroke-linecap="round" />
           <path
             class={LINE_CLASS}
             d={path.d}
             stroke={branchColour(path.color) ?? UNCOMMITTED_COLOUR}
+            stroke-linejoin="round"
+            stroke-linecap="round"
           />
         </g>
       ))}
@@ -72,15 +71,12 @@ export function CommitGraph({
         const isHovered = hoveredRow === index;
         const isSelected = selectedRow === index;
 
-        const expandOffset = expansion !== null && index > expansion.row ? expansion.height : 0;
-        const cy = row.y + expandOffset;
-
         return (
           <HexagonNode
             key={row.hash || index}
             id={commit?.hash ?? row.hash ?? index}
             cx={row.x}
-            cy={cy}
+            cy={row.y}
             colour={colour}
             isCurrent={isCurrent}
             isCommitted={true}

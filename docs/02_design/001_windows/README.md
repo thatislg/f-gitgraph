@@ -64,3 +64,10 @@ Thư mục này chứa toàn bộ hệ thống các bản thiết kế kỹ thu�
     - Cầu nối dữ liệu `GraphDataBridge` gộp tọa độ F# với metadata commit và giao thức RPC `graph.load`/`graph.window`.
     - Cơ chế Dumb Renderer giải phóng CPU trình duyệt và phân trang cuộn ảo (Virtual Scrolling).
     - Thanh lý dứt điểm luồng truy vấn Git cũ bằng TypeScript (`loadCommits.ts`).
+
+12. **[12_Graph_Rendering_And_Webview_Fix_Design.md](12_Graph_Rendering_And_Webview_Fix_Design.md)**:
+    - Thiết kế kỹ thuật khắc phục triệt để các sự cố hiển thị đồ thị và suy thoái giao diện từ báo cáo điều tra `REP-WIN-011`.
+    - Thuật toán phân bổ màu sắc nhất quán theo dòng dõi nhánh (Color Lineage) và chống trùng màu kề cạnh.
+    - Cơ chế chuyển đổi hình học thích ứng cho đường nối SVG khi mở rộng hàng commit (Expansion).
+    - Thuật toán đóng làn dứt khoát tại commit gốc và giới hạn khung vẽ chính xác.
+    - Khôi phục token màu badge ref trong Tailwind CSS v4 và đồng bộ hằng số hình học mép cột graph.

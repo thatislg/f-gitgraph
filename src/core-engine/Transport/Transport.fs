@@ -286,15 +286,17 @@ module Protocol =
 
     // --- Giải mã yêu cầu (TS -> F#) ---
 
-    let decodeInitRequest (payload: byte[]) : string =
+    let decodeInitRequest (payload: byte[]) : string * string option =
         let r = MsgPack.Reader(payload)
         let n = MsgPack.readMapHeader r
         let mutable repoPath = ""
+        let mutable branch = None
         for _ in 1 .. n do
             match MsgPack.readString r with
             | "repoPath" -> repoPath <- MsgPack.readString r
+            | "branch" -> branch <- Some(MsgPack.readString r)
             | _ -> failwith "khóa không mong đợi trong init request"
-        repoPath
+        repoPath, branch
 
     let decodeQueryRange (payload: byte[]) : int * int =
         let r = MsgPack.Reader(payload)
@@ -323,7 +325,15 @@ module Protocol =
             MsgPack.writeString w (GitHash.toString h)
         w.ToArray()
 
-    let encodeRangeData (nodes: Geometry.Node[]) (paths: Geometry.Path[]) : byte[] =
+    /// Đường nối đã mã hóa lệnh vẽ SVG `d`, sẵn sàng gửi sang Webview.
+    type PathEmit = {
+        /// Chuỗi lệnh vẽ SVG (đường dẫn `d`) với tọa độ Y tương đối theo cửa sổ.
+        D: string
+        /// Chỉ số màu nét vẽ.
+        Color: int
+    }
+
+    let encodeRangeData (nodes: Geometry.Node[]) (paths: PathEmit[]) : byte[] =
         let w = MsgPack.Writer()
         MsgPack.writeMapHeader w 2
         MsgPack.writeString w "nodes"
@@ -362,6 +372,8 @@ module Daemon =
     type State = {
         /// Đường dẫn kho đang mở (để tái nạp khi làm mới bộ đệm).
         RepoPath: string
+        /// Nhánh đang hiển thị: `None`/`Some "*"` = toàn bộ, `Some tên` = riêng một nhánh.
+        Branch: string option
         Snapshot: GraphSnapshot
         Layout: Geometry.Layout
         /// Thứ tự hiển thị (index commit theo dòng).
@@ -373,8 +385,8 @@ module Daemon =
     }
 
     /// Nạp kho mã nguồn và tính bố cục đồ thị.
-    let loadRepo (path: string) : Result<State, GitError> =
-        match GitReader.readGraph path with
+    let loadRepo (path: string) (branch: string option) : Result<State, GitError> =
+        match GitReader.readGraph path branch with
         | Error e -> Error e
         | Ok snap ->
             let layout = Layout.compute snap
@@ -384,6 +396,7 @@ module Daemon =
             let commits = order |> Array.map (fun c -> snap.Commits[c])
             Ok
                 { RepoPath = path
+                  Branch = branch
                   Snapshot = snap
                   Layout = layout
                   Order = order
@@ -391,7 +404,7 @@ module Daemon =
                   Commits = commits }
 
     /// Chạy vòng lặp daemon với bộ nạp kho tùy chỉnh (dùng cho kiểm thử).
-    let runWith (loader: string -> Result<State, GitError>) (input: Stream) (output: Stream) : unit =
+    let runWith (loader: string -> string option -> Result<State, GitError>) (input: Stream) (output: Stream) : unit =
         let writeFrame (opcode: byte) (sequence: uint32) (payload: byte[]) =
             let bytes = Frame.encode { Opcode = opcode; Sequence = sequence; Payload = payload }
             output.Write(bytes, 0, bytes.Length)
@@ -409,8 +422,8 @@ module Daemon =
             | Some frame ->
                 try
                     if frame.Opcode = Opcode.InitializeRepo then
-                        let path = Protocol.decodeInitRequest frame.Payload
-                        match loader path with
+                        let path, branch = Protocol.decodeInitRequest frame.Payload
+                        match loader path branch with
                         | Error e ->
                             writeFrame Opcode.Error frame.Sequence (Protocol.encodeError 1 (GitError.describe e))
                         | Ok s ->
@@ -435,14 +448,31 @@ module Daemon =
                                 else
                                     [||]
 
+                            // Dịch gốc tọa độ Y về đầu cửa sổ ảo để Webview vẽ trực tiếp
+                            // trong hệ tọa độ cửa sổ (khắc phục BUG-02/BUG-03: node/line lệch
+                            // vị trí khi cuộn).
+                            let dy = float fromRow * Geometry.RowHeight
+                            let offsetNode (nd: Geometry.Node) = { nd with Y = nd.Y - dy }
+
+                            let nodes = nodes |> Array.map offsetNode
+
                             // Đường nối hiển thị nếu cắt khoảng dòng [fromRow, toRow]:
                             // con nằm trên hoặc ngang đáy cửa sổ và cha nằm dưới hoặc ngang đỉnh cửa sổ.
                             let paths =
                                 s.Layout.Edges
                                 |> Array.mapi (fun k edge ->
                                     let struct (c, p) = edge
-                                    if s.Row[c] <= toRow && s.Row[p] >= fromRow then Some s.Layout.Paths[k]
-                                    else None)
+                                    if s.Row[c] <= toRow && s.Row[p] >= fromRow then
+                                        let path = s.Layout.Paths[k]
+                                        Some
+                                            { Protocol.D =
+                                                Geometry.renderPath
+                                                    path.BendAtChildRow
+                                                    (offsetNode s.Layout.Nodes[c])
+                                                    (offsetNode s.Layout.Nodes[p])
+                                              Protocol.Color = path.Color }
+                                    else
+                                        None)
                                 |> Array.choose id
 
                             writeFrame Opcode.RangeData frame.Sequence (Protocol.encodeRangeData nodes paths)
@@ -452,7 +482,7 @@ module Daemon =
                         match state with
                         | None -> writeFrame Opcode.Error frame.Sequence (Protocol.encodeError 2 "chưa khởi tạo kho")
                         | Some prev ->
-                            match loader prev.RepoPath with
+                            match loader prev.RepoPath prev.Branch with
                             | Error e ->
                                 writeFrame Opcode.Error frame.Sequence (Protocol.encodeError 1 (GitError.describe e))
                             | Ok s ->

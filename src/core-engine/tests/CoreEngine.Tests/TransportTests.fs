@@ -113,7 +113,17 @@ let ``protocol decodes init request`` () =
     MsgPack.writeMapHeader w 1
     MsgPack.writeString w "repoPath"
     MsgPack.writeString w "some/repo"
-    Assert.Equal("some/repo", Protocol.decodeInitRequest (w.ToArray()))
+    Assert.Equal(("some/repo", None), Protocol.decodeInitRequest (w.ToArray()))
+
+[<Fact>]
+let ``protocol decodes init request with branch`` () =
+    let w = MsgPack.Writer()
+    MsgPack.writeMapHeader w 2
+    MsgPack.writeString w "repoPath"
+    MsgPack.writeString w "some/repo"
+    MsgPack.writeString w "branch"
+    MsgPack.writeString w "main"
+    Assert.Equal(("some/repo", Some "main"), Protocol.decodeInitRequest (w.ToArray()))
 
 [<Fact>]
 let ``protocol decodes query range`` () =
@@ -136,13 +146,14 @@ let private makeState (snapshot: GraphSnapshot) : Daemon.State =
     order |> Array.iteri (fun i c -> row[c] <- i)
     let commits = order |> Array.map (fun c -> snapshot.Commits[c])
     { RepoPath = "some/repo"
+      Branch = None
       Snapshot = snapshot
       Layout = layout
       Order = order
       Row = row
       Commits = commits }
 
-let private runDaemon (loader: string -> Result<Daemon.State, GitError>) (frames: Frame[]) : Frame[] =
+let private runDaemon (loader: string -> string option -> Result<Daemon.State, GitError>) (frames: Frame[]) : Frame[] =
     use input = new MemoryStream()
     for f in frames do
         let b = Frame.encode f
@@ -171,7 +182,7 @@ let ``daemon serves ready init query and heartbeat`` () =
           CommitTime = [| 100L; 200L; 300L |] }
 
     let state = makeState snapshot
-    let loader (_path: string) = Ok state
+    let loader (_path: string) (_branch: string option) = Ok state
 
     let initPayload =
         let w = MsgPack.Writer()
@@ -204,7 +215,7 @@ let ``daemon serves ready init query and heartbeat`` () =
 
 [<Fact>]
 let ``daemon reports error for query before init`` () =
-    let loader (_path: string) = failwith "không nên được gọi"
+    let loader (_path: string) (_branch: string option) = failwith "không nên được gọi"
     let queryPayload =
         let w = MsgPack.Writer()
         MsgPack.writeMapHeader w 2
@@ -222,6 +233,38 @@ let ``daemon reports error for query before init`` () =
     Assert.Equal(Opcode.Error, responses[1].Opcode)
 
 [<Fact>]
+let ``daemon threads branch through to the loader`` () =
+    // Chống hồi quy cho lỗi lọc nhánh: tên nhánh phải đi trọn đường từ init request
+    // tới bộ nạp kho (trước đây bị rơi mất vì chỉ giải mã mỗi repoPath).
+    let snapshot : GraphSnapshot =
+        { Commits = [| hash "1" |]
+          Parents = [| [||] |]
+          Generation = [| 1u |]
+          CommitTime = [| 100L |] }
+
+    let mutable receivedBranch = None
+    let loader (_path: string) (branch: string option) =
+        receivedBranch <- branch
+        Ok(makeState snapshot)
+
+    let initPayload =
+        let w = MsgPack.Writer()
+        MsgPack.writeMapHeader w 2
+        MsgPack.writeString w "repoPath"
+        MsgPack.writeString w "some/repo"
+        MsgPack.writeString w "branch"
+        MsgPack.writeString w "main"
+        w.ToArray()
+
+    let responses =
+        runDaemon
+            loader
+            [| { Opcode = Opcode.InitializeRepo; Sequence = 0u; Payload = initPayload } |]
+
+    Assert.Equal(Opcode.InitSuccess, responses[1].Opcode)
+    Assert.Equal(Some "main", receivedBranch)
+
+[<Fact>]
 let ``daemon range data contains expected node and path counts`` () =
     // Merge: root(0), a(1->0), b(2->0), merge(3->1,2).
     let snapshot : GraphSnapshot =
@@ -230,7 +273,7 @@ let ``daemon range data contains expected node and path counts`` () =
           Generation = [| 1u; 2u; 2u; 3u |]
           CommitTime = [| 100L; 200L; 300L; 400L |] }
 
-    let loader (_path: string) = Ok(makeState snapshot)
+    let loader (_path: string) (_branch: string option) = Ok(makeState snapshot)
 
     let queryPayload =
         let w = MsgPack.Writer()

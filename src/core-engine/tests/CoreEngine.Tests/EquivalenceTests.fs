@@ -19,7 +19,7 @@ open NeoGitCore.Graph
 //     1. Thứ tự dòng: commit con luôn nằm TRÊN (trước) commit cha trong dãy hiển thị.
 //     2. Mỗi commit chiếm đúng một dòng, không có hai commit trùng dòng.
 //     3. Làn được cấp phát thu gọn trái: tập làn sử dụng luôn liên tục 0..MaxLane.
-//     4. Màu nhánh ổn định theo làn (lane % 8).
+//     4. Màu nhánh thuộc bảng màu và phân bổ đa dạng giữa các nhánh (round-robin).
 //     5. Hình học nhất quán: tọa độ Y tăng theo dòng, X tăng theo làn,
 //        mọi cạnh tham chiếu đúng nút, đường nối trỏ đúng cha-con.
 
@@ -107,12 +107,21 @@ let ``lane allocation is left-compact with contiguous lanes`` () =
     Assert.Equal(used.Length - 1, laneOf |> Array.max)
 
 [<Fact>]
-let ``color is stable and derived from lane modulo palette`` () =
-    // Màu nhánh ổn định: phải luôn bằng lane % 8, đảm bảo không thay đổi trực quan.
+let ``color is within palette and merge-in edges carry the secondary branch color`` () =
+    // Khắc phục BUG-01: màu nhánh nằm trong bảng 8 màu, và đường sáp nhập
+    // (merge-in) mang màu của nhánh phụ (cha) thay vì màu nhánh chính.
     let s = Synthetic.snapshot 200
     let layout = Layout.compute s
+
+    // 1. Mọi màu thuộc bảng màu (0..PaletteSize-1).
     for nd in layout.Nodes do
-        Assert.Equal(nd.Lane % Geometry.PaletteSize, nd.Color)
+        Assert.InRange(nd.Color, 0, Geometry.PaletteSize - 1)
+
+    // 2. Đường sáp nhập (con là merge, cha là cha phụ) mang màu nhánh phụ (cha).
+    for k in 0 .. layout.Edges.Length - 1 do
+        let struct (c, p) = layout.Edges[k]
+        if s.Parents[c].Length >= 2 && p <> s.Parents[c][0] then
+            Assert.Equal(layout.Nodes[p].Color, layout.Paths[k].Color)
 
 [<Fact>]
 let ``geometry is consistent with row and lane ordering`` () =

@@ -68,7 +68,7 @@ export type RpcMethodMap = {
     result: ScanRepoResult;
   };
   "graph.load": {
-    params: { repoPath: string };
+    params: { repoPath: string; branch?: string | null };
     result: GraphLoadResult;
   };
   "graph.window": {

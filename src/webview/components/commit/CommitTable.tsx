@@ -8,13 +8,12 @@ import {
   type ZoomedAvatarInfo
 } from "@/webview/components/commit/AvatarZoomPreview";
 import { CommitDetails } from "@/webview/components/commit/CommitDetails";
-import { CommitGraph, type GraphExpansion } from "@/webview/components/commit/CommitGraph";
+import { CommitGraph } from "@/webview/components/commit/CommitGraph";
 import { CommitHoverPanel } from "@/webview/components/commit/CommitHoverPanel";
 import { CommitRow } from "@/webview/components/commit/CommitRow";
 import type { ColumnResize } from "@/webview/components/commit/useColumnResize";
 import { useColumnResize } from "@/webview/components/commit/useColumnResize";
 import {
-  COMMIT_DETAILS_HEIGHT,
   GRAPH_PADDING,
   LANE_OFFSET,
   LANE_WIDTH,
@@ -89,8 +88,6 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
 
   const expandedHash = expandedCommit.value;
   const expandedRow = rows.findIndex((row) => row.hash === expandedHash);
-  const expansion: GraphExpansion | null =
-    expandedRow === -1 ? null : { row: expandedRow, height: COMMIT_DETAILS_HEIGHT };
   const isAnyExpanded = expandedCommit.value !== null;
   const hoveredRow = useSignal<number | null>(null);
 
@@ -109,8 +106,9 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const effectiveTop = Math.max(0, scrollTop);
       const viewportHeight = window.innerHeight;
-      const firstVisible = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT));
+      const firstVisible = Math.max(0, Math.floor(effectiveTop / ROW_HEIGHT));
       const visibleCount = Math.ceil(viewportHeight / ROW_HEIGHT);
       const lastVisible = firstVisible + visibleCount;
 
@@ -203,7 +201,6 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
           rows={rows}
           paths={paths}
           maxLane={maxL}
-          expansion={expansion}
           hoveredRow={hoveredRow.value}
           selectedRow={expandedRow}
           onAvatarClick={handleAvatarClick}
@@ -272,13 +269,25 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
                       : () => toggleCommitDetails(row.hash)
                   }
                 />
-                {index === expandedRow && <CommitDetails details={commitDetails.value} />}
               </Fragment>
             );
           })}
           {bottomSpacer > 0 && <tr style={{ height: `${bottomSpacer}px` }} aria-hidden="true" />}
         </tbody>
       </table>
+
+      {/* Overlay Inspector Panel: commit details float below the selected row
+          without expanding the table, keeping the graph geometry 100% intact
+          (BUG-EXPAND-01/02). It starts after the graph column so the branch
+          lines stay visible. */}
+      {expandedRow !== -1 && (
+        <div
+          class="absolute right-0 z-10"
+          style={`left: var(--col-graph); top: ${TABLE_HEADER_HEIGHT + (from + expandedRow + 1) * ROW_HEIGHT}px`}
+        >
+          <CommitDetails details={commitDetails.value} />
+        </div>
+      )}
 
       {/* Floating rich commit hover panel */}
       {hoverPopover.value && !zoomedAvatar.value && !isAnyExpanded && (

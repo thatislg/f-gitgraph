@@ -15,8 +15,8 @@ export class GraphDataBridge {
     private readonly metadataProvider: MetadataProvider
   ) {}
 
-  async initialize(repoPath: string): Promise<InitSuccess> {
-    const init = await this.sidecar.initialize(repoPath);
+  async initialize(repoPath: string, branch?: string): Promise<InitSuccess> {
+    const init = await this.sidecar.initialize(repoPath, branch);
     this.commitList = init.commits;
     return init;
   }

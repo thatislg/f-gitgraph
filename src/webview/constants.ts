@@ -30,10 +30,10 @@ export const HEXAGON_RADIUS = 10;
 export const HEXAGON_ICON_SIZE = 12;
 
 /** Distance between two lanes, in pixels. */
-export const LANE_WIDTH = 16;
+export const LANE_WIDTH = 20;
 
 /** Distance from the left edge of the graph to the first lane, in pixels. */
-export const LANE_OFFSET = 10;
+export const LANE_OFFSET = 16;
 
 /** Space kept between the widest lane and the next table column, in pixels. */
 export const GRAPH_PADDING = 20;

@@ -70,8 +70,7 @@ describe("CommitGraph", () => {
       h(CommitGraph, {
         rows,
         paths,
-        maxLane: 1,
-        expansion: null
+        maxLane: 1
       }),
       container
     );
@@ -114,7 +113,6 @@ describe("CommitGraph", () => {
         rows,
         paths: [],
         maxLane: 1,
-        expansion: null,
         renderNodeIcon: () => h("text", { id: "custom-glyph" }, "★")
       }),
       container

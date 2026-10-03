@@ -30,6 +30,21 @@ module private Native =
     extern int git_revwalk_push_head(nativeint walk)
 
     [<DllImport("git2-5853918", CallingConvention = CallingConvention.Cdecl)>]
+    extern int git_revwalk_push_glob(nativeint walk, [<MarshalAs(UnmanagedType.LPUTF8Str)>] string glob)
+
+    [<DllImport("git2-5853918", CallingConvention = CallingConvention.Cdecl)>]
+    extern int git_revwalk_push(nativeint walk, nativeint id)
+
+    [<DllImport("git2-5853918", CallingConvention = CallingConvention.Cdecl)>]
+    extern int git_revparse_single(nativeint& outObject, nativeint repo, [<MarshalAs(UnmanagedType.LPUTF8Str)>] string spec)
+
+    [<DllImport("git2-5853918", CallingConvention = CallingConvention.Cdecl)>]
+    extern nativeint git_object_id(nativeint obj)
+
+    [<DllImport("git2-5853918", CallingConvention = CallingConvention.Cdecl)>]
+    extern void git_object_free(nativeint obj)
+
+    [<DllImport("git2-5853918", CallingConvention = CallingConvention.Cdecl)>]
     extern int git_revwalk_next(nativeint outOid, nativeint walk)
 
     [<DllImport("git2-5853918", CallingConvention = CallingConvention.Cdecl)>]
@@ -136,25 +151,51 @@ type GitRepository internal (handle: nativeint) =
 
     let mutable disposed = false
 
-    /// Duyệt lịch sử commit từ HEAD, trả về danh sách mã băm theo thứ tự topo.
-    member _.WalkHead() : Result<GitHash list, GitError> =
+    /// Duyệt lịch sử commit theo nhánh yêu cầu, trả về danh sách mã băm theo thứ tự topo.
+    /// `None` (hoặc `Some "*"`) duyệt toàn bộ nhánh; `Some tênNhánh` duyệt riêng một nhánh.
+    member _.Walk(branch: string option) : Result<GitHash list, GitError> =
         let mutable walk = 0n
         let r = Native.git_revwalk_new(&walk, handle)
         if r < 0 then
             Error(GitError.NativeLibraryError(r, "git_revwalk_new"))
         else
             try
-                Native.git_revwalk_push_head(walk) |> ignore
-                Helpers.withPinned (Array.zeroCreate<byte> Helpers.gitOidMaxSize) (fun oidBuf ->
-                    let mutable hashes = []
-                    let mutable continueLoop = true
-                    while continueLoop do
-                        let next = Native.git_revwalk_next(oidBuf, walk)
-                        if next = 0 then
-                            hashes <- Helpers.readOidHex oidBuf :: hashes
+                let pushResult =
+                    match branch with
+                    | Some name when name <> "*" ->
+                        // Nhánh cụ thể: giải mã shorthand ("main", "origin/main", ...)
+                        // sang tip qua git_revparse_single, rồi đẩy OID vào bộ duyệt.
+                        // (git_revwalk_push_ref đòi tên ref đầy đủ nên không dùng cho shorthand.)
+                        let mutable obj = 0n
+                        let rr = Native.git_revparse_single(&obj, handle, name)
+                        if rr < 0 then
+                            Error(GitError.NativeLibraryError(rr, "git_revparse_single: " + name))
                         else
-                            continueLoop <- false
-                    Ok(List.rev hashes))
+                            try
+                                Native.git_revwalk_push(walk, Native.git_object_id obj) |> ignore
+                                Ok()
+                            finally
+                                Native.git_object_free(obj)
+                    | _ ->
+                        // Toàn bộ nhánh: HEAD + mọi nhánh local và remote.
+                        Native.git_revwalk_push_head(walk) |> ignore
+                        Native.git_revwalk_push_glob(walk, "refs/heads/*") |> ignore
+                        Native.git_revwalk_push_glob(walk, "refs/remotes/*") |> ignore
+                        Ok()
+
+                match pushResult with
+                | Error e -> Error e
+                | Ok () ->
+                    Helpers.withPinned (Array.zeroCreate<byte> Helpers.gitOidMaxSize) (fun oidBuf ->
+                        let mutable hashes = []
+                        let mutable continueLoop = true
+                        while continueLoop do
+                            let next = Native.git_revwalk_next(oidBuf, walk)
+                            if next = 0 then
+                                hashes <- Helpers.readOidHex oidBuf :: hashes
+                            else
+                                continueLoop <- false
+                        Ok(List.rev hashes))
             finally
                 Native.git_revwalk_free(walk)
 

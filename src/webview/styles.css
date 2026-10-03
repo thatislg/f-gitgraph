@@ -56,6 +56,8 @@
   --color-git-deleted: var(--vscode-gitDecoration-deletedResourceForeground);
 
   --color-editor: var(--vscode-editor-background);
+  --color-editor-fg: var(--vscode-foreground);
+  --color-graph-fg: var(--vscode-editor-foreground, #ffffff);
   --color-row-head: var(--vscode-list-inactiveSelectionBackground);
   --color-row-hover: var(--vscode-list-hoverBackground);
   --color-row-selected: rgba(128, 128, 128, 0.25);

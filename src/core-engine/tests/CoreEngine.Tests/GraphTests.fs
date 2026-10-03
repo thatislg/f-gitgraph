@@ -112,7 +112,7 @@ let ``lane allocation keeps linear history on single lane`` () =
         Assert.Equal(0, l)
 
 [<Fact>]
-let ``geometry produces nodes and paths with stable colors`` () =
+let ``geometry produces nodes and paths with distinct branch colors`` () =
     let s =
         Graph.snapshot
             [| (h 1, [], 1u, 100L)
@@ -125,9 +125,56 @@ let ``geometry produces nodes and paths with stable colors`` () =
     Assert.Equal(4, layout.RowCount)
     // 3 cạnh (a->root, b->root, merge->a, merge->b) = 4 đường nối.
     Assert.Equal(4, layout.Paths.Length)
-    // Màu ổn định theo làn: làn 0 -> màu 0, làn 1 -> màu 1.
-    let colors = layout.Nodes |> Array.map (fun nd -> nd.Color) |> Array.distinct
-    Assert.Equal<int>([| 0; 1 |], Array.sort colors)
+
+    // Khắc phục BUG-01: nhánh chính (merge -> a -> root) giữ màu liên tục,
+    // nhánh phụ (b) mang màu khác biệt để không trùng làn kề.
+    let nodeOf = layout.Nodes
+    Assert.Equal(nodeOf[3].Color, nodeOf[1].Color) // merge và a (first-parent) cùng màu
+    Assert.Equal(nodeOf[1].Color, nodeOf[0].Color) // a và root cùng màu
+    Assert.NotEqual(nodeOf[3].Color, nodeOf[2].Color) // nhánh phụ b khác màu nhánh chính
+
     // Merge commit được đánh dấu.
     let mergeNode = layout.Nodes |> Array.find (fun nd -> nd.IsMerge)
     Assert.True(mergeNode.IsMerge)
+
+[<Fact>]
+let ``sequential feature branches receive distinct round-robin colors`` () =
+    // Khắc phục BUG-COLOR-01: các nhánh tính năng kế tiếp tách từ cùng một nhánh
+    // chính phải nhận các màu khác nhau (xoay vòng bảng màu), không bị dồn về một
+    // màu duy nhất như thuật toán "khoảng cách lớn nhất" theo màu làn kề trước đây.
+    // Cấu trúc: main (first-parent) với 3 nhánh feature fork rồi merge kế tiếp nhau.
+    let s =
+        Graph.snapshot
+            [| (h 1, [], 1u, 100L) // 0 root
+               (h 2, [ 0 ], 2u, 200L) // 1 main1
+               (h 3, [ 0 ], 2u, 300L) // 2 featA (fork từ root)
+               (h 4, [ 1; 2 ], 3u, 400L) // 3 main2 (merge featA)
+               (h 5, [ 1 ], 3u, 500L) // 4 featB (fork từ main1)
+               (h 6, [ 3; 4 ], 4u, 600L) // 5 main3 (merge featB)
+               (h 7, [ 3 ], 4u, 700L) // 6 featC (fork từ main2)
+               (h 8, [ 5; 6 ], 5u, 800L) |] // 7 main4 (merge featC)
+
+    let layout = Layout.compute s
+    let colorOf (i: int) = layout.Nodes[i].Color
+    let feats = [| colorOf 2; colorOf 4; colorOf 6 |]
+    // Ba nhánh feature phải mang ba màu khác nhau.
+    Assert.Equal(3, feats |> Array.distinct |> Array.length)
+
+[<Fact>]
+let ``parallel branches active simultaneously receive distinct colors`` () =
+    // Khắc phục BUG-COLOR-01 (lẫn màu làn kề): các nhánh song song hoạt động
+    // đồng thời phải mang màu phân biệt, không có hai làn kề trùng màu.
+    // Octopus merge: main + 3 nhánh feature tách từ root, gộp lại ở một merge.
+    let s =
+        Graph.snapshot
+            [| (h 1, [], 1u, 100L) // 0 root
+               (h 2, [ 0 ], 2u, 200L) // 1 main
+               (h 3, [ 0 ], 2u, 300L) // 2 featA
+               (h 4, [ 0 ], 2u, 400L) // 3 featB
+               (h 5, [ 0 ], 2u, 500L) // 4 featC
+               (h 6, [ 1; 2; 3; 4 ], 3u, 600L) |] // 5 merge (octopus)
+
+    let layout = Layout.compute s
+    let colorOf (i: int) = layout.Nodes[i].Color
+    let branches = [| colorOf 1; colorOf 2; colorOf 3; colorOf 4 |]
+    Assert.Equal(4, branches |> Array.distinct |> Array.length)

@@ -113,13 +113,24 @@ module Bench =
         let toRow = min (n - 1) toRow
 
         // 3. Cắt cửa sổ 100 dòng từ bố cục đã tính sẵn (phản chiếu nhánh QueryRange của daemon).
-        let nodes = [| for r in fromRow .. toRow -> state.Layout.Nodes[state.Order[r]] |]
+        let dy = float fromRow * Geometry.RowHeight
+        let offsetNode (nd: Geometry.Node) = { nd with Y = nd.Y - dy }
+        let nodes = [| for r in fromRow .. toRow -> offsetNode state.Layout.Nodes[state.Order[r]] |]
         let paths =
             state.Layout.Edges
             |> Array.mapi (fun k edge ->
                 let struct (c, p) = edge
-                if state.Row[c] <= toRow && state.Row[p] >= fromRow then Some state.Layout.Paths[k]
-                else None)
+                if state.Row[c] <= toRow && state.Row[p] >= fromRow then
+                    let path = state.Layout.Paths[k]
+                    Some
+                        { Protocol.D =
+                            Geometry.renderPath
+                                path.BendAtChildRow
+                                (offsetNode state.Layout.Nodes[c])
+                                (offsetNode state.Layout.Nodes[p])
+                          Protocol.Color = path.Color }
+                else
+                    None)
             |> Array.choose id
 
         // 4. Mã hóa khung RangeData (phía F#).
@@ -149,8 +160,9 @@ module Bench =
 
         // --- Các giai đoạn bố cục đồ thị ---
         let order, _ = measure "topo sort" (fun () -> TopoSort.order snapshot)
-        let laneOf, _ = measure "lane allocation" (fun () -> Lanes.assign snapshot order)
-        let layout, _ = measure "geometry (parallel)" (fun () -> Geometry.compute snapshot order laneOf)
+        let assign, _ = measure "lane allocation" (fun () -> Lanes.assignWithColor snapshot order)
+        let layout, _ =
+            measure "geometry (parallel)" (fun () -> Geometry.compute snapshot order assign.LaneOf assign.ColorOf)
         let _, _ = measure "layout (end-to-end)" (fun () -> Layout.compute snapshot)
 
         // --- RAM sau khi nạp + bố cục ---
@@ -168,6 +180,7 @@ module Bench =
         // --- Vòng khứ hồi IPC (cửa sổ 100 dòng) ---
         let state : Daemon.State =
             { RepoPath = "benchmark/repo"
+              Branch = None
               Snapshot = snapshot
               Layout = layout
               Order = order
