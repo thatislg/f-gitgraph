@@ -1,6 +1,6 @@
 # Tiến Độ Phase 1: Windows First Milestone (Xây Dựng Nền Móng Nhân F#)
 
-Tài liệu này ghi nhận tổng quan mục tiêu, phạm vi công việc chi tiết hóa từng nhiệm vụ con (subtasks), tiêu chuẩn nghiệm thu và nhật ký thực hiện cho **Phase 1: Xây dựng nền móng nhân F# Core Engine trên môi trường Windows**.
+Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệu thiết kế áp dụng, phạm vi công việc chi tiết hóa từng nhiệm vụ con (subtasks), tiêu chuẩn nghiệm thu và nhật ký thực hiện cho **Phase 1: Xây dựng nền móng nhân F# Core Engine trên môi trường Windows**.
 
 > [!NOTE]
 > Mọi nội dung trong tài liệu này tuân thủ nguyên tắc: mô tả bằng ngôn ngữ tự nhiên, tập trung vào tiến độ, kiến trúc và luồng xử lý kỹ thuật, không sử dụng mã nguồn mẫu.
@@ -23,13 +23,31 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phạm vi công việc chi 
 
 ---
 
-## 2. Danh Mục Các Đầu Việc & Nhiệm Vụ Con Chi Tiết (Detailed Subtasks)
+## 2. Bảng Ánh Xạ Tài Liệu Thiết Kế Áp Dụng Cho Từng Nhóm Việc
+
+Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên dưới bắt buộc phải bám sát hệ thống tài liệu thiết kế chi tiết tương ứng nằm trong thư mục **[docs/02_design/001_windows/](../02_design/001_windows/README.md)**:
+
+| STT | Nhóm Việc Kỹ Thuật | Tài Liệu Thiết Kế Chi Tiết Bắt Buộc Áp Dụng | Phạm Vi Thiết Kế Trọng Tâm |
+| :---: | :--- | :--- | :--- |
+| **1** | **Khởi Tạo Dự Án F# & Native AOT** | **[01_Project_Structure_And_NativeAOT.md](../02_design/001_windows/01_Project_Structure_And_NativeAOT.md)** | Cấu trúc phân tầng `src/core-engine/`, cờ xuất bản Native AOT (`win-x64`), cắt tỉa Trimming, LTO, kiểm định máy sạch. |
+| **2** | **Tầng Miền Nghiệp Vụ & Bảng Mã Lỗi** | **[02_Domain_Model_And_Error_Taxonomy.md](../02_design/001_windows/02_Domain_Model_And_Error_Taxonomy.md)** | Thực thể GitHash, Author, CommitNode, GitRef, trạng thái In-Flight (`MERGE_HEAD`, `rebase-merge`), bảng lỗi vét cạn qua kiểu `Result`. |
+| **3** | **Tầng Đọc Dữ Liệu Git Tốc Độ Cao** | **[03_Fast_Git_Storage_Reader.md](../02_design/001_windows/03_Fast_Git_Storage_Reader.md)** | Tích hợp LibGit2 C-binding in-process, Memory-Mapped File đọc `commit-graph`, Zero-Allocation Span, giải mã UTF-8 tiếng Việt. |
+| **4** | **Thuật Toán Xếp Làn Đồ Thị Topo Song Song** | **[04_Parallel_DAG_Layout_Solver.md](../02_design/001_windows/04_Parallel_DAG_Layout_Solver.md)** | Sắp xếp Topo xử lý shallow/orphan/multi-root, phân bổ làn thu gọn bên trái (Lane Pool), tính toán song song đa luồng CPU tọa độ SVG. |
+| **5** | **Giao Thức Giao Tiếp Nội Bộ (IPC Daemon)** | **[05_IPC_Stdio_Streaming_Protocol.md](../02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md)** | Quản lý vòng đời tiến trình F# sidecar, cấu trúc khung gói tin Stdio RPC MessagePack, phân trang cửa sổ ảo (Virtual Scrolling). |
+| **6** | **Ghép Nối Webview & Lệnh Ghi An Toàn** | **[06_Webview_Integration_And_Git_Mutator.md](../02_design/001_windows/06_Webview_Integration_And_Git_Mutator.md)** | Ghép nối dữ liệu hình học phẳng vào Webview Preact Phase 1, ủy thác 100% lệnh ghi cho `git.exe`, File Watcher cập nhật vi sai. |
+| **7** | **Kiểm Thử Nghiệm Thu & Benchmark** | **[07_Benchmarking_And_Verification_Plan.md](../02_design/001_windows/07_Benchmarking_And_Verification_Plan.md)** | Kịch bản kiểm thử tương đương đồ thị 100%, đo đạc 4 chỉ số benchmark định lượng, bảng kiểm tra an toàn dữ liệu Git. |
+
+---
+
+## 3. Danh Mục Các Đầu Việc & Nhiệm Vụ Con Chi Tiết (Detailed Subtasks)
 
 ---
 
 ### 📋 Nhóm Việc 1: Khởi Tạo Dự Án F# & Cấu Hình Biên Dịch Native AOT
 
-Mục tiêu của nhóm việc này là thiết lập nền móng dự án F# độc lập, có khả năng biên dịch thẳng ra một file thực thi mã máy duy nhất trên Windows mà không phụ thuộc vào .NET SDK hay Runtime bên ngoài.
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/01_Project_Structure_And_NativeAOT.md](../02_design/001_windows/01_Project_Structure_And_NativeAOT.md)**
+> 
+> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để cấu trúc các thư mục con trong `src/core-engine/`, Mục 2 để áp dụng các thiết lập xuất bản Native AOT (Trimming, LTO, Symbol Stripping, Invariant Globalization), và Mục 4 để thực thi quy trình kiểm định tính độc lập trên máy Windows sạch.
 
 - [ ] **Nhiệm vụ 1.1: Thiết lập cấu trúc dự án và phân chia module logic**
   - Khởi tạo thư mục mã nguồn `src/core-engine/` chứa dự án F# độc lập dưới dạng Console Application.
@@ -50,7 +68,9 @@ Mục tiêu của nhóm việc này là thiết lập nền móng dự án F# đ
 
 ### 📋 Nhóm Việc 2: Xây Dựng Tầng Miền Nghiệp Vụ & Mô Hình Hóa Lỗi (Domain Model)
 
-Mục tiêu là mô hình hóa toàn bộ thế giới dữ liệu Git bằng hệ thống kiểu dữ liệu đại số tĩnh của F#, loại bỏ hoàn toàn các lỗi dữ liệu không hợp lệ hoặc lỗi thiếu trường thông tin.
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/02_Domain_Model_And_Error_Taxonomy.md](../02_design/001_windows/02_Domain_Model_And_Error_Taxonomy.md)**
+> 
+> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để định nghĩa các kiểu thực thể Git cốt lõi (`GitHash`, `Author`, `CommitNode`, `GitRef`), Mục 2 để định nghĩa các trạng thái biến động dở dang (`InFlightState`), Mục 3 để xây dựng bảng mã lỗi hệ thống vét cạn, và Mục 4 để áp dụng nguyên tắc xử lý lỗi qua kiểu kết quả `Result`.
 
 - [ ] **Nhiệm vụ 2.1: Mô hình hóa các thực thể cốt lõi của Git (Core Entities)**
   - Định nghĩa kiểu dữ liệu mã băm Git bất biến: hỗ trợ đồng thời cả chuẩn SHA-1 truyền thống (40 ký tự hexa) và chuẩn SHA-256 hiện đại (64 ký tự hexa), tích hợp hàm sinh chuỗi viết tắt (7 ký tự) phục vụ hiển thị.
@@ -73,7 +93,9 @@ Mục tiêu là mô hình hóa toàn bộ thế giới dữ liệu Git bằng h�
 
 ### 📋 Nhóm Việc 3: Tầng Đọc Dữ Liệu Git Tốc Độ Cao Trên Windows (Fast Git Reader)
 
-Mục tiêu là đọc toàn bộ lịch sử commit trực tiếp từ cơ sở dữ liệu nhị phân của Git trong thư mục `.git` mà không cần gọi tiến trình con dòng lệnh `git.exe`.
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/03_Fast_Git_Storage_Reader.md](../02_design/001_windows/03_Fast_Git_Storage_Reader.md)**
+> 
+> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để tích hợp LibGit2 C-binding in-process qua P/Invoke, Mục 2 để triển khai module ánh xạ bộ nhớ (Memory-Mapped Files) đọc trực tiếp cấu trúc nhị phân của tệp `commit-graph` kèm cơ chế dự phòng, và Mục 3 để áp dụng kỹ thuật lát cắt bộ nhớ `ReadOnlySpan<byte>` giải mã chuỗi UTF-8 tiếng Việt chuẩn xác.
 
 - [ ] **Nhiệm vụ 3.1: Tích hợp thư viện C gốc LibGit2 trên Windows**
   - Cấu hình liên kết thư viện mã máy LibGit2 (`libgit2.dll`) tương thích hoàn toàn với chế độ Native AOT trên Windows 64-bit.
@@ -92,7 +114,9 @@ Mục tiêu là đọc toàn bộ lịch sử commit trực tiếp từ cơ sở
 
 ### 📋 Nhóm Việc 4: Thuật Toán Xếp Làn Đồ Thị Topo Song Song (Parallel DAG Solver)
 
-Mục tiêu là đưa toàn bộ gánh nặng tính toán đồ thị phức tạp ra khỏi luồng giao diện của Webview, thực thi song song đa luồng trên CPU của engine F#.
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/04_Parallel_DAG_Layout_Solver.md](../02_design/001_windows/04_Parallel_DAG_Layout_Solver.md)**
+> 
+> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để áp dụng thuật toán sắp xếp Topo xử lý các trường hợp đặc biệt (bản sao nông, nhánh mồ côi, kho đa gốc), Mục 2 để hiện thực thuật toán phân bổ làn thu gọn bên trái (Lane Pool) và cơ chế bảo toàn màu sắc nhánh, và Mục 3 để phân chia khối tính toán song song đa luồng CPU sinh mảng tọa độ hình học SVG.
 
 - [ ] **Nhiệm vụ 4.1: Chuyển đổi và tinh gọn thuật toán sắp xếp Topo (Topological Sort)**
   - Hiện thực thuật toán sắp xếp topo dựa trên phả hệ cha-con và thứ tự thời gian tạo commit, đảm bảo commit con luôn xuất hiện phía trên commit cha.
@@ -112,7 +136,9 @@ Mục tiêu là đưa toàn bộ gánh nặng tính toán đồ thị phức t�
 
 ### 📋 Nhóm Việc 5: Giao Thức Giao Tiếp Nội Bộ (IPC Daemon & Streaming)
 
-Mục tiêu là xây dựng kênh truyền thông dữ liệu siêu tốc hai chiều giữa Extension Host (Node.js) và engine F# Native AOT, loại bỏ hoàn toàn độ trễ của chuỗi JSON.
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md](../02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md)**
+> 
+> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để xây dựng module quản lý vòng đời tiến trình F# sidecar trong TypeScript (khởi động ngầm, heartbeat ping-pong, tự phục hồi khi crash, thu hồi tài nguyên an toàn), Mục 2 để đặc tả cấu trúc khung gói tin nhị phân Stdio RPC và bảng mã Opcode MessagePack, và Mục 3 để hiện thực cơ chế phân trang cửa sổ ảo (Virtual Scrolling Window Streaming).
 
 - [ ] **Nhiệm vụ 5.1: Xây dựng cơ chế quản lý vòng đời tiến trình F# Sidecar**
   - Viết module điều phối trong TypeScript: tự động khởi chạy tiến trình `neo-git-core.exe` ở chế độ chạy nền khi người dùng mở bảng Git Graph.
@@ -132,7 +158,9 @@ Mục tiêu là xây dựng kênh truyền thông dữ liệu siêu tốc hai ch
 
 ### 📋 Nhóm Việc 6: Ghép Nối Với Giao Diện Webview & Bảo Toàn Lệnh Ghi
 
-Mục tiêu là kết nối dữ liệu từ engine F# mới vào giao diện Preact hiện tại, đồng thời bảo đảm an toàn dữ liệu 100% bằng cách ủy thác mọi thao tác ghi cho Git gốc.
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/06_Webview_Integration_And_Git_Mutator.md](../02_design/001_windows/06_Webview_Integration_And_Git_Mutator.md)**
+> 
+> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để tích hợp dữ liệu hình học phẳng vào các component Preact Phase 1 (CommitTable, CommitGraph, HexagonNode, RefLabel, CommitHoverPanel, AvatarZoomPreview), Mục 2 để xây dựng module `GitCliMutator.ts` ủy thác 100% lệnh ghi cho `git.exe` gốc để bảo toàn GPG/SSH và Git Credential Manager, và Mục 3 để cài đặt File Watcher cập nhật vi sai (Debounce 150ms).
 
 - [ ] **Nhiệm vụ 6.1: Ghép nối dữ liệu hình học vào tầng Webview Preact (Phase 1)**
   - Cập nhật module tiếp nhận dữ liệu trong Webview để giải mã các gói tin nhị phân và truyền trực tiếp tọa độ hình học vào bảng commit.
@@ -151,7 +179,9 @@ Mục tiêu là kết nối dữ liệu từ engine F# mới vào giao diện Pr
 
 ### 📋 Nhóm Việc 7: Kiểm Thử Nghiệm Thu & Đo Đạc Hiệu Năng Thực Tế (Benchmarking)
 
-Mục tiêu là kiểm chứng tính đúng đắn về mặt dữ liệu và chứng minh mức cải thiện hiệu năng vượt trội so với phiên bản cũ trên môi trường Windows.
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/07_Benchmarking_And_Verification_Plan.md](../02_design/001_windows/07_Benchmarking_And_Verification_Plan.md)**
+> 
+> *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để áp dụng kế hoạch kiểm thử so sánh tính tương đương đồ thị 100% trên 3 quy mô kho mã nguồn, Mục 2 để thực hiện quy trình đo đạc 4 chỉ số hiệu năng định lượng trên Windows, và Mục 3 để đối chiếu bảng kiểm tra an toàn dữ liệu Git trước khi hoàn tất nghiệm thu.
 
 - [ ] **Nhiệm vụ 7.1: Bộ kiểm thử so sánh tính tương đương đồ thị (Equivalence Testing)**
   - Xây dựng kịch bản kiểm thử tự động so sánh kết quả tính toán đồ thị giữa thuật toán F# mới và thuật toán TypeScript cũ trên các kho mã nguồn mẫu.
@@ -164,7 +194,7 @@ Mục tiêu là kiểm chứng tính đúng đắn về mặt dữ liệu và ch
 
 ---
 
-## 3. Tiêu Chuẩn Nghiệm Thu Hoàn Thành Toàn Diện (Definition of Done - DoD)
+## 4. Tiêu Chuẩn Nghiệm Thu Hoàn Thành Toàn Diện (Definition of Done - DoD)
 
 1. **Tính Độc Lập**: File nhị phân `neo-git-core.exe` chạy độc lập hoàn toàn trên Windows 10 và Windows 11 mà không đòi hỏi cài đặt bất kỳ gói .NET runtime nào.
 2. **Hiệu Năng Vượt Trội**: Thời gian nạp và hiển thị toàn bộ đồ thị trên kho mã nguồn 50.000 commits đạt mốc **dưới 300 phần nghìn giây** (nhanh hơn từ 30 đến 50 lần so với phiên bản TypeScript cũ).
@@ -173,7 +203,8 @@ Mục tiêu là kiểm chứng tính đúng đắn về mặt dữ liệu và ch
 
 ---
 
-## 4. Nhật Ký Tiến Độ Triển Khai (Worklog & Activity Log)
+## 5. Nhật Ký Tiến Độ Triển Khai (Worklog & Activity Log)
 
 - **2026-10-03**: Khởi tạo cấu trúc tài liệu tiến độ Phase 1. Xác lập tổng quan mục tiêu, phạm vi đầu việc và tiêu chuẩn nghiệm thu cho môi trường Windows.
 - **2026-10-03**: Chi tiết hóa toàn bộ 7 nhóm công việc lớn thành 20 nhiệm vụ con (subtasks) cụ thể, xác định rõ mục tiêu kỹ thuật, luồng xử lý và tiêu chí hoàn thành cho từng nhiệm vụ.
+- **2026-10-03**: Bổ sung bảng ánh xạ tài liệu thiết kế áp dụng chi tiết cho từng nhóm việc, liên kết trực tiếp tới 7 bản thiết kế kỹ thuật tương ứng trong thư mục `docs/02_design/001_windows/`.
