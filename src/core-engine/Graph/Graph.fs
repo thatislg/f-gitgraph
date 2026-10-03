@@ -178,6 +178,8 @@ module Geometry =
         Nodes: Node[]
         /// Mảng các đường nối nhánh.
         Paths: Path[]
+        /// Cạnh (chỉ số commit con, cha) tương ứng từng phần tử của Paths.
+        Edges: struct (int * int)[]
         /// Tổng số dòng hiển thị.
         RowCount: int
         /// Số làn tối đa được cấp phát.
@@ -254,6 +256,7 @@ module Geometry =
 
         { Nodes = nodes
           Paths = paths
+          Edges = edges.ToArray()
           RowCount = n
           MaxLane = maxLane }
 

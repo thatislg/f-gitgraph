@@ -2,6 +2,7 @@ module Program
 
 open System
 open NeoGitCore.Domain
+open NeoGitCore.Transport
 
 [<EntryPoint>]
 let main argv =
@@ -16,7 +17,12 @@ let main argv =
         // Phản hồi tức thời dùng để đo lường cold-start latency (mục tiêu < 5ms).
         Console.WriteLine("ready")
         0
+    | [| "serve" |]
+    | [| "--serve" |]
+    | [||] ->
+        // Vòng lặp daemon sidecar: lắng nghe khung gói tin Stdio RPC trên stdin/stdout.
+        Daemon.run (Console.OpenStandardInput()) (Console.OpenStandardOutput())
+        0
     | _ ->
-        // Vòng lặp lắng nghe yêu cầu qua Stdio RPC sẽ được bổ sung ở Nhóm Việc 5.
         Console.WriteLine(Version.Name + " " + Version.Current + " ready")
         0
