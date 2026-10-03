@@ -10,6 +10,33 @@ export type ScanRepoResult = {
   repos: GitRepo[];
 };
 
+/** Tọa độ hình học một nút commit do nhân F# cung cấp. */
+export type GraphNode = {
+  x: number;
+  y: number;
+  lane: number;
+  color: number;
+  isMerge: boolean;
+  isRoot: boolean;
+};
+
+/** Đường nối nhánh (lệnh vẽ SVG `d`) do nhân F# cung cấp. */
+export type GraphPath = {
+  d: string;
+  color: number;
+};
+
+export type GraphLoadResult = {
+  commitCount: number;
+  maxLane: number;
+  commits: string[];
+};
+
+export type GraphWindowResult = {
+  nodes: GraphNode[];
+  paths: GraphPath[];
+};
+
 export type RpcMethodMap = {
   "clipboard.copy": {
     params: string;
@@ -26,6 +53,14 @@ export type RpcMethodMap = {
   "repo.scan": {
     params: null;
     result: ScanRepoResult;
+  };
+  "graph.load": {
+    params: { repoPath: string };
+    result: GraphLoadResult;
+  };
+  "graph.window": {
+    params: { from: number; to: number };
+    result: GraphWindowResult;
   };
 };
 
