@@ -3,6 +3,10 @@
 **/out/
 *.vsix
 
+# .NET / F# build outputs
+**/bin/
+**/obj/
+
 *.orig
 
 # nix / direnv
