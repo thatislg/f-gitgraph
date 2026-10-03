@@ -20,8 +20,8 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
 
-- **Trạng thái**: Nhóm Việc 8 (Chuẩn hóa nhận diện thương hiệu) và Nhóm Việc 9 (Dọn dẹp mã nguồn Backend TS cũ) đã hoàn thành; Nhóm Việc 10 (Thiết kế hệ thống biểu tượng & icon F-GitGraph) đang triển khai.
-- **Tiến độ tổng thể**: 9/10 nhóm việc hoàn thành (90.0%). Ghi chú: thư mục `src/old-extension/` đã được thanh lý hoàn toàn (chuyển sang `src/extension/`); tầng truy vấn TS còn lại (`loadCommits`/`loadBranches`/`commitDetails`) vẫn phụ thuộc di trú RPC metadata (xem Báo cáo 009).
+- **Trạng thái**: Nhóm Việc 8 (Chuẩn hóa thương hiệu) và Nhóm Việc 9 (Dọn dẹp mã nguồn Backend TS cũ & thanh lý `src/old-extension/`) đã hoàn thành; Nhóm Việc 10 (Hệ thống biểu tượng & icon) đang triển khai; Nhóm Việc 11 (Di trú Webview sang nhân F# Core Engine & vận hành thực tế) đã hoàn thành thiết kế chi tiết và sẵn sàng triển khai.
+- **Tiến độ tổng thể**: 9/11 nhóm việc hoàn thành (81.8%). Nhóm Việc 11 giải quyết triệt để bài toán đưa nhân F# Native AOT vào vận hành thực tế 100% trong luồng hiển thị đồ thị của Webview.
 
 ---
 
@@ -41,6 +41,7 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 | **8**  | **Dọn Dẹp Tàn Dư & Chuẩn Hóa Nhận Diện Thương Hiệu**  | **[08_Rebranding_And_Identity_Cleanup.md](../02_design/001_windows/08_Rebranding_And_Identity_Cleanup.md)**         | Tái thiết kế tài liệu README/CHANGELOG/NLS, dọn sạch metadata và tệp tàn dư.                                                                                                |
 | **9**  | **Dọn Dẹp Backend TS Cũ & Tinh Giản Tài Nguyên Thừa** | **[09_Legacy_TS_Backend_Cleanup.md](../02_design/001_windows/09_Legacy_TS_Backend_Cleanup.md)**                     | Xóa bỏ Nix và localization tiếng Trung; di chuyển domain types sang `src/types/`; xóa bỏ tầng truy vấn Git regex cũ bằng TS (`src/backend/queries/`, `src/old-extension/`). |
 | **10** | **Thiết Kế Hệ Thống Biểu Tượng & Icon F-GitGraph**    | **[10_Extension_Iconography_Design.md](../02_design/001_windows/10_Extension_Iconography_Design.md)**               | Ý tưởng sáng tạo F-Branch & Neon Hexagon, bảng kiểm kê 7 vị trí icon (128x128 PNG, 512x512 Master, SVG Webview Tab, Activity Bar, Status Bar).                              |
+| **11** | **Di Trú Webview Sang Nhân F# Core Engine**           | **[11_Webview_FSharp_Core_Migration.md](../02_design/001_windows/11_Webview_FSharp_Core_Migration.md)**           | Đưa F# vào vận hành thực tế 100%, Webview Dumb Renderer, nạp đồ thị qua RPC `graph.load`/`graph.window`, xóa `loadCommits` cũ.                                              |
 
 ---
 
@@ -285,6 +286,37 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 
 ---
 
+### 📋 Nhóm Việc 11: Di Trú Tầng Webview Sang Nhân F# Core Engine & Vận Hành Thực Tế
+
+> 📖 **Tài liệu thiết kế chi tiết áp dụng**: **[docs/02_design/001_windows/11_Webview_FSharp_Core_Migration.md](../02_design/001_windows/11_Webview_FSharp_Core_Migration.md)**
+>
+> _Nội dung thiết kế hướng dẫn_: Tham khảo Mục 1 để nắm rõ yêu cầu đưa nhân F# vào vận hành thực tế 100%, Mục 2 để áp dụng luồng dữ liệu `GraphDataBridge` và 3 phương thức RPC (`graph.load`, `graph.window`, `graph.invalidate`), Mục 3 để thực hiện cơ chế Dumb Renderer và cuộn trang ảo, và Mục 4 để hoàn thành toàn bộ 5 nhiệm vụ con chi tiết.
+
+- [x] **Nhiệm vụ 11.1: Tích hợp Cầu Nối `GraphDataBridge` vào Luồng Điều Phối Extension Host**
+  - Khởi tạo và quản lý vòng đời `GraphDataBridge` trong Extension Host, kết nối trực tiếp với thể hiện `SidecarManager` đang chạy.
+  - Xây dựng module trích xuất metadata nhanh (`MetadataProvider`) để gộp thông tin commit (tác giả, ngày tháng, thông điệp, nhãn nhánh/tag) với dữ liệu hình học phẳng từ F#.
+  - Hoàn thiện bộ xử lý RPC `graph.load` và `graph.window` trong Extension Host, trả về dữ liệu chuẩn cho Webview.
+
+- [ ] **Nhiệm vụ 11.2: Tái Cấu Trúc Tầng Store & Hành Động Trong Webview Preact**
+  - Thay thế toàn bộ logic phát yêu cầu `loadCommits` cũ trong Webview bằng lệnh gọi RPC `rpcClient.request("graph.load")`.
+  - Xây dựng Store quản lý dữ liệu đồ thị theo cửa sổ ảo (`graph-window.store.ts`): Lưu trữ danh sách dòng hiển thị, trạng thái tải và danh sách đường nối SVG.
+  - Cập nhật cơ chế cuộn trang của Webview để kích hoạt gọi RPC `graph.window` khi người dùng cuộn ra ngoài phạm vi vùng đệm an toàn.
+
+- [ ] **Nhiệm vụ 11.3: Chuyển Đổi Component `CommitGraph` Sang Vẽ Trực Tiếp Tọa Độ F#**
+  - Điều chỉnh component `CommitGraph.tsx` và `CommitRow.tsx`: Trực tiếp sử dụng thuộc tính tọa độ `(x, y)`, bán kính và đường vẽ SVG từ dữ liệu F#, loại bỏ hoàn toàn việc chạy hàm tính layout JavaScript cũ.
+  - Bảo tồn nguyên vẹn 100% các tính năng thị giác Phase 1: Nút lục giác clipping avatar, vầng sáng neon ambient, viền tím tiêu điểm khi chọn commit, panel commit message và avatar zoom 5x.
+
+- [ ] **Nhiệm vụ 11.4: Tích Hợp Cơ Chế Cập Nhật Vi Sai & Đồng Bộ Hóa Watcher**
+  - Nối sự kiện phát hiện biến động kho mã nguồn từ `git-ref.watcher` và `coalescer` vào hàm làm mới bộ nhớ đệm `sidecar.invalidate()`.
+  - Phát thông báo RPC từ Extension Host xuống Webview khi có commit mới hoặc khi chuyển nhánh, kích hoạt Webview tự động nạp lại cửa sổ hiện hành một cách mượt mà không làm mất vị trí cuộn.
+
+- [ ] **Nhiệm vụ 11.5: Thanh Lý Triệt Để Luồng Truy Vấn TS Cũ & Kiểm Định Toàn Diện**
+  - Xóa bỏ hoàn toàn mã nguồn truy vấn Git regex cũ bằng TypeScript (`src/backend/queries/loadCommits.ts`) và các thông điệp tiếp nhận tương ứng trong `messageHandler.ts`.
+  - Chạy toàn bộ các bài kiểm thử tự động (Unit Test, Integration Test, Typecheck, Lint) bảo đảm 0 lỗi biên dịch, 0 cảnh báo.
+  - Kiểm định thực tế trên kho mã nguồn quy mô lớn (50.000 commits): Xác nhận tiến trình `f-gitgraph-core.exe` vận hành thực tế 100%, phản hồi tức thời dưới 300ms và mức tiêu thụ RAM ổn định.
+
+---
+
 ## 4. Tiêu Chuẩn Nghiệm Thu Hoàn Thành Toàn Diện (Definition of Done - DoD)
 
 1. **Tính Độc Lập**: File nhị phân `f-gitgraph-core.exe` chạy độc lập hoàn toàn trên Windows 10 và Windows 11 mà không đòi hỏi cài đặt bất kỳ gói .NET runtime nào.
@@ -327,3 +359,4 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 - **2026-10-03**: Hoàn thành Nhóm Việc 8 — Chuẩn hóa nhận diện thương hiệu: quét sạch toàn bộ tàn dư `neo-git-*` khỏi mã nguồn và tài liệu người dùng (chỉ còn trong văn bản mô tả việc dọn dẹp), làm mới `CHANGELOG.md` (mốc `[Unreleased]` ghi nhận F-GitGraph + đồng bộ link `thatislg/f-gitgraph`), viết lại `README.md` theo nhận diện F-GitGraph (loại bỏ khung "fork", bổ sung kiến trúc F# và roadmap Windows → Linux → macOS → Release), xác minh `publisher`/`author`/`sponsor` thành `lmo-lab`/LMO-LAB (`lnllnl01111@gmail.com`), và đóng gói build 0 lỗi. Nhiệm vụ 8.1 (bộ tài nguyên hình ảnh) chuyển giao cho Nhóm Việc 10.
 - **2026-10-03**: Hoàn thành Nhóm Việc 9 — Dọn dẹp Backend TS cũ: (1) xóa Nix + localization tiếng Trung; (2) di chuyển toàn bộ kiểu dữ liệu sang `src/types/` (`git.ts`, `actions.ts`, `queries.ts`, `repo.ts`) và cập nhật 35 import `@/backend/types` → `@/types`, xóa `src/backend/types/`; (3) xóa dead code khung kích hoạt cũ (`old-extension/main.ts`, `initExtension.ts`, `watchForRepos.ts`, `webviewHtml.ts`, `webviewPanel.ts`, `maxDepthTracker.ts`, `statusBarItem.ts`, `constant/`) cùng `backend/queries/repoSearch.ts`, `utils/repoSearch.ts`, `utils/nonce.ts` và test tương ứng; (4) chuyển `GitCliMutator` → `src/extension/mutator/`, `avatarManager`/`diffDocProvider` → `src/extension/services/`. Kiểm định zero-regression: typecheck/lint/format 0 lỗi, vitest 174/174, F# 56/56. Ghi chú: `loadCommits`/`loadBranches`/`commitDetails` và các dịch vụ `old-extension` còn lại vẫn hoạt động (sidecar F# chưa cung cấp metadata commit/nhánh/chi tiết) — xem Báo cáo 009.
 - **2026-10-03**: Thanh lý triệt để thư mục `src/old-extension/` (bổ sung Nhóm Việc 9): chuyển các dịch vụ còn hoạt động sang `src/extension/services/` (`extensionState.ts`, `repoManager.ts`, `webviewBridge.ts`, `messageHandler.ts`), gộp hai config trùng lặp `extConfig` + `config` thành một `src/extension/config.ts` duy nhất, chuyển `l10n/webviewL10n.ts` → `src/extension/l10n/`, xóa `utils/logger.ts` (`legacyLogger` đã chết) và `tsconfig.json` rỗng cũ. Đồng thời chuẩn hóa tên thư mục kiểm thử: `tests/old-extension/` → `tests/extension/`, `tests-ext/` → `tests-e2e/` (cập nhật `vitest.config.ts`, `.vscode-test.mjs`, `.oxlintrc.json`, `package.json`, `tests/tsconfig.json`, sửa import `tests-e2e/repoManager.test.ts`). Zero-regression: typecheck/lint 0 lỗi, vitest 174/174.
+- **2026-10-03**: Hoàn thành Nhiệm vụ 11.1 — Tích hợp `GraphDataBridge` vào luồng điều phối Extension Host: thêm `src/backend/queries/commitMetadata.ts` (`getCommitMetadata` đọc tác giả/email/ngày/thông điệp/refs cho tập hash bằng `git log --no-walk`, không duyệt lịch sử), thêm `src/extension/sidecar/graph-bridge-service.ts` (singleton `loadGraph`/`loadGraphWindow`/`invalidateGraph` gắn `MetadataProvider` với `SidecarManager`), mở rộng `GraphDataBridge.initialize/invalidate` trả về `InitSuccess` đầy đủ, và định tuyến RPC `graph.load`/`graph.window` qua cầu nối trả về `GraphWindowResult` đã gộp hình học F# + metadata (`GraphRow`). Cập nhật `src/types/rpc.types.ts` (thêm `GraphRow`, đổi `GraphWindowResult` thành `{ from, rows, paths }`). Kiểm định: typecheck/lint 0 lỗi, 22 test sidecar pass. Ghi chú quan trọng cho 11.3: hệ tọa độ F# (`LaneWidth=16`, `Margin=10`) lệch với Webview (`LANE_WIDTH=20`, `LANE_OFFSET=16`) — cần đồng bộ hằng số hình học trước khi chuyển `CommitGraph` sang vẽ trực tiếp tọa độ F#.
