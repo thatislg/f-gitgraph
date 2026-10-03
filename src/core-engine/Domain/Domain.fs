@@ -7,9 +7,9 @@ namespace NeoGitCore.Domain
 /// Định danh sản phẩm và phiên bản của nhân F# Core Engine.
 module Version =
 
-    /// Tên định danh sản phẩm (trùng với tên file thực thi `neo-git-core.exe`).
+    /// Tên định danh sản phẩm (trùng với tên file thực thi `f-gitgraph-core.exe`).
     [<Literal>]
-    let Name = "neo-git-core"
+    let Name = "f-gitgraph-core"
 
     /// Phiên bản hiện tại của nhân tính toán F#.
     [<Literal>]

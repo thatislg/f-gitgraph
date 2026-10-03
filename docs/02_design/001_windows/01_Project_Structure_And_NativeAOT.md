@@ -1,6 +1,6 @@
-# 01. Thiết Kế Cấu Trúc Dự Án F# & Cấu Hình Biên Dịch Native AOT (Windows)
+﻿# 01. Thiết Kế Cấu Trúc Dự Án F# & Cấu Hình Biên Dịch Native AOT (Windows)
 
-Tài liệu này đặc tả chi tiết kiến trúc tổ chức mã nguồn, phân tách module chức năng và cơ chế biên dịch xuất bản mã máy **Native AOT** trên môi trường Windows 64-bit cho nhân tính toán Neo Git Graph.
+Tài liệu này đặc tả chi tiết kiến trúc tổ chức mã nguồn, phân tách module chức năng và cơ chế biên dịch xuất bản mã máy **Native AOT** trên môi trường Windows 64-bit cho nhân tính toán F-GitGraph.
 
 > [!NOTE]
 > Mọi nội dung trong tài liệu này tuân thủ nguyên tắc: mô tả bằng ngôn ngữ tự nhiên, tập trung vào kiến trúc và cấu hình hệ thống, không sử dụng mã nguồn mẫu.
@@ -34,13 +34,15 @@ Dự án nhân F# được đặt hoàn toàn trong thư mục `src/core-engine/
 ## 2. Cơ Chế Biên Dịch Xuất Bản Native AOT Trên Windows
 
 ### 2.1. Nguyên Lý Hoạt Động Của Native AOT
+
 - Trong mô hình .NET truyền thống, mã nguồn được biên dịch thành mã bytecode trung gian (CIL) và cần máy ảo Common Language Runtime (CLR) cùng trình biên dịch Just-In-Time (JIT) để dịch sang mã máy tại thời điểm chạy. Quá trình này đòi hỏi máy người dùng phải cài sẵn .NET Runtime và tốn thời gian khởi động JIT.
 - **Mô hình Native AOT (Ahead-Of-Time)**:
   - Trình biên dịch mã máy tối ưu hóa trước toàn bộ mã nguồn F# cùng một tập hợp con tối thiểu của runtime .NET ngay trong quá trình build trên máy của nhà phát triển.
-  - Kết hợp với bộ công cụ liên kết mã máy MSVC Linker của Windows để tạo ra một file thực thi định dạng PE (`neo-git-core.exe`) thuần túy.
+  - Kết hợp với bộ công cụ liên kết mã máy MSVC Linker của Windows để tạo ra một file thực thi định dạng PE (`f-gitgraph-core.exe`) thuần túy.
   - Khi người dùng chạy file này trên Windows, hệ điều hành nạp trực tiếp mã máy vào bộ nhớ và thực thi ngay lập tức, không qua bất kỳ lớp thông dịch hay JIT nào.
 
 ### 2.2. Các Thiết Lập Tối Ưu Hóa Biên Dịch Bắt Buộc
+
 1. **Thiết lập Nền tảng Mục tiêu**:
    - Định danh hệ điều hành và kiến trúc: Windows 64-bit (`win-x64`).
    - Chế độ tự chứa toàn diện (Self-Contained): Nhúng toàn bộ các thành phần runtime cơ bản vào chính file thực thi.
@@ -59,10 +61,12 @@ Dự án nhân F# được đặt hoàn toàn trong thư mục `src/core-engine/
 ## 3. Tối Ưu Hóa Kích Thước File & Độ Trễ Khởi Động Lạnh
 
 ### 3.1. Mục Tiêu Dung Lượng File (< 10MB)
-- Nhờ áp dụng đồng thời kỹ thuật cắt tỉa mã nguồn và liên kết tĩnh, file `neo-git-core.exe` đầu ra đạt kích thước nằm trong khoảng tối ưu **từ 6MB đến 9MB**.
+
+- Nhờ áp dụng đồng thời kỹ thuật cắt tỉa mã nguồn và liên kết tĩnh, file `f-gitgraph-core.exe` đầu ra đạt kích thước nằm trong khoảng tối ưu **từ 6MB đến 9MB**.
 - Mức dung lượng này hoàn toàn nhẹ nhàng, giúp gói cài đặt extension VSIX giữ được tính nhỏ gọn, thuận tiện cho việc chia sẻ và cài đặt nhanh chóng.
 
 ### 3.2. Mục Tiêu Độ Trễ Khởi Động Lạnh (< 5ms)
+
 - Không có bước nạp JIT: Hệ điều hành Windows chỉ việc ánh xạ các trang mã máy từ ổ đĩa vào RAM và nhảy thẳng đến điểm nhập của chương trình.
 - Cấu trúc vùng nhớ heap ban đầu được định lượng trước (Pre-sized Heap), tránh việc hệ điều hành phải cấp phát lại vùng nhớ liên tục trong giây đầu tiên.
 - Kết quả kiểm thử kỳ vọng: Thời gian từ khi lệnh gọi tiến trình được phát ra từ Node.js đến khi F# gửi lại thông điệp sẵn sàng đầu tiên đạt **dưới 5 phần nghìn giây**.
@@ -76,7 +80,7 @@ Dự án nhân F# được đặt hoàn toàn trong thư mục `src/core-engine/
 1. **Chuẩn Bị Môi Trường Kiểm Thử**:
    - Sử dụng một máy ảo Windows 10 hoặc Windows 11 mới cài đặt nguyên bản (Clean Windows Environment), hoàn toàn không cài đặt Visual Studio, .NET SDK hay bất kỳ phiên bản .NET Framework/Runtime tùy biến nào.
 2. **Kịch Bản Kiểm Tra Khởi Động Độc Lập**:
-   - Sao chép trực tiếp file `neo-git-core.exe` vào máy ảo sạch.
+   - Sao chép trực tiếp file `f-gitgraph-core.exe` vào máy ảo sạch.
    - Chạy lệnh kiểm tra phiên bản hoặc lệnh phản hồi tức thời từ Command Prompt.
    - Tiêu chí đạt: File thực thi chạy thành công tức thì, trả về đúng mã định danh phiên bản và mã thoát 0 mà không đòi hỏi người dùng phải tải thêm bất kỳ gói cập nhật nào từ Microsoft.
 3. **Kiểm Tra Tính Toàn Vẹn Của Các Thư Viện C Gốc**:

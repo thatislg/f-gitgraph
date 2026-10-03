@@ -1,4 +1,4 @@
-# Báo Cáo Kiểm Định Tính Độc Lập File Nhị Phân Native AOT (Nhóm Việc 1)
+﻿# Báo Cáo Kiểm Định Tính Độc Lập File Nhị Phân Native AOT (Nhóm Việc 1)
 
 > **Mã báo cáo**: 001_NativeAOT_Independence_Report
 > **Giai đoạn**: Phase 1 — Windows First Milestone
@@ -10,7 +10,7 @@
 
 ## 1. Mục Tiêu Báo Cáo
 
-Báo cáo này ghi nhận kết quả kiểm định tính độc lập của file nhị phân `neo-git-core.exe` được biên dịch bằng cơ chế **Native AOT** trên môi trường Windows, bao gồm:
+Báo cáo này ghi nhận kết quả kiểm định tính độc lập của file nhị phân `f-gitgraph-core.exe` được biên dịch bằng cơ chế **Native AOT** trên môi trường Windows, bao gồm:
 
 - Xác nhận file thực thi chạy độc lập hoàn toàn, không phụ thuộc .NET SDK/Runtime.
 - Đo đạc dung lượng file nhị phân thực tế.
@@ -21,36 +21,36 @@ Báo cáo này ghi nhận kết quả kiểm định tính độc lập của fi
 
 ## 2. Môi Trường Biên Dịch & Cấu Hình Áp Dụng
 
-| Hạng mục | Giá trị |
-| :--- | :--- |
-| Hệ điều hành biên dịch | Windows (64-bit) |
-| .NET SDK | 10.0.401 |
-| Framework mục tiêu | `net10.0` (LTS) |
-| Runtime Identifier | `win-x64` |
-| Bộ công cụ C++ (MSVC Build Tools) | 14.50.35717 |
-| Dự án | `src/core-engine/core-engine.fsproj` |
+| Hạng mục                          | Giá trị                              |
+| :-------------------------------- | :----------------------------------- |
+| Hệ điều hành biên dịch            | Windows (64-bit)                     |
+| .NET SDK                          | 10.0.401                             |
+| Framework mục tiêu                | `net10.0` (LTS)                      |
+| Runtime Identifier                | `win-x64`                            |
+| Bộ công cụ C++ (MSVC Build Tools) | 14.50.35717                          |
+| Dự án                             | `src/core-engine/core-engine.fsproj` |
 
 ### Các thiết lập Native AOT đã kích hoạt
 
-| Thiết lập | Giá trị | Mục đích |
-| :--- | :--- | :--- |
-| `PublishAot` | `true` | Biên dịch trước mã máy, loại bỏ CIL/JIT |
-| `SelfContained` | `true` | Tự chứa runtime tối thiểu |
-| `PublishTrimmed` | `true` | Cắt tỉa mã nguồn tích cực |
-| `InvariantGlobalization` | `true` | Loại bỏ bảng tra cứu văn hóa |
-| `StripSymbols` | `true` | Lược bỏ biểu tượng gỡ lỗi khỏi nhị phân |
-| `OptimizationPreference` / `IlcOptimizationPreference` | `Size` | Tối ưu hóa kích thước |
-| `IlcGenerateStackTraceData` | `false` | Không phát sinh dữ liệu stack trace |
-| `IlcFoldIdenticalMethodBodies` | `true` | Hợp nhất thân phương thức trùng lặp |
+| Thiết lập                                              | Giá trị | Mục đích                                |
+| :----------------------------------------------------- | :------ | :-------------------------------------- |
+| `PublishAot`                                           | `true`  | Biên dịch trước mã máy, loại bỏ CIL/JIT |
+| `SelfContained`                                        | `true`  | Tự chứa runtime tối thiểu               |
+| `PublishTrimmed`                                       | `true`  | Cắt tỉa mã nguồn tích cực               |
+| `InvariantGlobalization`                               | `true`  | Loại bỏ bảng tra cứu văn hóa            |
+| `StripSymbols`                                         | `true`  | Lược bỏ biểu tượng gỡ lỗi khỏi nhị phân |
+| `OptimizationPreference` / `IlcOptimizationPreference` | `Size`  | Tối ưu hóa kích thước                   |
+| `IlcGenerateStackTraceData`                            | `false` | Không phát sinh dữ liệu stack trace     |
+| `IlcFoldIdenticalMethodBodies`                         | `true`  | Hợp nhất thân phương thức trùng lặp     |
 
 ---
 
 ## 3. Kết Quả Đo Đạc Dung Lượng File Nhị Phân
 
-| Hạng mục | Kích thước (bytes) | Kích thước (đọc được) |
-| :--- | ---: | :--- |
-| `neo-git-core.exe` | 862.720 | ~0,84 MB (842 KiB) |
-| `neo-git-core.pdb` (biểu tượng gỡ lỗi, tách riêng) | 5.795.840 | ~5,53 MB |
+| Hạng mục                                           | Kích thước (bytes) | Kích thước (đọc được) |
+| :------------------------------------------------- | -----------------: | :-------------------- |
+| `f-gitgraph-core.exe`                                 |            862.720 | ~0,84 MB (842 KiB)    |
+| `f-gitgraph-core.pdb` (biểu tượng gỡ lỗi, tách riêng) |          5.795.840 | ~5,53 MB              |
 
 **Đánh giá so với mục tiêu**:
 
@@ -62,14 +62,14 @@ Báo cáo này ghi nhận kết quả kiểm định tính độc lập của fi
 
 ## 4. Kết Quả Đo Đạc Thời Gian Khởi Động Lạnh (Cold-start Latency)
 
-Phương pháp đo: lặp 20 lần lệnh `ping` (phản hồi tức thời), đo bằng `System.Diagnostics.Stopwatch`. Kịch bản đo có thể tái hiện bằng script **[measure_cold_start.ps1](./measure_cold_start.ps1)** (tự tìm file `neo-git-core.exe` trong bản phát hành, chạy: `powershell -NoProfile -ExecutionPolicy Bypass -File measure_cold_start.ps1`).
+Phương pháp đo: lặp 20 lần lệnh `ping` (phản hồi tức thời), đo bằng `System.Diagnostics.Stopwatch`. Kịch bản đo có thể tái hiện bằng script **[measure_cold_start.ps1](./measure_cold_start.ps1)** (tự tìm file `f-gitgraph-core.exe` trong bản phát hành, chạy: `powershell -NoProfile -ExecutionPolicy Bypass -File measure_cold_start.ps1`).
 
-| Chỉ số | Giá trị |
-| :--- | ---: |
-| Số lần đo | 20 |
-| Tối thiểu (min) | 29,141 ms |
+| Chỉ số           |   Giá trị |
+| :--------------- | --------: |
+| Số lần đo        |        20 |
+| Tối thiểu (min)  | 29,141 ms |
 | Trung bình (avg) | 37,473 ms |
-| Tối đa (max) | 56,525 ms |
+| Tối đa (max)     | 56,525 ms |
 
 **Đánh giá so với mục tiêu**:
 
@@ -86,34 +86,34 @@ Phương pháp đo: lặp 20 lần lệnh `ping` (phản hồi tức thời), đ
 
 Thư mục `bin/Release/net10.0/win-x64/publish/` chỉ chứa duy nhất:
 
-- `neo-git-core.exe` (file thực thi mã máy thuần túy)
-- `neo-git-core.pdb` (biểu tượng gỡ lỗi, tách riêng, không nằm trong file `.exe`)
+- `f-gitgraph-core.exe` (file thực thi mã máy thuần túy)
+- `f-gitgraph-core.pdb` (biểu tượng gỡ lỗi, tách riêng, không nằm trong file `.exe`)
 
 **Không tồn tại** bất kỳ DLL runtime .NET nào (`coreclr.dll`, `System.Private.CoreLib.dll`, ...) trong thư mục phát hành — xác nhận tính tự chứa (self-contained) của nhị phân AOT.
 
 ### 5.2. Kiểm tra lệnh phản hồi tức thời
 
-| Lệnh | Kết quả đầu ra | Mã thoát |
-| :--- | :--- | :---: |
-| `neo-git-core.exe --version` | `neo-git-core 0.1.0` | 0 |
-| `neo-git-core.exe ping` | `ready` | 0 |
+| Lệnh                         | Kết quả đầu ra       | Mã thoát |
+| :--------------------------- | :------------------- | :------: |
+| `f-gitgraph-core.exe --version` | `f-gitgraph-core 0.1.0` |    0     |
+| `f-gitgraph-core.exe ping`      | `ready`              |    0     |
 
 ### 5.3. Hạn chế cần bổ sung
 
 - **Chưa thực hiện** kiểm định trên máy ảo Windows sạch (không cài .NET SDK/Runtime) do giới hạn môi trường. Tính độc lập hiện được khẳng định gián tiếp qua cấu trúc nhị phân AOT tự chứa (Mục 5.1).
-- **Khuyến nghị**: trước khi nghiệm thu chính thức, cần sao chép `neo-git-core.exe` vào máy ảo Windows 10/11 nguyên bản và chạy lệnh `--version` để xác nhận mã thoát 0 mà không yêu cầu cài đặt gì thêm.
+- **Khuyến nghị**: trước khi nghiệm thu chính thức, cần sao chép `f-gitgraph-core.exe` vào máy ảo Windows 10/11 nguyên bản và chạy lệnh `--version` để xác nhận mã thoát 0 mà không yêu cầu cài đặt gì thêm.
 
 ---
 
 ## 6. Kết Luận
 
-| Tiêu chí | Trạng thái | Ghi chú |
-| :--- | :---: | :--- |
-| Khởi tạo dự án F# phân tầng module | ✅ Đạt | `Domain` / `Storage` / `Graph` / `Transport` / `Program` |
-| Biên dịch Native AOT thành công | ✅ Đạt | Sinh mã máy qua MSVC Build Tools 14.50 |
-| Tính độc lập (self-contained) | ✅ Đạt | Không có DLL runtime .NET trong bản phát hành |
-| Kích thước nhị phân 6–9 MB | ⚠️ Dưới ngưỡng | 0,84 MB — sẽ tăng khi bổ sung tính năng |
-| Cold-start < 5 ms | ❌ Chưa đạt | ~37 ms, do chi phí spawn tiến trình Windows |
-| Kiểm định trên máy Windows sạch | ⏳ Chờ thực hiện | Cần máy ảo nguyên bản |
+| Tiêu chí                           |    Trạng thái    | Ghi chú                                                  |
+| :--------------------------------- | :--------------: | :------------------------------------------------------- |
+| Khởi tạo dự án F# phân tầng module |      ✅ Đạt      | `Domain` / `Storage` / `Graph` / `Transport` / `Program` |
+| Biên dịch Native AOT thành công    |      ✅ Đạt      | Sinh mã máy qua MSVC Build Tools 14.50                   |
+| Tính độc lập (self-contained)      |      ✅ Đạt      | Không có DLL runtime .NET trong bản phát hành            |
+| Kích thước nhị phân 6–9 MB         |  ⚠️ Dưới ngưỡng  | 0,84 MB — sẽ tăng khi bổ sung tính năng                  |
+| Cold-start < 5 ms                  |   ❌ Chưa đạt    | ~37 ms, do chi phí spawn tiến trình Windows              |
+| Kiểm định trên máy Windows sạch    | ⏳ Chờ thực hiện | Cần máy ảo nguyên bản                                    |
 
 **Nhận định tổng thể**: Nền móng dự án F# Native AOT đã được thiết lập thành công và biên dịch ra nhị phân mã máy độc lập đúng kỳ vọng. Hai điểm cần theo dõi tiếp là (1) cold-start < 5 ms chỉ khả thi với mô hình daemon thường trú ở Nhóm Việc 5, và (2) kiểm định thực tế trên máy Windows sạch trước khi nghiệm thu.

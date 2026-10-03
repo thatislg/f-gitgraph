@@ -1,6 +1,7 @@
-# 03. Nhật Ký Tiến Độ & Báo Cáo Thực Hiện (Progress & Worklogs)
+﻿# 03. Nhật Ký Tiến Độ & Báo Cáo Thực Hiện (Progress & Worklogs)
 
-Thư mục này ghi nhận toàn bộ tiến trình triển khai thực tế của dự án Neo Git Graph:
+Thư mục này ghi nhận toàn bộ tiến trình triển khai thực tế của dự án F-GitGraph:
+
 - Nhật ký thực hiện theo từng chặng (Milestone Tracking: Windows -> Linux -> macOS).
 - Báo cáo kết quả kiểm thử và benchmark đo đạc hiệu năng thực tế.
 - Biên bản nghiệm thu theo từng tiêu chí kỹ thuật (Definition of Done - DoD).
@@ -18,5 +19,3 @@ Thư mục này ghi nhận toàn bộ tiến trình triển khai thực tế c�
   Hoàn thiện nhân F# trên macOS (Apple Silicon M-series ARM64 & Intel x64), xử lý rào cản bảo mật Apple Gatekeeper, kiểm thử hiển thị mượt mà trên màn hình Retina 120Hz.
 - **[Phase 4: Unified Packaging & Release Milestone](004_release_progress.md)**:
   Tự động hóa CI/CD xuất bản đa nền tảng, đóng gói gói cài đặt toàn diện Universal VSIX (~30-35MB) và nghiệm thu an toàn 100% cho mọi thao tác Git.
-
-

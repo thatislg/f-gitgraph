@@ -7,7 +7,7 @@ export function initConfigWatcher(): vscode.Disposable {
   return vscode.workspace.onDidChangeConfiguration((e) => {
     if (
       e.affectsConfiguration("git.path") ||
-      e.affectsConfiguration("neo-git-graph.maxDepthOfRepoSearch")
+      e.affectsConfiguration("f-gitgraph.maxDepthOfRepoSearch")
     ) {
       logger.info("Configuration changed");
       void rpcNotify.notify("repo.rescan", null);

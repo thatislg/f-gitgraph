@@ -20,13 +20,13 @@ Báo cáo này ghi nhận kết quả xây dựng ba hợp phần ghép nối gi
 
 ## 2. Cấu Trúc Mã Nguồn
 
-| File | Nội dung |
-| :--- | :--- |
-| `src/extension/sidecar/graph-merge.ts` | Gộp hình học + metadata commit (hàm thuần, kiểm thử độc lập) |
-| `src/extension/sidecar/graph-data-bridge.ts` | `GraphDataBridge` điều phối sidecar + metadata |
-| `src/backend/gitCliMutator.ts` | `GitCliMutator` ủy thác lệnh ghi cho `git.exe` |
-| `src/extension/watchers/git-ref.watcher.ts` | Theo dõi `.git/HEAD` + `.git/refs/**` |
-| `src/extension/util/coalescer.ts` | Cơ chế gom sự kiện (debounce) |
+| File                                         | Nội dung                                                     |
+| :------------------------------------------- | :----------------------------------------------------------- |
+| `src/extension/sidecar/graph-merge.ts`       | Gộp hình học + metadata commit (hàm thuần, kiểm thử độc lập) |
+| `src/extension/sidecar/graph-data-bridge.ts` | `GraphDataBridge` điều phối sidecar + metadata               |
+| `src/backend/gitCliMutator.ts`               | `GitCliMutator` ủy thác lệnh ghi cho `git.exe`               |
+| `src/extension/watchers/git-ref.watcher.ts`  | Theo dõi `.git/HEAD` + `.git/refs/**`                        |
+| `src/extension/util/coalescer.ts`            | Cơ chế gom sự kiện (debounce)                                |
 
 ---
 
@@ -55,13 +55,13 @@ Báo cáo này ghi nhận kết quả xây dựng ba hợp phần ghép nối gi
 
 ## 6. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `gitCliMutator.test.ts` (thao tác ghi trên kho Git thật) | 6/6 pass |
-| `graph-merge.test.ts` (gộp hình học + metadata) | 2/2 pass |
-| `coalescer.test.ts` (debounce/coalescing, fake timers) | 3/3 pass |
-| Tổng backend vitest (nhóm này) | **28/28 pass** |
-| Typecheck + lint (oxlint) + format (oxfmt) | ✅ Đạt |
+| Hạng mục                                                 | Kết quả        |
+| :------------------------------------------------------- | :------------- |
+| `gitCliMutator.test.ts` (thao tác ghi trên kho Git thật) | 6/6 pass       |
+| `graph-merge.test.ts` (gộp hình học + metadata)          | 2/2 pass       |
+| `coalescer.test.ts` (debounce/coalescing, fake timers)   | 3/3 pass       |
+| Tổng backend vitest (nhóm này)                           | **28/28 pass** |
+| Typecheck + lint (oxlint) + format (oxfmt)               | ✅ Đạt         |
 
 Ghi chú: hai file `repoSearch.test.ts` (backend/utils và backend/queries) thất bại sẵn từ trước, không liên quan Nhóm Việc 6.
 
@@ -77,10 +77,10 @@ Ghi chú: hai file `repoSearch.test.ts` (backend/utils và backend/queries) th�
 
 ## 8. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Cầu nối dữ liệu hình học (bridge) | ✅ Đạt |
-| Thực thi lệnh ghi an toàn qua `git.exe` | ✅ Đạt |
-| File Watcher + debounce cập nhật vi sai | ✅ Đạt |
-| Kiểm thử backend | ✅ 28/28 |
-| Typecheck + lint + format | ✅ Đạt |
+| Tiêu chí                                | Trạng thái |
+| :-------------------------------------- | :--------: |
+| Cầu nối dữ liệu hình học (bridge)       |   ✅ Đạt   |
+| Thực thi lệnh ghi an toàn qua `git.exe` |   ✅ Đạt   |
+| File Watcher + debounce cập nhật vi sai |   ✅ Đạt   |
+| Kiểm thử backend                        |  ✅ 28/28  |
+| Typecheck + lint + format               |   ✅ Đạt   |

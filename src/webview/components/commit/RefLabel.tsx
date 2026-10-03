@@ -46,8 +46,7 @@ export function RefLabel({ gitRef, active }: { gitRef: GitRef; active: boolean }
   const menuOpen = activeSource.value === source;
 
   const isPrerelease =
-    gitRef.type === "tag" &&
-    /-(rc|beta|alpha|preview|next|canary)\b/i.test(gitRef.name);
+    gitRef.type === "tag" && /-(rc|beta|alpha|preview|next|canary)\b/i.test(gitRef.name);
 
   const pillTheme =
     gitRef.type === "tag"

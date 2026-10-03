@@ -1,6 +1,6 @@
-# Phase 1: Avatar, Hexagon Node, Hover & Commit Message Panel
+﻿# Phase 1: Avatar, Hexagon Node, Hover & Commit Message Panel
 
-Tài liệu chi tiết về quá trình nghiên cứu, thiết kế và cài đặt toàn bộ hệ thống Avatar lục giác, hiệu ứng Neon Ambient, tương tác Zoom và Panel hiển thị Commit Message trong Neo Git Graph.
+Tài liệu chi tiết về quá trình nghiên cứu, thiết kế và cài đặt toàn bộ hệ thống Avatar lục giác, hiệu ứng Neon Ambient, tương tác Zoom và Panel hiển thị Commit Message trong F-GitGraph.
 
 ---
 

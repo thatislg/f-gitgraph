@@ -22,7 +22,7 @@ export function createViewCommand(ctx: vscode.ExtensionContext) {
     }
 
     const webPanel = vscode.window.createWebviewPanel(
-      "neo-git-graph",
+      "f-gitgraph",
       EXTENSION_NAME,
       vscode.window.activeTextEditor?.viewColumn ?? vscode.ViewColumn.One,
       {

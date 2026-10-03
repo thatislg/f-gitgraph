@@ -34,14 +34,14 @@ function registerViewCommand(
 ) {
   let currentPanel: WebviewPanel | undefined;
   ctx.subscriptions.push(
-    vscode.commands.registerCommand("neo-git-graph.view", () => {
+    vscode.commands.registerCommand("f-gitgraph.view", () => {
       if (currentPanel) {
         currentPanel.reveal(vscode.window.activeTextEditor?.viewColumn);
         return;
       }
 
       const vsPanel = vscode.window.createWebviewPanel(
-        "neo-git-graph",
+        "f-gitgraph",
         EXTENSION_NAME,
         vscode.window.activeTextEditor?.viewColumn ?? vscode.ViewColumn.One,
         {
@@ -96,7 +96,7 @@ export function initExtension(
     const avatarManager = new AvatarManager(config.gitPath, extensionState);
 
     ctx.subscriptions.push(
-      vscode.commands.registerCommand("neo-git-graph.clearAvatarCache", () => {
+      vscode.commands.registerCommand("f-gitgraph.clearAvatarCache", () => {
         avatarManager.clearCache();
       })
     );
@@ -158,11 +158,11 @@ export function initExtension(
         }
       }),
       vscode.workspace.onDidChangeConfiguration((e) => {
-        if (e.affectsConfiguration("neo-git-graph.showStatusBarItem")) {
+        if (e.affectsConfiguration("f-gitgraph.showStatusBarItem")) {
           statusBarItem.refresh();
         } else if (e.affectsConfiguration("git.path")) {
           gitClient.setGitPath(config.gitPath());
-        } else if (e.affectsConfiguration("neo-git-graph.maxDepthOfRepoSearch")) {
+        } else if (e.affectsConfiguration("f-gitgraph.maxDepthOfRepoSearch")) {
           if (maxDepth.increased(config.maxDepthOfRepoSearch())) {
             const paths = (vscode.workspace.workspaceFolders ?? []).map((f) => f.uri.fsPath);
             void findGitRepos(paths, config.gitPath(), config.maxDepthOfRepoSearch()).then(

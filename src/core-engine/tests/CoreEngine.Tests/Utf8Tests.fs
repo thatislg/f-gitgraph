@@ -24,5 +24,5 @@ let ``decode handles Vietnamese UTF-8`` () =
 
 [<Fact>]
 let ``decode handles emoji`` () =
-    let bytes = Encoding.UTF8.GetBytes("🚀 neo-git-graph")
-    Assert.Equal("🚀 neo-git-graph", Utf8.decode (ReadOnlySpan<byte>(bytes)))
+    let bytes = Encoding.UTF8.GetBytes("🚀 F-GitGraph")
+    Assert.Equal("🚀 F-GitGraph", Utf8.decode (ReadOnlySpan<byte>(bytes)))

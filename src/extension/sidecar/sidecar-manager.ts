@@ -18,12 +18,33 @@ import {
   type RangeData
 } from "./protocol";
 
-// Module điều phối vòng đời tiến trình F# sidecar (neo-git-core.exe) và máy khách
+// Module điều phối vòng đời tiến trình F# sidecar (f-gitgraph-core.exe) và máy khách
 // RPC nhị phân qua đường ống stdin/stdout. Tham khảo thiết kế:
 // docs/02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md (Mục 1 & 2).
 
 const HEARTBEAT_INTERVAL_MS = 10_000;
 const READY_TIMEOUT_MS = 5_000;
+
+/// Tên nhị phân sidecar (Nhân F# Native AOT) và thư viện C gốc LibGit2.
+const SIDECAR_EXECUTABLE = "f-gitgraph-core.exe";
+const SIDECAR_LIBGIT2 = "git2-5853918.dll";
+
+/**
+ * Phân giải đường dẫn tuyệt đối tới nhị phân sidecar trong thư mục phân phối nội
+ * bộ `bin/win-x64/`. Dùng `context.asAbsolutePath` để hoạt động đúng cả trong môi
+ * trường phát triển (F5 Extension Host) lẫn môi trường đã cài từ gói VSIX.
+ */
+export function resolveSidecarBinaryPath(context: vscode.ExtensionContext): string {
+  return context.asAbsolutePath(`bin/win-x64/${SIDECAR_EXECUTABLE}`);
+}
+
+/**
+ * Phân giải đường dẫn tuyệt đối tới thư viện C gốc LibGit2. Đặt cạnh nhị phân trong
+ * cùng thư mục `bin/win-x64/` để P/Invoke của nhân F# nạp được qua tên file.
+ */
+export function resolveSidecarLibGit2Path(context: vscode.ExtensionContext): string {
+  return context.asAbsolutePath(`bin/win-x64/${SIDECAR_LIBGIT2}`);
+}
 
 type PendingRequest = {
   resolve: (frame: Frame) => void;
@@ -43,11 +64,16 @@ export class SidecarManager implements vscode.Disposable {
 
   constructor(private readonly exePath: string) {}
 
+  /** Tạo trình quản lý sidecar trỏ tới nhị phân trong thư mục phân phối nội bộ. */
+  static create(context: vscode.ExtensionContext): SidecarManager {
+    return new SidecarManager(resolveSidecarBinaryPath(context));
+  }
+
   async start(): Promise<void> {
     const ready = new Promise<void>((resolve, reject) => {
       this.readyResolve = resolve;
       this.readyTimer = setTimeout(() => {
-        reject(new Error("hết thời gian chờ tín hiệu sẵn sàng từ neo-git-core"));
+        reject(new Error("hết thời gian chờ tín hiệu sẵn sàng từ f-gitgraph-core"));
       }, READY_TIMEOUT_MS);
     });
 
@@ -57,7 +83,7 @@ export class SidecarManager implements vscode.Disposable {
 
     this.child.stdout?.on("data", (chunk: Buffer) => this.onData(new Uint8Array(chunk)));
     this.child.stderr?.on("data", (chunk: Buffer) =>
-      logger.debug(`neo-git-core stderr: ${chunk.toString()}`)
+      logger.debug(`f-gitgraph-core stderr: ${chunk.toString()}`)
     );
     this.child.on("exit", (code) => this.onExit(code));
 
@@ -152,7 +178,7 @@ export class SidecarManager implements vscode.Disposable {
       if (pending !== undefined) {
         this.pending.delete(frame.sequence);
         const err = decodeError(frame.payload);
-        pending.reject(new Error(`neo-git-core (${err.code}): ${err.message}`));
+        pending.reject(new Error(`f-gitgraph-core (${err.code}): ${err.message}`));
       }
       return;
     }
@@ -171,7 +197,7 @@ export class SidecarManager implements vscode.Disposable {
       return;
     }
     // Tự phục hồi: khởi động lại tiến trình và tái lập kết nối.
-    logger.warn(`neo-git-core thoát bất ngờ (${code}); khởi động lại...`);
+    logger.warn(`f-gitgraph-core thoát bất ngờ (${code}); khởi động lại...`);
     void this.start().catch((err) =>
       logger.error(`Không thể khởi động lại sidecar: ${err.message}`)
     );

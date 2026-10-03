@@ -7,6 +7,7 @@ Trong phiên bản trước (Tài liệu 06), hiệu ứng **Neon Ambient Highli
 Đối với các dòng chưa được chọn, khi người dùng rê chuột qua (`mouse move over`), dòng chỉ có hiệu ứng sáng nền nhẹ mặc định (`hover:bg-table-hover`), thiếu đi độ sinh động và cảm giác neon đặc trưng.
 
 **Yêu cầu mới**:
+
 - Bổ sung hiệu ứng **Neon Ambient Highlight** khi **rê chuột (`mouse move over`)** qua bất kỳ dòng commit nào (kể cả dòng chưa được chọn).
 - Giữ nguyên các đặc tính hình học đã thiết lập:
   - Vùng bên trái avatar tới mép phải avatar: hoàn toàn trong suốt (`transparent`).
@@ -22,13 +23,17 @@ Trong phiên bản trước (Tài liệu 06), hiệu ứng **Neon Ambient Highli
 ## 2. Thiết kế chi tiết (Technical Implementation)
 
 ### 2.1. Quản lý trạng thái Hover tại dòng commit
+
 Trong component `CommitRow.tsx`:
+
 - Quản lý trạng thái hover cục bộ: `const [isRowHovered, setIsRowHovered] = useState(false);`.
 - Khi `handleMouseEnter`: cập nhật `setIsRowHovered(true)` và gọi callback `onHover?.(true)`.
 - Khi `handleMouseLeave`: cập nhật `setIsRowHovered(false)` và gọi callback `onHover?.(false)`.
 
 ### 2.2. Công thức phối màu dải sáng Neon theo trạng thái
+
 - **Trường hợp 1: Dòng được click chọn (`expanded = true`)**:
+
   ```css
   background: linear-gradient(
     to right,
@@ -42,6 +47,7 @@ Trong component `CommitRow.tsx`:
   ```
 
 - **Trường hợp 2: Dòng được rê chuột (`isRowHovered = true`, `expanded = false`)**:
+
   ```css
   background: linear-gradient(
     to right,
@@ -60,6 +66,7 @@ Trong component `CommitRow.tsx`:
 ---
 
 ## 3. Danh sách tệp tin thay đổi
+
 1. `src/webview/components/commit/CommitRow.tsx`: Tích hợp trạng thái `isRowHovered`, áp dụng gradient neon ambient cho cả hover và selected.
 2. `tests/webview/components/commit/CommitRow.test.ts`: Bổ sung kiểm thử unit test cho hiệu ứng neon khi hover.
 3. `docs/README.md`: Cập nhật mục lục tài liệu.

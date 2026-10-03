@@ -1,6 +1,7 @@
-# 04. Báo Cáo Nghiệm Thu & Đo Đạc Hiệu Năng (Reports & Verification)
+﻿# 04. Báo Cáo Nghiệm Thu & Đo Đạc Hiệu Năng (Reports & Verification)
 
-Thư mục này lưu trữ toàn bộ các biên bản kiểm thử, báo cáo đo đạc hiệu năng (Benchmarking Reports) và biên bản nghiệm thu kỹ thuật (Sign-off Reports) theo từng giai đoạn triển khai của dự án Neo Git Graph:
+Thư mục này lưu trữ toàn bộ các biên bản kiểm thử, báo cáo đo đạc hiệu năng (Benchmarking Reports) và biên bản nghiệm thu kỹ thuật (Sign-off Reports) theo từng giai đoạn triển khai của dự án F-GitGraph:
+
 - Báo cáo đo đạc 4 chỉ số hiệu năng định lượng (thời gian nạp, RAM, FPS cuộn trang, độ trễ IPC).
 - Báo cáo kiểm thử so sánh tính tương đương đồ thị 100% giữa thuật toán mới và phiên bản cũ.
 - Báo cáo nghiệm thu an toàn dữ liệu đối với các thao tác Git mutation (commit, push, merge, rebase).

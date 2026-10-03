@@ -1,7 +1,7 @@
 <div align="center">
   <img src="./resources/icon.png" height="128"/>
   <samp>
-    <h1>(neo) Git Graph for Visual Studio Code</h1>
+    <h1>F-GitGraph for Visual Studio Code</h1>
     <h3>An MIT-licensed fork of Git Graph with visual history, branch actions, and devcontainer support.</h3>
   </samp>
 </div>
@@ -16,9 +16,9 @@
 </h4>
 
 <p align="center">
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/asispts/neo-git-graph" alt="License"></a>
-  <a href="https://github.com/asispts/neo-git-graph/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/asispts/neo-git-graph"></a>
-  <a href="https://open-vsx.org/extension/asispts/neo-git-graph"><img alt="open-vsx downloads" src="https://img.shields.io/open-vsx/dt/asispts/neo-git-graph?label=open-vsx"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/thatislg/f-gitgraph" alt="License"></a>
+  <a href="https://github.com/thatislg/f-gitgraph/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/thatislg/f-gitgraph"></a>
+  <a href="https://open-vsx.org/extension/asispts/f-gitgraph"><img alt="open-vsx downloads" src="https://img.shields.io/open-vsx/dt/asispts/f-gitgraph?label=open-vsx"></a>
 </p>
 
 <!-- ![demo](resources/demo.gif) -->
@@ -52,10 +52,10 @@ This fork:
 
 ## Installation
 
-Search for `neo-git-graph` in Extensions, or install from:
+Search for `f-gitgraph` in Extensions, or install from:
 
-- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=asispts.neo-git-graph)
-- [Open VSX Registry](https://open-vsx.org/extension/asispts/neo-git-graph)
+- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=asispts.f-gitgraph)
+- [Open VSX Registry](https://open-vsx.org/extension/asispts/f-gitgraph)
 
 ## Roadmap
 
@@ -71,7 +71,7 @@ Search for `neo-git-graph` in Extensions, or install from:
 
 ## Configuration
 
-All settings use the `neo-git-graph` prefix.
+All settings use the `f-gitgraph` prefix.
 
 | Setting                       | Default         | Description                                                            |
 | ----------------------------- | --------------- | ---------------------------------------------------------------------- |
@@ -92,7 +92,7 @@ All settings use the `neo-git-graph` prefix.
 
 Pull requests from external contributors are currently limited while the project undergoes heavy refactoring.
 
-Please use [Issues](https://github.com/asispts/neo-git-graph/issues) for bug reports, feature requests, and discussion.
+Please use [Issues](https://github.com/thatislg/f-gitgraph/issues) for bug reports, feature requests, and discussion.
 
 See the [Roadmap](#roadmap) for the project's current direction.
 

@@ -22,12 +22,12 @@ Báo cáo này ghi nhận kết quả xây dựng tầng giải thuật đồ th
 
 Toàn bộ tầng Graph nằm trong `src/core-engine/Graph/Graph.fs` (thay thế phần khai báo trống trước đây).
 
-| Module | Nội dung |
-| :--- | :--- |
+| Module     | Nội dung                                             |
+| :--------- | :--------------------------------------------------- |
 | `TopoSort` | Sắp xếp topo bằng thuật toán Kahn + hàng đợi ưu tiên |
-| `Lanes` | Phân bổ làn thu gọn trái (Lane Pool) |
-| `Geometry` | Sinh tọa độ nút + đường nối SVG song song đa luồng |
-| `Layout` | Điểm vào cấp cao: topo → phân làn → sinh hình học |
+| `Lanes`    | Phân bổ làn thu gọn trái (Lane Pool)                 |
+| `Geometry` | Sinh tọa độ nút + đường nối SVG song song đa luồng   |
+| `Layout`   | Điểm vào cấp cao: topo → phân làn → sinh hình học    |
 
 Đồng thời mở rộng `GraphSnapshot` (tầng Storage) với hai trường `Generation` và `CommitTime` để tầng Graph có dữ liệu sắp xếp ưu tiên.
 
@@ -35,7 +35,7 @@ Toàn bộ tầng Graph nằm trong `src/core-engine/Graph/Graph.fs` (thay thế
 
 ## 3. Sắp Xếp Topo (Nhiệm vụ 4.1)
 
-- **Thuật toán**: Kahn cải tiến kết hợp hàng đợi ưu tiên (max-heap). Nút có bậc vào bằng 0 (commit mới nhất của mỗi nhánh — "tip") được đưa vào hàng đợi; mỗi lần lấy ra theo ưu tiên **thế hệ cao trước, thời gian tạo muộn trước**, sau đó giảm bậc vào của các commit cha. Đảm bảo bất biến *commit con luôn đứng trên commit cha* với độ phức tạp tuyến tính-logarit.
+- **Thuật toán**: Kahn cải tiến kết hợp hàng đợi ưu tiên (max-heap). Nút có bậc vào bằng 0 (commit mới nhất của mỗi nhánh — "tip") được đưa vào hàng đợi; mỗi lần lấy ra theo ưu tiên **thế hệ cao trước, thời gian tạo muộn trước**, sau đó giảm bậc vào của các commit cha. Đảm bảo bất biến _commit con luôn đứng trên commit cha_ với độ phức tạp tuyến tính-logarit.
 - **Xử lý trường hợp đặc biệt**:
   - **Bản sao nông**: cha bị thiếu đã được tầng Storage lược bỏ trước khi vào Graph — xem là biên giới hợp lệ.
   - **Nhánh mồ côi / Kho đa gốc (Forest)**: nhiều nút "tip" độc lập được xử lý đồng thời qua hàng đợi, không gây lỗi.
@@ -47,9 +47,9 @@ Toàn bộ tầng Graph nằm trong `src/core-engine/Graph/Graph.fs` (thay thế
 ## 4. Phân Bổ Làn Thu Gọn Trái (Nhiệm vụ 4.2)
 
 - **Bể làn hoạt động (Lane Pool)**: mỗi làn ghi nhớ commit cha mà nó đang chờ (`active[l]`). Khi xét một commit:
-  1. *Kế thừa làn*: commit là cha mà một làn đang chờ sẽ đặt ngay trên làn trái nhất đang chờ nó.
-  2. *Thu gọn trái*: nhánh mới tái sử dụng làn trống đầu tiên bên trái; chỉ cấp làn mới ở mép phải khi toàn bộ làn bên trái đều bận.
-  3. *Đóng làn*: commit gốc (không cha) hoặc nhánh nhập vào commit khác sẽ giải phóng làn để nhánh dưới tái sử dụng.
+  1. _Kế thừa làn_: commit là cha mà một làn đang chờ sẽ đặt ngay trên làn trái nhất đang chờ nó.
+  2. _Thu gọn trái_: nhánh mới tái sử dụng làn trống đầu tiên bên trái; chỉ cấp làn mới ở mép phải khi toàn bộ làn bên trái đều bận.
+  3. _Đóng làn_: commit gốc (không cha) hoặc nhánh nhập vào commit khác sẽ giải phóng làn để nhánh dưới tái sử dụng.
 - **Bảo toàn màu sắc nhánh**: màu gán theo chỉ số làn theo modulo 8 (`lane % 8`). Do cơ chế kế thừa làn, một nhánh giữ nguyên làn (và màu) xuyên suốt từ commit đầu đến điểm nhập vào nhánh khác — không đổi màu đột ngột khi cuộn trang.
 
 ---
@@ -66,11 +66,11 @@ Toàn bộ tầng Graph nằm trong `src/core-engine/Graph/Graph.fs` (thay thế
 
 ## 6. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `GraphTests` (topo + phân làn + hình học, đồ thị tổng hợp) | 7/7 pass |
-| Tổng bộ test (Domain + Storage + Graph) | **34/34 pass** |
-| Biên dịch Native AOT kèm `git2-*.dll` | ✅ Đạt |
+| Hạng mục                                                   | Kết quả        |
+| :--------------------------------------------------------- | :------------- |
+| `GraphTests` (topo + phân làn + hình học, đồ thị tổng hợp) | 7/7 pass       |
+| Tổng bộ test (Domain + Storage + Graph)                    | **34/34 pass** |
+| Biên dịch Native AOT kèm `git2-*.dll`                      | ✅ Đạt         |
 
 Các kịch bản kiểm thử bao phủ: thứ tự cha-con, merge trên hai cha, kho đa gốc (forest), dự phòng thiếu generation, thu gọn làn trái khi merge, lịch sử tuyến tính một làn, và tính ổn định màu + cờ merge trong hình học.
 
@@ -86,10 +86,10 @@ Các kịch bản kiểm thử bao phủ: thứ tự cha-con, merge trên hai ch
 
 ## 8. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Sắp xếp topo + xử lý đồ thị đặc biệt | ✅ Đạt |
-| Phân bổ làn thu gọn trái + màu ổn định | ✅ Đạt |
-| Tính toán song song tọa độ SVG | ✅ Đạt |
-| Kiểm thử đơn vị | ✅ 34/34 |
-| Biên dịch Native AOT | ✅ Đạt |
+| Tiêu chí                               | Trạng thái |
+| :------------------------------------- | :--------: |
+| Sắp xếp topo + xử lý đồ thị đặc biệt   |   ✅ Đạt   |
+| Phân bổ làn thu gọn trái + màu ổn định |   ✅ Đạt   |
+| Tính toán song song tọa độ SVG         |   ✅ Đạt   |
+| Kiểm thử đơn vị                        |  ✅ 34/34  |
+| Biên dịch Native AOT                   |   ✅ Đạt   |

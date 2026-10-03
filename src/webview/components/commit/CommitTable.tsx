@@ -3,7 +3,10 @@ import { Fragment } from "preact";
 import { useEffect, useMemo, useRef } from "preact/hooks";
 
 import type { GitCommitNode } from "@/backend/types";
-import { AvatarZoomPreview, type ZoomedAvatarInfo } from "@/webview/components/commit/AvatarZoomPreview";
+import {
+  AvatarZoomPreview,
+  type ZoomedAvatarInfo
+} from "@/webview/components/commit/AvatarZoomPreview";
 import { CommitDetails } from "@/webview/components/commit/CommitDetails";
 import { CommitGraph } from "@/webview/components/commit/CommitGraph";
 import { CommitHoverPanel } from "@/webview/components/commit/CommitHoverPanel";

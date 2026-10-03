@@ -1,6 +1,7 @@
 # 03. Thiết Kế Kiến Trúc Nhân Core Git Bằng F# (.NET / Native AOT)
 
 Tài liệu này đưa ra bản thiết kế chi tiết (Blueprints) cho việc hiện thực hóa nhân xử lý Git bằng **F#**. F# được lựa chọn nhờ sự kết hợp hoàn hảo giữa:
+
 1. **Lập trình hàm (Functional Programming)**: Xử lý cây đồ thị bất biến (Immutable DAG) tự nhiên, an toàn, không có hiệu ứng phụ.
 2. **Hệ thống kiểu dữ liệu tĩnh mạnh mẽ**: Discriminated Unions và Pattern Matching loại bỏ hoàn toàn các lỗi NullReferenceException hoặc unhandled error cases.
 3. **Hiệu năng cấp hệ thống (Native Performance)**: Tận dụng .NET Runtime hiện đại với các cấu trúc bộ nhớ liền kề không cấp phát rác, và khả năng biên dịch thẳng ra mã máy không cần runtime thông qua **.NET Native AOT**.
@@ -51,9 +52,11 @@ Thay vì dùng các cấu trúc dữ liệu lỏng lẻo hay chuỗi text tự d
 ## 3. Thuật Toán Xếp Làn Đồ Thị Topo Song Song (Parallel Lane Allocation)
 
 ### Hạn chế của giải pháp hiện tại:
+
 Thuật toán hiện nay trong TypeScript phải duyệt tuần tự từng commit một trên luồng xử lý giao diện của trình duyệt, làm đơ toàn bộ các thao tác cuộn và nhấp chuột khi số lượng commit vượt quá ngưỡng vài chục nghìn.
 
 ### Nguyên lý giải pháp trong F#:
+
 1. **Tổ chức Bộ Đệm Làn Tái Sử Dụng (Zero-Allocation Lane Pool)**:
    - F# duy trì một danh sách các làn đang hoạt động trong bộ nhớ native.
    - Khi duyệt qua danh sách commit theo thứ tự topo thời gian, engine tìm kiếm làn hiện tại đang trỏ tới commit đó. Nếu tìm thấy, commit sẽ tiếp tục nằm trên làn đó.
@@ -95,10 +98,10 @@ Thay vì gọi tiến trình dòng lệnh `git.exe` làm tiêu tốn từ 30ms �
 
 ## 6. Lộ Trình Hiện Thực Hóa Từng Bước
 
-| Giai đoạn | Mục Tiêu Kỹ Thuật | Kết Quả Nghiệm Thu |
-| :--- | :--- | :--- |
+| Giai đoạn       | Mục Tiêu Kỹ Thuật                                   | Kết Quả Nghiệm Thu                                                                                                                  |
+| :-------------- | :-------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
 | **Giai đoạn 1** | Xây dựng Dự án F# & Định nghĩa Toàn bộ Domain Types | Hoàn thiện cấu trúc dự án F#, cài đặt bộ kiểm thử tự động kiểm tra tính đúng đắn của toàn bộ mô hình dữ liệu và bảng phân loại lỗi. |
-| **Giai đoạn 2** | Tích hợp Bộ Đọc Dữ Liệu Git Tốc Độ Cao | Hoàn thiện module đọc log và cây nhánh qua LibGit2/commit-graph, đạt tốc độ nạp dữ liệu dưới 50ms cho kho chứa 20.000 commits. |
-| **Giai đoạn 3** | Cài đặt Thuật Toán Xếp Làn Đồ Thị Song Song | Hoàn thiện bộ thuật toán tính toán phân làn và tọa độ hình học đồ thị song song đa luồng. |
-| **Giai đoạn 4** | Xây dựng Giao Thức IPC & Biên Dịch Native AOT | Xuất bản file nhị phân độc lập siêu nhẹ (~8MB), kết nối trơn tru với Extension Host qua đường ống xuất nhập chuẩn. |
-| **Giai đoạn 5** | Tích hợp Hoàn Chỉnh Với Giao Diện Webview | Kết nối với tầng giao diện Preact Phase 1, đạt độ mượt mà tuyệt đối 60-120 khung hình/giây trên các kho mã nguồn khổng lồ. |
+| **Giai đoạn 2** | Tích hợp Bộ Đọc Dữ Liệu Git Tốc Độ Cao              | Hoàn thiện module đọc log và cây nhánh qua LibGit2/commit-graph, đạt tốc độ nạp dữ liệu dưới 50ms cho kho chứa 20.000 commits.      |
+| **Giai đoạn 3** | Cài đặt Thuật Toán Xếp Làn Đồ Thị Song Song         | Hoàn thiện bộ thuật toán tính toán phân làn và tọa độ hình học đồ thị song song đa luồng.                                           |
+| **Giai đoạn 4** | Xây dựng Giao Thức IPC & Biên Dịch Native AOT       | Xuất bản file nhị phân độc lập siêu nhẹ (~8MB), kết nối trơn tru với Extension Host qua đường ống xuất nhập chuẩn.                  |
+| **Giai đoạn 5** | Tích hợp Hoàn Chỉnh Với Giao Diện Webview           | Kết nối với tầng giao diện Preact Phase 1, đạt độ mượt mà tuyệt đối 60-120 khung hình/giây trên các kho mã nguồn khổng lồ.          |

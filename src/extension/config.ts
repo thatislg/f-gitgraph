@@ -20,5 +20,5 @@ export const extConfig = {
 };
 
 function getConfig<T>(key: string, defaultValue: T): T {
-  return vscode.workspace.getConfiguration("neo-git-graph").get(key, defaultValue);
+  return vscode.workspace.getConfiguration("f-gitgraph").get(key, defaultValue);
 }

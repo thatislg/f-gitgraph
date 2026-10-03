@@ -1,4 +1,4 @@
-# Báo Cáo Tầng Miền Nghiệp Vụ & Bảng Lỗi (Nhóm Việc 2)
+﻿# Báo Cáo Tầng Miền Nghiệp Vụ & Bảng Lỗi (Nhóm Việc 2)
 
 > **Mã báo cáo**: 002_Domain_Model_Report
 > **Giai đoạn**: Phase 1 — Windows First Milestone
@@ -23,12 +23,12 @@ Báo cáo này ghi nhận kết quả xây dựng tầng miền nghiệp vụ th
 
 Toàn bộ tầng Domain nằm trong `src/core-engine/Domain/`, tách theo trách nhiệm:
 
-| File | Nội dung |
-| :--- | :--- |
-| `Domain/Domain.fs` | Định danh sản phẩm & phiên bản (`Version`) |
-| `Domain/CoreEntities.fs` | `GitHash`, `Author`, `CommitNode`, `GitRef` |
+| File                      | Nội dung                                                                        |
+| :------------------------ | :------------------------------------------------------------------------------ |
+| `Domain/Domain.fs`        | Định danh sản phẩm & phiên bản (`Version`)                                      |
+| `Domain/CoreEntities.fs`  | `GitHash`, `Author`, `CommitNode`, `GitRef`                                     |
 | `Domain/InFlightState.fs` | `InFlightState` + `MergeState`, `RebaseState`, `CherryPickState`, `BisectState` |
-| `Domain/GitError.fs` | `GitError` (9 trường hợp) + `GitError.describe` |
+| `Domain/GitError.fs`      | `GitError` (9 trường hợp) + `GitError.describe`                                 |
 
 Thứ tự biên dịch F# tuân theo chiều phụ thuộc: `Domain.fs → CoreEntities.fs → InFlightState.fs → GitError.fs`.
 
@@ -68,17 +68,17 @@ Phân loại 6 nhóm tham chiếu: `LocalBranch` (kèm cờ checkout), `RemoteBr
 
 `GitError` là Discriminated Union gồm **9 trường hợp**:
 
-| Trường hợp | Dữ liệu ngữ cảnh |
-| :--- | :--- |
-| `RepositoryNotFound` | đường dẫn thư mục |
-| `IndexLockConflict` | tên file khóa, tuổi khóa (giây), PID giữ khóa |
-| `RefLockConflict` | tên nhánh bị khóa |
-| `BranchAlreadyExists` | tên nhánh trùng |
-| `BranchNotMerged` | tên nhánh, số commit chưa merge |
-| `CheckoutConflict` | danh sách đường dẫn xung đột |
-| `ShallowCloneBoundary` | mã băm commit cha bị thiếu |
-| `CorruptGitObject` | mã băm đối tượng, thông báo kỹ thuật |
-| `NativeLibraryError` | mã lỗi native, mô tả |
+| Trường hợp             | Dữ liệu ngữ cảnh                              |
+| :--------------------- | :-------------------------------------------- |
+| `RepositoryNotFound`   | đường dẫn thư mục                             |
+| `IndexLockConflict`    | tên file khóa, tuổi khóa (giây), PID giữ khóa |
+| `RefLockConflict`      | tên nhánh bị khóa                             |
+| `BranchAlreadyExists`  | tên nhánh trùng                               |
+| `BranchNotMerged`      | tên nhánh, số commit chưa merge               |
+| `CheckoutConflict`     | danh sách đường dẫn xung đột                  |
+| `ShallowCloneBoundary` | mã băm commit cha bị thiếu                    |
+| `CorruptGitObject`     | mã băm đối tượng, thông báo kỹ thuật          |
+| `NativeLibraryError`   | mã lỗi native, mô tả                          |
 
 Kèm hàm `GitError.describe : GitError -> string` sinh chuỗi mô tả cho giao diện và nhật ký. Toàn bộ hàm nghiệp vụ trả về `Result<'T, GitError>` (kiểu `Result` chuẩn F#), không ném ngoại lệ.
 
@@ -86,17 +86,17 @@ Kèm hàm `GitError.describe : GitError -> string` sinh chuỗi mô tả cho gia
 
 ## 6. Kiểm Thử Đơn Vị (xUnit)
 
-Dự án test đặt tại `src/core-engine/tests/CoreEngine.Tests/`, gắn vào solution `src/core-engine/neo-git-core.sln`.
+Dự án test đặt tại `src/core-engine/tests/CoreEngine.Tests/`, gắn vào solution `src/core-engine/f-gitgraph-core.sln`.
 
-| Bộ test | Số case | Phạm vi |
-| :--- | ---: | :--- |
-| `GitHashTests` | 6 | parse SHA-1/SHA-256, từ chối độ dài/ký tự sai, abbrev, roundtrip |
-| `CommitNodeTests` | 5 | số commit cha (0/1/2), cờ checkout, phân loại tag |
-| `InFlightStateTests` | 4 | merging, rebasing, bisecting, clean |
-| `GitErrorTests` | 4 | mô tả lỗi repository/branch/lock/native |
-| **Tổng** | **19** | |
+| Bộ test              | Số case | Phạm vi                                                          |
+| :------------------- | ------: | :--------------------------------------------------------------- |
+| `GitHashTests`       |       6 | parse SHA-1/SHA-256, từ chối độ dài/ký tự sai, abbrev, roundtrip |
+| `CommitNodeTests`    |       5 | số commit cha (0/1/2), cờ checkout, phân loại tag                |
+| `InFlightStateTests` |       4 | merging, rebasing, bisecting, clean                              |
+| `GitErrorTests`      |       4 | mô tả lỗi repository/branch/lock/native                          |
+| **Tổng**             |  **19** |                                                                  |
 
-Kết quả chạy `dotnet test src/core-engine/neo-git-core.sln`:
+Kết quả chạy `dotnet test src/core-engine/f-gitgraph-core.sln`:
 
 ```text
 Passed!  - Failed: 0, Passed: 19, Skipped: 0, Total: 19
@@ -106,13 +106,13 @@ Passed!  - Failed: 0, Passed: 19, Skipped: 0, Total: 19
 
 ## 7. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Mô hình hóa thực thể cốt lõi | ✅ Đạt |
-| Mô hình hóa trạng thái in-flight | ✅ Đạt |
-| Bảng lỗi vét cạn (9 trường hợp) | ✅ Đạt |
-| Nguyên tắc `Result` thay ngoại lệ | ✅ Đạt |
-| Kiểm thử đơn vị chuẩn hóa | ✅ 19/19 pass |
-| Biên dịch Native AOT | ✅ thành công |
+| Tiêu chí                          |  Trạng thái   |
+| :-------------------------------- | :-----------: |
+| Mô hình hóa thực thể cốt lõi      |    ✅ Đạt     |
+| Mô hình hóa trạng thái in-flight  |    ✅ Đạt     |
+| Bảng lỗi vét cạn (9 trường hợp)   |    ✅ Đạt     |
+| Nguyên tắc `Result` thay ngoại lệ |    ✅ Đạt     |
+| Kiểm thử đơn vị chuẩn hóa         | ✅ 19/19 pass |
+| Biên dịch Native AOT              | ✅ thành công |
 
 Tầng Domain thuần túy, không phụ thuộc thư viện ngoài, đóng vai trò "ngôn ngữ chung" cho các tầng Storage, Graph và Transport ở các nhóm việc tiếp theo.

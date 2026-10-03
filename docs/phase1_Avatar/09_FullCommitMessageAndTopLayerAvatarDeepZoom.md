@@ -1,4 +1,4 @@
-# 09. Full Commit Message & Top-Layer Avatar Deep Zoom (5x)
+﻿# 09. Full Commit Message & Top-Layer Avatar Deep Zoom (5x)
 
 ## 1. Overview & Context
 
@@ -27,10 +27,11 @@ Sau khi trải nghiệm hai tính năng mới (Rich Commit Hover Panel và Avata
 ## 2. Kiến trúc giải pháp (Architecture & Design)
 
 ### 2.1. Backend: Tải toàn bộ Message Commit (Subject + Body)
+
 - Trong `src/backend/queries/loadCommits.ts`:
   - Thay vì dùng format `%s` kết hợp ngắt dòng thông thường (vốn sẽ làm vỡ dữ liệu nếu body có chứa ký tự `\n`), chúng ta sử dụng cặp ký tự phân tách chuyên biệt:
-    - Phân tách commit: `const COMMIT_DELIMITER = "---COMMIT-END-NEO-GIT-GRAPH---"`
-    - Phân tách trường: `const FIELD_DELIMITER = "---FIELD-SEP-NEO-GIT-GRAPH---"`
+    - Phân tách commit: `const COMMIT_DELIMITER = "---COMMIT-END-f-gitgraph---"`
+    - Phân tách trường: `const FIELD_DELIMITER = "---FIELD-SEP-f-gitgraph---"`
     - Định dạng format Git: `["%H", "%P", "%an", "%ae", dateField, "%s", "%b"].join(FIELD_DELIMITER) + COMMIT_DELIMITER`
   - Trường `message` lưu Subject (dùng cho hiển thị gọn 1 dòng trên danh sách commit).
   - Trường `body` lưu Body chi tiết nhiều dòng (dùng cho CommitHoverPanel và CommitDetails).
@@ -49,12 +50,14 @@ Sau khi trải nghiệm hai tính năng mới (Rich Commit Hover Panel và Avata
   ```
 
 ### 2.2. Webview: Top-Layer AvatarZoomPreview Component
+
 - Tách biệt hoàn toàn tính năng **Deep Zoom** ra khỏi SVG cây đồ thị:
   - `HexagonNode` trong cây đồ thị chỉ đóng vai trò kích hoạt: Khi người dùng rê chuột vào avatar và giữ $\ge 500\text{ms}$, sự kiện `onAvatarDwell` được kích hoạt mang theo tọa độ `DOMRect`, thông tin `commit`, màu sắc và tác giả.
   - `CommitTable` quản lý trạng thái `zoomedAvatar: ZoomedAvatarInfo | null`.
   - Component mới `AvatarZoomPreview` được render ở **mức root của `CommitTable`** với `position: fixed` và `z-index: 60`.
 
 ### 2.3. Chi tiết hình học & Tỷ lệ hiển thị 5x
+
 1. **Lục giác 5x**:
    - Bán kính: $R = 50\text{px}$.
    - Chiều rộng: $w = 2 \times 50 \times \frac{\sqrt{3}}{2} \approx 86.6\text{px}$.
@@ -62,7 +65,8 @@ Sau khi trải nghiệm hai tính năng mới (Rich Commit Hover Panel và Avata
    - Đường viền: `strokeWidth = 3`, `stroke = colour`, `strokeLinejoin = round`.
    - Hiệu ứng Neon:
      ```css
-     filter: drop-shadow(0 0 16px ${colour}) drop-shadow(0 0 6px ${colour}) drop-shadow(0 0 2px #ffffff);
+     filter: drop-shadow(0 0 16px ${colour}) drop-shadow(0 0 6px ${colour})
+       drop-shadow(0 0 2px #ffffff);
      ```
 2. **Độ nét ảnh (High-Resolution Avatar)**:
    - Truy vấn `getGitAccountAvatarUrl(commit.email, 256)`.
@@ -85,6 +89,7 @@ Sau khi trải nghiệm hai tính năng mới (Rich Commit Hover Panel và Avata
 ---
 
 ## 3. Danh sách tệp tin thay đổi
+
 1. `src/backend/types/git.types.ts`: Bổ sung trường `body?: string`.
 2. `src/backend/queries/loadCommits.ts`: Sử dụng `COMMIT_DELIMITER` và nạp `%s` + `%b`.
 3. `src/webview/utils/avatar.ts`: Hỗ trợ kích thước ảnh 256px cho avatar nét cao.

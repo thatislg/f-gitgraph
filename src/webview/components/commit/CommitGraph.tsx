@@ -34,10 +34,7 @@ export function CommitGraph({
   hoveredRow?: number | null | undefined;
   selectedRow?: number | null | undefined;
   /** Optional custom icon renderer to insert any icon into a commit node */
-  renderNodeIcon?: (
-    commit: GitCommitNode | undefined,
-    vertex: GraphVertex
-  ) => ComponentChildren;
+  renderNodeIcon?: (commit: GitCommitNode | undefined, vertex: GraphVertex) => ComponentChildren;
   onAvatarClick?: ((info: ZoomedAvatarInfo) => void) | undefined;
 }) {
   const angular = getWebviewConfig().graphStyle === "angular";

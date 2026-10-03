@@ -1,6 +1,7 @@
 # 05. Ambient Gradient Highlight & Tối ưu Khoảng đệm Graph Node
 
 Tài liệu này đặc tả thiết kế kỹ thuật cho 2 cải tiến giao diện Commit Graph:
+
 1. **Hiệu ứng Ambient Gradient Highlight theo chiều ngang khi chọn (selected/active) một dòng commit.**
 2. **Tối ưu khoảng đệm lề trái và phải của cột Graph để bảo vệ node lục giác khi scale(1.15).**
 
@@ -9,6 +10,7 @@ Tài liệu này đặc tả thiết kế kỹ thuật cho 2 cải tiến giao d
 ## 1. Hiệu ứng Ambient Gradient Highlight cho Selected Commit Row
 
 ### 1.1. Mục tiêu thiết kế
+
 - Khi người dùng click chọn một dòng commit (`expanded === true`), toàn bộ hàng commit cần nhận diện trực quan rõ rệt nhưng vẫn giữ được độ tinh tế (premium & modern look).
 - Thay vì chỉ dùng màu nền xám/xanh phẳng đơn điệu (`bg-row-selected`), ta áp dụng thêm lớp ánh sáng tỏa **Ambient Gradient Highlight** theo chiều ngang:
   - Xuất phát từ mép trái (khu vực icon commit node).
@@ -17,6 +19,7 @@ Tài liệu này đặc tả thiết kế kỹ thuật cho 2 cải tiến giao d
   - Lan tỏa và mờ dần về trong suốt (`transparent`) khi đọc văn bản sang phía bên phải.
 
 ### 1.2. Giải pháp kỹ thuật CSS / Preact
+
 - Sử dụng hàm `color-mix(in srgb, ...)` chuẩn CSS hiện đại (hỗ trợ 100% trong VS Code Chromium):
   ```css
   background-image: linear-gradient(
@@ -36,6 +39,7 @@ Tài liệu này đặc tả thiết kế kỹ thuật cho 2 cải tiến giao d
 ## 2. Tối ưu Khoảng đệm Cột Graph (Tránh bị cắt mép khi Hover/Select Scale)
 
 ### 2.1. Phân tích nguyên nhân bị cắt mép
+
 - Hiện tại:
   - Bán kính lục giác: $r = 10.5\text{px}$.
   - Bán kính phương ngang: $dx = 10.5 \times \frac{\sqrt{3}}{2} \approx 9.09\text{px}$.
@@ -74,9 +78,9 @@ Tài liệu này đặc tả thiết kế kỹ thuật cho 2 cải tiến giao d
 
 ## 3. Tóm tắt danh sách tệp thay đổi
 
-| Tệp tin | Thay đổi chính |
-|---|---|
-| `src/webview/graph/constants.ts` | Tăng `LANE_OFFSET = 16`, `GRAPH_PADDING = 20` |
-| `src/webview/graph/utils.ts` | Cập nhật `graphWidth(layout)` tính đủ khoảng đệm `2 * LANE_OFFSET` |
-| `src/webview/components/commit/CommitRow.tsx` | Thêm `linear-gradient` Ambient Highlight màu nhánh với độ mờ 18% khi `expanded === true` |
-| `src/webview/components/commit/CommitGraph.tsx` | Thêm `overflow-visible` cho SVG để bảo vệ mép node |
+| Tệp tin                                         | Thay đổi chính                                                                           |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `src/webview/graph/constants.ts`                | Tăng `LANE_OFFSET = 16`, `GRAPH_PADDING = 20`                                            |
+| `src/webview/graph/utils.ts`                    | Cập nhật `graphWidth(layout)` tính đủ khoảng đệm `2 * LANE_OFFSET`                       |
+| `src/webview/components/commit/CommitRow.tsx`   | Thêm `linear-gradient` Ambient Highlight màu nhánh với độ mờ 18% khi `expanded === true` |
+| `src/webview/components/commit/CommitGraph.tsx` | Thêm `overflow-visible` cho SVG để bảo vệ mép node                                       |

@@ -1,25 +1,28 @@
-# Quy tắc Quản lý Nhánh & Đồng bộ Git (Git Workflow Rules)
+﻿# Quy tắc Quản lý Nhánh & Đồng bộ Git (Git Workflow Rules)
 
-Tài liệu này quy định chiến lược phân nhánh, nguyên tắc đồng bộ từ upstream và quy trình làm việc chuẩn cho dự án **Neo Git Graph** (fork của `thatislg`).
+Tài liệu này quy định chiến lược phân nhánh, nguyên tắc đồng bộ từ upstream và quy trình làm việc chuẩn cho dự án **F-GitGraph** (fork của `thatislg`).
 
 ---
 
 ## 1. Cấu hình Remotes
 
 Dự án duy trì 2 remote chính:
-- **`origin`**: Kho fork cá nhân (`https://github.com/thatislg/neo-git-graph.git`). Nơi chúng ta lưu trữ toàn bộ code và nhánh tùy biến.
-- **`upstream`**: Kho nguồn gốc (`https://github.com/asispts/neo-git-graph.git`). Nơi nhận các bản vá lỗi và tính năng mới từ tác giả gốc.
+
+- **`origin`**: Kho fork cá nhân (`https://github.com/thatislg/f-gitgraph.git`). Nơi chúng ta lưu trữ toàn bộ code và nhánh tùy biến.
+- **`upstream`**: Kho nguồn gốc (`https://github.com/asispts/f-gitgraph.git`). Nơi nhận các bản vá lỗi và tính năng mới từ tác giả gốc.
 
 Kiểm tra cấu hình remotes:
+
 ```bash
 git remote -v
-# origin    https://github.com/thatislg/neo-git-graph.git (fetch & push)
-# upstream  https://github.com/asispts/neo-git-graph.git (fetch)
+# origin    https://github.com/thatislg/f-gitgraph.git (fetch & push)
+# upstream  https://github.com/asispts/f-gitgraph.git (fetch)
 ```
 
 Nếu chưa có remote `upstream`, thêm bằng lệnh:
+
 ```bash
-git remote add upstream https://github.com/asispts/neo-git-graph.git
+git remote add upstream https://github.com/asispts/f-gitgraph.git
 git remote set-url --push upstream DISABLED
 ```
 
@@ -28,13 +31,15 @@ git remote set-url --push upstream DISABLED
 ## 2. Chiến lược Phân nhánh (Branching Strategy)
 
 ### 🌿 Nhánh `main` (Upstream Tracker - Clean Mirror)
+
 - **Mục đích:** Chỉ phản chiếu chính xác trạng thái từ `upstream/main`.
-- **Nguyên tắc:** 
+- **Nguyên tắc:**
   - **TUYỆT ĐỐI KHÔNG** commit code tùy biến trực tiếp lên nhánh `main`.
   - Mọi cập nhật trên `main` đều phải đến từ `upstream/main` qua fast-forward merge.
   - Sau khi kéo cập nhật từ `upstream`, đẩy lên `origin/main` để giữ fork luôn cập nhật.
 
 ### 🚀 Nhánh `custom` (Active Development Branch)
+
 - **Mục đích:** Nhánh phát triển chính thức chứa các tính năng, tùy biến giao diện và tài liệu riêng của chúng ta.
 - **Nguyên tắc:**
   - Toàn bộ commit tính năng, sửa đổi UI/UX, thêm tài liệu đều thực hiện tại đây.
@@ -48,7 +53,9 @@ git remote set-url --push upstream DISABLED
 Thực hiện theo 5 bước sau mỗi khi phát hiện hoặc định kỳ đồng bộ từ upstream:
 
 ### Bước 1: Lưu trạng thái làm việc hiện tại trên `custom`
+
 Đảm bảo thư mục làm việc sạch sẽ trước khi chuyển nhánh:
+
 ```bash
 # Kiểm tra trạng thái
 git status
@@ -58,6 +65,7 @@ git stash push -m "WIP on custom before upstream sync"
 ```
 
 ### Bước 2: Chuyển sang `main` và kéo cập nhật từ `upstream`
+
 ```bash
 # 1. Chuyển sang main
 git switch main
@@ -74,6 +82,7 @@ git push origin main
 ```
 
 ### Bước 3: Chuyển về nhánh `custom` và merge `main` vào
+
 ```bash
 # 1. Chuyển lại về nhánh custom
 git switch custom
@@ -86,7 +95,9 @@ git merge main
 ```
 
 ### Bước 4: Giải quyết xung đột (Conflict Resolution - nếu có)
+
 Nếu có xung đột xảy ra giữa code upstream và code custom của chúng ta:
+
 1. Mở các file bị conflict trong VS Code và chọn thay đổi phù hợp:
    - Ưu tiên giữ lại các đoạn code tính năng tùy biến của `custom`.
    - Tiếp thu các cải tiến/sửa lỗi từ `main`.
@@ -103,6 +114,7 @@ Nếu có xung đột xảy ra giữa code upstream và code custom của chúng
    ```
 
 ### Bước 5: Đẩy code nhánh `custom` lên GitHub
+
 ```bash
 git push origin custom
 ```
@@ -132,6 +144,7 @@ git push origin custom
 ## 5. Quy tắc Commit trên nhánh `custom`
 
 Tuân thủ định dạng **Conventional Commits**:
+
 - `feat(graph): ...` - Tính năng mới (ví dụ: lục giác, icon, giao diện).
 - `fix(graph): ...` - Sửa lỗi.
 - `docs: ...` - Thêm hoặc cập nhật tài liệu trong thư mục `docs/`.

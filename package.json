@@ -1,6 +1,6 @@
 {
-  "name": "neo-git-graph",
-  "displayName": "(neo) Git Graph",
+  "name": "f-gitgraph",
+  "displayName": "F-GitGraph",
   "version": "0.0.1",
   "description": "%description%",
   "categories": [
@@ -14,9 +14,9 @@
     "git history",
     "git log"
   ],
-  "homepage": "https://github.com/asispts/neo-git-graph",
+  "homepage": "https://github.com/thatislg/f-gitgraph",
   "bugs": {
-    "url": "https://github.com/asispts/neo-git-graph/issues"
+    "url": "https://github.com/thatislg/f-gitgraph/issues"
   },
   "license": "MIT",
   "author": {
@@ -31,7 +31,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/asispts/neo-git-graph.git"
+    "url": "https://github.com/thatislg/f-gitgraph.git"
   },
   "sponsor": {
     "url": "https://github.com/sponsors/asispts"
@@ -42,6 +42,7 @@
     "typecheck": "tsc -p . && tsc -p src/webview && tsc -p tests && tsc -p tests/webview && tsc -p tests-ext --noEmit",
     "vscode:prepublish": "pnpm run clean && pnpm run package",
     "package": "pnpm run typecheck && pnpm run lint && node esbuild.js --production",
+    "package:vsix:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-native-win.ps1 && vsce package --no-dependencies --out f-gitgraph-win-x64.vsix",
     "clean": "node -e \"require('fs').rmSync('out',{recursive:true,force:true})\"",
     "compile": "pnpm run clean && node esbuild.js",
     "test": "vitest run --project backend && vitest run --project extension && vitest run --project webview",
@@ -86,8 +87,8 @@
   "contributes": {
     "commands": [
       {
-        "category": "(neo) Git Graph",
-        "command": "neo-git-graph.view",
+        "category": "F-GitGraph",
+        "command": "f-gitgraph.view",
         "title": "%command.view%",
         "icon": {
           "light": "resources/webview-icon-light.svg",
@@ -95,15 +96,15 @@
         }
       },
       {
-        "category": "(neo) Git Graph",
-        "command": "neo-git-graph.clearAvatarCache",
+        "category": "F-GitGraph",
+        "command": "f-gitgraph.clearAvatarCache",
         "title": "%command.clearAvatarCache%"
       }
     ],
     "menus": {
       "scm/title": [
         {
-          "command": "neo-git-graph.view",
+          "command": "f-gitgraph.view",
           "group": "navigation",
           "when": "scmProvider == git"
         }
@@ -111,14 +112,14 @@
     },
     "configuration": {
       "type": "object",
-      "title": "(neo) Git Graph",
+      "title": "F-GitGraph",
       "properties": {
-        "neo-git-graph.autoCenterCommitDetailsView": {
+        "f-gitgraph.autoCenterCommitDetailsView": {
           "type": "boolean",
           "default": true,
           "description": "%config.autoCenterCommitDetailsView%"
         },
-        "neo-git-graph.dateFormat": {
+        "f-gitgraph.dateFormat": {
           "type": "string",
           "enum": [
             "Date & Time",
@@ -133,7 +134,7 @@
           "default": "Date & Time",
           "description": "%config.dateFormat%"
         },
-        "neo-git-graph.dateType": {
+        "f-gitgraph.dateType": {
           "type": "string",
           "enum": [
             "Author Date",
@@ -146,13 +147,13 @@
           "default": "Author Date",
           "description": "%config.dateType%"
         },
-        "neo-git-graph.fetchAvatars": {
+        "f-gitgraph.fetchAvatars": {
           "type": "boolean",
           "default": false,
           "description": "%config.fetchAvatars%",
           "deprecationMessage": "%config.fetchAvatars.deprecation%"
         },
-        "neo-git-graph.graphColours": {
+        "f-gitgraph.graphColours": {
           "type": "array",
           "items": {
             "type": "string",
@@ -175,7 +176,7 @@
           ],
           "description": "%config.graphColours%"
         },
-        "neo-git-graph.graphStyle": {
+        "f-gitgraph.graphStyle": {
           "type": "string",
           "enum": [
             "rounded",
@@ -188,32 +189,32 @@
           "default": "rounded",
           "description": "%config.graphStyle%"
         },
-        "neo-git-graph.initialLoadCommits": {
+        "f-gitgraph.initialLoadCommits": {
           "type": "number",
           "default": 300,
           "description": "%config.initialLoadCommits%"
         },
-        "neo-git-graph.loadMoreCommits": {
+        "f-gitgraph.loadMoreCommits": {
           "type": "number",
           "default": 100,
           "description": "%config.loadMoreCommits%"
         },
-        "neo-git-graph.maxDepthOfRepoSearch": {
+        "f-gitgraph.maxDepthOfRepoSearch": {
           "type": "number",
           "default": 0,
           "description": "%config.maxDepthOfRepoSearch%"
         },
-        "neo-git-graph.showCurrentBranchByDefault": {
+        "f-gitgraph.showCurrentBranchByDefault": {
           "type": "boolean",
           "default": false,
           "description": "%config.showCurrentBranchByDefault%"
         },
-        "neo-git-graph.showUncommittedChanges": {
+        "f-gitgraph.showUncommittedChanges": {
           "type": "boolean",
           "default": true,
           "description": "%config.showUncommittedChanges%"
         },
-        "neo-git-graph.tabIconColourTheme": {
+        "f-gitgraph.tabIconColourTheme": {
           "type": "string",
           "enum": [
             "colour",

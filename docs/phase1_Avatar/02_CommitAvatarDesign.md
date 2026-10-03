@@ -84,6 +84,7 @@ Tài liệu thiết kế chi tiết về cơ chế lấy và hiển thị biểu
 ## 4. Thiết kế hiển thị trong `HexagonNode.tsx`
 
 Khi một commit có `avatarUrl`:
+
 1. **Clip Path hình tròn:**
    - Tạo thẻ `<clipPath id="hex-avatar-{id}">` với một hình tròn `<circle cx={cx} cy={cy} r={radius - 1.8} />`.
    - Với bán kính lục giác mặc định $R = 7\text{px}$, bán kính avatar sẽ là $5.2\text{px}$ (đường kính $10.4\text{px}$), để lại khoảng viền đệm $1.8\text{px}$ tinh tế giữa ảnh và viền lục giác.
@@ -106,11 +107,14 @@ Khi một commit có `avatarUrl`:
 Trong Webview của VS Code, chính sách Content Security Policy mặc định chặn các ảnh tải từ internet. Cần mở quyền cho giao thức `https:` tại chỉ thị `img-src`:
 
 ```html
-<meta http-equiv="Content-Security-Policy" content="
+<meta
+  http-equiv="Content-Security-Policy"
+  content="
   default-src 'none';
   style-src ${webview.cspSource} 'unsafe-inline';
   script-src ${webview.cspSource} 'nonce-${nonce}';
   img-src ${webview.cspSource} https: data:;
   connect-src ${webview.cspSource};
-">
+"
+/>
 ```

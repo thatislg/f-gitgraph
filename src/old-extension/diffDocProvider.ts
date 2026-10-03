@@ -4,7 +4,7 @@ import type { GitInstance } from "@/backend/gitClient";
 import { getPathFromStr } from "@/backend/utils/path";
 
 export class DiffDocProvider implements vscode.TextDocumentContentProvider {
-  public static scheme = "neo-git-graph";
+  public static scheme = "f-gitgraph";
   private gitClient: GitInstance;
   private onDidChangeEventEmitter = new vscode.EventEmitter<vscode.Uri>();
   private docs = new Map<string, DiffDocument>();

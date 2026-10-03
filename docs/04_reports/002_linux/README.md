@@ -1,4 +1,4 @@
-# Báo Cáo Nghiệm Thu & Đo Đạc: Phase 2 Linux Milestone
+﻿# Báo Cáo Nghiệm Thu & Đo Đạc: Phase 2 Linux Milestone
 
 Thư mục này lưu trữ các báo cáo kỹ thuật, biên bản đo đạc hiệu năng và kết quả kiểm thử nghiệm thu chi tiết cho **Phase 2: Linux Milestone (Ubuntu, Fedora, Debian)**.
 
@@ -7,7 +7,7 @@ Thư mục này lưu trữ các báo cáo kỹ thuật, biên bản đo đạc h
 ## Danh Mục Các Báo Cáo Dự Kiến Cần Thu Thập
 
 1. **Báo Cáo Kiểm Định Tính Tương Thích Thư Viện C (`glibc`)**:
-   - Ghi nhận kết quả chạy thử nghiệm file nhị phân `neo-git-core` trên các bản phân phối Linux phổ biến:
+   - Ghi nhận kết quả chạy thử nghiệm file nhị phân `f-gitgraph-core` trên các bản phân phối Linux phổ biến:
      - Ubuntu 20.04 LTS (glibc 2.31)
      - Ubuntu 22.04 LTS (glibc 2.35)
      - Ubuntu 24.04 LTS (glibc 2.39)

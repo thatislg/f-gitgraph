@@ -22,12 +22,12 @@ Báo cáo này ghi nhận kết quả xây dựng tầng đọc dữ liệu Git 
 
 Toàn bộ tầng Storage nằm trong `src/core-engine/Storage/`:
 
-| File | Nội dung |
-| :--- | :--- |
-| `Utf8.fs` | Giải mã UTF-8 (span) + hex encode/decode zero-allocation |
-| `CommitGraph.fs` | Parser commit-graph bằng Memory-Mapped Files |
-| `LibGit2.fs` | P/Invoke LibGit2 + wrapper `GitRepository` |
-| `Storage.fs` | Điều phối `GitReader.readGraph` (fast path + fallback) |
+| File             | Nội dung                                                 |
+| :--------------- | :------------------------------------------------------- |
+| `Utf8.fs`        | Giải mã UTF-8 (span) + hex encode/decode zero-allocation |
+| `CommitGraph.fs` | Parser commit-graph bằng Memory-Mapped Files             |
+| `LibGit2.fs`     | P/Invoke LibGit2 + wrapper `GitRepository`               |
+| `Storage.fs`     | Điều phối `GitReader.readGraph` (fast path + fallback)   |
 
 Thứ tự biên dịch: `Utf8.fs → CommitGraph.fs → LibGit2.fs → Storage.fs`.
 
@@ -71,25 +71,25 @@ Thứ tự biên dịch: `Utf8.fs → CommitGraph.fs → LibGit2.fs → Storage.
 
 ## 6. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `Utf8Tests` (hex, UTF-8 tiếng Việt, emoji) | 4/4 pass |
-| `CommitGraphTests` (builder nhị phân tổng hợp: root/child/merge/corrupt/absent) | 4/4 pass |
-| Tổng bộ test (Domain + Storage) | **27/27 pass** |
+| Hạng mục                                                                        | Kết quả        |
+| :------------------------------------------------------------------------------ | :------------- |
+| `Utf8Tests` (hex, UTF-8 tiếng Việt, emoji)                                      | 4/4 pass       |
+| `CommitGraphTests` (builder nhị phân tổng hợp: root/child/merge/corrupt/absent) | 4/4 pass       |
+| Tổng bộ test (Domain + Storage)                                                 | **27/27 pass** |
 
 ### Kiểm thử tích hợp trên kho Git thật
 
 Tạo kho với 5 commit (gồm 1 root, 1 merge, tiếng Việt có dấu, emoji), sinh `commit-graph` bằng `git commit-graph write`:
 
-| Tiêu chí | Kết quả |
-| :--- | :---: |
-| Commit-graph đọc đúng 5 commit | ✅ |
-| Nhận diện 1 root / 1 merge | ✅ |
-| LibGit2 walk được 5 commit | ✅ |
-| Tiêu đề tiếng Việt "Khởi tạo dự án" | ✅ |
-| Tên tác giả "An Nguyễn" (UTF-8) | ✅ |
-| Emoji 🚀 hiển thị nguyên bản | ✅ |
-| Merge commit có 2 cha | ✅ |
+| Tiêu chí                            | Kết quả |
+| :---------------------------------- | :-----: |
+| Commit-graph đọc đúng 5 commit      |   ✅    |
+| Nhận diện 1 root / 1 merge          |   ✅    |
+| LibGit2 walk được 5 commit          |   ✅    |
+| Tiêu đề tiếng Việt "Khởi tạo dự án" |   ✅    |
+| Tên tác giả "An Nguyễn" (UTF-8)     |   ✅    |
+| Emoji 🚀 hiển thị nguyên bản        |   ✅    |
+| Merge commit có 2 cha               |   ✅    |
 
 ---
 
@@ -103,11 +103,11 @@ Tạo kho với 5 commit (gồm 1 root, 1 merge, tiếng Việt có dấu, emoji
 
 ## 8. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Tích hợp LibGit2 in-process | ✅ Đạt |
-| Đọc commit-graph bằng Memory-Mapped Files | ✅ Đạt |
-| Cơ chế fallback LibGit2 | ✅ Đạt |
-| Zero-Allocation + UTF-8 tiếng Việt | ✅ Đạt |
-| Kiểm thử đơn vị + tích hợp | ✅ 27/27 + tích hợp thật |
-| Biên dịch Native AOT kèm `git2-*.dll` | ✅ Đạt |
+| Tiêu chí                                  |        Trạng thái        |
+| :---------------------------------------- | :----------------------: |
+| Tích hợp LibGit2 in-process               |          ✅ Đạt          |
+| Đọc commit-graph bằng Memory-Mapped Files |          ✅ Đạt          |
+| Cơ chế fallback LibGit2                   |          ✅ Đạt          |
+| Zero-Allocation + UTF-8 tiếng Việt        |          ✅ Đạt          |
+| Kiểm thử đơn vị + tích hợp                | ✅ 27/27 + tích hợp thật |
+| Biên dịch Native AOT kèm `git2-*.dll`     |          ✅ Đạt          |

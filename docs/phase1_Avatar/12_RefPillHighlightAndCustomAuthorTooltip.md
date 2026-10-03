@@ -22,16 +22,18 @@ Người dùng đã phát hiện hai vấn đề trải nghiệm liên quan đ�
 ## 2. Thiết kế chi tiết (Technical Design)
 
 ### 2.1. Phối màu Ref Pills theo chuẩn GitLens trong `RefLabel.tsx`
+
 Loại bỏ thuộc tính `title={gitRef.name}`. Phân loại màu sắc theo `gitRef.type` và `active`:
 
-| Loại Ref | Kiểu hiển thị | Màu nền (Background) | Màu viền (Border) | Màu chữ & Icon | Hiệu ứng Hover |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Tag / Release** (`tag`) | Huy hiệu phiên bản phát hành | `bg-amber-500/15` | `border-amber-500/40` | `text-amber-300 dark:text-amber-200` | `hover:bg-amber-500/25 hover:border-amber-400 hover:shadow-[0_0_8px_rgba(245,158,11,0.35)]` |
-| **Remote Branch** (`remote`) | Huy hiệu nhánh từ xa | `bg-sky-500/15` | `border-sky-500/35` | `text-sky-300 dark:text-sky-200` | `hover:bg-sky-500/25 hover:border-sky-400 hover:shadow-[0_0_8px_rgba(14,165,233,0.35)]` |
-| **Active Branch** (`head`, active) | Nhánh đang checkout | `bg-graph/15` | `border-graph` | `font-bold text-graph-fg` | `hover:bg-graph/25 hover:shadow-[0_0_8px_var(--color-graph)]` |
-| **Other Branch** (`head`, inactive) | Nhánh local khác | `bg-editor-fg/10` | `border-editor-fg/20` | `text-editor-fg/90` | `hover:bg-editor-fg/20 hover:border-editor-fg/40` |
+| Loại Ref                            | Kiểu hiển thị                | Màu nền (Background) | Màu viền (Border)     | Màu chữ & Icon                       | Hiệu ứng Hover                                                                              |
+| :---------------------------------- | :--------------------------- | :------------------- | :-------------------- | :----------------------------------- | :------------------------------------------------------------------------------------------ |
+| **Tag / Release** (`tag`)           | Huy hiệu phiên bản phát hành | `bg-amber-500/15`    | `border-amber-500/40` | `text-amber-300 dark:text-amber-200` | `hover:bg-amber-500/25 hover:border-amber-400 hover:shadow-[0_0_8px_rgba(245,158,11,0.35)]` |
+| **Remote Branch** (`remote`)        | Huy hiệu nhánh từ xa         | `bg-sky-500/15`      | `border-sky-500/35`   | `text-sky-300 dark:text-sky-200`     | `hover:bg-sky-500/25 hover:border-sky-400 hover:shadow-[0_0_8px_rgba(14,165,233,0.35)]`     |
+| **Active Branch** (`head`, active)  | Nhánh đang checkout          | `bg-graph/15`        | `border-graph`        | `font-bold text-graph-fg`            | `hover:bg-graph/25 hover:shadow-[0_0_8px_var(--color-graph)]`                               |
+| **Other Branch** (`head`, inactive) | Nhánh local khác             | `bg-editor-fg/10`    | `border-editor-fg/20` | `text-editor-fg/90`                  | `hover:bg-editor-fg/20 hover:border-editor-fg/40`                                           |
 
 ### 2.2. Custom Author Badge trên Avatar khi Hover
+
 - Loại bỏ hoàn toàn `{author && <title>{author}</title>}` trong `HexagonNode.tsx` cũng như các thuộc tính `title` trong `CommitRow.tsx` và `CommitHoverPanel.tsx`.
 - Khi người dùng rê chuột vào avatar trong cột graph:
   - `CommitRow.tsx` phát hiện con trỏ nằm trong phạm vi avatar ($\pm 14\text{px}$ quanh `avatarCx`) và phát sự kiện `onAvatarHover`.
@@ -43,6 +45,7 @@ Loại bỏ thuộc tính `title={gitRef.name}`. Phân loại màu sắc theo `g
     - Không chặn chuột: `pointer-events-none select-none`, biến mất mượt mà khi chuột rời khỏi avatar.
 
 ### 2.3. Khắc phục mất hiệu ứng Zoom trên Cột Graph
+
 - Trong `CommitRow.tsx`:
   - Bỏ `pointer-events-none` khỏi `<td class={CELL_CLASS}>` của cột graph.
   - Cột graph trở thành một phần tự nhiên của dòng `<tr>`. Khi con trỏ chuột di chuyển vào bất kỳ điểm nào của cột graph (kể cả ngay trên avatar), `<tr>` vẫn đang `:hover`, giữ nguyên:
@@ -58,6 +61,7 @@ Loại bỏ thuộc tính `title={gitRef.name}`. Phân loại màu sắc theo `g
 ---
 
 ## 3. Danh sách tệp tin thay đổi
+
 1. `src/webview/components/commit/RefLabel.tsx`: Bỏ `title`, thêm highlight màu sắc cho Tag, Prerelease, Remote, Head.
 2. `src/webview/components/commit/HexagonNode.tsx`: Bỏ SVG `<title>`, đảm bảo scale mượt mà.
 3. `src/webview/components/commit/CommitRow.tsx`: Giữ hover cho cột graph, phát hiện hover & click avatar, bỏ `title`.

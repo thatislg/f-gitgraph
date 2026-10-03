@@ -1,6 +1,6 @@
-# Thiết Kế Kỹ Thuật Chi Tiết: Phase 1 Windows Milestone
+﻿# Thiết Kế Kỹ Thuật Chi Tiết: Phase 1 Windows Milestone
 
-Thư mục này chứa toàn bộ hệ thống các bản thiết kế kỹ thuật chi tiết (Design Specifications) phục vụ cho quá trình hiện thực hóa **Phase 1: Xây dựng nền móng nhân F# Core Engine trên môi trường Windows** theo kế hoạch tại [001_windows_progress.md](file:///d:/Kojin/neo-git-graph/docs/03_progess/001_windows_progress.md).
+Thư mục này chứa toàn bộ hệ thống các bản thiết kế kỹ thuật chi tiết (Design Specifications) phục vụ cho quá trình hiện thực hóa **Phase 1: Xây dựng nền móng nhân F# Core Engine trên môi trường Windows** theo kế hoạch tại [001_windows_progress.md](file:///d:/Kojin/f-gitgraph/docs/03_progess/001_windows_progress.md).
 
 > [!NOTE]
 > Mọi tài liệu thiết kế trong thư mục này được biên soạn nghiêm ngặt theo nguyên tắc: **100% mô tả bằng ngôn ngữ tự nhiên**, tập trung vào kiến trúc hệ thống, cấu trúc dữ liệu, luồng giải thuật và đặc tả giao thức, tuyệt đối không sử dụng mã nguồn mẫu.

@@ -1,11 +1,12 @@
-# Neo Git Graph Documentation
+﻿# F-GitGraph Documentation
 
-Tài liệu kỹ thuật và kiến trúc cho dự án Neo Git Graph.
+Tài liệu kỹ thuật và kiến trúc cho dự án F-GitGraph.
 
 ## Mục lục tài liệu
 
 ### 🎨 Phase 1: Avatar, Hexagon Node, Hover & Commit Message Panel
-Thư mục [`docs/phase1_Avatar/`](phase1_Avatar/README.md) tổng hợp toàn bộ các nghiên cứu, thiết kế và triển khai giao diện Neo Git Graph giai đoạn 1:
+
+Thư mục [`docs/phase1_Avatar/`](phase1_Avatar/README.md) tổng hợp toàn bộ các nghiên cứu, thiết kế và triển khai giao diện F-GitGraph giai đoạn 1:
 
 - **[00. Quy tắc Git & Chiến lược Merge (Git Workflow Rules)](phase1_Avatar/00_GitRules.md)**: Quy định luồng đồng bộ giữa `upstream` -> `main` -> `custom`.
 - **[01. Thiết kế Graph Node Lục giác & Hệ thống Icon](phase1_Avatar/01_GraphNodeDesign.md)**: Thiết kế node lục giác (Hexagon) và hệ thống biểu tượng (Icons) bên trong commit node.
@@ -37,7 +38,8 @@ Thư mục [`docs/core_git/`](core_git/README.md) tập trung nghiên cứu, t�
 ---
 
 ### 🔬 Phase 2: Investigation & F# Migration Blueprint
-Thư mục [`docs/phase2_Investigation/`](phase2_Investigation/README.md) chứa các bản điều tra chi tiết và kế hoạch tái thiết kế Neo Git Graph với nhân F#:
+
+Thư mục [`docs/phase2_Investigation/`](phase2_Investigation/README.md) chứa các bản điều tra chi tiết và kế hoạch tái thiết kế F-GitGraph với nhân F#:
 
 - **[001. Tổng Quan & Phân Rã Đầu Việc Tái Thiết Kế (Overview)](phase2_Investigation/001_Overview.md)**:
   Phân tích triết lý Read (F# Engine) vs Write (Native Git CLI), ranh giới giữ lại vs đập đi xây lại, đảm bảo an toàn cho commit/push, và bảng phân rã 7 mục đầu việc cần triển khai.
@@ -58,9 +60,3 @@ Thư mục [`docs/phase2_Investigation/`](phase2_Investigation/README.md) chứa
   - **[002_linux](04_reports/002_linux/README.md)**: Báo cáo tương thích `glibc`, kiểm thử stress-test kho Linux kernel và tự cấp quyền `chmod +x`.
   - **[003_macos](04_reports/003_macos/README.md)**: Báo cáo tối ưu mã máy ARM64/Intel, kiểm định Gatekeeper và hiển thị Retina 120Hz.
   - **[004_release](04_reports/004_release/README.md)**: Báo cáo tự động hóa CI/CD, kiểm định Universal VSIX và biên bản bàn giao tổng thể.
-
-
-
-
-
-

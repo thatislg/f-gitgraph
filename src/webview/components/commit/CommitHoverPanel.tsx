@@ -87,15 +87,15 @@ export function CommitHoverPanel({
         <div class="min-w-0 flex-1">
           <div class="flex items-center justify-between gap-2">
             <span class="truncate font-semibold text-editor-fg">{commit.author}</span>
-            <span class="font-mono text-[11px] text-editor-fg/60">
-              {abbrevCommit(commit.hash)}
-            </span>
+            <span class="font-mono text-[11px] text-editor-fg/60">{abbrevCommit(commit.hash)}</span>
           </div>
 
           <div class="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-editor-fg/70">
             <span>{commit.email}</span>
             <span>•</span>
-            <span>{relativeDate} ({fullDate})</span>
+            <span>
+              {relativeDate} ({fullDate})
+            </span>
           </div>
 
           {commit.refs.length > 0 && (

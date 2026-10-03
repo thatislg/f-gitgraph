@@ -1,4 +1,4 @@
-# Báo Cáo Nghiệm Thu & Đo Đạc: Phase 1 Windows Milestone
+﻿# Báo Cáo Nghiệm Thu & Đo Đạc: Phase 1 Windows Milestone
 
 Thư mục này lưu trữ các báo cáo kỹ thuật, biên bản đo đạc hiệu năng và kết quả kiểm thử nghiệm thu chi tiết cho **Phase 1: Windows First Milestone** theo các tiêu chuẩn thiết kế đã xác lập tại [07_Benchmarking_And_Verification_Plan.md](../../02_design/001_windows/07_Benchmarking_And_Verification_Plan.md).
 
@@ -7,7 +7,7 @@ Thư mục này lưu trữ các báo cáo kỹ thuật, biên bản đo đạc h
 ## Danh Mục Các Báo Cáo Dự Kiến Cần Thu Thập
 
 1. **Báo Cáo Kiểm Định Tính Độc Lập Của File Nhị Phân Native AOT**:
-   - Ghi nhận kết quả chạy thử nghiệm file `neo-git-core.exe` trên môi trường máy ảo Windows 10/11 sạch (không có .NET SDK/Runtime).
+   - Ghi nhận kết quả chạy thử nghiệm file `f-gitgraph-core.exe` trên môi trường máy ảo Windows 10/11 sạch (không có .NET SDK/Runtime).
    - Đo đạc dung lượng file nhị phân thực tế và thời gian phản hồi khởi động lạnh (< 5ms).
 
 2. **Báo Cáo Đo Đạc Hiệu Năng So Sánh Định Lượng (Benchmark Report)**:

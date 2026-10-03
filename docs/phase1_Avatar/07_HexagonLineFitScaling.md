@@ -1,6 +1,7 @@
 # 07. Tối ưu Kích thước Hexagon Mặc định & Zoom Khít Chiều cao Dòng
 
 Tài liệu này đặc tả thiết kế kỹ thuật tinh chỉnh kích thước của Commit Graph Node:
+
 1. **Kích thước mặc định nhỏ hơn chiều cao dòng một chút (tạo khoảng hở thanh thoát).**
 2. **Kích thước khi zoom (hover / selected) vừa bằng chiều cao của một dòng (`ROW_HEIGHT = 24px`), không bị vượt ra ngoài dòng.**
 
@@ -9,6 +10,7 @@ Tài liệu này đặc tả thiết kế kỹ thuật tinh chỉnh kích thư�
 ## 1. Phân tích Hình học & Tỷ lệ Zoom
 
 ### 1.1. Hiện trạng trước điều chỉnh
+
 - Chiều cao dòng: $\text{ROW\_HEIGHT} = 24\text{px}$.
 - Trước đây: `HEXAGON_RADIUS = 10.5px`.
   - Chiều cao mặc định: $H = 2 \times 10.5 = 21\text{px}$.
@@ -17,6 +19,7 @@ Tài liệu này đặc tả thiết kế kỹ thuật tinh chỉnh kích thư�
   - Hậu quả: Khi rê chuột (mouse over) hoặc chọn (select), đỉnh trên và đỉnh dưới của lục giác nở ra vượt quá chiều cao $24\text{px}$ của hàng, chạm/lấn sang đường phân cách giữa hai hàng commit.
 
 ### 1.2. Tính toán kích thước tối ưu
+
 - **Mục tiêu**:
   - Trạng thái nghỉ (mặc định): nhỏ hơn chiều cao dòng $24\text{px}$ một khoảng vừa đủ để tạo độ thoáng.
   - Trạng thái zoom (hover / selected): nở to lên vừa bằng chiều cao $23\text{px} \sim 24\text{px}$ của dòng.
@@ -40,9 +43,9 @@ Tài liệu này đặc tả thiết kế kỹ thuật tinh chỉnh kích thư�
 
 ## 2. Tóm tắt danh sách tệp thay đổi
 
-| Tệp tin | Nội dung thay đổi |
-|---|---|
-| `src/webview/graph/constants.ts` | Cập nhật `HEXAGON_RADIUS = 10`, `HEXAGON_ICON_SIZE = 12` |
-| `src/webview/components/commit/CommitTable.tsx` | Cập nhật `avatarRightX = laneX(vertex.x) + 10` |
-| `tests/webview/components/commit/HexagonNode.test.ts` | Cập nhật assertions nếu có liên quan đến radius |
-| `tests/webview/components/commit/CommitRow.test.ts` | Cập nhật assertion `avatarRightX: 26` |
+| Tệp tin                                               | Nội dung thay đổi                                        |
+| ----------------------------------------------------- | -------------------------------------------------------- |
+| `src/webview/graph/constants.ts`                      | Cập nhật `HEXAGON_RADIUS = 10`, `HEXAGON_ICON_SIZE = 12` |
+| `src/webview/components/commit/CommitTable.tsx`       | Cập nhật `avatarRightX = laneX(vertex.x) + 10`           |
+| `tests/webview/components/commit/HexagonNode.test.ts` | Cập nhật assertions nếu có liên quan đến radius          |
+| `tests/webview/components/commit/CommitRow.test.ts`   | Cập nhật assertion `avatarRightX: 26`                    |

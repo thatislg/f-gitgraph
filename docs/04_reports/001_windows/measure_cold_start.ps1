@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Đo đạc cold-start latency và dung lượng file nhị phân neo-git-core.exe (Native AOT).
+    Đo đạc cold-start latency và dung lượng file nhị phân f-gitgraph-core.exe (Native AOT).
 
 .DESCRIPTION
     Script hỗ trợ kiểm định tính độc lập của nhân F# (Nhóm Việc 1):
@@ -9,7 +9,7 @@
       - Trả về phiên bản qua lệnh `--version`.
 
 .PARAMETER ExePath
-    Đường dẫn tới neo-git-core.exe. Nếu bỏ trống, script tự tìm file trong
+    Đường dẫn tới f-gitgraph-core.exe. Nếu bỏ trống, script tự tìm file trong
     src/core-engine/bin/Release/**/publish/ (lấy bản mới nhất).
 
 .PARAMETER Runs
@@ -32,13 +32,13 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
 
 if (-not $ExePath) {
     $candidate = Get-ChildItem -Path (Join-Path $repoRoot 'src\core-engine\bin\Release') `
-        -Recurse -Filter 'neo-git-core.exe' -ErrorAction SilentlyContinue |
+        -Recurse -Filter 'f-gitgraph-core.exe' -ErrorAction SilentlyContinue |
         Where-Object { $_.FullName -match 'publish' } |
         Sort-Object LastWriteTime -Descending |
         Select-Object -First 1
 
     if (-not $candidate) {
-        Write-Error "Không tìm thấy neo-git-core.exe. Hãy chạy 'dotnet publish -c Release' trong src/core-engine trước."
+        Write-Error "Không tìm thấy f-gitgraph-core.exe. Hãy chạy 'dotnet publish -c Release' trong src/core-engine trước."
         exit 1
     }
     $ExePath = $candidate.FullName
@@ -79,7 +79,7 @@ else {
 }
 
 Write-Output "================================================"
-Write-Output " Cold-Start Benchmark: neo-git-core (Native AOT)"
+Write-Output " Cold-Start Benchmark: f-gitgraph-core (Native AOT)"
 Write-Output "================================================"
 Write-Output " Exe     : $ExePath"
 Write-Output " Version : $version"

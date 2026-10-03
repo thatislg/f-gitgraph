@@ -14,9 +14,8 @@ let container: SVGSVGElement;
 
 beforeAll(async () => {
   setupWebviewTest();
-  ({ HexagonNode, hexagonPoints, getCommitNodeType } = await import(
-    "@/webview/components/commit/HexagonNode"
-  ));
+  ({ HexagonNode, hexagonPoints, getCommitNodeType } =
+    await import("@/webview/components/commit/HexagonNode"));
 });
 
 afterEach(() => {

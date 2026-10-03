@@ -17,7 +17,7 @@ export function createMessageProtocol(ctx: vscode.ExtensionContext) {
   const repoManager = createRepoManager(extensionState, config);
 
   ctx.subscriptions.push(
-    vscode.commands.registerCommand("neo-git-graph.clearAvatarCache", () => {
+    vscode.commands.registerCommand("f-gitgraph.clearAvatarCache", () => {
       avatarManager.clearCache();
     }),
     vscode.workspace.registerTextDocumentContentProvider(

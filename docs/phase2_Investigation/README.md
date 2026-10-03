@@ -1,6 +1,6 @@
-# Phase 2 Investigation: Nghiên Cứu Tái Thiết Kế Nhân Core Git Bằng F#
+﻿# Phase 2 Investigation: Nghiên Cứu Tái Thiết Kế Nhân Core Git Bằng F#
 
-Thư mục này tập trung vào việc khảo sát kiến trúc, phân rã công việc và đánh giá an toàn kỹ thuật cho kế hoạch chuyển đổi tầng xử lý dữ liệu Git của Neo Git Graph sang **F# (.NET / Native AOT)**.
+Thư mục này tập trung vào việc khảo sát kiến trúc, phân rã công việc và đánh giá an toàn kỹ thuật cho kế hoạch chuyển đổi tầng xử lý dữ liệu Git của F-GitGraph sang **F# (.NET / Native AOT)**.
 
 ---
 
@@ -23,5 +23,3 @@ Thư mục này tập trung vào việc khảo sát kiến trúc, phân rã côn
   - Chiến lược ưu tiên thực thi dứt điểm: Windows trước $\rightarrow$ Linux thứ hai $\rightarrow$ macOS hoàn thiện cuối cùng.
   - Kế hoạch chi tiết 4 giai đoạn phát triển và chuyển giao.
   - Tiêu chí nghiệm thu (DoD) và biện pháp phòng ngừa rủi ro cho từng nền tảng.
-
-

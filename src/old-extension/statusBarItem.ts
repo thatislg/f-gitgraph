@@ -13,7 +13,7 @@ export class StatusBarItem {
     this.config = config;
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
     this.statusBarItem.name = EXTENSION_NAME;
-    this.statusBarItem.command = "neo-git-graph.view";
+    this.statusBarItem.command = "f-gitgraph.view";
     context.subscriptions.push(this.statusBarItem);
     legacyLogger.log(
       `StatusBarItem created (showStatusBarItem=${config.showStatusBarItem()}, numRepos=0)`

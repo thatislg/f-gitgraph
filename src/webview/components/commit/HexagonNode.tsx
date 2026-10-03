@@ -219,7 +219,6 @@ export function HexagonNode({
       }}
       onClick={handleClick}
     >
-
       {/* Background mask: hides branch line underneath node */}
       <polygon
         points={hexagonPoints(cx, cy, radius + 1, pointy)}

@@ -53,13 +53,13 @@ export function watchForRepos(
       check(ctx, state, onReposFound, statusBarItem)
     ),
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("neo-git-graph.maxDepthOfRepoSearch")) {
+      if (e.affectsConfiguration("f-gitgraph.maxDepthOfRepoSearch")) {
         if (maxDepth.increased(config.maxDepthOfRepoSearch())) {
           void check(ctx, state, onReposFound, statusBarItem);
         }
       }
     }),
-    vscode.commands.registerCommand("neo-git-graph.view", async () => {
+    vscode.commands.registerCommand("f-gitgraph.view", async () => {
       await vscode.window.showErrorMessage(EXTENSION_NAME, {
         detail: vscode.l10n.t(
           "Either the current workspace does not contain a Git repository, or the Git repository is not configured correctly."
@@ -67,7 +67,7 @@ export function watchForRepos(
         modal: true
       });
     }),
-    vscode.commands.registerCommand("neo-git-graph.clearAvatarCache", async () => {
+    vscode.commands.registerCommand("f-gitgraph.clearAvatarCache", async () => {
       await vscode.window.showErrorMessage(EXTENSION_NAME, {
         detail: vscode.l10n.t(
           "Either the current workspace does not contain a Git repository, or the Git repository is not configured correctly."

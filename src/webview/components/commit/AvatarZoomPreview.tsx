@@ -34,7 +34,9 @@ export function AvatarZoomPreview({ info, onClose }: AvatarZoomPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
   const { commit, anchorRect, colour, author, nodeType = "commit" } = info;
   // High-resolution avatar: size=256 ensures crystal clear quality when zoomed 5x
-  const highResAvatarUrl = commit.email ? getGitAccountAvatarUrl(commit.email, 256) : info.avatarUrl;
+  const highResAvatarUrl = commit.email
+    ? getGitAccountAvatarUrl(commit.email, 256)
+    : info.avatarUrl;
 
   const [coords, setCoords] = useState<{ left: number; top: number }>({
     left: anchorRect.left + anchorRect.width / 2,
@@ -46,7 +48,10 @@ export function AvatarZoomPreview({ info, onClose }: AvatarZoomPreviewProps) {
     const origCenterY = anchorRect.top + anchorRect.height / 2;
 
     const halfWidth = SVG_SIZE / 2;
-    const clampedX = Math.max(halfWidth + 12, Math.min(window.innerWidth - halfWidth - 12, origCenterX));
+    const clampedX = Math.max(
+      halfWidth + 12,
+      Math.min(window.innerWidth - halfWidth - 12, origCenterX)
+    );
     const clampedY = Math.max(halfWidth + 12, Math.min(window.innerHeight - 120, origCenterY));
 
     setCoords({ left: clampedX, top: clampedY });
@@ -135,10 +140,7 @@ export function AvatarZoomPreview({ info, onClose }: AvatarZoomPreviewProps) {
             preserveAspectRatio="xMidYMid slice"
           />
         ) : (
-          <g
-            transform={`translate(${CENTER - 25}, ${CENTER - 25}) scale(3.125)`}
-            fill={colour}
-          >
+          <g transform={`translate(${CENTER - 25}, ${CENTER - 25}) scale(3.125)`} fill={colour}>
             {renderDefaultIcon(nodeType)}
           </g>
         )}
