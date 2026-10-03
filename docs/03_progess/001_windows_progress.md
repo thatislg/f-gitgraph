@@ -18,8 +18,8 @@ Tài liệu này ghi nhận tổng quan mục tiêu, bảng ánh xạ tài liệ
   - Bảo đảm an toàn tuyệt đối 100% cho các thao tác ghi (commit, push, pull, rebase...) bằng cách tiếp tục định tuyến qua Git gốc (`git.exe`).
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
-- **Trạng thái**: Đang triển khai — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT) và Nhóm Việc 2 (Domain Model & Error Taxonomy) đã hoàn thành.
-- **Tiến độ tổng thể**: 2/7 nhóm việc hoàn thành (29%).
+- **Trạng thái**: Đang triển khai — Nhóm Việc 1 (Khởi tạo dự án F# & Native AOT), Nhóm Việc 2 (Domain Model) và Nhóm Việc 3 (Fast Git Reader) đã hoàn thành.
+- **Tiến độ tổng thể**: 3/7 nhóm việc hoàn thành (43%).
 
 ---
 
@@ -97,16 +97,16 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 > 
 > *Nội dung thiết kế hướng dẫn*: Tham khảo Mục 1 để tích hợp LibGit2 C-binding in-process qua P/Invoke, Mục 2 để triển khai module ánh xạ bộ nhớ (Memory-Mapped Files) đọc trực tiếp cấu trúc nhị phân của tệp `commit-graph` kèm cơ chế dự phòng, và Mục 3 để áp dụng kỹ thuật lát cắt bộ nhớ `ReadOnlySpan<byte>` giải mã chuỗi UTF-8 tiếng Việt chuẩn xác.
 
-- [ ] **Nhiệm vụ 3.1: Tích hợp thư viện C gốc LibGit2 trên Windows**
+- [x] **Nhiệm vụ 3.1: Tích hợp thư viện C gốc LibGit2 trên Windows**
   - Cấu hình liên kết thư viện mã máy LibGit2 (`libgit2.dll`) tương thích hoàn toàn với chế độ Native AOT trên Windows 64-bit.
   - Thiết lập giao diện gọi hàm trực tiếp (P/Invoke) an toàn cho các tác vụ: mở kho mã nguồn trên đĩa, khởi tạo bộ duyệt lịch sử commit (`git_revwalk`), nạp danh sách commit cha và trích xuất thông tin tác giả.
 
-- [ ] **Nhiệm vụ 3.2: Module đọc trực tiếp file nhị phân Commit-Graph bằng ánh xạ bộ nhớ (Memory-Mapped Files)**
+- [x] **Nhiệm vụ 3.2: Module đọc trực tiếp file nhị phân Commit-Graph bằng ánh xạ bộ nhớ (Memory-Mapped Files)**
   - Phân tích cấu trúc bảng mục lục nhị phân của tệp `commit-graph` nằm trong thư mục `.git/objects/info/`.
   - Ứng dụng kỹ thuật ánh xạ bộ nhớ trực tiếp (Memory-Mapped Files) của Windows để nạp toàn bộ cấu trúc đồ thị hàng trăm nghìn commit vào không gian địa chỉ RAM trong thời gian từ 1 đến 2 phần nghìn giây.
   - Xây dựng cơ chế dự phòng tự động (Fallback): trong trường hợp kho mã nguồn cũ chưa được bật tính năng tạo file `commit-graph`, engine tự động chuyển sang đọc tuần tự qua LibGit2 mà không làm gián đoạn trải nghiệm người dùng.
 
-- [ ] **Nhiệm vụ 3.3: Tối ưu hóa bộ nhớ Zero-Allocation & Xử lý mã hóa UTF-8 tiếng Việt**
+- [x] **Nhiệm vụ 3.3: Tối ưu hóa bộ nhớ Zero-Allocation & Xử lý mã hóa UTF-8 tiếng Việt**
   - Sử dụng các lát cắt bộ nhớ liên tục (`ReadOnlySpan<byte>`) để trích xuất các trường văn bản trực tiếp từ bộ đệm của LibGit2, không cấp phát chuỗi trung gian vào bộ nhớ heap thu gom rác.
   - Giải mã trực tiếp mảng byte UTF-8 thô sang chuỗi ký tự .NET đúng chuẩn, khắc phục triệt để lỗi hiển thị tiếng Việt có dấu bị mã hóa thành chuỗi bát phân (octal escape) thường gặp trên Git CLI Windows.
 
@@ -212,3 +212,5 @@ Toàn bộ quá trình hiện thực hóa các nhóm việc kỹ thuật bên d�
 - **2026-10-03**: Biên dịch thành công `neo-git-core.exe` Native AOT (self-contained, không phụ thuộc .NET runtime), nhắm mục tiêu `net10.0` (LTS). Kích thước nhị phân đo được 0.84MB (dưới ngưỡng mục tiêu 6–9MB, sẽ tăng khi tích hợp LibGit2/MessagePack ở các nhóm việc sau). Cold-start latency đo được ~29–56ms (trung bình ~37ms), chưa đạt mục tiêu < 5ms — phần lớn độ trễ đến từ chi phí spawn tiến trình `CreateProcessW` của Windows, sẽ được tối ưu bằng mô hình sidecar daemon thường trú ở Nhóm Việc 5 thay vì spawn tiến trình mỗi lần gọi.
 - **2026-10-03**: Hoàn thành Nhóm Việc 2 — Xây dựng tầng miền nghiệp vụ thuần túy trong `src/core-engine/Domain/`: `CoreEntities.fs` (`GitHash` hỗ trợ SHA-1/SHA-256 với `tryParse`/`abbrev`, `Author`, `CommitNode`, `GitRef` phân loại 6 nhóm tham chiếu), `InFlightState.fs` (Clean/Merging/Rebasing/CherryPicking/Bisecting) và `GitError.fs` (bảng lỗi vét cạn 9 trường hợp kèm hàm `describe`).
 - **2026-10-03**: Dựng dự án kiểm thử đơn vị chuẩn hóa `src/core-engine/tests/CoreEngine.Tests/` dùng xUnit (tương thích `dotnet test`), gồm 19 test case phủ toàn bộ tầng Domain (GitHash, CommitNode, InFlightState, GitError). Tạo solution `src/core-engine/neo-git-core.sln` gắn dự án nhân + test để di chuyển trọn gói khi tách dự án. Xóa smoke test tạm `smoke_test.fsx`.
+- **2026-10-03**: Hoàn thành Nhóm Việc 3 — Tầng đọc Git tốc độ cao trong `src/core-engine/Storage/`: `Utf8.fs` (giải mã UTF-8 zero-allocation + hex encode/decode), `CommitGraph.fs` (đọc trực tiếp tệp nhị phân `commit-graph` bằng Memory-Mapped Files qua `SafeMemoryMappedViewHandle.AcquirePointer`, parse header/chunk/OID fanout/lookup/CDAT/EDGE), `LibGit2.fs` (P/Invoke `git2-5853918.dll` từ gói `LibGit2Sharp.NativeBinaries`: open repo, revwalk, đọc commit cha/tác giả/tiêu đề qua `git_oid_tostr`/`git_oid_fromstr` tránh vấn đề layout struct SHA-256) và `Storage.fs` (điều phối `GitReader.readGraph`: ưu tiên commit-graph, fallback LibGit2).
+- **2026-10-03**: Kiểm chứng Nhóm Việc 3 bằng 27 test case xUnit (thêm `Utf8Tests`, `CommitGraphTests` với bộ dựng commit-graph nhị phân tổng hợp) và kiểm thử tích hợp trên kho Git thật: commit-graph đọc đúng 5 commit (1 root, 1 merge), LibGit2 đọc đúng tiêu đề tiếng Việt có dấu, emoji 🚀 và merge 2 cha. Biên dịch Native AOT thành công kèm `git2-5853918.dll` (~2MB) trong bản phát hành.
