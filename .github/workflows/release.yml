@@ -1,0 +1,184 @@
+name: Release (Multi-Platform Matrix & Universal VSIX)
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag name for the release (e.g. v1.0.0)"
+        required: true
+        default: "v1.0.0"
+      prerelease:
+        description: "Is this a pre-release?"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-platform-packages:
+    name: Build & Package (${{ matrix.os }} - ${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            target: win32-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+            target: linux-x64
+          - os: macos-latest
+            rid: osx-arm64
+            target: darwin-arm64
+          - os: macos-13
+            rid: osx-x64
+            target: darwin-x64
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Tests
+        run: |
+          dotnet test src/core-engine/tests/CoreEngine.Tests -c Release
+          pnpm run test
+
+      - name: Build F# Native AOT Binary
+        run: node scripts/build-native.mjs --rid ${{ matrix.rid }}
+
+      - name: Package Platform-Specific VSIX
+        run: npx vsce package --no-dependencies --githubBranch custom --target ${{ matrix.target }} --out f-gitgraph-${{ matrix.target }}.vsix
+
+      - name: Upload Platform VSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ matrix.target }}
+          path: f-gitgraph-${{ matrix.target }}.vsix
+          if-no-files-found: error
+
+      - name: Upload Native Binary Directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-bin-${{ matrix.rid }}
+          path: bin/${{ matrix.rid }}
+          if-no-files-found: error
+
+  publish-release:
+    name: Package Universal VSIX & Publish GitHub Release
+    needs: build-platform-packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create bin directory
+        run: mkdir -p bin
+
+      - name: Download Windows x64 Native Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: native-bin-win-x64
+          path: bin/win-x64
+
+      - name: Download Linux x64 Native Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: native-bin-linux-x64
+          path: bin/linux-x64
+
+      - name: Download macOS ARM64 Native Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: native-bin-osx-arm64
+          path: bin/osx-arm64
+
+      - name: Download macOS x64 Native Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: native-bin-osx-x64
+          path: bin/osx-x64
+
+      - name: Grant Executable Permissions on Unix Binaries
+        run: |
+          chmod +x bin/linux-x64/f-gitgraph-core || true
+          chmod +x bin/osx-arm64/f-gitgraph-core || true
+          chmod +x bin/osx-x64/f-gitgraph-core || true
+          ls -laR bin/
+
+      - name: Download All Platform VSIXs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: vsix-*
+          merge-multiple: true
+          path: ./dist
+
+      - name: Package Universal VSIX (All Platforms)
+        run: npx vsce package --no-dependencies --githubBranch custom --out ./dist/f-gitgraph-universal.vsix
+
+      - name: Generate SHA-256 Checksums
+        working-directory: ./dist
+        run: |
+          sha256sum *.vsix > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Determine Release Tag
+        id: release_info
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+            echo "prerelease=${{ github.event.inputs.prerelease }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release & Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_info.outputs.tag }}
+          name: F-GitGraph ${{ steps.release_info.outputs.tag }}
+          draft: false
+          prerelease: ${{ steps.release_info.outputs.prerelease == 'true' }}
+          generate_release_notes: true
+          files: |
+            ./dist/*.vsix
+            ./dist/SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

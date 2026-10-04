@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process";
+import * as fs from "node:fs";
 
 import * as vscode from "vscode";
 
@@ -19,32 +20,96 @@ import {
   type RangeData
 } from "./protocol";
 
-// Module điều phối vòng đời tiến trình F# sidecar (f-gitgraph-core.exe) và máy khách
-// RPC nhị phân qua đường ống stdin/stdout. Tham khảo thiết kế:
-// docs/02_design/001_windows/05_IPC_Stdio_Streaming_Protocol.md (Mục 1 & 2).
+// Module điều phối vòng đời tiến trình F# sidecar (f-gitgraph-core) và máy khách
+// RPC nhị phân qua đường ống stdin/stdout. Hỗ trợ đa nền tảng Windows, Linux, macOS.
 
 const HEARTBEAT_INTERVAL_MS = 10_000;
 const READY_TIMEOUT_MS = 5_000;
 
-/// Tên nhị phân sidecar (Nhân F# Native AOT) và thư viện C gốc LibGit2.
-const SIDECAR_EXECUTABLE = "f-gitgraph-core.exe";
-const SIDECAR_LIBGIT2 = "git2-5853918.dll";
-
-/**
- * Phân giải đường dẫn tuyệt đối tới nhị phân sidecar trong thư mục phân phối nội
- * bộ `bin/win-x64/`. Dùng `context.asAbsolutePath` để hoạt động đúng cả trong môi
- * trường phát triển (F5 Extension Host) lẫn môi trường đã cài từ gói VSIX.
- */
-export function resolveSidecarBinaryPath(context: vscode.ExtensionContext): string {
-  return context.asAbsolutePath(`bin/win-x64/${SIDECAR_EXECUTABLE}`);
+export interface PlatformBinaryInfo {
+  directories: string[];
+  executable: string;
+  libgit2: string;
 }
 
 /**
- * Phân giải đường dẫn tuyệt đối tới thư viện C gốc LibGit2. Đặt cạnh nhị phân trong
- * cùng thư mục `bin/win-x64/` để P/Invoke của nhân F# nạp được qua tên file.
+ * Xác định tên thư mục và tên file nhị phân tương ứng với nền tảng & kiến trúc CPU hiện tại.
+ */
+export function getPlatformBinaryInfo(
+  platform = process.platform,
+  arch = process.arch
+): PlatformBinaryInfo {
+  const isWindows = platform === "win32";
+  const isMac = platform === "darwin";
+  const isLinux = platform === "linux";
+
+  const exeName = isWindows ? "f-gitgraph-core.exe" : "f-gitgraph-core";
+  let libName = "git2-5853918.dll";
+  if (isLinux) {
+    libName = "libgit2-5853918.so";
+  } else if (isMac) {
+    libName = "libgit2-5853918.dylib";
+  }
+
+  let directories: string[];
+  if (isWindows) {
+    directories = arch === "arm64" ? ["win-arm64", "win32-arm64"] : ["win-x64", "win32-x64"];
+  } else if (isMac) {
+    directories = arch === "arm64" ? ["osx-arm64", "darwin-arm64"] : ["osx-x64", "darwin-x64"];
+  } else if (isLinux) {
+    directories = arch === "arm64" ? ["linux-arm64"] : ["linux-x64"];
+  } else {
+    directories = [`${platform}-${arch}`];
+  }
+
+  return { directories, executable: exeName, libgit2: libName };
+}
+
+/**
+ * Phân giải đường dẫn tuyệt đối tới nhị phân sidecar.
+ * Tìm kiếm theo thứ tự: thư mục nền tảng (Universal/Platform VSIX), thư mục bin gốc,
+ * hoặc fallback về đường dẫn mặc định của nền tảng hiện hành.
+ */
+export function resolveSidecarBinaryPath(context: vscode.ExtensionContext): string {
+  const info = getPlatformBinaryInfo();
+
+  // 1. Kiểm tra thư mục tương ứng nền tảng (VD: bin/win-x64, bin/linux-x64, bin/osx-arm64)
+  for (const dir of info.directories) {
+    const candidate = context.asAbsolutePath(`bin/${dir}/${info.executable}`);
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  // 2. Kiểm tra trực tiếp tại bin/ (khi đóng gói phẳng cho 1 nền tảng duy nhất)
+  const flatCandidate = context.asAbsolutePath(`bin/${info.executable}`);
+  if (fs.existsSync(flatCandidate)) {
+    return flatCandidate;
+  }
+
+  // 3. Fallback trả về vị trí chuẩn dự kiến
+  return context.asAbsolutePath(`bin/${info.directories[0] ?? "win-x64"}/${info.executable}`);
+}
+
+/**
+ * Phân giải đường dẫn tuyệt đối tới thư viện C gốc LibGit2.
  */
 export function resolveSidecarLibGit2Path(context: vscode.ExtensionContext): string {
-  return context.asAbsolutePath(`bin/win-x64/${SIDECAR_LIBGIT2}`);
+  const info = getPlatformBinaryInfo();
+
+  for (const dir of info.directories) {
+    const candidate = context.asAbsolutePath(`bin/${dir}/${info.libgit2}`);
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  const flatCandidate = context.asAbsolutePath(`bin/${info.libgit2}`);
+  if (fs.existsSync(flatCandidate)) {
+    return flatCandidate;
+  }
+
+  return context.asAbsolutePath(`bin/${info.directories[0] ?? "win-x64"}/${info.libgit2}`);
 }
 
 type PendingRequest = {
@@ -71,6 +136,24 @@ export class SidecarManager implements vscode.Disposable {
   }
 
   async start(): Promise<void> {
+    if (!fs.existsSync(this.exePath)) {
+      throw new Error(`Không tìm thấy file thực thi F# sidecar tại: ${this.exePath}`);
+    }
+
+    // Tự động cấp quyền thực thi (chmod +x) trên Unix (Linux / macOS) nếu thiếu cờ
+    if (process.platform !== "win32") {
+      try {
+        const stat = fs.statSync(this.exePath);
+        if ((stat.mode & 0o111) === 0) {
+          fs.chmodSync(this.exePath, 0o755);
+        }
+      } catch (err) {
+        logger.warn(
+          `Không thể tự động cấp cờ thực thi (chmod +x) cho ${this.exePath}: ${String(err)}`
+        );
+      }
+    }
+
     const ready = new Promise<void>((resolve, reject) => {
       this.readyResolve = resolve;
       this.readyTimer = setTimeout(() => {

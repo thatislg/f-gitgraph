@@ -37,4 +37,3 @@ Thư mục này lưu trữ các báo cáo kỹ thuật, biên bản đo đạc h
    - Báo cáo kỹ thuật (`REP-WIN-013`): Tính năng Commit Ordering (Topological/Date) trên toàn pipeline (F# Core → RPC → Webview) và tinh chỉnh giao diện (gradient neon, viền panel, panel lật phía trên, avatar scale 1.2x).
 4. **[014_PanelGap_Consistency_Fix.md](014_PanelGap_Consistency_Fix.md)**:
    - Báo cáo kỹ thuật (`REP-WIN-014`): Phân tích căn nguyên và khắc phục hiện tượng khoảng cách không đều giữa dòng commit và panel chi tiết (bổ sung hằng số `PANEL_GAP` áp dụng đồng nhất trong cả hai nhánh định vị panel).
-

@@ -23,7 +23,9 @@ Tài liệu này đặc tả chi tiết giải pháp thiết kế kỹ thuật n
 ## 2. Thiết Kế Thuật Toán Phân Bổ Màu Sắc Nhất Quán & Chống Trùng Màu (Khắc phục BUG-01)
 
 ### 2.1. Phân Tích Nguyên Nhân Kỹ Thuật
+
 Ở phiên bản ban đầu, thuật toán F# gán màu bằng phép toán đơn giản `lane % PaletteSize` và cố định màu của đường nối SVG theo màu nút con (`child.Color`). Cách tiếp cận này dẫn tới:
+
 - Khi một làn được giải phóng rồi tái sử dụng ngay lập tức cho một nhánh hoàn toàn mới, nhánh mới lại mang màu giống hệt nhánh vừa kết thúc.
 - Hai làn nằm cạnh nhau có thể vô tình nhận cùng một màu hoặc các màu có tông gần nhau trong bảng 8 màu.
 - Khi rẽ nhánh hoặc sáp nhập nhánh, đường nối cong lấy sai màu nguồn/đích, gây hiện tượng một đường nhánh đổi màu giữa chừng.
@@ -48,7 +50,9 @@ Tài liệu này đặc tả chi tiết giải pháp thiết kế kỹ thuật n
 ## 3. Thiết Kế Cơ Chế Đồng Bộ Hình Học Khi Mở Rộng Dòng Commit (Khắc phục BUG-02)
 
 ### 3.1. Phân Tích Nguyên Nhân Kỹ Thuật
+
 Khi người dùng chọn một commit, bảng HTML chèn thêm một hàng chi tiết panel có chiều cao cố định (~250px).
+
 - **Lệch pha hai nơi tính tọa độ Y riêng rẽ**: Hiện tượng đường nối và node avatar được tính toán vị trí theo trục thẳng đứng tại hai luồng logic tách rời. Nếu một bên được cộng bù độ lệch dãn nở trong khi bên kia vẫn sử dụng công thức nhân chỉ số dòng với chiều cao hàng ban đầu, phần đường nối sẽ bị dời dịch trong khi avatar đứng yên tại chỗ cũ (hoặc ngược lại), tạo ra khoảng trống dị thường ngay trong vùng hiển thị panel chi tiết.
 - **Biến dạng đường cong khi dãn khoảng cách**: Khi khoảng cách giữa hai commit bị kéo dãn thêm 250px, nếu giữ nguyên phép vẽ cong Bezier toàn phần, đường nối cong sẽ bị kéo dãn thành hình chữ S dài méo mó, phá vỡ tính liên tục và quy chuẩn thị giác của đồ thị.
 - **Lệch pha trong layer avatar lồng nhau**: Node avatar được tạo bởi nhiều phần tử lồng nhau gồm nhóm thẻ SVG, vùng cắt mặt nạ đa giác clip-path, và thẻ nhúng ảnh đại diện. Nếu chỉ có một thuộc tính nhận tọa độ dãn nở còn vùng cắt clip-path hoặc điểm gốc biến đổi hình học transform-origin giữ nguyên tọa độ cũ, ảnh avatar sẽ bị cắt cụt, biến mất hoặc cố định tại tọa độ khởi tạo ban đầu.
@@ -89,6 +93,7 @@ Khi người dùng chọn một commit, bảng HTML chèn thêm một hàng chi 
 ## 4. Thiết Kế Đồng Bộ Hệ Tọa Độ Y Theo Cửa Sổ Ảo & Khép Kín Đồ Thị Tại Commit Gốc (Khắc phục BUG-03)
 
 ### 4.1. Phân Tích Nguyên Nhân Kỹ Thuật
+
 Hiện tượng xuất hiện node và các làn kéo dài dưới commit gốc bắt nguồn từ sự lệch pha hệ tọa độ giữa nhân F# và tầng Webview khi áp dụng cơ chế cửa sổ ảo (Virtual Scrolling Window):
 
 - **Lệch gốc tọa độ Y (nguyên nhân cốt lõi)**: Nhân F# `Geometry.compute` sinh tọa độ Y **tuyệt đối** (`Margin + row * RowHeight`) trên toàn bộ đồ thị. Khi Webview yêu cầu một cửa sổ dòng `[from, to]`, tầng `QueryRange` trả về nguyên tọa độ tuyệt đối này, nhưng component `CommitGraph` lại vẽ vào một khung SVG được định vị tại `top = header + from * RowHeight` và có chiều cao `rows.length * RowHeight` (hệ tọa độ **cửa sổ**). Hệ quả: toàn bộ node và đường nối bị dịch xuống đúng `from * RowHeight` pixel, khiến khi cuộn xuống cuối danh sách, node của commit gốc cùng các line bị "tràn" xuống dưới đáy bảng.
@@ -113,7 +118,9 @@ Hiện tượng xuất hiện node và các làn kéo dài dưới commit gốc 
 ## 5. Thiết Kế Khôi Phục Hệ Thống Token Màu Nền Badge Ref Trong Tailwind CSS v4 (Khắc phục BUG-04)
 
 ### 5.1. Phân Tích Nguyên Nhân Kỹ Thuật
+
 Trong cấu trúc mới của Tailwind CSS v4, cơ chế biên dịch class opacity (như `bg-editor-fg/10`, `border-editor-fg/20`) bắt buộc tên token màu phải được đăng ký tường minh trong directive `@theme`.
+
 - Trong file stylesheet hiện tại, token `--color-editor-fg` và `--color-graph-fg` không hề tồn tại (chỉ có `--color-editor` và `--color-fg`).
 - Trình biên dịch Tailwind v4 loại bỏ class không hợp lệ, khiến thuộc tính `background-color` không được áp dụng vào phần tử badge, dẫn tới việc badge bị mất nền và nhìn xuyên thấu xuống màu nền trang.
 
@@ -158,14 +165,14 @@ Trong cấu trúc mới của Tailwind CSS v4, cơ chế biên dịch class opac
 
 ## 7. Bảng Kế Hoạch Triển Khai Chi Tiết Theo Module
 
-| Thứ Tự | Hạng Mục Cần Sửa | Tệp Tin Tác Động | Trách Nhiệm Kỹ Thuật |
-| :---: | :--- | :--- | :--- |
-| **BƯỚC 1** | Khôi phục token màu badge ref | `src/webview/styles.css`, `RefLabel.tsx` | Đăng ký biến màu `--color-editor-fg` và chuẩn hóa utility class. |
-| **BƯỚC 2** | Đồng bộ hằng số hình học F# & Webview | `src/core-engine/Graph/Graph.fs`, `src/webview/constants.ts` | Đồng bộ `LaneWidth = 20.0`, `Margin = 16.0`, `RowHeight = 24.0`. |
-| **BƯỚC 3** | Sửa thuật toán màu làn & khép làn F# | `src/core-engine/Graph/Graph.fs` | Kế thừa màu nhánh, chống trùng màu kề cạnh, đóng làn khi hết commit. |
-| **BƯỚC 4** | Xử lý biến đổi hình học khi mở commit | `src/webview/components/commit/CommitGraph.tsx` | Biến đổi chuỗi lệnh SVG `path.d` thích ứng khi có `expansion`. |
-| **BƯỚC 5** | Đồng bộ hóa nạp avatar theo cửa sổ ảo | `src/webview/lib/stores/graph-window.store.ts` | Gửi danh sách email/hash cần nạp đồng bộ theo dải khung nhìn. |
-| **BƯỚC 6** | Biên dịch kiểm thử & Nghiệm thu | F# AOT build, Webview bundle, VSIX packaging | Chạy test, kiểm tra trực quan đa nhánh trên VS Code thực tế. |
+|   Thứ Tự   | Hạng Mục Cần Sửa                      | Tệp Tin Tác Động                                             | Trách Nhiệm Kỹ Thuật                                                 |
+| :--------: | :------------------------------------ | :----------------------------------------------------------- | :------------------------------------------------------------------- |
+| **BƯỚC 1** | Khôi phục token màu badge ref         | `src/webview/styles.css`, `RefLabel.tsx`                     | Đăng ký biến màu `--color-editor-fg` và chuẩn hóa utility class.     |
+| **BƯỚC 2** | Đồng bộ hằng số hình học F# & Webview | `src/core-engine/Graph/Graph.fs`, `src/webview/constants.ts` | Đồng bộ `LaneWidth = 20.0`, `Margin = 16.0`, `RowHeight = 24.0`.     |
+| **BƯỚC 3** | Sửa thuật toán màu làn & khép làn F#  | `src/core-engine/Graph/Graph.fs`                             | Kế thừa màu nhánh, chống trùng màu kề cạnh, đóng làn khi hết commit. |
+| **BƯỚC 4** | Xử lý biến đổi hình học khi mở commit | `src/webview/components/commit/CommitGraph.tsx`              | Biến đổi chuỗi lệnh SVG `path.d` thích ứng khi có `expansion`.       |
+| **BƯỚC 5** | Đồng bộ hóa nạp avatar theo cửa sổ ảo | `src/webview/lib/stores/graph-window.store.ts`               | Gửi danh sách email/hash cần nạp đồng bộ theo dải khung nhìn.        |
+| **BƯỚC 6** | Biên dịch kiểm thử & Nghiệm thu       | F# AOT build, Webview bundle, VSIX packaging                 | Chạy test, kiểm tra trực quan đa nhánh trên VS Code thực tế.         |
 
 ---
 

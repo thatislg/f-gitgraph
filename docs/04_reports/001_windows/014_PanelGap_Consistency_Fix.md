@@ -52,12 +52,12 @@ Hành vi **lật panel phía trên khi gần đáy** (khắc phục lỗi "hộp
 
 ## 4. Kiểm Định (Zero-Regression)
 
-| Hạng mục kiểm định | Kết quả |
-| :--- | :---: |
-| `pnpm typecheck` | 0 lỗi |
-| `pnpm lint` | 0 lỗi / 0 cảnh báo |
-| `vitest` — webview `components/commit` | 21/21 pass |
-| `pnpm run package:vsix:win` | Đóng gói thành công `f-gitgraph-win-x64.vsix` (2.63 MB, 20 files) |
+| Hạng mục kiểm định                     |                              Kết quả                              |
+| :------------------------------------- | :---------------------------------------------------------------: |
+| `pnpm typecheck`                       |                               0 lỗi                               |
+| `pnpm lint`                            |                        0 lỗi / 0 cảnh báo                         |
+| `vitest` — webview `components/commit` |                            21/21 pass                             |
+| `pnpm run package:vsix:win`            | Đóng gói thành công `f-gitgraph-win-x64.vsix` (2.63 MB, 20 files) |
 
 Ghi chú: thay đổi nằm hoàn toàn trong tầng Webview, không đụng chạm tới hình học F# Core (`Graph.fs`, `Transport.fs`) nên đồ thị giữ nguyên 100% hình học.
 

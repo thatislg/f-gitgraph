@@ -20,7 +20,9 @@ Sau khi hoàn tất bước đầu tích hợp F# Core Engine vào Webview, qua 
 ## 2. Chi Tiết Sự Cố 1: Lỗi Biến Dạng Đường Nối & Mất Kết Nối Khi Mở Rộng Dòng Commit (`BUG-EXPAND-01`)
 
 ### 2.1. Hiện Tượng Quan Sát Được Thực Tế
+
 Khi người dùng nhấp chọn vào một dòng commit trong bảng danh sách để xem chi tiết thông điệp commit (`CommitDetails`):
+
 1. **Line graph trong vùng mở rộng tự nhiên bị nhạt màu**:
    - Các đường nhánh đi ngang qua vùng panel chi tiết bị giảm độ mờ (opacity) đột ngột, trở nên mờ nhạt so với các đoạn đường phía trên và phía dưới, gây cảm giác đồ thị bị đứt quãng hoặc bị lỗi kết xuất.
 2. **Đường nối bị thẳng đuột và mất định hướng nối**:
@@ -44,13 +46,13 @@ function transformPathD(d: string, splitTop: number, height: number): PathSegmen
   return [
     { d: renderPath(x0, p.y0, x0, splitTop) },
     { d: renderPath(x0, splitTop, x0, splitBottom), faint: true }, // [1] Ép opacity 0.35 làm nhạt màu
-    { d: renderPath(x1, splitBottom, x1, p.y1 + height) }          // [2] Bắt đầu tại x1, tạo khoảng đứt gãy x0 -> x1!
+    { d: renderPath(x1, splitBottom, x1, p.y1 + height) } // [2] Bắt đầu tại x1, tạo khoảng đứt gãy x0 -> x1!
   ];
 }
 ```
 
 1. **Nguyên nhân làm nhạt màu**: Thuộc tính `faint: true` gắn với cấu hình `opacity={segment.faint ? 0.35 : undefined}` trong thẻ `<g>` của SVG đã làm giảm độ tương phản của nét vẽ xuống còn 35%.
-2. **Nguyên nhân hở chân và thẳng đuột**: 
+2. **Nguyên nhân hở chân và thẳng đuột**:
    - Hàm `transformPathD` chia đường nối thành 3 đoạn: đoạn trên chạy từ $(x_0, y_0)$ đến $(x_0, splitTop)$, đoạn giữa chạy từ $(x_0, splitTop)$ đến $(x_0, splitBottom)$, và đoạn dưới bắt đầu từ $(x_1, splitBottom)$ đến $(x_1, y_1 + height)$.
    - Nếu đường nối là đường đổi làn (rẽ nhánh hoặc merge giữa hai làn khác nhau: $x_0 \neq x_1$), đoạn giữa kết thúc tại tọa độ ngang $x_0$, trong khi đoạn dưới lại bắt đầu tại tọa độ ngang $x_1$.
    - **Khoảng cách ngang giữa $x_0$ và $x_1$ hoàn toàn không có đường nối nào kết nối lại**, tạo ra một vết đứt gãy hở chân trắng trợn ở đáy panel chi tiết!
@@ -60,13 +62,17 @@ function transformPathD(d: string, splitTop: number, height: number): PathSegmen
 ## 3. Kiến Trúc Tham Chiếu & Định Hướng Đổi Mới Toàn Diện
 
 ### 3.1. Hạn Chế Cốt Tử Của Cơ Chế Dãn Nở Nội Dòng (In-row Table Expansion)
+
 Cơ chế chèn một hàng `<tr>` có chiều cao lớn (~250px) vào giữa bảng danh sách commit để hiển thị chi tiết (In-row Expansion) bộc lộ hàng loạt nhược điểm kiến trúc cố hữu:
+
 - **Xung đột mô hình hình học**: Đồ thị commit là một hệ trục tọa độ liên tục tính theo từng hàng cố định (`ROW_HEIGHT = 24px`). Việc dãn nở đột ngột một hàng làm gãy cấu trúc không gian của đồ thị SVG.
 - **Rủi ro tính toán lại phức tạp**: Đòi hỏi phải tịnh tiến $Y$, cắt xẻ chuỗi lệnh SVG `path.d`, bù trừ dãn nở vào thuật toán ảo hóa cuộn trang (`Virtual Scrolling`), dễ dẫn tới hiện tượng mất node hoặc lệch pha avatar clip-path.
 - **Thẩm mỹ kém**: Đoạn đồ thị kéo dài lê thê qua panel chi tiết gây rối mắt và làm loãng ngữ cảnh lịch sử commit.
 
 ### 3.2. Giải Pháp Đột Phá: Chuyển Sang Cơ Chế Layer Hiển Thị Trên (Overlay / Inspector Panel Layer)
+
 Tham khảo trực tiếp kiến trúc của **GitLens** và các công cụ quản lý Git chuyên nghiệp:
+
 - Khi người dùng nhấp chọn một dòng commit:
   - **Giữ nguyên 100% cấu trúc của bảng commit và đồ thị SVG**: Bảng danh sách commit hoàn toàn KHÔNG chèn thêm hàng dãn nở, KHÔNG thay đổi chiều cao của bất kỳ hàng nào.
   - Toàn bộ đồ thị commit giữ nguyên vẹn tọa độ hình học, đường nối liền mạch, không bị đứt nét, không bị cong méo, không bị hở chân.
@@ -76,6 +82,7 @@ Tham khảo trực tiếp kiến trúc của **GitLens** và các công cụ qu�
     - **Tùy chọn C (Floating Modal / Popover Inspector)**: Panel nổi có bóng đổ hiện đại hiển thị ngay phía dưới dòng được chọn mà không đẩy các dòng khác xuống.
 
 ### 3.3. Quy Chuẩn Đường Nối Vuông Góc Bo Góc Tròn (Orthogonal Rounded Routing)
+
 - Thay vì các đường cong Bezier bậc ba tự do uốn lượn dễ bị biến dạng:
 - Áp dụng triệt để phong cách hình học GitLens:
   - Đường chạy dọc trên cùng một làn: Đường thẳng đứng $100\%$.
@@ -87,6 +94,7 @@ Tham khảo trực tiếp kiến trúc của **GitLens** và các công cụ qu�
 ## 4. Chi Tiết Sự Cố 2: Thuật Toán Màu Nhánh Bị Dồn Vào 1 Đến 2 Màu (`BUG-COLOR-01`)
 
 ### 4.1. Hiện Tượng Quan Sát Được Thực Tế
+
 - Trên một kho mã nguồn có cấu trúc phức tạp với hàng chục nhánh `feature/*`, `bugfix/*` và nhiều lần sáp nhập:
 - Khi hiển thị trên đồ thị, hầu hết tất cả các đường nhánh song song và nút commit chỉ mang **1 đến 2 màu duy nhất** (ví dụ: toàn bộ đồ thị ngập tràn màu xanh lá và màu cam, các màu xanh dương, tím, vàng, đỏ, ngọc lam hoàn toàn không xuất hiện).
 - Các nhánh đứng cạnh nhau bị trùng màu, khiến người dùng không thể phân biệt ranh giới giữa các luồng phát triển khác nhau.
@@ -133,11 +141,11 @@ else
 
 ## 5. Bảng Tổng Hợp Vấn Đề & Phương Án Đề Xuất
 
-| Mã Sự Cố | Mô Tả Hiện Tượng | Căn Nguyên Kỹ Thuật | Phương Án Khắc Phục Khuyến Nghị |
-| :--- | :--- | :--- | :--- |
+| Mã Sự Cố          | Mô Tả Hiện Tượng                                                           | Căn Nguyên Kỹ Thuật                                                                                    | Phương Án Khắc Phục Khuyến Nghị                                                                                                      |
+| :---------------- | :------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
 | **BUG-EXPAND-01** | Line mờ nhạt (opacity 35%), thẳng đuột và hở chân tại đáy panel khi expand | `faint: true` giảm opacity; `transformPathD` thiếu đoạn chuyển làn giữa $x_0$ và $x_1$ ở `splitBottom` | **Chuyển sang cơ chế Layer hiển thị trên (Overlay Panel)** để không dãn nở đồ thị; hoặc sửa triệt để thuật toán hình học chuyển làn. |
-| **BUG-EXPAND-02** | Đường cong Bezier kéo dãn méo mó, đường nối không vuông vức | Dùng đường cong Bezier bậc 3 tự do cho cả đoạn dài | **Áp dụng chuẩn GitLens Orthogonal Routing**: Nối bằng đường vuông góc bo tròn bán kính fillet ($4\text{px} - 6\text{px}$). |
-| **BUG-COLOR-01** | Hàng chục nhánh nhưng chỉ có 1-2 màu lặp đi lặp lại | Thuật toán thu gọn làn tái sử dụng làn 0, 1 quá mức; màu tính theo `lane % 8` nên chỉ ra màu 0 và 1 | **Tách độc lập gán màu khỏi chỉ số làn**: Gán màu theo định danh nhánh (xoay vòng bảng màu + chống trùng màu kề cạnh). |
+| **BUG-EXPAND-02** | Đường cong Bezier kéo dãn méo mó, đường nối không vuông vức                | Dùng đường cong Bezier bậc 3 tự do cho cả đoạn dài                                                     | **Áp dụng chuẩn GitLens Orthogonal Routing**: Nối bằng đường vuông góc bo tròn bán kính fillet ($4\text{px} - 6\text{px}$).          |
+| **BUG-COLOR-01**  | Hàng chục nhánh nhưng chỉ có 1-2 màu lặp đi lặp lại                        | Thuật toán thu gọn làn tái sử dụng làn 0, 1 quá mức; màu tính theo `lane % 8` nên chỉ ra màu 0 và 1    | **Tách độc lập gán màu khỏi chỉ số làn**: Gán màu theo định danh nhánh (xoay vòng bảng màu + chống trùng màu kề cạnh).               |
 
 ---
 

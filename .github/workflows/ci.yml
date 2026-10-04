@@ -1,0 +1,110 @@
+name: CI (Multi-Platform Build & Test)
+
+on:
+  push:
+    branches:
+      - main
+      - custom
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+  pull_request:
+    branches:
+      - main
+      - custom
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check Code Formatting
+        run: pnpm run format
+
+      - name: Run Oxlint
+        run: pnpm run lint
+
+      - name: TypeScript Typecheck
+        run: pnpm run typecheck
+
+  test-and-build:
+    name: Test & Build Native (${{ matrix.os }} - ${{ matrix.rid }})
+    needs: lint-and-typecheck
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            target: win32-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+            target: linux-x64
+          - os: macos-latest
+            rid: osx-arm64
+            target: darwin-arm64
+          - os: macos-13
+            rid: osx-x64
+            target: darwin-x64
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run F# Core Unit Tests
+        run: dotnet test src/core-engine/tests/CoreEngine.Tests -c Release
+
+      - name: Run Extension & Webview Unit Tests
+        run: pnpm run test
+
+      - name: Build F# Native AOT Engine
+        run: node scripts/build-native.mjs --rid ${{ matrix.rid }}
+
+      - name: Package Platform-Specific VSIX
+        run: npx vsce package --no-dependencies --githubBranch custom --target ${{ matrix.target }} --out f-gitgraph-${{ matrix.target }}.vsix
+
+      - name: Upload Test VSIX Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ matrix.target }}
+          path: f-gitgraph-${{ matrix.target }}.vsix
+          if-no-files-found: error

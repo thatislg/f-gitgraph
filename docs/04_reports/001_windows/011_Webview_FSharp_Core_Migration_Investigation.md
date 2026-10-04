@@ -18,37 +18,42 @@ Tài liệu này đóng vai trò là **Hồ sơ điều tra sự cố tập trun
 
 ## 2. Bảng Theo Dõi Tổng Hợp Các Lỗi Ghi Nhận
 
-| Mã Lỗi | Tên Lỗi / Sự Cố | Phân Vùng Ảnh Hưởng | Mức Độ | Trạng Thái |
-| :---: | :--- | :--- | :---: | :---: |
-| **BUG-01** | Màu của các line (lane) trong đồ thị commit bị xung đột, đổi màu giữa chừng | `src/core-engine/Graph/Graph.fs` | Cao | Đã tiếp nhận chi tiết |
-| **BUG-02** | Avatar/Node biến mất trong vùng mở của commit được chọn, line đứt & cong kéo giãn | `CommitGraph.tsx`, `CommitTable.tsx` | Cao | Đã tiếp nhận chi tiết |
-| **BUG-03** | Commit gốc ("Initial from origin") nhưng phía dưới vẫn có nhiều avatar/node và lane kéo dài | `Graph.fs`, `CommitGraph.tsx`, `CommitTable.tsx` | Cao | Đã tiếp nhận chi tiết |
-| **BUG-04** | Badge nhánh/ref mất màu nền sau khi sửa màu (trở về trong suốt) | `RefLabel.tsx`, `styles.css` | Trung bình | Đã tiếp nhận chi tiết |
-| **BUG-05** | Node đồ thị và avatar bị sát mép cột graph ở cả hai bên trái và phải | `CommitGraph.tsx`, `Graph.fs` (Margin/Offset) | Trung bình | Chờ bổ sung mô tả |
-| **BUG-06** | Cuộn trang ảo (Virtual Scrolling) khiến nhiều avatar commit không được nạp | `src/webview/`, `avatarManager.ts` | Trung bình | Chờ bổ sung mô tả |
+|   Mã Lỗi   | Tên Lỗi / Sự Cố                                                                             | Phân Vùng Ảnh Hưởng                              |   Mức Độ   |      Trạng Thái       |
+| :--------: | :------------------------------------------------------------------------------------------ | :----------------------------------------------- | :--------: | :-------------------: |
+| **BUG-01** | Màu của các line (lane) trong đồ thị commit bị xung đột, đổi màu giữa chừng                 | `src/core-engine/Graph/Graph.fs`                 |    Cao     | Đã tiếp nhận chi tiết |
+| **BUG-02** | Avatar/Node biến mất trong vùng mở của commit được chọn, line đứt & cong kéo giãn           | `CommitGraph.tsx`, `CommitTable.tsx`             |    Cao     | Đã tiếp nhận chi tiết |
+| **BUG-03** | Commit gốc ("Initial from origin") nhưng phía dưới vẫn có nhiều avatar/node và lane kéo dài | `Graph.fs`, `CommitGraph.tsx`, `CommitTable.tsx` |    Cao     | Đã tiếp nhận chi tiết |
+| **BUG-04** | Badge nhánh/ref mất màu nền sau khi sửa màu (trở về trong suốt)                             | `RefLabel.tsx`, `styles.css`                     | Trung bình | Đã tiếp nhận chi tiết |
+| **BUG-05** | Node đồ thị và avatar bị sát mép cột graph ở cả hai bên trái và phải                        | `CommitGraph.tsx`, `Graph.fs` (Margin/Offset)    | Trung bình |   Chờ bổ sung mô tả   |
+| **BUG-06** | Cuộn trang ảo (Virtual Scrolling) khiến nhiều avatar commit không được nạp                  | `src/webview/`, `avatarManager.ts`               | Trung bình |   Chờ bổ sung mô tả   |
 
 ---
 
 ## 3. Chi Tiết Lỗi 1: Màu Của Các Line (Lane) Trong Đồ Thị Commit Bị Xung Đột (BUG-01)
 
 ### 3.1. Bối cảnh
+
 Phần vẽ đồ thị commit được viết lại từ TypeScript sang F#. Ảnh chụp thực tế ghi nhận một đoạn đồ thị của repo có nhiều nhánh `feature/*` và `change_request/*`, với nhiều lần merge pull request và merge branch.
 
 ### 3.2. Hiện tượng quan sát được
+
 1. **Nhiều lane đứng cạnh nhau có màu giống hoặc rất gần nhau:** Ở cột bên trái, các đường dọc chạy song song (xanh lá, cam, vàng, đỏ, tím, xanh dương) đôi khi trùng màu giữa các nhánh khác nhau. Mắt người không phân biệt được đâu là nhánh nào.
 2. **Màu không ổn định theo nhánh:** Một line đổi màu giữa chừng, thường ở các điểm rẽ nhánh hoặc merge (đường cong nối sang lane khác). Cùng một nhánh nhưng đoạn trên và đoạn dưới mang màu khác nhau.
 3. **Màu của line nối và màu của node không khớp:** Các đường cong tại điểm merge/fork lấy màu của lane khác với lane chứa commit. Các node (hình lục giác) cũng có viền, nền và họa tiết (chấm, sọc, lưới) khác nhau, nên khó biết node thuộc lane nào.
 4. **Vùng nhiều nhánh đan xen thì lỗi nặng hơn:** Ở các cụm commit `Feature_Commit_A`, `Feature_Commit_B` và các merge PR `#PR_01`, `#PR_02`, `#PR_03`, `#PR_04`, `#PR_05`, nhiều line cắt nhau và cùng lúc xuất hiện nhiều màu tranh chấp.
 
 ### 3.3. Kết quả mong đợi
+
 - Mỗi lane/nhánh có một màu riêng, giữ nguyên từ lúc tách ra đến lúc merge.
 - Các lane liền kề không được trùng màu.
 - Line nối khi merge/fork lấy màu của lane nguồn hoặc lane đích theo một quy tắc nhất quán.
 
 ### 3.4. Kết quả thực tế
+
 Màu bị gán lại hoặc bị trùng giữa các line, nên các line trông như "đấu màu" với nhau và đồ thị khó đọc.
 
 ### 3.5. Giả thuyết cần kiểm tra
+
 - **Quy tắc gán màu theo làn**: Cách gán màu theo chỉ số lane (`index % số màu`) ở bản F# khác bản TS, ví dụ khi lane được giải phóng rồi tái sử dụng ngay lập tức cho nhánh khác.
 - **Thứ tự xử lý parent**: Thứ tự xử lý parent (first parent so với các parent còn lại) khác nhau, làm màu bị gán sai lane kế thừa.
 - **Lưu vết trạng thái màu**: Màu bị tính lại độc lập theo từng hàng/nút thay vì lưu vết liên tục theo định danh nhánh (branch lifecycle) xuyên suốt các hàng.
@@ -97,6 +102,7 @@ let private makePath (child: Node) (parent: Node) : Path =
 ```
 
 ### 3.7. Cách tái hiện đề xuất
+
 Dùng kho mã nguồn có nhiều nhánh feature được merge xen kẽ (tương tự đoạn commit trong ảnh mô tả). Chạy đối chiếu giữa thuật toán phân làn cũ và F# Core trên cùng tập lịch sử để so sánh màu từng hàng.
 
 ---
@@ -104,9 +110,11 @@ Dùng kho mã nguồn có nhiều nhánh feature được merge xen kẽ (tươn
 ## 4. Chi Tiết Lỗi 2: Avatar/Node Biến Mất Trong Vùng Mở Của Commit Được Chọn (BUG-02)
 
 ### 4.1. Bối cảnh
+
 Cùng đồ thị commit đã viết lại sang F#. Lỗi chỉ xảy ra khi người dùng chọn (click) một commit và hàng đó mở ra vùng chi tiết (Commit, Parents, Author, Date, Committer, cây file thay đổi như `schema.sql +104 | -131`).
 
 ### 4.2. Hiện tượng quan sát được
+
 - **Trạng thái bình thường (ảnh 1, chưa chọn):** Mọi commit đều có node/avatar hình lục giác nằm đúng trên lane của nó. Các line nối liền mạch giữa các node.
 - **Trạng thái lỗi (ảnh 2, đã chọn commit `Feature_Commit_A`, hash `a1b2c3d...`):**
   1. **Node biến mất trong vùng mở:** Trong khoảng chiều cao của panel chi tiết, cột đồ thị không còn avatar nào. Các node ở phía trên và phía dưới panel vẫn hiển thị bình thường.
@@ -115,19 +123,24 @@ Cùng đồ thị commit đã viết lại sang F#. Lỗi chỉ xảy ra khi ng�
   4. **Node của commit được chọn vẫn có hiệu ứng highlight** (viền sáng màu teal) ở hàng trên cùng của vùng mở, nhưng các node nằm trong vùng bên dưới thì không xuất hiện.
 
 ### 4.3. Kết quả mong đợi
+
 - Chọn commit chỉ làm giãn hàng ra để chứa panel chi tiết.
 - Các node vẫn nằm đúng vị trí trên lane tương ứng với các hàng tiếp theo bên dưới.
 - Các line đi xuyên qua vùng mở thì liền mạch và thẳng, đồng bộ về kiểu nét với phần còn lại (hoặc theo quy chuẩn thị giác thống nhất).
 
 ### 4.4. Kết quả thực tế
+
 Trong vùng mở, node không được vẽ, line chuyển sang nét đứt, và các đường cong bị kéo giãn. Đồ thị mất tính liên tục về mặt thị giác.
 
 ### 4.5. Lưu ý khi điều tra
+
 Bản thân panel không phải là một hàng commit, nên việc không có node ngay trong vùng panel có thể là hành vi chủ ý. Nét đứt cũng có thể là quy ước hiển thị "line đi xuyên qua vùng mở". Cần so với bản TS để xác định phần nào là lỗi:
+
 - Nếu bản TS cũng có nét đứt nhưng giữ nguyên các node của những hàng không bị panel che, thì lỗi là node bị mất.
 - Nếu các node sau khi mở bị đẩy xuống ngoài vùng nhìn thấy hoặc bị cắt, thì lỗi nằm ở việc tính lại vị trí.
 
 ### 4.6. Phân tích Căn nguyên Kỹ thuật & Các Lưu ý Trọng yếu
+
 1. **Lệch pha hai nơi tính tọa độ Y riêng rẽ (Desynchronized Y Coordinate Mapping):**
    - Hiện tượng đường nối (`path`) và nút avatar (`node`) được tính toán vị trí Y tại hai nơi độc lập nhau: Nếu đường nối được cộng thêm độ lệch dãn nở (`expansion offset`) trong khi node/avatar lại được tính cố định theo tọa độ ban đầu `row * rowHeight` (hoặc ngược lại), phần đường nối sẽ bị đẩy dời xuống phía dưới trong khi avatar vẫn đứng yên ở vị trí cũ, tạo ra một khoảng trống rỗng kỳ dị ngay trong vùng panel chi tiết.
    - **Giải pháp căn cơ**: Gom toàn bộ phép chuyển đổi từ chỉ số dòng (`row index`) sang tọa độ thẳng đứng ($Y$) về **một hàm chuyển đổi duy nhất (Single Source of Truth)**. Cả điểm đầu/cuối của các đoạn đường nối và tọa độ tâm `cy` của toàn bộ node/avatar đều phải đi qua hàm này, tuyệt đối không tự ý cộng bù trừ phân tán ở các component riêng lẻ.
@@ -163,10 +176,11 @@ const cy = row.y + expandOffset;
 
 // 3. src/webview/components/commit/HexagonNode.tsx:
 // Avatar phụ thuộc vào clipPath id="hex-avatar-{safeId}" và image y={cy - radius}
-<image href={avatarUrl} x={cx - radius} y={cy - radius} clipPath={`url(#${clipId})`} />
+<image href={avatarUrl} x={cx - radius} y={cy - radius} clipPath={`url(#${clipId})`} />;
 ```
 
 ### 4.8. Cách tái hiện
+
 Mở đồ thị tại một đoạn có nhiều lane song song và nhiều node, click vào một commit bất kỳ (ví dụ `Feature_Commit_A`) để mở panel chi tiết. Quan sát cột đồ thị trong vùng panel, rồi so sánh với bản TS trên cùng commit.
 
 ---
@@ -174,23 +188,29 @@ Mở đồ thị tại một đoạn có nhiều lane song song và nhiều node
 ## 5. Chi Tiết Lỗi 3: Commit Gốc ("Initial from origin") Nhưng Phía Dưới Vẫn Có Nhiều Avatar (BUG-03)
 
 ### 5.1. Bối cảnh
+
 Commit `Initial from origin` (hash `0xROOT_A`, ngày May 13, 2025, tác giả `Author_A`) là commit đầu tiên của repo. Ô `Parents:` trong panel chi tiết để trống, xác nhận đây là root commit. Danh sách commit sắp xếp từ mới đến cũ, nên không thể có commit nào cũ hơn nằm bên dưới nó.
 
 ### 5.2. Hiện tượng quan sát được
+
 1. **Có node/avatar xuất hiện bên dưới root commit:** Khi chọn dòng `Initial from origin` và mở panel chi tiết, cột đồ thị bên trái trong vùng panel vẫn hiện nhiều node (hình lục giác với nhiều kiểu: trắng, xám, xanh lá có họa tiết, đỏ/hồng). Chúng nằm rải ở nhiều lane, kể cả những node sát đáy vùng hiển thị.
 2. **Các lane không kết thúc tại root commit:** Nhiều line (xanh lá, cam, đỏ, tím, xanh dương, teal) vẫn kéo dài xuống dưới điểm của root commit. Một số cong và hội tụ về phía bên trái ở đáy, như thể còn các commit cũ hơn để nối vào.
 3. **Hàng root commit tự nó trông bình thường:** Node của nó được tô sáng, và dòng được chọn có viền tím. Vấn đề chỉ nằm ở phần đồ thị phía dưới nó.
 
 ### 5.3. Kết quả mong đợi
+
 Root commit là điểm kết thúc của toàn bộ đồ thị. Mọi lane đều phải khép lại tại hoặc trước hàng này. Bên dưới nó không có node nào, nên vùng đồ thị trong panel phải để trống hoặc chỉ có line đi xuyên qua nếu còn lane chưa khép.
 
 ### 5.4. Kết quả thực tế
+
 Vùng bên dưới root commit vẫn có node và line như thể danh sách còn tiếp tục. Điều này mâu thuẫn với việc commit này không có parent.
 
 ### 5.5. Mối liên hệ với Lỗi 2
+
 Ở Lỗi 2, node biến mất trong vùng mở. Ở Lỗi 3, node lại xuất hiện trong vùng mở ở cuối danh sách. Hai lỗi có chung nguồn gốc: **Vị trí node và line không được tính lại đúng khi hàng được mở rộng**. Ở Lỗi 3, các node xuất hiện trong vùng panel có thể chính là các node của những hàng khác bị dịch chuyển sai tọa độ, hoặc do cơ chế tính cửa sổ/bộ đệm SVG không đồng bộ với chiều cao thực tế của bảng.
 
 ### 5.6. Giả thuyết cần kiểm tra
+
 - **Phân trang & Cờ kết thúc dữ liệu**: Danh sách commit đã được tải theo trang (phân trang cửa sổ ảo), nên đồ thị vẫn giả định còn commit tiếp theo và vẽ các lane đang mở. Cần kiểm tra cờ "hết dữ liệu" khi tới root commit.
 - **Xử lý lane còn mở khi hết commit**: Khi tới root commit (parents rỗng), các lane đang chờ parent chưa được đóng lại. Cách xử lý "lane còn mở nhưng hết commit" ở bản F# có thể khác bản TS.
 - **Node bị vẽ lại với tọa độ Y bị lệch**: Node của các hàng trước bị vẽ lại với tọa độ Y bị lệch sau khi hàng được mở rộng, nên xuất hiện sai chỗ trong vùng panel.
@@ -219,6 +239,7 @@ else
 ```
 
 ### 5.8. Cách tái hiện
+
 Cuộn xuống cuối danh sách của repo trong ảnh, click vào `Initial from origin`, rồi quan sát cột đồ thị bên dưới hàng này. Thử thêm trường hợp không chọn commit nào để xem node bên dưới root commit có xuất hiện sẵn hay chỉ khi mở panel.
 
 ---
@@ -228,21 +249,26 @@ Cuộn xuống cuối danh sách của repo trong ảnh, click vào `Initial fro
 ## 6. Chi Tiết Lỗi 4: Badge Nhánh/Ref Mất Màu Nền Sau Khi Sửa Màu (BUG-04)
 
 ### 6.1. Bối cảnh
+
 Lỗi nằm ở cột Description, ở các nhãn (badge/pill) hiển thị tên nhánh và tag gắn vào commit, ví dụ `Branch_A/main`, `origin/Branch_B/main`, `origin/Branch_C/develop`. Lỗi rõ nhất ở các commit merge (như PR merge `#PR_01`, `#PR_02`) và ở dòng có nhiều ref xếp cạnh nhau.
 
 ### 6.2. Hiện tượng quan sát được
+
 1. **Nền của badge bị mất:** Bên trong badge, màu nền giống hệt màu nền của dòng/trang (xanh navy tối), không còn là một khối màu riêng. Badge chỉ nhận ra được nhờ viền và chữ.
 2. **Viền vẫn sẫm đúng như trước:** Phần border vẫn giữ màu tối, nên trông như khung rỗng.
 3. **Icon nhánh vẫn có nền xanh dương sáng:** Chỉ phần nền của toàn badge bị mất, không phải toàn bộ style.
 4. **Dòng có nhiều ref** (các badge rút gọn `o...`, `ori...`) cũng bị tương tự. Các ô nhãn này nhìn như những khung viền liền nhau trên nền phẳng.
 
 ### 6.3. Kết quả mong đợi
+
 Mỗi badge có nền sẫm (như trước khi sửa), viền sẫm và chữ sáng, nổi lên khỏi nền dòng.
 
 ### 6.4. Kết quả thực tế
+
 Nền badge trả về màu nền trang, tức là hoạt động như `transparent` hoặc bị bỏ qua. Chỉ còn viền.
 
 ### 6.5. Giả thuyết cần kiểm tra
+
 - Thuộc tính bị đổi tên hoặc gán nhầm, ví dụ ghi vào `border-color` nhưng không còn ghi `background` hoặc `background-color`.
 - Định dạng màu sai sau khi sinh từ F#: thiếu `#`, độ dài hex không hợp lệ, hoặc nhầm thứ tự kênh alpha (`#RRGGBBAA` so với `#AARRGGBB`). Trình duyệt bỏ qua giá trị không hợp lệ, nên rơi về nền mặc định.
 - Màu nền được tạo từ màu nhánh với độ trong suốt (alpha/opacity). Giá trị alpha bằng 0 hoặc bị tính sai làm nền trong suốt hoàn toàn.
@@ -253,6 +279,7 @@ Nền badge trả về màu nền trang, tức là hoạt động như `transpar
 ### 6.6. Đối chiếu mã nguồn & Phát hiện nguyên nhân cốt lõi
 
 Khi kiểm tra [RefLabel.tsx](file:///d:/Kojin/neo-git-graph/src/webview/components/commit/RefLabel.tsx):
+
 ```tsx
 // src/webview/components/commit/RefLabel.tsx: dòng 58-60
 const pillTheme =
@@ -266,6 +293,7 @@ const pillTheme =
 ```
 
 Đối chiếu với định nghĩa `@theme` trong [styles.css](file:///d:/Kojin/neo-git-graph/src/webview/styles.css):
+
 ```css
 /* src/webview/styles.css */
 @theme {
@@ -280,13 +308,14 @@ const pillTheme =
 > **Phát hiện quan trọng**: Trong Tailwind CSS v4, utility class `bg-editor-fg/10` đòi hỏi biến token màu `--color-editor-fg` phải được khai báo trong `@theme`. Do trong `styles.css` chỉ có `--color-editor` và `--color-fg`, nên token `editor-fg` hoàn toàn không tồn tại. Tailwind v4 bỏ qua class này, dẫn đến `background-color` không được sinh ra, làm cho **nền của badge rơi về `transparent` (màu nền trang)**! Tương tự, `text-graph-fg` cũng là token chưa được định nghĩa.
 
 ### 6.7. Cách tái hiện
+
 Mở đồ thị tại đoạn có commit merge mang nhiều ref (đầu danh sách trong ảnh) và quan sát màu nền của badge. Dùng DevTools kiểm tra phần tử badge, xem giá trị `background` / `background-color` đang được tính ra.
 
 ---
 
 ## 7. Chi Tiết Lỗi 5: Node Đồ Thị & Avatar Bị Dính Sát Mép Cột Trái/Phải (BUG-05)
 
-*(Khung chờ tiếp nhận - Sẽ cập nhật chi tiết khi có bản mô tả tiếp theo)*
+_(Khung chờ tiếp nhận - Sẽ cập nhật chi tiết khi có bản mô tả tiếp theo)_
 
 - **Bối cảnh**:
 - **Hiện tượng**:
@@ -300,7 +329,7 @@ Mở đồ thị tại đoạn có commit merge mang nhiều ref (đầu danh s�
 
 ## 8. Chi Tiết Lỗi 6: Cuộn Trang Ảo Khiến Nhiều Avatar Không Được Nạp (BUG-06)
 
-*(Khung chờ tiếp nhận - Sẽ cập nhật chi tiết khi có bản mô tả tiếp theo)*
+_(Khung chờ tiếp nhận - Sẽ cập nhật chi tiết khi có bản mô tả tiếp theo)_
 
 - **Bối cảnh**:
 - **Hiện tượng**:
@@ -313,6 +342,7 @@ Mở đồ thị tại đoạn có commit merge mang nhiều ref (đầu danh s�
 ---
 
 ## 9. Kế Hoạch Phối Hợp & Các Bước Tiếp Theo
+
 1. Tiếp tục ghi nhận các mô tả chi tiết còn lại (BUG-05, BUG-06).
 2. Xây dựng ma trận phân tích so sánh toàn diện giữa kiến trúc F# Native AOT và Webview Preact.
 3. Đề xuất phương án sửa chữa đồng bộ triệt để cho toàn bộ 6 lỗi.

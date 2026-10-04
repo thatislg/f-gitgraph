@@ -9,8 +9,8 @@
 !out/
 !l10n/
 
-# Nhân F# Native AOT và thư viện C gốc LibGit2 (Nhóm Việc 7.3).
-!bin/win-x64/
+# Nhân F# Native AOT và thư viện C gốc LibGit2 cho mọi hệ điều hành (Windows, Linux, macOS).
+!bin/**
 
 !resources/icon.png
 !resources/icon-512.png

@@ -76,14 +76,14 @@ Trước đây nhân F# chỉ hỗ trợ duy nhất sắp xếp topology với b
 
 ## 4. Kiểm Định (Zero-Regression)
 
-| Hạng mục kiểm định | Kết quả |
-| :--- | :---: |
-| `dotnet test` (F# Core) | 62/62 pass |
-| `vitest` — backend | 90/90 pass |
-| `vitest` — extension | 2/2 pass |
-| `vitest` — webview | 73/73 pass |
-| `pnpm typecheck` | 0 lỗi |
-| `pnpm lint` | 0 lỗi / 0 cảnh báo |
+| Hạng mục kiểm định          |                              Kết quả                              |
+| :-------------------------- | :---------------------------------------------------------------: |
+| `dotnet test` (F# Core)     |                            62/62 pass                             |
+| `vitest` — backend          |                            90/90 pass                             |
+| `vitest` — extension        |                             2/2 pass                              |
+| `vitest` — webview          |                            73/73 pass                             |
+| `pnpm typecheck`            |                               0 lỗi                               |
+| `pnpm lint`                 |                        0 lỗi / 0 cảnh báo                         |
 | `pnpm run package:vsix:win` | Đóng gói thành công `f-gitgraph-win-x64.vsix` (2.63 MB, 20 files) |
 
 Các test mới bổ sung:

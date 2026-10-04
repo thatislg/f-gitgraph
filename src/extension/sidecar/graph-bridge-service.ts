@@ -43,11 +43,7 @@ export async function loadGraph(
     getCommitMetadata(git, hashes, config.dateType(), true);
 
   bridge = new GraphDataBridge(getSidecar(), metadataProvider);
-  const result = await bridge.initialize(
-    repo,
-    branch ?? undefined,
-    commitOrdering ?? undefined
-  );
+  const result = await bridge.initialize(repo, branch ?? undefined, commitOrdering ?? undefined);
 
   if (refWatcher === undefined) {
     refWatcher = watchGitRefs(repo, async () => {

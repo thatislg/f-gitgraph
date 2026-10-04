@@ -1,15 +1,17 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.0] - 2026-10-05
 
 ### Added
 
-- F# Native AOT core engine (`f-gitgraph-core.exe`) for high-speed graph computation
-- Memory-mapped `commit-graph` reading and in-process LibGit2 C-binding
-- Parallel DAG lane sorting with multi-threaded SVG geometry
-- Stdio RPC daemon with MessagePack streaming protocol
-- Hexagon SVG commit nodes, neon ambient glow, and 5x avatar zoom preview
-- Safe Git write operations delegated to native `git.exe` (GPG/SSH/GCM preserved)
+- Native F# Ahead-Of-Time (Native AOT) core engine (`f-gitgraph-core`) for ultra-high-speed DAG computation.
+- Full cross-platform support for **Windows (x64, arm64)**, **Linux (x64, arm64)**, and **macOS (Apple Silicon arm64, Intel x64)**.
+- Automated file permission resolution (`chmod +x`) on Unix platforms for seamless zero-config startup.
+- Memory-mapped `commit-graph` binary parser and in-process LibGit2 C-binding fallback.
+- Binary MessagePack streaming IPC daemon via standard I/O (zero TCP/HTTP overhead).
+- Modern Preact UI with hexagon SVG commit nodes, neon ambient glow, branch filtering, commit detail inspector, and 5x avatar zoom preview.
+- Safe Git write operations (merge, branch, checkout, tag, commit actions) routed directly through native Git CLI (preserving SSH, GPG signing, and Git Credential Manager).
+- Automated multi-platform CI/CD build matrix and VSIX release pipeline.
 
 ## [0.6.0] - 2026-08-25
 

@@ -1,7 +1,7 @@
 {
   "name": "f-gitgraph",
   "displayName": "F-GitGraph",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "%description%",
   "categories": [
     "SCM Providers",
@@ -28,13 +28,17 @@
     "url": "https://github.com/thatislg/f-gitgraph.git"
   },
   "publisher": "lmo-lab",
-  "icon": "resources/icon.png",
   "main": "./out/extension.js",
   "scripts": {
     "typecheck": "tsc -p . && tsc -p src/webview && tsc -p tests && tsc -p tests/webview && tsc -p tests-e2e --noEmit",
     "vscode:prepublish": "pnpm run clean && pnpm run package",
     "package": "pnpm run typecheck && pnpm run lint && node esbuild.js --production",
-    "package:vsix:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-native-win.ps1 && vsce package --no-dependencies --githubBranch custom --out f-gitgraph-win-x64.vsix",
+    "build:native": "node scripts/build-native.mjs",
+    "package:vsix": "vsce package --no-dependencies --githubBranch custom",
+    "package:vsix:universal": "vsce package --no-dependencies --githubBranch custom --out f-gitgraph-universal.vsix",
+    "package:vsix:win": "node scripts/build-native.mjs --rid win-x64 && vsce package --no-dependencies --githubBranch custom --target win32-x64 --out f-gitgraph-win32-x64.vsix",
+    "package:vsix:linux": "node scripts/build-native.mjs --rid linux-x64 && vsce package --no-dependencies --githubBranch custom --target linux-x64 --out f-gitgraph-linux-x64.vsix",
+    "package:vsix:mac": "node scripts/build-native.mjs --rid osx-arm64 && vsce package --no-dependencies --githubBranch custom --target darwin-arm64 --out f-gitgraph-darwin-arm64.vsix",
     "clean": "node -e \"require('fs').rmSync('out',{recursive:true,force:true})\"",
     "compile": "pnpm run clean && node esbuild.js",
     "test": "vitest run --project backend && vitest run --project extension && vitest run --project webview",
