@@ -59,7 +59,7 @@ export function CommitDetails({ details }: { details: GitCommitDetails | null })
   return (
     <div
       class="relative bg-editor text-ui leading-4.5 whitespace-normal after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-line"
-      style={`height: ${COMMIT_DETAILS_HEIGHT}px`}
+      style={`height: ${COMMIT_DETAILS_HEIGHT}px; outline: 1.5px solid #a855f7; outline-offset: -1.5px; box-shadow: 0 0 10px rgba(168, 85, 247, 0.45), inset 0 0 6px rgba(168, 85, 247, 0.2);`}
     >
       <div
         class="overflow-hidden"

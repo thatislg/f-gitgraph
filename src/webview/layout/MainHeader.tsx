@@ -4,10 +4,17 @@ import { Checkbox } from "@/webview/components/ui/Checkbox";
 import { Dropdown } from "@/webview/components/ui/Dropdown";
 import { Icon } from "@/webview/components/ui/Icons";
 import { SHOW_ALL_BRANCHES } from "@/webview/constants";
-import { refresh, selectBranch, selectRepo, setShowRemoteBranch } from "@/webview/lib/actions";
+import {
+  refresh,
+  selectBranch,
+  selectCommitOrdering,
+  selectRepo,
+  setShowRemoteBranch
+} from "@/webview/lib/actions";
 import {
   branchList,
   commitHead,
+  commitOrdering,
   selectedBranch,
   selectedRepo,
   showRemoteBranch
@@ -21,6 +28,11 @@ function repoOption(repo: GitRepo) {
 function branchOption(value: string) {
   return { label: value.startsWith("remotes/") ? value.slice(8) : value, value };
 }
+
+const commitOrderingOptions = [
+  { label: "Topological", value: "topological" },
+  { label: "Date", value: "date" }
+] as const;
 
 export function MainHeader({ repos }: { repos: Array<GitRepo> }) {
   const noCommits =
@@ -57,6 +69,16 @@ export function MainHeader({ repos }: { repos: Array<GitRepo> }) {
                 value={selectedBranch.value}
                 onChange={selectBranch}
                 disabled={branchList.value === undefined}
+              />
+              <Dropdown
+                label={window.l10n.commitOrdering}
+                class="max-w-40"
+                options={commitOrderingOptions.map((option) => ({
+                  label: option.label,
+                  value: option.value
+                }))}
+                value={commitOrdering.value}
+                onChange={selectCommitOrdering}
               />
               <Checkbox
                 label={window.l10n.showRemoteBranches}

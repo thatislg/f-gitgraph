@@ -1,6 +1,6 @@
 import { batch, signal } from "@preact/signals";
 
-import type { GraphPath, GraphRow } from "@/types";
+import type { CommitOrdering, GraphPath, GraphRow } from "@/types";
 import { rpcClient } from "@/webview/lib/rpc/rpc-client";
 import { getGitAccountAvatarUrl } from "@/webview/utils/avatar";
 
@@ -46,13 +46,23 @@ let pendingWindowRequest: { from: number; to: number } | null = null;
 let isFetchingWindow = false;
 
 export const graphWindowStore = {
-  async loadGraph(repoPath: string, branch?: string): Promise<void> {
+  async loadGraph(
+    repoPath: string,
+    branch?: string,
+    commitOrdering?: CommitOrdering
+  ): Promise<void> {
     isGraphLoading.value = true;
     try {
-      const result = await rpcClient.request(
-        "graph.load",
-        branch === undefined ? { repoPath } : { repoPath, branch }
-      );
+      const params: { repoPath: string; branch?: string; commitOrdering?: CommitOrdering } = {
+        repoPath
+      };
+      if (branch !== undefined) {
+        params.branch = branch;
+      }
+      if (commitOrdering !== undefined) {
+        params.commitOrdering = commitOrdering;
+      }
+      const result = await rpcClient.request("graph.load", params);
       batch(() => {
         totalCommits.value = result.commitCount;
         maxLane.value = result.maxLane;

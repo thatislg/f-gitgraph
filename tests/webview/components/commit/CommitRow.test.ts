@@ -91,11 +91,11 @@ describe("CommitRow", () => {
     expect(style).toContain("outline: 1.5px solid #a855f7");
     expect(style).toContain("box-shadow: 0 0 10px rgba(168, 85, 247, 0.45)");
 
-    // Neon gradient on graph cell starting from avatar right edge (27px)
+    // Neon gradient on graph cell starting from the centre of the avatar's right half (27 - 5 = 22px)
     const graphCell = container.querySelector("td:first-child");
     const graphCellStyle = graphCell?.getAttribute("style") ?? "";
     expect(graphCellStyle).toContain("linear-gradient");
-    expect(graphCellStyle).toContain("transparent 27px");
+    expect(graphCellStyle).toContain("transparent 22px");
     expect(graphCellStyle).toMatch(/(#ff5500|255, 85, 0)/);
   });
 
@@ -136,10 +136,10 @@ describe("CommitRow", () => {
     row?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await new Promise((resolve) => setTimeout(resolve, 20));
 
-    // After hover: neon gradient appears starting from avatarRightX (35px)
+    // After hover: neon gradient appears starting from the centre of the avatar's right half (35 - 5 = 30px)
     const hoveredStyle = graphCell?.getAttribute("style") ?? "";
     expect(hoveredStyle).toContain("linear-gradient");
-    expect(hoveredStyle).toContain("transparent 35px");
+    expect(hoveredStyle).toContain("transparent 30px");
     expect(hoveredStyle).toMatch(/(#10b981|16, 185, 129)/);
 
     // Trigger mouseleave

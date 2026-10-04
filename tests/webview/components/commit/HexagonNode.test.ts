@@ -182,7 +182,7 @@ describe("HexagonNode rendering", () => {
     expect(title).toBeNull();
   });
 
-  it("applies micro-interaction scale(1.15) on hover or selection", () => {
+  it("applies micro-interaction scale(1.2) on hover or selection", () => {
     container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
     // Normal state
@@ -211,7 +211,7 @@ describe("HexagonNode rendering", () => {
       container
     );
     group = container.querySelector(".graph-node-hexagon") as SVGGElement | null;
-    expect(group?.style.transform).toBe("scale(1.15)");
+    expect(group?.style.transform).toBe("scale(1.2)");
     expect(group?.classList.contains("is-active")).toBe(true);
 
     // Selected state
@@ -225,7 +225,7 @@ describe("HexagonNode rendering", () => {
       container
     );
     group = container.querySelector(".graph-node-hexagon") as SVGGElement | null;
-    expect(group?.style.transform).toBe("scale(1.15)");
+    expect(group?.style.transform).toBe("scale(1.2)");
     expect(group?.classList.contains("is-active")).toBe(true);
   });
 });

@@ -41,7 +41,9 @@ module GitReader =
             for i in 0 .. commits.Length - 1 do
                 match repo.ReadCommit commits[i] with
                 | Ok node ->
-                    commitTime[i] <- node.Author.Timestamp
+                    // Dùng committer time (commit date) — khớp thứ tự mặc định của
+                    // `git log`/Git History. Author time chỉ dùng cho `--author-date-order`.
+                    commitTime[i] <- node.Committer.Timestamp
                     // Bỏ qua commit cha không nằm trong phạm vi duyệt (biên giới bản sao nông).
                     parents[i] <-
                         node.Parents
@@ -53,10 +55,34 @@ module GitReader =
                 | Error _ ->
                     parents[i] <- [||]
 
+            // Tính thế hệ topo (topological level): gốc = 1, con = 1 + max(thế hệ cha).
+            // Khác với commit-graph (thế hệ có sẵn), đường dẫn fallback phải tự tính để
+            // phân biệt sắp xếp Topological và Date (nếu để toàn 0, cả hai đều suy biến
+            // về thứ tự theo thời gian).
+            let generation = Array.create commits.Length 1u
+            let remainingParents = parents |> Array.map (fun ps -> ps.Length)
+            let children = Array.init commits.Length (fun _ -> ResizeArray<int>())
+            for i in 0 .. commits.Length - 1 do
+                for p in parents[i] do
+                    children[p].Add(i)
+            let queue = Queue<int>()
+            for i in 0 .. commits.Length - 1 do
+                if remainingParents[i] = 0 then
+                    queue.Enqueue(i)
+            while queue.Count > 0 do
+                let i = queue.Dequeue()
+                let childGen = generation[i] + 1u
+                for c in children[i] do
+                    if childGen > generation[c] then
+                        generation[c] <- childGen
+                    remainingParents[c] <- remainingParents[c] - 1
+                    if remainingParents[c] = 0 then
+                        queue.Enqueue(c)
+
             Ok
                 { Commits = commits
                   Parents = parents
-                  Generation = Array.zeroCreate commits.Length
+                  Generation = generation
                   CommitTime = commitTime }
 
         match branch with

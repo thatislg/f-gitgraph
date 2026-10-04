@@ -122,19 +122,23 @@ export function CommitRow({
     .filter(Boolean)
     .join("; ");
 
-  // Neon ambient light on the graph column: transparent up to avatar right edge, then shimmering neon gradient
+  // Neon ambient light on the graph column: transparent up to the centre of the
+  // avatar's right half, then a shimmering neon gradient fanning out to the right.
   const isNeonActive = (expanded || isRowHovered) && avatarRightX !== undefined;
+  // The avatar spans roughly `[avatarRightX - 20, avatarRightX]`; its right half is
+  // `[avatarRightX - 10, avatarRightX]`, whose centre is `avatarRightX - 5`.
+  const neonStartX = avatarRightX !== undefined ? avatarRightX - 5 : 0;
   const graphCellStyle = isNeonActive
     ? expanded
-      ? `background: linear-gradient(to right, transparent 0px, transparent ${avatarRightX}px, color-mix(in srgb, ${branchColourVal} 45%, #ffffff 15%) ${avatarRightX}px, color-mix(in srgb, ${branchColourVal} 22%, transparent) ${
-          avatarRightX + 25
+      ? `background: linear-gradient(to right, transparent 0px, transparent ${neonStartX}px, color-mix(in srgb, ${branchColourVal} 45%, #ffffff 15%) ${neonStartX}px, color-mix(in srgb, ${branchColourVal} 22%, transparent) ${
+          neonStartX + 25
         }px, color-mix(in srgb, ${branchColourVal} 6%, transparent) ${
-          avatarRightX + 60
+          neonStartX + 60
         }px, transparent 100%); transition: background 0.15s ease-out;`
-      : `background: linear-gradient(to right, transparent 0px, transparent ${avatarRightX}px, color-mix(in srgb, ${branchColourVal} 35%, #ffffff 10%) ${avatarRightX}px, color-mix(in srgb, ${branchColourVal} 18%, transparent) ${
-          avatarRightX + 25
+      : `background: linear-gradient(to right, transparent 0px, transparent ${neonStartX}px, color-mix(in srgb, ${branchColourVal} 35%, #ffffff 10%) ${neonStartX}px, color-mix(in srgb, ${branchColourVal} 18%, transparent) ${
+          neonStartX + 25
         }px, color-mix(in srgb, ${branchColourVal} 5%, transparent) ${
-          avatarRightX + 60
+          neonStartX + 60
         }px, transparent 100%); transition: background 0.15s ease-out;`
     : "transition: background 0.15s ease-out;";
 

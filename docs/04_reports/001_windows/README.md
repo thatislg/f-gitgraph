@@ -33,4 +33,6 @@ Thư mục này lưu trữ các báo cáo kỹ thuật, biên bản đo đạc h
    - Báo cáo điều tra sự cố tập trung (`REP-WIN-011`): Ghi nhận 4 lỗi cốt lõi (BUG-01 đến BUG-04) và 2 lỗi bổ trợ về hình học và hiển thị sau khi di trú sang nhân F# Core Engine.
 2. **[012_Graph_Expansion_Defects_And_Overlay_Architecture_Issue.md](012_Graph_Expansion_Defects_And_Overlay_Architecture_Issue.md)**:
    - Báo cáo sự cố kỹ thuật & Đề xuất cải tiến kiến trúc (`ISSUE-WIN-012`): Chi tiết lỗi vùng expand (nhạt màu, thẳng đuột, hở chân), lỗi thuật toán dồn 1-2 màu, và đề xuất chuyển đổi sang cơ chế Layer hiển thị trên (Overlay / Inspector Panel) cùng đường nối vuông góc bo tròn theo chuẩn GitLens.
+3. **[013_CommitOrdering_And_UIRefinements.md](013_CommitOrdering_And_UIRefinements.md)**:
+   - Báo cáo kỹ thuật (`REP-WIN-013`): Tính năng Commit Ordering (Topological/Date) trên toàn pipeline (F# Core → RPC → Webview) và tinh chỉnh giao diện (gradient neon, viền panel, panel lật phía trên, avatar scale 1.2x).
 

@@ -81,6 +81,22 @@ let ``topo sort tolerates unknown generation via commit time`` () =
     Assert.Equal(0, order[order.Length - 1])
 
 [<Fact>]
+let ``date ordering differs from topological on branching history`` () =
+    // root(0) <- a(1) <- c(3); root(0) <- b(2). b muộn hơn c về thời gian nhưng
+    // c sâu hơn về thế hệ, nên hai chiến lược phải cho thứ tự khác nhau.
+    let s =
+        Graph.snapshot
+            [| (h 1, [], 1u, 100L) // 0 root
+               (h 2, [ 0 ], 2u, 200L) // 1 a
+               (h 3, [ 0 ], 2u, 350L) // 2 b
+               (h 4, [ 1 ], 3u, 300L) |] // 3 c
+
+    let topo = TopoSort.orderWith CommitOrdering.Topological s
+    let date = TopoSort.orderWith CommitOrdering.Date s
+    Assert.Equal<int>([| 3; 2; 1; 0 |], topo)
+    Assert.Equal<int>([| 2; 3; 1; 0 |], date)
+
+[<Fact>]
 let ``lane allocation compacts merge to the left`` () =
     // root(0), a(1,parent0), b(2,parent0), merge(3, parents 1,2).
     let s =

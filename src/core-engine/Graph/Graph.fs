@@ -19,19 +19,36 @@ module BranchColor =
     [<Literal>]
     let PaletteSize = 8
 
+/// Chiến lược sắp xếp thứ tự commit hiển thị.
+[<RequireQualifiedAccess>]
+type CommitOrdering =
+    /// Sắp xếp topology (mặc định): ưu tiên thế hệ rồi đến commit time.
+    | Topological
+    /// Sắp xếp theo thời gian commit (date-order): ưu tiên commit time muộn hơn.
+    | Date
+
+    /// Chuyển chuỗi giao thức (RPC) sang kiểu liệt kê; mặc định Topological.
+    static member ofString (value: string) : CommitOrdering =
+        if value.ToLowerInvariant() = "date" then Date else Topological
+
 // --- Nhiệm vụ 4.1: Sắp Xếp Topo ---
 
 [<RequireQualifiedAccess>]
 module TopoSort =
 
-    /// Bộ so sánh ưu tiên dạng max-heap: ưu tiên thế hệ cao hơn trước,
-    /// sau đó đến thời gian tạo commit muộn hơn.
-    let private priorityComparer =
-        Comparer.Create(fun (g1: uint32, t1: int64) (g2: uint32, t2: int64) ->
-            let c = compare g2 g1
-            if c <> 0 then c else compare t2 t1)
+    /// Bộ so sánh ưu tiên dạng max-heap cho từng chiến lược sắp xếp commit.
+    let private comparerFor (ordering: CommitOrdering) =
+        match ordering with
+        | CommitOrdering.Date ->
+            // Date-order: ưu tiên commit time muộn hơn trước (vẫn giữ ràng buộc topo).
+            Comparer.Create(fun (_: uint32, t1: int64) (_: uint32, t2: int64) -> compare t2 t1)
+        | CommitOrdering.Topological ->
+            // Topo-order: ưu tiên thế hệ cao hơn trước, rồi đến thời gian tạo muộn hơn.
+            Comparer.Create(fun (g1: uint32, t1: int64) (g2: uint32, t2: int64) ->
+                let c = compare g2 g1
+                if c <> 0 then c else compare t2 t1)
 
-    /// Sắp xếp topo dùng thuật toán Kahn cải tiến + hàng đợi ưu tiên.
+    /// Sắp xếp topo dùng thuật toán Kahn cải tiến + hàng đợi ưu tiên theo chiến lược.
     /// Trả về mảng chỉ số (index vào Commits) theo thứ tự hiển thị: commit con
     /// (mới hơn) luôn đứng trước commit cha (cũ hơn).
     ///
@@ -39,7 +56,7 @@ module TopoSort =
     /// - Bản sao nông (shallow): cha bị thiếu đã được tầng Storage lược bỏ.
     /// - Nhánh mồ côi / kho đa gốc: nhiều nút không có con (tip) được xử lý song song.
     /// - Octopus merge: chỉ cần quan hệ cha-con, không phụ thuộc số lượng cha.
-    let order (snapshot: GraphSnapshot) : int[] =
+    let orderWith (ordering: CommitOrdering) (snapshot: GraphSnapshot) : int[] =
         let n = snapshot.Commits.Length
 
         // indegree[i] = số lượng commit con đang trỏ tới commit i (chưa được đặt).
@@ -49,7 +66,7 @@ module TopoSort =
             for p in snapshot.Parents[i] do
                 indegree[p] <- indegree[p] + 1
 
-        let queue = PriorityQueue<int, uint32 * int64>(priorityComparer)
+        let queue = PriorityQueue<int, uint32 * int64>(comparerFor ordering)
         for i in 0 .. n - 1 do
             if indegree[i] = 0 then
                 queue.Enqueue(i, (snapshot.Generation[i], snapshot.CommitTime[i]))
@@ -66,6 +83,9 @@ module TopoSort =
                     queue.Enqueue(p, (snapshot.Generation[p], snapshot.CommitTime[p]))
 
         result
+
+    /// Sắp xếp topo mặc định (Topological) — giữ tương thích các chỗ gọi hiện hữu.
+    let order (snapshot: GraphSnapshot) : int[] = orderWith CommitOrdering.Topological snapshot
 
 // --- Nhiệm vụ 4.2 + 12.3: Phân Bổ Làn Thu Gọn Trái & Kế Thừa Màu Nhánh ---
 
@@ -267,7 +287,8 @@ module Geometry =
     let private BatchSize = 1000
 
     let private centerX (lane: int) = Margin + float lane * LaneWidth
-    let private centerY (row: int) = Margin + float row * RowHeight
+    // Tâm dọc = nửa chiều cao hàng (để nút đồng tâm với dòng commit).
+    let private centerY (row: int) = RowHeight / 2.0 + float row * RowHeight
 
     let private makeNode (isMerge: bool) (isRoot: bool) (lane: int) (color: int) (row: int) : Node =
         { X = centerX lane
@@ -374,8 +395,12 @@ module Geometry =
 [<RequireQualifiedAccess>]
 module Layout =
 
-    /// Tính toán bố cục đồ thị (sắp xếp topo -> phân làn -> sinh hình học song song).
-    let compute (snapshot: GraphSnapshot) : Geometry.Layout =
-        let order = TopoSort.order snapshot
+    /// Tính toán bố cục đồ thị theo chiến lược sắp xếp (topo -> phân làn -> hình học).
+    let computeWith (ordering: CommitOrdering) (snapshot: GraphSnapshot) : Geometry.Layout =
+        let order = TopoSort.orderWith ordering snapshot
         let assign = Lanes.assignWithColor snapshot order
         Geometry.compute snapshot order assign.LaneOf assign.ColorOf
+
+    /// Tính toán bố cục đồ thị mặc định (Topological) — giữ tương thích các chỗ gọi.
+    let compute (snapshot: GraphSnapshot) : Geometry.Layout =
+        computeWith CommitOrdering.Topological snapshot

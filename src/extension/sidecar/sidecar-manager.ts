@@ -3,6 +3,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import * as vscode from "vscode";
 
 import { logger } from "@/extension/util/logger";
+import type { CommitOrdering } from "@/types";
 
 import {
   Opcode,
@@ -95,8 +96,15 @@ export class SidecarManager implements vscode.Disposable {
     }, HEARTBEAT_INTERVAL_MS);
   }
 
-  async initialize(repoPath: string, branch?: string): Promise<InitSuccess> {
-    const response = await this.request(Opcode.InitializeRepo, encodeInitRequest(repoPath, branch));
+  async initialize(
+    repoPath: string,
+    branch?: string,
+    commitOrdering?: CommitOrdering
+  ): Promise<InitSuccess> {
+    const response = await this.request(
+      Opcode.InitializeRepo,
+      encodeInitRequest(repoPath, branch, commitOrdering)
+    );
     return decodeInitSuccess(response.payload);
   }
 

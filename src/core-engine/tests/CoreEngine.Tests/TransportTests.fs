@@ -113,7 +113,7 @@ let ``protocol decodes init request`` () =
     MsgPack.writeMapHeader w 1
     MsgPack.writeString w "repoPath"
     MsgPack.writeString w "some/repo"
-    Assert.Equal(("some/repo", None), Protocol.decodeInitRequest (w.ToArray()))
+    Assert.Equal(("some/repo", None, CommitOrdering.Topological), Protocol.decodeInitRequest (w.ToArray()))
 
 [<Fact>]
 let ``protocol decodes init request with branch`` () =
@@ -123,7 +123,17 @@ let ``protocol decodes init request with branch`` () =
     MsgPack.writeString w "some/repo"
     MsgPack.writeString w "branch"
     MsgPack.writeString w "main"
-    Assert.Equal(("some/repo", Some "main"), Protocol.decodeInitRequest (w.ToArray()))
+    Assert.Equal(("some/repo", Some "main", CommitOrdering.Topological), Protocol.decodeInitRequest (w.ToArray()))
+
+[<Fact>]
+let ``protocol decodes init request with commit ordering`` () =
+    let w = MsgPack.Writer()
+    MsgPack.writeMapHeader w 2
+    MsgPack.writeString w "repoPath"
+    MsgPack.writeString w "some/repo"
+    MsgPack.writeString w "commitOrdering"
+    MsgPack.writeString w "date"
+    Assert.Equal(("some/repo", None, CommitOrdering.Date), Protocol.decodeInitRequest (w.ToArray()))
 
 [<Fact>]
 let ``protocol decodes query range`` () =
@@ -147,13 +157,14 @@ let private makeState (snapshot: GraphSnapshot) : Daemon.State =
     let commits = order |> Array.map (fun c -> snapshot.Commits[c])
     { RepoPath = "some/repo"
       Branch = None
+      Ordering = CommitOrdering.Topological
       Snapshot = snapshot
       Layout = layout
       Order = order
       Row = row
       Commits = commits }
 
-let private runDaemon (loader: string -> string option -> Result<Daemon.State, GitError>) (frames: Frame[]) : Frame[] =
+let private runDaemon (loader: string -> string option -> CommitOrdering -> Result<Daemon.State, GitError>) (frames: Frame[]) : Frame[] =
     use input = new MemoryStream()
     for f in frames do
         let b = Frame.encode f
@@ -182,7 +193,7 @@ let ``daemon serves ready init query and heartbeat`` () =
           CommitTime = [| 100L; 200L; 300L |] }
 
     let state = makeState snapshot
-    let loader (_path: string) (_branch: string option) = Ok state
+    let loader (_path: string) (_branch: string option) (_ordering: CommitOrdering) = Ok state
 
     let initPayload =
         let w = MsgPack.Writer()
@@ -215,7 +226,8 @@ let ``daemon serves ready init query and heartbeat`` () =
 
 [<Fact>]
 let ``daemon reports error for query before init`` () =
-    let loader (_path: string) (_branch: string option) = failwith "không nên được gọi"
+    let loader (_path: string) (_branch: string option) (_ordering: CommitOrdering) =
+        failwith "không nên được gọi"
     let queryPayload =
         let w = MsgPack.Writer()
         MsgPack.writeMapHeader w 2
@@ -243,8 +255,10 @@ let ``daemon threads branch through to the loader`` () =
           CommitTime = [| 100L |] }
 
     let mutable receivedBranch = None
-    let loader (_path: string) (branch: string option) =
+    let mutable receivedOrdering = CommitOrdering.Topological
+    let loader (_path: string) (branch: string option) (ordering: CommitOrdering) =
         receivedBranch <- branch
+        receivedOrdering <- ordering
         Ok(makeState snapshot)
 
     let initPayload =
@@ -263,6 +277,7 @@ let ``daemon threads branch through to the loader`` () =
 
     Assert.Equal(Opcode.InitSuccess, responses[1].Opcode)
     Assert.Equal(Some "main", receivedBranch)
+    Assert.Equal(CommitOrdering.Topological, receivedOrdering)
 
 [<Fact>]
 let ``daemon range data contains expected node and path counts`` () =
@@ -273,7 +288,8 @@ let ``daemon range data contains expected node and path counts`` () =
           Generation = [| 1u; 2u; 2u; 3u |]
           CommitTime = [| 100L; 200L; 300L; 400L |] }
 
-    let loader (_path: string) (_branch: string option) = Ok(makeState snapshot)
+    let loader (_path: string) (_branch: string option) (_ordering: CommitOrdering) =
+        Ok(makeState snapshot)
 
     let queryPayload =
         let w = MsgPack.Writer()

@@ -21,7 +21,7 @@ describe("graph RPC handlers", () => {
 
     const result = await graphLoad({ repoPath: "/some/repo" });
 
-    expect(loadGraphMock).toHaveBeenCalledWith("/some/repo");
+    expect(loadGraphMock).toHaveBeenCalledWith("/some/repo", undefined, undefined);
     expect(result.commitCount).toBe(3);
     expect(result.maxLane).toBe(1);
     expect(result.commits).toEqual(["aaa", "bbb", "ccc"]);

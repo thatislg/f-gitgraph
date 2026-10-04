@@ -14,6 +14,7 @@ import { CommitRow } from "@/webview/components/commit/CommitRow";
 import type { ColumnResize } from "@/webview/components/commit/useColumnResize";
 import { useColumnResize } from "@/webview/components/commit/useColumnResize";
 import {
+  COMMIT_DETAILS_HEIGHT,
   GRAPH_PADDING,
   LANE_OFFSET,
   LANE_WIDTH,
@@ -190,13 +191,30 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
   const topSpacer = from * ROW_HEIGHT;
   const bottomSpacer = Math.max(0, (total - (from + rows.length)) * ROW_HEIGHT);
 
+  // Position the details panel directly below the selected row. When there is not
+  // enough room left under the row (near the bottom of the list), flip it above the
+  // row instead so it never overlaps the last few commits with an empty black box.
+  const detailsPanelTop =
+    expandedRow === -1
+      ? 0
+      : (() => {
+          const belowTop = TABLE_HEADER_HEIGHT + (from + expandedRow + 1) * ROW_HEIGHT;
+          const rowsBelow = total - (from + expandedRow + 1);
+          if (rowsBelow * ROW_HEIGHT >= COMMIT_DETAILS_HEIGHT) {
+            return belowTop;
+          }
+          const aboveTop =
+            TABLE_HEADER_HEIGHT + (from + expandedRow) * ROW_HEIGHT - COMMIT_DETAILS_HEIGHT;
+          return Math.max(TABLE_HEADER_HEIGHT, aboveTop);
+        })();
+
   const graphClip =
     `width: var(--col-graph); top: ${TABLE_HEADER_HEIGHT + topSpacer}px;` +
     ` mask-image: linear-gradient(to right, black calc(100% - ${GRAPH_FADE}px), transparent)`;
 
   return (
     <div class="relative" ref={resize.containerRef}>
-      <div class="pointer-events-none absolute left-0 overflow-hidden" style={graphClip}>
+      <div class="pointer-events-none absolute left-0 z-10 overflow-hidden" style={graphClip}>
         <CommitGraph
           rows={rows}
           paths={paths}
@@ -283,7 +301,7 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
       {expandedRow !== -1 && (
         <div
           class="absolute right-0 z-10"
-          style={`left: var(--col-graph); top: ${TABLE_HEADER_HEIGHT + (from + expandedRow + 1) * ROW_HEIGHT}px`}
+          style={`left: var(--col-graph); top: ${detailsPanelTop}px`}
         >
           <CommitDetails details={commitDetails.value} />
         </div>

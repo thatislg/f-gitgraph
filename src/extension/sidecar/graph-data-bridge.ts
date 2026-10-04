@@ -1,3 +1,5 @@
+import type { CommitOrdering } from "@/types";
+
 import { mergeGraphWindow, type GraphWindow, type MetadataProvider } from "./graph-merge";
 import type { InitSuccess } from "./protocol";
 import { SidecarManager } from "./sidecar-manager";
@@ -15,8 +17,12 @@ export class GraphDataBridge {
     private readonly metadataProvider: MetadataProvider
   ) {}
 
-  async initialize(repoPath: string, branch?: string): Promise<InitSuccess> {
-    const init = await this.sidecar.initialize(repoPath, branch);
+  async initialize(
+    repoPath: string,
+    branch?: string,
+    commitOrdering?: CommitOrdering
+  ): Promise<InitSuccess> {
+    const init = await this.sidecar.initialize(repoPath, branch, commitOrdering);
     this.commitList = init.commits;
     return init;
   }

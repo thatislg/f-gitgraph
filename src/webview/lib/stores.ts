@@ -1,6 +1,11 @@
 import { computed, signal } from "@preact/signals";
 
-import type { GitCommitDetails, GitCommitNode, GitRepoSet } from "@/types";
+import type {
+  CommitOrdering,
+  GitCommitDetails,
+  GitCommitNode,
+  GitRepoSet
+} from "@/types";
 import type { CommitBranchType, ContextMenuState, DialogState } from "@/webview/types";
 import { isColumnWidths } from "@/webview/utils/columns";
 
@@ -56,6 +61,7 @@ export const columnWidths = computed(() => {
 export const selectedBranch = signal<CommitBranchType | undefined>(undefined);
 export const showRemoteBranch = signal<boolean>(true);
 export const maxCommits = signal<number>(0);
+export const commitOrdering = signal<CommitOrdering>("topological");
 
 export function initializeStores(initialLoadCommits: number): void {
   maxCommits.value = initialLoadCommits;

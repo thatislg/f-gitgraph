@@ -181,6 +181,7 @@ module Bench =
         let state : Daemon.State =
             { RepoPath = "benchmark/repo"
               Branch = None
+              Ordering = CommitOrdering.Topological
               Snapshot = snapshot
               Layout = layout
               Order = order

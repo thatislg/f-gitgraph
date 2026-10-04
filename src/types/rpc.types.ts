@@ -1,6 +1,8 @@
 import type { LocalizedStrings } from "@/extension/l10n/webviewL10n";
 import type { GitCommitNode, GitRepo, RepoChange, RepoUpdate, WebviewConfig } from "@/types";
 
+export type CommitOrdering = "topological" | "date";
+
 export type WebviewInitialize = {
   l10n: LocalizedStrings;
   config: WebviewConfig;
@@ -68,7 +70,7 @@ export type RpcMethodMap = {
     result: ScanRepoResult;
   };
   "graph.load": {
-    params: { repoPath: string; branch?: string | null };
+    params: { repoPath: string; branch?: string | null; commitOrdering?: CommitOrdering | null };
     result: GraphLoadResult;
   };
   "graph.window": {

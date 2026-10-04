@@ -286,17 +286,19 @@ module Protocol =
 
     // --- Giải mã yêu cầu (TS -> F#) ---
 
-    let decodeInitRequest (payload: byte[]) : string * string option =
+    let decodeInitRequest (payload: byte[]) : string * string option * CommitOrdering =
         let r = MsgPack.Reader(payload)
         let n = MsgPack.readMapHeader r
         let mutable repoPath = ""
         let mutable branch = None
+        let mutable ordering = CommitOrdering.Topological
         for _ in 1 .. n do
             match MsgPack.readString r with
             | "repoPath" -> repoPath <- MsgPack.readString r
             | "branch" -> branch <- Some(MsgPack.readString r)
+            | "commitOrdering" -> ordering <- CommitOrdering.ofString (MsgPack.readString r)
             | _ -> failwith "khóa không mong đợi trong init request"
-        repoPath, branch
+        repoPath, branch, ordering
 
     let decodeQueryRange (payload: byte[]) : int * int =
         let r = MsgPack.Reader(payload)
@@ -374,6 +376,8 @@ module Daemon =
         RepoPath: string
         /// Nhánh đang hiển thị: `None`/`Some "*"` = toàn bộ, `Some tên` = riêng một nhánh.
         Branch: string option
+        /// Chiến lược sắp xếp thứ tự commit hiển thị.
+        Ordering: CommitOrdering
         Snapshot: GraphSnapshot
         Layout: Geometry.Layout
         /// Thứ tự hiển thị (index commit theo dòng).
@@ -385,18 +389,19 @@ module Daemon =
     }
 
     /// Nạp kho mã nguồn và tính bố cục đồ thị.
-    let loadRepo (path: string) (branch: string option) : Result<State, GitError> =
+    let loadRepo (path: string) (branch: string option) (ordering: CommitOrdering) : Result<State, GitError> =
         match GitReader.readGraph path branch with
         | Error e -> Error e
         | Ok snap ->
-            let layout = Layout.compute snap
-            let order = TopoSort.order snap
+            let layout = Layout.computeWith ordering snap
+            let order = TopoSort.orderWith ordering snap
             let row = Array.zeroCreate<int> snap.Commits.Length
             order |> Array.iteri (fun i c -> row[c] <- i)
             let commits = order |> Array.map (fun c -> snap.Commits[c])
             Ok
                 { RepoPath = path
                   Branch = branch
+                  Ordering = ordering
                   Snapshot = snap
                   Layout = layout
                   Order = order
@@ -404,7 +409,7 @@ module Daemon =
                   Commits = commits }
 
     /// Chạy vòng lặp daemon với bộ nạp kho tùy chỉnh (dùng cho kiểm thử).
-    let runWith (loader: string -> string option -> Result<State, GitError>) (input: Stream) (output: Stream) : unit =
+    let runWith (loader: string -> string option -> CommitOrdering -> Result<State, GitError>) (input: Stream) (output: Stream) : unit =
         let writeFrame (opcode: byte) (sequence: uint32) (payload: byte[]) =
             let bytes = Frame.encode { Opcode = opcode; Sequence = sequence; Payload = payload }
             output.Write(bytes, 0, bytes.Length)
@@ -422,8 +427,8 @@ module Daemon =
             | Some frame ->
                 try
                     if frame.Opcode = Opcode.InitializeRepo then
-                        let path, branch = Protocol.decodeInitRequest frame.Payload
-                        match loader path branch with
+                        let path, branch, ordering = Protocol.decodeInitRequest frame.Payload
+                        match loader path branch ordering with
                         | Error e ->
                             writeFrame Opcode.Error frame.Sequence (Protocol.encodeError 1 (GitError.describe e))
                         | Ok s ->
@@ -482,7 +487,7 @@ module Daemon =
                         match state with
                         | None -> writeFrame Opcode.Error frame.Sequence (Protocol.encodeError 2 "chưa khởi tạo kho")
                         | Some prev ->
-                            match loader prev.RepoPath prev.Branch with
+                            match loader prev.RepoPath prev.Branch prev.Ordering with
                             | Error e ->
                                 writeFrame Opcode.Error frame.Sequence (Protocol.encodeError 1 (GitError.describe e))
                             | Ok s ->

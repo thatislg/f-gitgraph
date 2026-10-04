@@ -7,6 +7,7 @@ import { rpcNotify } from "@/extension/rpc/rpc-notify";
 import { getSidecar } from "@/extension/sidecar/graph-service";
 import { logger } from "@/extension/util/logger";
 import { watchGitRefs } from "@/extension/watchers/git-ref.watcher";
+import type { CommitOrdering } from "@/types";
 
 import { GraphDataBridge } from "./graph-data-bridge";
 import type { GraphWindow, MetadataProvider } from "./graph-merge";
@@ -21,7 +22,11 @@ let currentRepo: string | undefined;
 let refWatcher: vscode.Disposable | undefined;
 
 /** Nạp đồ thị cho một kho, trả về tổng số commit, số làn và danh sách hash theo thứ tự topo. */
-export async function loadGraph(repo: string, branch?: string | null): Promise<InitSuccess> {
+export async function loadGraph(
+  repo: string,
+  branch?: string | null,
+  commitOrdering?: CommitOrdering | null
+): Promise<InitSuccess> {
   if (currentRepo !== repo) {
     refWatcher?.dispose();
     refWatcher = undefined;
@@ -38,7 +43,11 @@ export async function loadGraph(repo: string, branch?: string | null): Promise<I
     getCommitMetadata(git, hashes, config.dateType(), true);
 
   bridge = new GraphDataBridge(getSidecar(), metadataProvider);
-  const result = await bridge.initialize(repo, branch ?? undefined);
+  const result = await bridge.initialize(
+    repo,
+    branch ?? undefined,
+    commitOrdering ?? undefined
+  );
 
   if (refWatcher === undefined) {
     refWatcher = watchGitRefs(repo, async () => {

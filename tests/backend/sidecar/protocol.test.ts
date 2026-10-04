@@ -53,6 +53,12 @@ describe("message schemas", () => {
     expect(Array.from(encodeInitRequest("some/repo"))).toEqual(expected);
   });
 
+  it("encodes init request with branch and commit ordering", () => {
+    // map(3) -> repoPath, branch, commitOrdering.
+    const encoded = encodeInitRequest("some/repo", "main", "date");
+    expect(encoded[0]).toBe(0x83);
+  });
+
   it("encodes query range", () => {
     // map(2) -> "from" 100, "to" 300.
     expect(Array.from(encodeQueryRange(100, 300))).toEqual([

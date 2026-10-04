@@ -156,7 +156,8 @@ export type HexagonNodeProps = {
 /**
  * A GitLens-inspired hexagonal graph node with an inner git avatar / icon.
  * Includes a background mask to cleanly hide branch lines passing behind it.
- * Features a smooth micro-interaction hover/selected scale(1.15) effect.
+ * Features a smooth micro-interaction hover/selected scale(1.2) effect (avatar
+ * grows to exactly the row height when hovered).
  */
 export function HexagonNode({
   cx,
@@ -197,7 +198,7 @@ export function HexagonNode({
     }
   };
 
-  const currentScale = isScaled ? 1.15 : 1;
+  const currentScale = isScaled ? 1.2 : 1;
   const currentFilter = isScaled
     ? `drop-shadow(0 0 5px ${colour}) drop-shadow(0 0 2px ${colour})`
     : undefined;

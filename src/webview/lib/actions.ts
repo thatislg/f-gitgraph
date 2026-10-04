@@ -1,10 +1,11 @@
 import { batch } from "@preact/signals";
 import type { ComponentChildren } from "preact";
 
-import type { ActionRequest, GitFileChange } from "@/types";
+import type { ActionRequest, CommitOrdering, GitFileChange } from "@/types";
 import {
   branchList,
   commitDetails,
+  commitOrdering,
   contextMenu,
   dialog,
   expandedCommit,
@@ -50,7 +51,7 @@ export function selectRepo(repo: string) {
 
   vscode.postMessage({ command: "selectRepo", repo });
   requestBranches(repo);
-  void graphWindowStore.loadGraph(repo);
+  void graphWindowStore.loadGraph(repo, undefined, commitOrdering.value);
 }
 
 export function selectBranch(branch: CommitBranchType) {
@@ -65,7 +66,22 @@ export function selectBranch(branch: CommitBranchType) {
 
   const repo = selectedRepo.value;
   if (repo !== undefined) {
-    void graphWindowStore.loadGraph(repo, branch);
+    void graphWindowStore.loadGraph(repo, branch, commitOrdering.value);
+  }
+}
+
+/** Chuyển kiểu sắp xếp commit (Topological hoặc Date) và nạp lại đồ thị. */
+export function selectCommitOrdering(value: string) {
+  const ordering: CommitOrdering = value === "date" ? "date" : "topological";
+  if (ordering === commitOrdering.value) {
+    return;
+  }
+
+  commitOrdering.value = ordering;
+
+  const repo = selectedRepo.value;
+  if (repo !== undefined) {
+    void graphWindowStore.loadGraph(repo, selectedBranch.value, ordering);
   }
 }
 
@@ -114,7 +130,7 @@ export function setShowRemoteBranch(value: boolean) {
   }
 
   requestBranches(repo);
-  void graphWindowStore.loadGraph(repo, selectedBranch.value);
+  void graphWindowStore.loadGraph(repo, selectedBranch.value, commitOrdering.value);
 }
 
 export function refresh() {
@@ -124,7 +140,7 @@ export function refresh() {
   }
 
   requestBranches(repo);
-  void graphWindowStore.loadGraph(repo, selectedBranch.value);
+  void graphWindowStore.loadGraph(repo, selectedBranch.value, commitOrdering.value);
 }
 
 export function closeCommitDetails() {

@@ -74,18 +74,23 @@ export function tryDecodeFrame(bytes: Uint8Array): Frame | null {
 
 // --- Lược đồ thông điệp ---
 
-export function encodeInitRequest(repoPath: string, branch?: string): Uint8Array {
+export function encodeInitRequest(
+  repoPath: string,
+  branch?: string,
+  commitOrdering?: string
+): Uint8Array {
   const w = new MsgPackWriter();
-  if (branch === undefined) {
-    encodeMapHeader(w, 1);
-    encodeString(w, "repoPath");
-    encodeString(w, repoPath);
-  } else {
-    encodeMapHeader(w, 2);
-    encodeString(w, "repoPath");
-    encodeString(w, repoPath);
+  const keyCount = 1 + (branch !== undefined ? 1 : 0) + (commitOrdering !== undefined ? 1 : 0);
+  encodeMapHeader(w, keyCount);
+  encodeString(w, "repoPath");
+  encodeString(w, repoPath);
+  if (branch !== undefined) {
     encodeString(w, "branch");
     encodeString(w, branch);
+  }
+  if (commitOrdering !== undefined) {
+    encodeString(w, "commitOrdering");
+    encodeString(w, commitOrdering);
   }
   return w.toUint8Array();
 }

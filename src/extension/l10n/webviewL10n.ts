@@ -12,6 +12,7 @@ export function getWebviewLocalizedStrings() {
     // UI labels
     repo: vscode.l10n.t("Repo"),
     branch: vscode.l10n.t("Branch"),
+    commitOrdering: vscode.l10n.t("Commit Ordering"),
     showRemoteBranches: vscode.l10n.t("Show Remote Branches"),
     refresh: vscode.l10n.t("Refresh"),
     close: vscode.l10n.t("Close"),
