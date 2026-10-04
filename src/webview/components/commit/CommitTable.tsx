@@ -18,6 +18,7 @@ import {
   GRAPH_PADDING,
   LANE_OFFSET,
   LANE_WIDTH,
+  PANEL_GAP,
   ROW_HEIGHT,
   TABLE_HEADER_HEIGHT,
   UNCOMMITTED_CHANGES
@@ -191,20 +192,25 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
   const topSpacer = from * ROW_HEIGHT;
   const bottomSpacer = Math.max(0, (total - (from + rows.length)) * ROW_HEIGHT);
 
-  // Position the details panel directly below the selected row. When there is not
-  // enough room left under the row (near the bottom of the list), flip it above the
-  // row instead so it never overlaps the last few commits with an empty black box.
+  // Position the details panel directly below the selected row, offset by a fixed
+  // PANEL_GAP so the row and panel neon borders sit adjacent without overlapping.
+  // The gap is applied explicitly and uniformly (both below and above the row),
+  // instead of relying on the previous flush placement whose apparent gap came
+  // from sub-pixel outline/glow rendering and varied per row. When there is not
+  // enough room under the row (near the bottom of the list), flip it above the row
+  // so it never overlaps the last few commits with an empty black box.
   const detailsPanelTop =
     expandedRow === -1
       ? 0
       : (() => {
-          const belowTop = TABLE_HEADER_HEIGHT + (from + expandedRow + 1) * ROW_HEIGHT;
+          const rowTop = TABLE_HEADER_HEIGHT + (from + expandedRow) * ROW_HEIGHT;
+          const rowBottom = rowTop + ROW_HEIGHT;
+          const belowTop = rowBottom + PANEL_GAP;
           const rowsBelow = total - (from + expandedRow + 1);
           if (rowsBelow * ROW_HEIGHT >= COMMIT_DETAILS_HEIGHT) {
             return belowTop;
           }
-          const aboveTop =
-            TABLE_HEADER_HEIGHT + (from + expandedRow) * ROW_HEIGHT - COMMIT_DETAILS_HEIGHT;
+          const aboveTop = rowTop - COMMIT_DETAILS_HEIGHT - PANEL_GAP;
           return Math.max(TABLE_HEADER_HEIGHT, aboveTop);
         })();
 

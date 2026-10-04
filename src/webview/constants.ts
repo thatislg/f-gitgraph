@@ -14,6 +14,14 @@ export const TABLE_HEADER_HEIGHT = 32;
 export const COMMIT_DETAILS_HEIGHT = 250;
 
 /**
+ * Vertical gap kept between the selected commit row and the floating details
+ * panel so their neon borders sit adjacent without overlapping. Applied
+ * deterministically (unlike the previous flush placement, whose apparent gap
+ * came from sub-pixel outline/glow rendering and varied per row).
+ */
+export const PANEL_GAP = 4;
+
+/**
  * Index in a commit row of each column the user resizes, in the order the
  * widths are stored. The description column is absent: it takes the width the
  * other columns leave.
