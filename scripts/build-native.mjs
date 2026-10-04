@@ -65,6 +65,7 @@ const dotnetArgs = [
   configuration,
   "-r",
   rid,
+  "-p:PublishAot=true",
   "--nologo",
   "-v",
   "minimal"

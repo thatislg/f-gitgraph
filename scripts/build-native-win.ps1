@@ -31,7 +31,7 @@ Write-Output "==> Biên dịch nhân F# Native AOT ($Configuration)..."
 
 Push-Location $coreEngineDir
 try {
-    dotnet publish core-engine.fsproj -c $Configuration --nologo -v minimal
+    dotnet publish core-engine.fsproj -c $Configuration -r win-x64 --nologo -v minimal
     if ($LASTEXITCODE -ne 0) {
         throw "dotnet publish thất bại (mã $LASTEXITCODE)"
     }

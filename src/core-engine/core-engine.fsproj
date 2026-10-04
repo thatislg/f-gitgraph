@@ -18,25 +18,19 @@
   </PropertyGroup>
 
   <!--
-    Cấu hình biên dịch Native AOT (Ahead-Of-Time) cho Windows 64-bit:
-    - PublishAot: biên dịch trước toàn bộ mã máy, loại bỏ bytecode trung gian (CIL) và JIT.
-    - RuntimeIdentifier / SelfContained: nhắm win-x64, tự chứa toàn bộ runtime tối thiểu.
-    - PublishTrimmed: kích hoạt cắt tỉa mã nguồn tích cực (Aggressive Trimming).
-    - InvariantGlobalization: cắt bỏ bảng tra cứu văn hóa quốc gia (tiết kiệm 3–5MB).
-    - StripSymbols: lược bỏ biểu tượng gỡ lỗi (PDB) khỏi nhị phân phát hành.
-    - IlcOptimizationPreference=Size: tối ưu hóa kích thước để đạt mục tiêu 6–9MB.
-      LTO (Link Time Optimization) do MSVC Linker thực hiện mặc định ở chế độ Release.
+    Cấu hình biên dịch Native AOT (Ahead-Of-Time):
+    Chỉ kích hoạt khi có RuntimeIdentifier hoặc cờ PublishAot=true (khi chạy dotnet publish).
+    Khi chạy dotnet test hoặc dotnet build thông thường, core-engine biên dịch dạng thư viện
+    chuẩn để chạy được trên mọi môi trường thử nghiệm (Windows, Linux, macOS) mà không gặp
+    lỗi assembly loader.
   -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(PublishAot)' == 'true' or '$(RuntimeIdentifier)' != ''">
     <PublishAot>true</PublishAot>
-    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-x64</RuntimeIdentifier>
-    <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
     <InvariantGlobalization>true</InvariantGlobalization>
     <StripSymbols>true</StripSymbols>
     <OptimizationPreference>Size</OptimizationPreference>
     <IlcOptimizationPreference>Size</IlcOptimizationPreference>
-    <!-- Không phát sinh dữ liệu stack trace để giảm kích thước nhị phân. -->
     <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
     <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
   </PropertyGroup>
