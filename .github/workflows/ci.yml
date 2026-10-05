@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -62,9 +62,6 @@ jobs:
           - os: macos-latest
             rid: osx-arm64
             target: darwin-arm64
-          - os: macos-13
-            rid: osx-x64
-            target: darwin-x64
 
     steps:
       - name: Checkout Code
@@ -78,7 +75,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
