@@ -3,14 +3,12 @@ name: CI (Multi-Platform Build & Test)
 on:
   push:
     branches:
-      - main
       - custom
     paths-ignore:
       - "docs/**"
       - "*.md"
   pull_request:
     branches:
-      - main
       - custom
 
 concurrency:
