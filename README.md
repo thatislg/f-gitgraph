@@ -15,7 +15,7 @@
 
 ## About
 
-**F-GitGraph** is a next-generation Git history visualizer built for large repositories, developed upon the **Neo-Git-Graph** codebase. It combines a lightweight Preact webview with a native **F# Native AOT core engine** (`f-gitgraph-core.exe`) that reads Git data directly and computes the graph layout in parallel — no dependency on a .NET runtime, and dramatically faster than previous single-threaded TypeScript implementations.
+**F-GitGraph** is a next-generation Git history visualizer built for large repositories, originally forked from the MIT-licensed **Git Graph** extension (via the **Neo-Git-Graph** fork). It combines a lightweight Preact webview with a native **F# Native AOT core engine** (`f-gitgraph-core.exe`) that reads Git data directly and computes the graph layout in parallel — no dependency on a .NET runtime, and dramatically faster than previous single-threaded TypeScript implementations.
 
 Maintained and published by **LMO-LAB**.
 
@@ -40,7 +40,7 @@ Maintained and published by **LMO-LAB**.
 
 ## Architecture
 
-Traditional implementations (including the upstream Neo-Git-Graph codebase) parsed `git log` output with regular expressions and computed the graph layout in a single JavaScript thread — creating severe performance bottlenecks on large repositories.
+Traditional implementations (including the upstream **Git Graph** and **Neo-Git-Graph** codebases) parsed `git log` output with regular expressions and computed the graph layout in a single JavaScript thread — creating severe performance bottlenecks on large repositories.
 
 F-GitGraph decouples the system into a **hybrid architecture**: a responsive TypeScript/Preact shell, a high-performance **F# Native AOT core engine** for read-heavy graph computation, and **native Git CLI delegation** for 100% signature-safe mutating operations.
 
@@ -130,4 +130,4 @@ Please use [Issues](https://github.com/thatislg/f-gitgraph/issues) for bug repor
 
 MIT — see [LICENSE](LICENSE).
 
-> F-GitGraph builds upon the MIT-licensed **Neo-Git-Graph** codebase (upstream: [asispts/neo-git-graph](https://github.com/asispts/neo-git-graph)). It is maintained and published by LMO-LAB.
+> F-GitGraph builds upon the MIT-licensed **Git Graph** extension by [mhutchie](https://github.com/mhutchie/vscode-git-graph) and the **Neo-Git-Graph** fork ([asispts/neo-git-graph](https://github.com/asispts/neo-git-graph)). It is maintained and published by LMO-LAB.
