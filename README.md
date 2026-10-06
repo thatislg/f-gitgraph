@@ -44,7 +44,7 @@ Traditional implementations (including the upstream **Git Graph** and **Neo-Git-
 
 F-GitGraph decouples the system into a **hybrid architecture**: a responsive TypeScript/Preact shell, a high-performance **F# Native AOT core engine** for read-heavy graph computation, and **native Git CLI delegation** for 100% signature-safe mutating operations.
 
-![Architecture](./resources/architecture.svg)
+![Architecture](./resources/architecture.png)
 
 | Concern             | Before (TypeScript)               | After (F# Native AOT)                             |
 | :------------------ | :-------------------------------- | :------------------------------------------------ |
