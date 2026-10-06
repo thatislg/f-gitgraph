@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="560" viewBox="0 0 680 560" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,3 L0,6 z" fill="#6b7280"/>
+    </marker>
+    <marker id="arrow-rev" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M9,0 L0,3 L9,6 z" fill="#6b7280"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="680" height="560" rx="12" fill="#ffffff"/>
+
+  <!-- Webview Presentation Layer -->
+  <rect x="30" y="20" width="620" height="100" rx="10" fill="#e8f1fb" stroke="#2f6fb2" stroke-width="1.5"/>
+  <text x="50" y="48" font-size="15" font-weight="700" fill="#1f3a5f">Webview Presentation Layer</text>
+  <text x="50" y="68" font-size="12" fill="#3c4a5c">Preact + TypeScript — dumb renderer</text>
+  <text x="50" y="90" font-size="12.5" fill="#1f2937">• Hexagon SVG commit nodes &amp; neon ambient glow</text>
+  <text x="50" y="108" font-size="12.5" fill="#1f2937">• Virtual window scrolling &amp; 5× avatar zoom preview</text>
+
+  <!-- Extension Host Orchestration -->
+  <rect x="30" y="180" width="620" height="100" rx="10" fill="#e9f7ef" stroke="#2f8f5b" stroke-width="1.5"/>
+  <text x="50" y="208" font-size="15" font-weight="700" fill="#1f5237">Extension Host Orchestration</text>
+  <text x="50" y="228" font-size="12" fill="#3c4a5c">Node.js + TypeScript</text>
+  <text x="50" y="250" font-size="12.5" fill="#1f2937">• RPC server &amp; request router</text>
+  <text x="50" y="268" font-size="12.5" fill="#1f2937">• Settings, watchers &amp; localization (l10n) · GitCliMutator</text>
+
+  <!-- Compute Engine (F# Native AOT) -->
+  <rect x="30" y="360" width="300" height="160" rx="10" fill="#fff3e0" stroke="#c77700" stroke-width="1.5"/>
+  <text x="50" y="388" font-size="15" font-weight="700" fill="#6b3f00">Compute Engine</text>
+  <text x="50" y="408" font-size="12" fill="#6b3f00">F# Native AOT binary</text>
+  <text x="50" y="434" font-size="12.5" fill="#1f2937">• Memory-mapped</text>
+  <text x="60" y="450" font-size="12.5" fill="#1f2937">commit-graph &amp; LibGit2</text>
+  <text x="50" y="474" font-size="12.5" fill="#1f2937">• Parallel DAG layout solver</text>
+  <text x="50" y="494" font-size="12.5" fill="#1f2937">• Stdio IPC daemon</text>
+  <text x="60" y="510" font-size="12.5" fill="#1f2937">(streaming MessagePack)</text>
+
+  <!-- System Git Runtime -->
+  <rect x="350" y="360" width="300" height="160" rx="10" fill="#fdecec" stroke="#b23c3c" stroke-width="1.5"/>
+  <text x="370" y="388" font-size="15" font-weight="700" fill="#6b1f1f">System Git Runtime</text>
+  <text x="370" y="408" font-size="12" fill="#6b1f1f">native git.exe</text>
+  <text x="370" y="434" font-size="12.5" fill="#1f2937">• GPG / SSH commit signing</text>
+  <text x="370" y="458" font-size="12.5" fill="#1f2937">• Git Credential Manager</text>
+  <text x="380" y="474" font-size="12.5" fill="#1f2937">(2FA &amp; SSO)</text>
+  <text x="370" y="498" font-size="12.5" fill="#1f2937">• Git hooks &amp; LFS</text>
+
+  <!-- Arrows -->
+  <line x1="340" y1="120" x2="340" y2="178" stroke="#6b7280" stroke-width="2" marker-start="url(#arrow-rev)" marker-end="url(#arrow)"/>
+  <text x="352" y="155" font-size="12" fill="#4b5563">JSON RPC / postMessage</text>
+
+  <line x1="160" y1="280" x2="160" y2="358" stroke="#6b7280" stroke-width="2" marker-start="url(#arrow-rev)" marker-end="url(#arrow)"/>
+  <text x="148" y="320" font-size="12" fill="#4b5563" text-anchor="end">Read: Stdio RPC daemon</text>
+
+  <line x1="500" y1="280" x2="500" y2="358" stroke="#6b7280" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="488" y="320" font-size="12" fill="#4b5563" text-anchor="end">Write: spawn git.exe</text>
+</svg>

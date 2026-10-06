@@ -44,38 +44,7 @@ Traditional implementations (including the upstream **Git Graph** and **Neo-Git-
 
 F-GitGraph decouples the system into a **hybrid architecture**: a responsive TypeScript/Preact shell, a high-performance **F# Native AOT core engine** for read-heavy graph computation, and **native Git CLI delegation** for 100% signature-safe mutating operations.
 
-```mermaid
-flowchart TD
-    subgraph UI["Webview Presentation Layer (Preact + TypeScript)"]
-        WV["Webview UI / Dumb Renderer"]
-        WV --- W1["Hexagon SVG Nodes & Neon Ambient Glow"]
-        WV --- W2["Virtual Window Scrolling & 5x Avatar Zoom"]
-    end
-
-    subgraph Host["Extension Host Orchestration (Node.js + TypeScript)"]
-        RPC["RPC Server & Request Router"]
-        CFG["Settings, Watchers & Localization (l10n)"]
-        MUT["GitCliMutator (Mutation Pipeline)"]
-    end
-
-    subgraph Core["Compute Engine (F# Native AOT Binary)"]
-        MMP["Memory-Mapped commit-graph & LibGit2"]
-        DAG["Parallel DAG Layout Solver (Multi-Threaded)"]
-        IPC["Stdio IPC Daemon (Streaming MessagePack)"]
-        MMP --> DAG --> IPC
-    end
-
-    subgraph CLI["System Git Runtime (Native Git CLI)"]
-        GIT["git.exe"]
-        GIT --- G1["GPG / SSH Commit Signing"]
-        GIT --- G2["Git Credential Manager (2FA & SSO)"]
-        GIT --- G3["Git Hooks (pre-commit, husky) & LFS"]
-    end
-
-    WV <==>|"JSON RPC / postMessage"| RPC
-    RPC <==>|"[Read Pipeline] Stdio RPC Daemon"| IPC
-    MUT ==>|"[Write Pipeline] spawn git.exe"| GIT
-```
+![Architecture](./resources/architecture.svg)
 
 | Concern             | Before (TypeScript)               | After (F# Native AOT)                             |
 | :------------------ | :-------------------------------- | :------------------------------------------------ |
