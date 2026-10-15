@@ -29,6 +29,11 @@ const INVALID_REF: MutatorResult = {
 export class GitCliMutator {
   constructor(private readonly options: MutatorOptions) {}
 
+  /** Cập nhật đường dẫn kho làm việc khi người dùng chuyển sang kho khác. */
+  setRepo(repoPath: string): void {
+    this.options.repoPath = repoPath;
+  }
+
   private get gitPath(): string {
     return this.options.gitPath ?? "git";
   }

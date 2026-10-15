@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 
 import { gitClientFactory } from "@/backend/gitClient";
 import { config } from "@/extension/config";
+import { GitCliMutator } from "@/extension/mutator/gitCliMutator";
 import { AvatarManager } from "@/extension/services/avatarManager";
 import { DiffDocProvider } from "@/extension/services/diffDocProvider";
 import { ExtensionState } from "@/extension/services/extensionState";
@@ -14,6 +15,10 @@ export function createMessageProtocol(ctx: vscode.ExtensionContext) {
   const extensionState = new ExtensionState(ctx);
   const avatarManager = new AvatarManager(config.gitPath, extensionState);
   const gitClient = gitClientFactory(extensionState.getLastActiveRepo() ?? "", config.gitPath());
+  const gitMutator = new GitCliMutator({
+    repoPath: extensionState.getLastActiveRepo() ?? "",
+    gitPath: config.gitPath()
+  });
   const repoManager = createRepoManager(extensionState, config);
 
   ctx.subscriptions.push(
@@ -36,6 +41,7 @@ export function createMessageProtocol(ctx: vscode.ExtensionContext) {
       const { onPanelShown } = registerMessageHandlers(bridge, {
         config,
         gitClient,
+        gitMutator,
         repoManager,
         extensionState,
         avatarManager

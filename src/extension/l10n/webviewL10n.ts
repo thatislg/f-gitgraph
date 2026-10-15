@@ -52,6 +52,13 @@ export function getWebviewLocalizedStrings() {
     unableToRenameBranch: vscode.l10n.t("Unable to Rename Branch"),
     unableToReset: vscode.l10n.t("Unable to Reset to Commit"),
     unableToRevert: vscode.l10n.t("Unable to Revert Commit"),
+    unableToStageFile: vscode.l10n.t("Unable to Stage File"),
+    unableToUnstageFile: vscode.l10n.t("Unable to Unstage File"),
+    unableToStageAll: vscode.l10n.t("Unable to Stage All Changes"),
+    unableToUnstageAll: vscode.l10n.t("Unable to Unstage All Changes"),
+    unableToDiscardFileChanges: vscode.l10n.t("Unable to Discard File Changes"),
+    unableToDiscardAllChanges: vscode.l10n.t("Unable to Discard All Changes"),
+    unableToCommitChanges: vscode.l10n.t("Unable to Commit Changes"),
     invalidCharacters: vscode.l10n.t("Unable to {0}, one or more invalid characters entered."),
 
     // Actions

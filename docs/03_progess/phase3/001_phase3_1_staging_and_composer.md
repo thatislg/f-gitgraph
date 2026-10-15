@@ -89,18 +89,18 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
   - [x] **1.2.3**: Phân tách rõ ràng giữa dòng tiêu đề (Summary) và khối mô tả mở rộng (Description): Truyền 2 cờ `-m` độc lập vào tiến trình `git.exe` để Git tự động chèn dòng trống ngăn cách chuẩn quy ước.
   - [x] **1.2.4**: Bắt và chuẩn hóa các thông báo lỗi đặc thù: Xung đột khóa tệp `.git/index.lock`, lỗi thiếu danh tính tác giả (`user.name` / `user.email`).
 
-- [ ] **Nhiệm vụ 1.3: Xây dựng bộ truy vấn trạng thái kho `src/backend/queries/workspaceStatus.ts`**
-  - [ ] **1.3.1 & 1.3.2 ([#18](https://github.com/thatislg/f-gitgraph/issues/18))**: Khởi tạo hàm thực thi `git status --porcelain=v2 --branch -uall -c core.quotepath=false` và bóc tách header nhánh (`# branch.head`, `# branch.upstream`, `# branch.ab +ahead -behind`).
-  - [ ] **1.3.3 - 1.3.6 ([#19](https://github.com/thatislg/f-gitgraph/issues/19))**: Bóc tách tệp untracked (`? <path>`), ordinary changes (`1 <XY> ...`), tệp đổi tên (`2 <XY> ... <path>\t<oldPath>`), tính cờ `isClean = true` và đóng gói `WorkspaceStatusResult`.
+- [x] **Nhiệm vụ 1.3: Xây dựng bộ truy vấn trạng thái kho `src/backend/queries/workspaceStatus.ts`**
+  - [x] **1.3.1 & 1.3.2 ([#18](https://github.com/thatislg/f-gitgraph/issues/18))**: Khởi tạo hàm thực thi `git status --porcelain=v2 --branch --untracked-files=all -c core.quotepath=false -z` và bóc tách header nhánh (`# branch.head`, `# branch.upstream`, `# branch.ab +ahead -behind`) theo máy trạng thái NUL-delimiter.
+  - [x] **1.3.3 - 1.3.6 ([#19](https://github.com/thatislg/f-gitgraph/issues/19))**: Bóc tách tệp untracked (`? <path>`), ordinary changes (`1 <XY> ...`), tệp đổi tên hai phân đoạn NUL (`2 <XY> ... <path>\0<origPath>`), tệp xung đột (`u <XY> ...` vào `conflictedFiles`), xử lý trạng thái kép `MM`/`AM`/`AD`/`RM`/`RD`, tính cờ `isClean` và đóng gói `WorkspaceStatusResult`.
 
-- [ ] **Nhiệm vụ 1.4 ([#20](https://github.com/thatislg/f-gitgraph/issues/20)): Định nghĩa kiểu dữ liệu & Đăng ký Message Handlers**
-  - [ ] **1.4.1**: Cập nhật `src/types/actions.ts`: Khai báo các payload cho `stageFile`, `unstageFile`, `stageAll`, `unstageAll`, `discardFileChanges`, `discardAllChanges`, `commitChanges`.
-  - [ ] **1.4.2**: Cập nhật `src/types/queries.ts`: Khai báo query payload cho `workspaceStatus` với cấu trúc `WorkspaceStatusResult`.
-  - [ ] **1.4.3**: Cập nhật `src/extension/services/messageHandler.ts`: Đăng ký tiếp nhận và chuyển tiếp các action và query mới tới `GitCliMutator` và `workspaceStatus`.
+- [x] **Nhiệm vụ 1.4 ([#20](https://github.com/thatislg/f-gitgraph/issues/20)): Định nghĩa kiểu dữ liệu & Đăng ký Message Handlers**
+  - [x] **1.4.1**: Cập nhật `src/types/actions.ts`: Khai báo các payload cho `stageFile`, `unstageFile`, `stageAll`, `unstageAll`, `discardFileChanges`, `discardAllChanges`, `commitChanges`.
+  - [x] **1.4.2**: Cập nhật `src/types/queries.ts`: Khai báo query payload cho `workspaceStatus` với cấu trúc `WorkspaceStatusResult`.
+  - [x] **1.4.3**: Cập nhật `src/extension/services/messageHandler.ts`: Đăng ký tiếp nhận và chuyển tiếp các action và query mới tới `GitCliMutator` và `workspaceStatus`.
 
-- [ ] **Nhiệm vụ 1.5 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend**
-  - [ ] **1.5.1 ([#21](https://github.com/thatislg/f-gitgraph/issues/21))**: Tạo `tests/extension/mutator/stagingMutator.test.ts`: Test cơ chế `canUseRestore()`, `stageFile`, `stageAll`, `unstageFile`, `unstageAll`, `discardFileChanges`, `discardAllChanges`, `commit` nâng cao với cả 2 nhánh Git phiên bản (>= 2.23 và < 2.23).
-  - [ ] **1.5.2 & 1.5.3 ([#22](https://github.com/thatislg/f-gitgraph/issues/22))**: Tạo `tests/backend/queries/workspaceStatus.test.ts` (test bóc tách porcelain v2, tên tiếng Việt, cờ isClean) và `tests/extension/services/stagingMessageHandler.test.ts` (test định tuyến RPC).
+- [x] **Nhiệm vụ 1.5 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend**
+  - [x] **1.5.1 ([#21](https://github.com/thatislg/f-gitgraph/issues/21))**: Test cơ chế `canUseRestore()`, `stageFile`, `stageAll`, `unstageFile`, `unstageAll`, `discardFileChanges`, `discardAllChanges`, `commit` nâng cao với cả 2 nhánh Git phiên bản (>= 2.23 và < 2.23) — đã phủ trong `tests/backend/gitCliMutator.test.ts`.
+  - [x] **1.5.2 & 1.5.3 ([#22](https://github.com/thatislg/f-gitgraph/issues/22))**: Tạo `tests/backend/queries/workspaceStatus.test.ts` (test bóc tách porcelain v2 NUL, tên tiếng Việt, xung đột, cờ isClean) và `tests/extension/services/stagingMessageHandler.test.ts` (test định tuyến RPC).
 
 ---
 
@@ -249,3 +249,4 @@ Quá trình lập trình được tiến hành theo thứ tự 5 bước khép k
 - **2026-10-15**: Chi tiết hóa toàn diện tài liệu tiến độ Chặng 3.1: Bổ sung bảng kiểm kê 16 tệp tin tác động, phân rã 28 nhiệm vụ kỹ thuật con từng bước, gắn liên kết trực tiếp tới toàn bộ 5 tài liệu thiết kế.
 - **2026-10-15**: Tích hợp các bộ kiểm thử độc lập cho từng nhóm nhiệm vụ riêng biệt (bổ sung 11 tệp unit/component/integration test tương ứng với từng tầng kỹ thuật), cập nhật lộ trình thực thi theo chuẩn TDD khép kín.
 - **2026-10-15**: Hoàn thành Nhiệm vụ 1.1 (6 lệnh staging + cơ chế thăm dò phiên bản `canUseRestore` và fallback đa phiên bản Git) và Nhiệm vụ 1.2 (nâng cấp `commit` hỗ trợ `--amend`, `-S`, tách summary/description, chuẩn hóa lỗi `index.lock`/danh tính). Kiểm thử backend 11/11 pass. Báo cáo nghiệm thu: `docs/04_reports/phase3/001_phase3_1_staging_mutator_report.md`.
+- **2026-10-15**: Hoàn thành lại Nhiệm vụ 1.3 theo thiết kế cập nhật (máy trạng thái NUL-delimiter, `--untracked-files=all -z`, `conflictedFiles`, trạng thái kép `MM`/`AM`/`AD`/`RM`/`RD`), Nhiệm vụ 1.4 (types RPC + message handlers) và Nhiệm vụ 1.5 (bộ test `workspaceStatus` + `stagingMessageHandler`). Kiểm thử `workspaceStatus` 20/20, `stagingMessageHandler` 5/5, typecheck + oxlint + oxfmt sạch.

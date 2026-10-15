@@ -1,3 +1,4 @@
+import type { WorkspaceStatusResult } from "@/backend/queries/workspaceStatus";
 import type { GitCommitDetails } from "./git";
 
 type QueryPayloads = {
@@ -14,6 +15,10 @@ type QueryPayloads = {
       hard: boolean;
       isRepo: boolean;
     };
+  };
+  workspaceStatus: {
+    request: { repo: string };
+    response: WorkspaceStatusResult;
   };
 };
 

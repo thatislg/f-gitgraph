@@ -12,8 +12,10 @@ import { addTag, deleteTag, pushTag } from "@/backend/actions/tag";
 import type { GitClient } from "@/backend/gitClient";
 import { commitDetails } from "@/backend/queries/commitDetails";
 import { loadBranches } from "@/backend/queries/loadBranches";
+import { getWorkspaceStatus } from "@/backend/queries/workspaceStatus";
 import { abbrevCommit } from "@/backend/utils/string";
 import type { Config } from "@/extension/config";
+import type { GitCliMutator, MutatorResult } from "@/extension/mutator/gitCliMutator";
 import { AvatarManager } from "@/extension/services/avatarManager";
 import { encodeDiffDocUri } from "@/extension/services/diffDocProvider";
 import { ExtensionState } from "@/extension/services/extensionState";
@@ -60,12 +62,13 @@ export function registerMessageHandlers(
   deps: {
     config: Config;
     gitClient: GitClient;
+    gitMutator: GitCliMutator;
     repoManager: RepoManager;
     extensionState: ExtensionState;
     avatarManager: AvatarManager;
   }
 ) {
-  const { config, gitClient, repoManager, extensionState, avatarManager } = deps;
+  const { config, gitClient, gitMutator, repoManager, extensionState, avatarManager } = deps;
 
   let currentRepo: string | null = null;
 
@@ -75,6 +78,7 @@ export function registerMessageHandlers(
     }
     currentRepo = repo;
     gitClient.setRepo(repo);
+    gitMutator.setRepo(repo);
     extensionState.setLastActiveRepo(repo);
     selectWatchedRepo(repo);
   }
@@ -94,6 +98,14 @@ export function registerMessageHandlers(
     });
   }
 
+  /** Chuyển đổi kết quả `MutatorResult` thành lỗi ném ra để `registerAction` bắt được. */
+  async function runMutation(result: Promise<MutatorResult>): Promise<void> {
+    const r = await result;
+    if (!r.ok) {
+      throw new Error(r.stderr || "Thao tác Git thất bại");
+    }
+  }
+
   // --- Action handlers ---
 
   registerAction("addTag", (msg) => addTag(gitClient.getInstance(), msg));
@@ -109,6 +121,26 @@ export function registerMessageHandlers(
   registerAction("resetToCommit", (msg) => resetToCommit(gitClient.getInstance(), msg));
   registerAction("mergeBranch", (msg) => mergeBranch(gitClient.getInstance(), msg));
   registerAction("mergeCommit", (msg) => mergeCommit(gitClient.getInstance(), msg));
+
+  // --- Staging & Commit actions (ủy thác cho GitCliMutator) ---
+
+  registerAction("stageFile", (msg) => runMutation(gitMutator.stageFile(msg.filePath)));
+  registerAction("unstageFile", (msg) => runMutation(gitMutator.unstageFile(msg.filePath)));
+  registerAction("stageAll", () => runMutation(gitMutator.stageAll()));
+  registerAction("unstageAll", () => runMutation(gitMutator.unstageAll()));
+  registerAction("discardFileChanges", (msg) =>
+    runMutation(gitMutator.discardFileChanges(msg.filePath, msg.isUntracked))
+  );
+  registerAction("discardAllChanges", () => runMutation(gitMutator.discardAllChanges()));
+  registerAction("commitChanges", (msg) =>
+    runMutation(
+      gitMutator.commit(msg.summary, {
+        description: msg.description,
+        amend: msg.amend,
+        sign: msg.sign
+      })
+    )
+  );
 
   // --- Query handlers ---
 
@@ -132,6 +164,14 @@ export function registerMessageHandlers(
         commitHash: msg.commitHash,
         dateType: config.dateType()
       }))
+    });
+  });
+
+  bridge.onMessage("workspaceStatus", async (msg) => {
+    setCurrentRepo(msg.repo);
+    bridge.post({
+      command: "workspaceStatus",
+      ...(await getWorkspaceStatus(gitClient.getInstance()))
     });
   });
 

@@ -15,7 +15,14 @@ const ERROR_KEY: Record<ActionResponse["command"], keyof LocalizedStrings> = {
   pushTag: "unableToPushTag",
   renameBranch: "unableToRenameBranch",
   resetToCommit: "unableToReset",
-  revertCommit: "unableToRevert"
+  revertCommit: "unableToRevert",
+  stageFile: "unableToStageFile",
+  unstageFile: "unableToUnstageFile",
+  stageAll: "unableToStageAll",
+  unstageAll: "unableToUnstageAll",
+  discardFileChanges: "unableToDiscardFileChanges",
+  discardAllChanges: "unableToDiscardAllChanges",
+  commitChanges: "unableToCommitChanges"
 };
 
 /** Every git command answers the same way, so one handler serves them all. */

@@ -16,6 +16,13 @@ type ActionPayloads = {
   renameBranch: { oldName: string; newName: string };
   resetToCommit: { commitHash: string; resetMode: GitResetMode };
   revertCommit: { commitHash: string; parentIndex: number };
+  stageFile: { filePath: string };
+  unstageFile: { filePath: string };
+  stageAll: object;
+  unstageAll: object;
+  discardFileChanges: { filePath: string; isUntracked: boolean };
+  discardAllChanges: object;
+  commitChanges: { summary: string; description: string; amend: boolean; sign: boolean };
 };
 
 export type ActionRequest = {
