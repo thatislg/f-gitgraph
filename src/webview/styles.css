@@ -65,6 +65,18 @@
 
   /* Colour of the graph branch a row belongs to. Overridden per commit table. */
   --color-graph: var(--vscode-focusBorder);
+
+  /* Neon status badges for the staging file list (A/M/D/R/U). */
+  --color-badge-added: light-dark(#059669, #10b981);
+  --color-badge-modified: light-dark(#d97706, #f59e0b);
+  --color-badge-deleted: light-dark(#dc2626, #ef4444);
+  --color-badge-renamed: light-dark(#9333ea, #a855f7);
+  --color-badge-untracked: light-dark(#475569, #64748b);
+
+  /* Corner cross rivet (`+`) states. */
+  --color-cross-idle: light-dark(#a1a1aa, #71717a);
+  --color-cross-active: light-dark(#7c3aed, #a855f7);
+  --color-cross-warning: light-dark(#dc2626, #ef4444);
 }
 
 @keyframes scroll-shadow {

@@ -17,3 +17,4 @@
 # Reference repos
 /vscode-gitlens/
 .fake
+.agents/

@@ -36,10 +36,13 @@ Thư mục [`docs/03_progess/`](03_progess/README.md) theo dõi tiến độ th�
 ---
 
 ### 📊 [04. Báo Cáo Nghiệm Thu & Đo Đạc (Reports & Verification)](04_reports/README.md)
+- **[Quy Chuẩn Đo Đạc & Báo Cáo Lỗi Biên Dịch](04_reports/RULES_COMPILATION_ERROR_TRACKING.md)**: Quy chuẩn ghi vết lỗi biên dịch 4 cổng, phân loại `[DESIGN_DEFECT]` vs `[DEV_BUG]` và công thức đo lường tỷ lệ chất lượng thiết kế vs lập trình khi dùng AI.
+- **[phase3](04_reports/phase3/)**: Báo cáo tiến độ, đo đạc và nghiệm thu Phase 3 (Reborn).
 - **[001_windows](04_reports/001_windows/README.md)**: Báo cáo đo đạc hiệu năng, kiểm thử tương đương đồ thị và an toàn dữ liệu trên Windows.
 - **[002_linux](04_reports/002_linux/README.md)**: Báo cáo tương thích `glibc`, kiểm thử stress-test kho Linux kernel và tự cấp quyền `chmod +x`.
 - **[003_macos](04_reports/003_macos/README.md)**: Báo cáo tối ưu mã máy ARM64/Intel, kiểm định Gatekeeper và hiển thị Retina 120Hz.
 - **[004_release](04_reports/004_release/README.md)**: Báo cáo tự động hóa CI/CD, kiểm định Universal VSIX và biên bản bàn giao tổng thể.
+
 
 ---
 

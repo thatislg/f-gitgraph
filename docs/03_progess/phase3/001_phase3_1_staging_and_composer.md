@@ -115,48 +115,48 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ### 📋 Nhóm Việc 2: Triển Khai Các Khối Giao Diện Cơ Bản (UI Building Blocks) — [Epic #23](https://github.com/thatislg/f-gitgraph/issues/23)
 *Tài liệu tham chiếu thiết kế*: [02_Staging_UI_And_Composer_Component_Design.md](../../02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md).
 
-- [ ] **Nhiệm vụ 2.1 ([#24](https://github.com/thatislg/f-gitgraph/issues/24)): Xây dựng khung kỹ thuật đinh tán góc `src/webview/components/ui/CornerCrossFrame.tsx`**
-  - [ ] **2.1.1**: Định vị chính xác 4 ký tự chữ thập (`+`) tại 4 góc của khung viền (top-left, top-right, bottom-left, bottom-right) với khoảng cách dịch chuyển tọa độ âm -6px so với cạnh container, phông chữ đơn cách (Courier New / Fira Code), `user-select: none`, z-index 10.
-  - [ ] **2.1.2**: Quản lý 3 trạng thái bừng sáng của đinh tán:
+- [x] **Nhiệm vụ 2.1 ([#24](https://github.com/thatislg/f-gitgraph/issues/24)): Xây dựng khung kỹ thuật đinh tán góc `src/webview/components/ui/CornerCrossFrame.tsx`**
+  - [x] **2.1.1**: Định vị chính xác 4 ký tự chữ thập (`+`) tại 4 góc của khung viền (top-left, top-right, bottom-left, bottom-right) với khoảng cách dịch chuyển tọa độ âm -6px so với cạnh container, phông chữ đơn cách (Courier New / Fira Code), `user-select: none`, z-index 10.
+  - [x] **2.1.2**: Quản lý 3 trạng thái bừng sáng của đinh tán:
     - *Trạng thái chờ (Idle)*: Độ mờ 50% (`opacity: 0.5`), màu xám viền kỹ thuật, không có đổ bóng.
     - *Trạng thái rê chuột (Hover)*: Độ mờ 80% (`opacity: 0.8`), viền sáng nhẹ.
     - *Trạng thái kích hoạt (Active/Focus)*: Độ mờ 100% (`opacity: 1`), bừng sáng sắc tím Neon (`#a855f7`) với hiệu ứng phát quang `drop-shadow(0 0 6px rgba(168, 85, 247, 0.6))`.
-  - [ ] **2.1.3**: Thiết lập tương thích hoàn hảo giữa 2 chế độ Dark Mode và Light Mode theo bảng token Cyber-Lab: Nền tối đậm `#0f172a` viền `#334155` ở Dark Mode; Nền sáng `#f8fafc` viền `#cbd5e1` ở Light Mode; luôn hiển thị mượt mà phần tử con (children).
+  - [x] **2.1.3**: Thiết lập tương thích hoàn hảo giữa 2 chế độ Dark Mode và Light Mode theo bảng token Cyber-Lab: Nền tối đậm `#0f172a` viền `#334155` ở Dark Mode; Nền sáng `#f8fafc` viền `#cbd5e1` ở Light Mode; luôn hiển thị mượt mà phần tử con (children).
 
-- [ ] **Nhiệm vụ 2.2: Xây dựng Component hiển thị dòng tệp `src/webview/components/staging/StagingFileItem.tsx`**
-  - [ ] **2.2.1 ([#25](https://github.com/thatislg/f-gitgraph/issues/25))**: Thiết kế huy hiệu trạng thái vuông Neon (Neon Status Badge) chuẩn kích thước $18\text{px} \times 18\text{px}$ cho 5 trạng thái Git:
+- [x] **Nhiệm vụ 2.2: Xây dựng Component hiển thị dòng tệp `src/webview/components/staging/StagingFileItem.tsx`**
+  - [x] **2.2.1 ([#25](https://github.com/thatislg/f-gitgraph/issues/25))**: Thiết kế huy hiệu trạng thái vuông Neon (Neon Status Badge) chuẩn kích thước $18\text{px} \times 18\text{px}$ cho 5 trạng thái Git:
     - Ký tự `A` (Added - Tệp tạo mới): Nền xanh lục nhạt, viền và chữ xanh lục Neon `#10b981`.
     - Ký tự `M` (Modified - Tệp sửa đổi): Nền vàng nhạt, viền và chữ vàng cam Neon `#f59e0b`.
     - Ký tự `D` (Deleted - Tệp đã xóa): Nền đỏ nhạt, viền và chữ đỏ tươi Neon `#ef4444`.
     - Ký tự `R` (Renamed - Tệp đổi tên): Nền tím nhạt, viền và chữ tím Neon `#a855f7`.
     - Ký tự `U` (Untracked - Tệp chưa theo dõi): Nền xanh lơ nhạt, viền và chữ xanh lơ Neon `#06b6d4`.
     - Định dạng: Bo góc nhẹ 3px, phông chữ Monospace in hoa đậm (font-weight 700), căn giữa tuyệt đối theo cả 2 trục.
-  - [ ] **2.2.2 ([#25](https://github.com/thatislg/f-gitgraph/issues/25))**: Thiết kế bố cục phân cấp Typography tên tệp và xử lý đường dẫn thư mục:
+  - [x] **2.2.2 ([#25](https://github.com/thatislg/f-gitgraph/issues/25))**: Thiết kế bố cục phân cấp Typography tên tệp và xử lý đường dẫn thư mục:
     - Chiều cao dòng chuẩn 28px, đệm lề ngang 8px, căn chỉnh linh hoạt dạng flexbox.
     - Tên tệp tin (File Name) đặt ở vị trí nổi bật phía trước: Phông chữ cỡ 12.5px, màu chữ sáng rõ (`#f8fafc` Dark Mode / `#0f172a` Light Mode).
     - Đường dẫn thư mục phụ (Folder Path) đặt ở phía sau: Phông chữ cỡ 11px, màu xám mờ (`#94a3b8` Dark Mode / `#64748b` Light Mode) để phân biệt rõ ràng cấp độ quan trọng.
     - Tích hợp cơ chế cắt ngắn đường dẫn ở giữa (Middle Ellipsis: ví dụ `src/.../components/StagingFileItem.tsx`) khi chiều ngang Inspector bị thu hẹp, bảo đảm tên tệp quan trọng không bao giờ bị che khuất.
-  - [ ] **2.2.3 ([#26](https://github.com/thatislg/f-gitgraph/issues/26))**: Hiện thực cơ chế *Hover-to-Reveal Actions* (Chống ô nhiễm thị giác):
+  - [x] **2.2.3 ([#26](https://github.com/thatislg/f-gitgraph/issues/26))**: Hiện thực cơ chế *Hover-to-Reveal Actions* (Chống ô nhiễm thị giác):
     - Trạng thái mặc định (Idle): Cụm nút thao tác bên phải ẩn hoàn toàn (`opacity: 0`, `pointer-events: none`), giúp danh sách tệp biến động nhìn tinh gọn, sạch sẽ, không bị rối mắt như giao diện GitLens.
     - Trạng thái rê chuột (Hover): Cụm nút thao tác mượt mà xuất hiện (`opacity: 1`, `pointer-events: auto`) với hiệu ứng chuyển tiếp CSS Transition 150ms `cubic-bezier(0.4, 0, 0.2, 1)`.
-  - [ ] **2.2.4 ([#26](https://github.com/thatislg/f-gitgraph/issues/26))**: Tích hợp các nút thao tác vi mô trực tiếp trên dòng tệp theo phân nhóm ngữ cảnh:
+  - [x] **2.2.4 ([#26](https://github.com/thatislg/f-gitgraph/issues/26))**: Tích hợp các nút thao tác vi mô trực tiếp trên dòng tệp theo phân nhóm ngữ cảnh:
     - Tệp thuộc phân nhóm "Changes (Unstaged)": Nút Stage (`+`) đưa tệp vào Index và nút Discard (`🗑` hoặc `x`) mở hộp thoại cảnh báo an toàn `DiscardConfirmModal`.
     - Tệp thuộc phân nhóm "Staged Changes": Nút Unstage (`-`) đưa tệp ra khỏi Index và nút Discard (`↺`) mở hộp thoại cảnh báo an toàn `DiscardConfirmModal`.
     - Kích thước vùng bấm chuẩn $24\text{px} \times 24\text{px}$, hiệu ứng hover viền phát sáng nhẹ, hỗ trợ phím tắt và nhãn chú thích tooltip rõ nghĩa.
-  - [ ] **2.2.5 ([#26](https://github.com/thatislg/f-gitgraph/issues/26))**: Bắt sự kiện tương tác chuột để xem so sánh khác biệt mã nguồn (Diff View):
+  - [x] **2.2.5 ([#26](https://github.com/thatislg/f-gitgraph/issues/26))**: Bắt sự kiện tương tác chuột để xem so sánh khác biệt mã nguồn (Diff View):
     - Nhấp chọn (Click) hoặc nhấp đúp (Double-click) vào vùng tên dòng tệp để gửi thông điệp RPC `openDiff` về Backend.
     - Backend gọi API gốc `vscode.diff` của VS Code để mở tab so sánh vi sai trực quan giữa phiên bản làm việc và Index hoặc commit HEAD.
     - Dòng tệp đang chọn hiển thị trạng thái Active Highlight (nền tím nhạt mờ, viền trái phát sáng) để lập trình viên nhận diện tệp đang mở diff.
 
-- [ ] **Nhiệm vụ 2.3 ([#27](https://github.com/thatislg/f-gitgraph/issues/27)): Xây dựng hộp thoại xác nhận an toàn `src/webview/components/staging/DiscardConfirmModal.tsx`**
-  - [ ] **2.3.1**: Thiết kế giao diện Modal nổi ở chính giữa màn hình, lớp nền Backdrop phủ mờ 4px (`backdrop-filter: blur(4px)`), đóng khung trong `CornerCrossFrame` với 4 đinh tán góc phát sáng màu đỏ cam cảnh báo (`#f87171`).
-  - [ ] **2.3.2**: Hiển thị thông điệp cảnh báo rõ ràng rằng thao tác hoàn tác sẽ xóa vĩnh viễn dữ liệu chưa commit của tệp và không thể phục hồi lại bằng `git reflog`.
-  - [ ] **2.3.3**: Cung cấp cơ chế bẫy tiêu điểm bàn phím an toàn (Focus Trapping): Nút Hủy Bỏ (`Cancel`) mặc định nhận tiêu điểm và nhận phím tắt `Esc`; Nút Xác Nhận Hoàn Tác (`Discard`) màu đỏ nguy hiểm chỉ kích hoạt khi người dùng chủ động chọn.
+- [x] **Nhiệm vụ 2.3 ([#27](https://github.com/thatislg/f-gitgraph/issues/27)): Xây dựng hộp thoại xác nhận an toàn `src/webview/components/staging/DiscardConfirmModal.tsx`**
+  - [x] **2.3.1**: Thiết kế giao diện Modal nổi ở chính giữa màn hình, lớp nền Backdrop phủ mờ 4px (`backdrop-filter: blur(4px)`), đóng khung trong `CornerCrossFrame` với 4 đinh tán góc phát sáng màu đỏ cam cảnh báo (`#f87171`).
+  - [x] **2.3.2**: Hiển thị thông điệp cảnh báo rõ ràng rằng thao tác hoàn tác sẽ xóa vĩnh viễn dữ liệu chưa commit của tệp và không thể phục hồi lại bằng `git reflog`.
+  - [x] **2.3.3**: Cung cấp cơ chế bẫy tiêu điểm bàn phím an toàn (Focus Trapping): Nút Hủy Bỏ (`Cancel`) mặc định nhận tiêu điểm và nhận phím tắt `Esc`; Nút Xác Nhận Hoàn Tác (`Discard`) màu đỏ nguy hiểm chỉ kích hoạt khi người dùng chủ động chọn.
 
-- [ ] **Nhiệm vụ 2.4 (TEST NHÓM 2) ([#34](https://github.com/thatislg/f-gitgraph/issues/34)): Bộ Unit Tests Độc Lập Cho Từng Component UI Cơ Bản**
-  - [ ] **2.4.1**: Tạo `tests/webview/components/ui/CornerCrossFrame.test.tsx`: Test render 4 ký tự đinh tán góc `+`, class active focus glow tím Neon, và hiển thị trọn vẹn children.
-  - [ ] **2.4.2**: Tạo `tests/webview/components/staging/StagingFileItem.test.tsx`: Test màu sắc 5 huy hiệu vuông neon (A/M/D/R/U), kiểm tra class hover-to-reveal opacity, kiểm tra kích hoạt đúng event callback khi click nút Stage/Unstage/Discard, và nhấp chọn mở Diff.
-  - [ ] **2.4.3**: Tạo `tests/webview/components/staging/DiscardConfirmModal.test.tsx`: Test hiển thị thông điệp cảnh báo đúng tên tệp, phím `Esc` gọi hàm cancel, và click nút Discard gọi hàm xác nhận xóa.
+- [x] **Nhiệm vụ 2.4 (TEST NHÓM 2) ([#34](https://github.com/thatislg/f-gitgraph/issues/34)): Bộ Unit Tests Độc Lập Cho Từng Component UI Cơ Bản**
+  - [x] **2.4.1**: Tạo `tests/webview/components/ui/CornerCrossFrame.test.tsx`: Test render 4 ký tự đinh tán góc `+`, class active focus glow tím Neon, và hiển thị trọn vẹn children.
+  - [x] **2.4.2**: Tạo `tests/webview/components/staging/StagingFileItem.test.tsx`: Test màu sắc 5 huy hiệu vuông neon (A/M/D/R/U), kiểm tra class hover-to-reveal opacity, kiểm tra kích hoạt đúng event callback khi click nút Stage/Unstage/Discard, và nhấp chọn mở Diff.
+  - [x] **2.4.3**: Tạo `tests/webview/components/staging/DiscardConfirmModal.test.tsx`: Test hiển thị thông điệp cảnh báo đúng tên tệp, phím `Esc` gọi hàm cancel, và click nút Discard gọi hàm xác nhận xóa.
 
 ---
 
@@ -296,3 +296,4 @@ Quá trình lập trình được tiến hành theo thứ tự 5 bước khép k
 - **2026-10-15**: Tích hợp các bộ kiểm thử độc lập cho từng nhóm nhiệm vụ riêng biệt (bổ sung 11 tệp unit/component/integration test tương ứng với từng tầng kỹ thuật), cập nhật lộ trình thực thi theo chuẩn TDD khép kín.
 - **2026-10-15**: Hoàn thành Nhiệm vụ 1.1 (6 lệnh staging + cơ chế thăm dò phiên bản `canUseRestore` và fallback đa phiên bản Git) và Nhiệm vụ 1.2 (nâng cấp `commit` hỗ trợ `--amend`, `-S`, tách summary/description, chuẩn hóa lỗi `index.lock`/danh tính). Kiểm thử backend 11/11 pass. Báo cáo nghiệm thu: `docs/04_reports/phase3/001_phase3_1_staging_mutator_report.md`.
 - **2026-10-15**: Hoàn thành lại Nhiệm vụ 1.3 theo thiết kế cập nhật (máy trạng thái NUL-delimiter, `--untracked-files=all -z`, `conflictedFiles`, trạng thái kép `MM`/`AM`/`AD`/`RM`/`RD`), Nhiệm vụ 1.4 (types RPC + message handlers) và Nhiệm vụ 1.5 (bộ test `workspaceStatus` + `stagingMessageHandler`). Kiểm thử `workspaceStatus` 20/20, `stagingMessageHandler` 5/5, typecheck + oxlint + oxfmt sạch.
+- **2026-10-15**: Hoàn thành Nhóm Việc 2 — Triển Khai Các Khối Giao Diện Cơ Bản: `CornerCrossFrame.tsx` (Nhiệm vụ 2.1), `StagingFileItem.tsx` (Nhiệm vụ 2.2), `DiscardConfirmModal.tsx` (Nhiệm vụ 2.3) và bộ unit test độc lập (Nhiệm vụ 2.4). Kiểm thử webview 21/21 test mới pass, typecheck sạch, compile (esbuild) thành công. Báo cáo nghiệm thu: `docs/04_reports/phase3/003_phase3_1_ui_building_blocks_report.md`.

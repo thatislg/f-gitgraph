@@ -11,6 +11,11 @@ Thư mục này lưu trữ các bản thiết kế chi tiết (Design Specificat
 
 ## Danh Mục Các Giai Đoạn Thiết Kế
 
+### 📐 [Quy Chuẩn Thiết Kế Kỹ Thuật "Design by Word" (RULES_DESIGN_SPECIFICATION.md)](RULES_DESIGN_SPECIFICATION.md)
+Quy chuẩn bắt buộc cho mọi hồ sơ thiết kế: 7 nguyên tắc bất biến (Design by Word, ranh giới an toàn 4 tầng, bảo toàn hình học SVG, thẩm mỹ Cyber-Lab, hợp đồng RPC định kiểu, ma trận test song hành, quy trình xử lý `[DESIGN_DEFECT]`), cấu trúc khung mẫu chuẩn 7 phần và Checklist 10 điểm kiểm định chất lượng thiết kế.
+
+---
+
 ### 📦 [Phase 1: Hồ Sơ Thiết Kế Nền Tảng F# Core Engine (ĐÃ HOÀN THÀNH & ĐÓNG GÓI)](phase1/README.md)
 Thư mục [`phase1/`](phase1/README.md) đóng gói 12 bản thiết kế chi tiết ban đầu:
 - **[Thư mục 001_windows](phase1/001_windows/README.md)**: Hệ thống 12 bản thiết kế chi tiết bao gồm: Cấu trúc dự án & Native AOT, Domain Model & Bảng mã lỗi, Fast Git Storage Reader, Parallel DAG Layout Solver, Giao thức IPC Stdio Streaming, Tích hợp Webview & Git Mutator, Benchmark Plan, Dọn dẹp TS cũ, Iconography, và Khắc phục sự cố đồ thị.

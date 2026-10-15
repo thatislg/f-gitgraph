@@ -1,4 +1,4 @@
-﻿# 04. Báo Cáo Nghiệm Thu & Đo Đạc Hiệu Năng (Reports & Verification)
+# 04. Báo Cáo Nghiệm Thu & Đo Đạc Hiệu Năng (Reports & Verification)
 
 Thư mục này lưu trữ toàn bộ các biên bản kiểm thử, báo cáo đo đạc hiệu năng (Benchmarking Reports) và biên bản nghiệm thu kỹ thuật (Sign-off Reports) theo từng giai đoạn triển khai của dự án F-GitGraph:
 
@@ -14,6 +14,10 @@ Thư mục này lưu trữ toàn bộ các biên bản kiểm thử, báo cáo �
 
 ## Danh Mục Các Thư Mục Báo Cáo Theo Giai Đoạn
 
+- **[Quy Chuẩn Báo Cáo Lỗi Biên Dịch & Thống Kê AI (RULES_COMPILATION_ERROR_TRACKING.md)](RULES_COMPILATION_ERROR_TRACKING.md)**:
+  Quy chuẩn bắt buộc áp dụng từ Phase 3.1 (Nhóm Việc 2 trở đi): Ghi vết lỗi qua 4 cổng chẩn đoán (`typecheck`, `lint`, `compile`, `test`), phân loại `[DESIGN_DEFECT]` vs `[DEV_BUG]`, công thức tính tỷ lệ lỗi thiết kế vs bug dev, và biểu mẫu báo cáo chuẩn.
+- **[phase3: Báo Cáo Tiến Độ & Nghiệm Thu Phase 3 (Reborn)](phase3/)**:
+  Các báo cáo theo từng nhóm việc của Phase 3.1 (Staging Area, Commit Composer) và các chặng tiếp theo.
 - **[001_windows: Báo Cáo Nghiệm Thu Phase 1 Windows](001_windows/README.md)**:
   Báo cáo đo đạc hiệu năng trên Windows 10/11, kiểm thử tương đương đồ thị, kiểm định độc lập Native AOT và nghiệm thu an toàn Git CLI.
 - **[002_linux: Báo Cáo Nghiệm Thu Phase 2 Linux](002_linux/README.md)**:
