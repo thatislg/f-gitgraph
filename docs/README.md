@@ -40,3 +40,9 @@ Thư mục [`docs/03_progess/`](03_progess/README.md) theo dõi tiến độ th�
 - **[002_linux](04_reports/002_linux/README.md)**: Báo cáo tương thích `glibc`, kiểm thử stress-test kho Linux kernel và tự cấp quyền `chmod +x`.
 - **[003_macos](04_reports/003_macos/README.md)**: Báo cáo tối ưu mã máy ARM64/Intel, kiểm định Gatekeeper và hiển thị Retina 120Hz.
 - **[004_release](04_reports/004_release/README.md)**: Báo cáo tự động hóa CI/CD, kiểm định Universal VSIX và biên bản bàn giao tổng thể.
+
+---
+
+### 🐛 [05. Theo Dõi Sự Cố & Vấn Đề Kỹ Thuật (Issues Tracking)](05_issues/README.md)
+Thư mục [`docs/05_issues/`](05_issues/README.md) ghi nhận toàn bộ các vấn đề kỹ thuật phát sinh, lỗi môi trường và rủi ro tương thích phục vụ đối soát và đồng bộ lên GitHub Issues:
+- **[ISSUE-001: Vitest hookTimeout 10s trên Windows](05_issues/001_vitest_hook_timeout_windows.md)**: Hiện tượng ngắt hook `beforeAll` do chi phí spawn 7 lệnh Git trong `makeRepo()` trên Windows, phân tích ranh giới ảnh hưởng và 3 phương án xử lý đề xuất.
