@@ -77,30 +77,30 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ### 📋 Nhóm Việc 1: Mở Rộng Backend GitCliMutator, Bộ Truy Vấn & RPC Protocol (Kèm Test Độc Lập)
 *Tài liệu tham chiếu thiết kế*: [01_Staging_Backend_And_Mutator_Design.md](../../02_design/phase3/01_Staging_Backend_And_Mutator_Design.md).
 
-- [ ] **Nhiệm vụ 1.1: Hiện thực cơ chế tương thích đa phiên bản Git & các lệnh Staging trong `src/extension/mutator/gitCliMutator.ts`**
-  - [ ] **1.1.0**: Hiện thực hàm thăm dò phiên bản một lần `canUseRestore()`: Thực thi `git version`, bóc tách chỉ số Major/Minor (Git >= 2.23), lưu cờ `supportsRestore` vào in-memory cache để không tốn thêm tiến trình ở các lần gọi sau.
-  - [ ] **1.1.1**: Hiện thực hàm `stageFile(filePath: string)`: Gọi lệnh `git add -- <filePath>`, bảo đảm ký tự phân tách `--` luôn hiện diện để ngăn nhầm lẫn đường dẫn với nhánh. Tương thích 100% mọi phiên bản Git.
-  - [ ] **1.1.2**: Hiện thực hàm `unstageFile(filePath: string)`: Rẽ nhánh an toàn theo phiên bản Git:
+- [x] **Nhiệm vụ 1.1: Hiện thực cơ chế tương thích đa phiên bản Git & các lệnh Staging trong `src/extension/mutator/gitCliMutator.ts`**
+  - [x] **1.1.0**: Hiện thực hàm thăm dò phiên bản một lần `canUseRestore()`: Thực thi `git version`, bóc tách chỉ số Major/Minor (Git >= 2.23), lưu cờ `supportsRestore` vào in-memory cache để không tốn thêm tiến trình ở các lần gọi sau.
+  - [x] **1.1.1**: Hiện thực hàm `stageFile(filePath: string)`: Gọi lệnh `git add -- <filePath>`, bảo đảm ký tự phân tách `--` luôn hiện diện để ngăn nhầm lẫn đường dẫn với nhánh. Tương thích 100% mọi phiên bản Git.
+  - [x] **1.1.2**: Hiện thực hàm `unstageFile(filePath: string)`: Rẽ nhánh an toàn theo phiên bản Git:
     - Nếu Git hỗ trợ `restore` (Git >= 2.23): Gọi `git restore --staged -- <filePath>`.
     - Nếu Git cũ (Git < 2.23): Fallback gọi `git reset -- <filePath>` (an toàn cho cả tệp tracked lẫn untracked vừa add).
-  - [ ] **1.1.3**: Hiện thực hàm `stageAll()`: Gọi lệnh `git add -A` đưa toàn bộ tệp mới, tệp sửa đổi và tệp xóa vào chỉ mục. Tương thích 100% mọi phiên bản Git.
-  - [ ] **1.1.4**: Hiện thực hàm `unstageAll()`: Rẽ nhánh an toàn:
+  - [x] **1.1.3**: Hiện thực hàm `stageAll()`: Gọi lệnh `git add -A` đưa toàn bộ tệp mới, tệp sửa đổi và tệp xóa vào chỉ mục. Tương thích 100% mọi phiên bản Git.
+  - [x] **1.1.4**: Hiện thực hàm `unstageAll()`: Rẽ nhánh an toàn:
     - Nếu Git hỗ trợ `restore` (Git >= 2.23): Gọi `git restore --staged .`.
     - Nếu Git cũ (Git < 2.23): Fallback gọi `git reset`.
-  - [ ] **1.1.5**: Hiện thực hàm `discardFileChanges(filePath: string, isUntracked: boolean)`:
+  - [x] **1.1.5**: Hiện thực hàm `discardFileChanges(filePath: string, isUntracked: boolean)`:
     - Nếu `isUntracked` là true: Gọi `git clean -f -- <filePath>` (tương thích mọi phiên bản Git).
     - Nếu `isUntracked` là false (tệp tracked): Rẽ nhánh:
       - Git >= 2.23: Gọi `git restore -- <filePath>`.
       - Git < 2.23: Fallback gọi `git checkout -- <filePath>`.
-  - [ ] **1.1.6**: Hiện thực hàm `discardAllChanges()`: Thực thi tuần tự 2 bước:
+  - [x] **1.1.6**: Hiện thực hàm `discardAllChanges()`: Thực thi tuần tự 2 bước:
     - Bước 1: Rẽ nhánh khôi phục tệp tracked: gọi `git restore .` (Git >= 2.23) hoặc `git checkout -- .` (Git < 2.23). Dừng ngay nếu bước 1 thất bại.
     - Bước 2: Gọi `git clean -fd` xóa sạch tệp và thư mục chưa theo dõi.
 
-- [ ] **Nhiệm vụ 1.2: Nâng cấp hàm `commit` trong `src/extension/mutator/gitCliMutator.ts`**
-  - [ ] **1.2.1**: Mở rộng tham số nhận diện cờ sửa đổi commit gần nhất `--amend` mà không tạo commit mới.
-  - [ ] **1.2.2**: Mở rộng tham số nhận diện cờ ký số bảo mật `-S` (GPG/SSH Commit Signing).
-  - [ ] **1.2.3**: Phân tách rõ ràng giữa dòng tiêu đề (Summary) và khối mô tả mở rộng (Description): Truyền 2 cờ `-m` độc lập vào tiến trình `git.exe` để Git tự động chèn dòng trống ngăn cách chuẩn quy ước.
-  - [ ] **1.2.4**: Bắt và chuẩn hóa các thông báo lỗi đặc thù: Xung đột khóa tệp `.git/index.lock`, lỗi thiếu danh tính tác giả (`user.name` / `user.email`).
+- [x] **Nhiệm vụ 1.2: Nâng cấp hàm `commit` trong `src/extension/mutator/gitCliMutator.ts`**
+  - [x] **1.2.1**: Mở rộng tham số nhận diện cờ sửa đổi commit gần nhất `--amend` mà không tạo commit mới.
+  - [x] **1.2.2**: Mở rộng tham số nhận diện cờ ký số bảo mật `-S` (GPG/SSH Commit Signing).
+  - [x] **1.2.3**: Phân tách rõ ràng giữa dòng tiêu đề (Summary) và khối mô tả mở rộng (Description): Truyền 2 cờ `-m` độc lập vào tiến trình `git.exe` để Git tự động chèn dòng trống ngăn cách chuẩn quy ước.
+  - [x] **1.2.4**: Bắt và chuẩn hóa các thông báo lỗi đặc thù: Xung đột khóa tệp `.git/index.lock`, lỗi thiếu danh tính tác giả (`user.name` / `user.email`).
 
 - [ ] **Nhiệm vụ 1.3: Xây dựng bộ truy vấn trạng thái kho `src/backend/queries/workspaceStatus.ts`**
   - [ ] **1.3.1**: Khởi tạo hàm thực thi `git status --porcelain=v2 --branch -uall -c core.quotepath=false` để lấy toàn bộ dữ liệu trạng thái phẳng UTF-8 không mã hóa octal.
@@ -343,3 +343,4 @@ Quá trình lập trình được tiến hành theo thứ tự 5 bước khép k
 - **2026-10-15**: Khởi tạo tài liệu tiến độ Chặng 3.1.
 - **2026-10-15**: Chi tiết hóa toàn diện tài liệu tiến độ Chặng 3.1: Bổ sung bảng kiểm kê 16 tệp tin tác động, phân rã 28 nhiệm vụ kỹ thuật con từng bước, gắn liên kết trực tiếp tới toàn bộ 5 tài liệu thiết kế.
 - **2026-10-15**: Tích hợp các bộ kiểm thử độc lập cho từng nhóm nhiệm vụ riêng biệt (bổ sung 11 tệp unit/component/integration test tương ứng với từng tầng kỹ thuật), cập nhật lộ trình thực thi theo chuẩn TDD khép kín.
+- **2026-10-15**: Hoàn thành Nhiệm vụ 1.1 (6 lệnh staging + cơ chế thăm dò phiên bản `canUseRestore` và fallback đa phiên bản Git) và Nhiệm vụ 1.2 (nâng cấp `commit` hỗ trợ `--amend`, `-S`, tách summary/description, chuẩn hóa lỗi `index.lock`/danh tính). Kiểm thử backend 11/11 pass. Báo cáo nghiệm thu: `docs/04_reports/phase3/001_phase3_1_staging_mutator_report.md`.

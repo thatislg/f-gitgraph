@@ -77,6 +77,35 @@ export class GitCliMutator {
     return this.supportsRestore;
   }
 
+  /**
+   * Chuẩn hóa các thông báo lỗi đặc thù của Git thành thông điệp thân thiện cho người dùng.
+   * Nhận diện xung đột khóa `.git/index.lock` và lỗi thiếu danh tính tác giả (user.name/user.email).
+   */
+  private normalizeError(result: MutatorResult): MutatorResult {
+    if (result.ok) {
+      return result;
+    }
+    const { stderr } = result;
+    if (stderr.includes("index.lock")) {
+      return {
+        ...result,
+        stderr:
+          "Kho mã nguồn đang bị khóa bởi một tiến trình Git khác. Vui lòng thử lại sau vài giây hoặc kiểm tra terminal"
+      };
+    }
+    if (
+      stderr.includes("Please tell me who you are") ||
+      stderr.includes("unable to auto-detect email address")
+    ) {
+      return {
+        ...result,
+        stderr:
+          "Chưa cấu hình danh tính tác giả (user.name / user.email). Vui lòng cấu hình trước khi commit"
+      };
+    }
+    return result;
+  }
+
   async commit(
     message: string,
     options: {
@@ -99,7 +128,7 @@ export class GitCliMutator {
     if (options.all) {
       args.push("-a");
     }
-    return this.run(args);
+    return this.normalizeError(await this.run(args));
   }
 
   /** Đưa một tệp vào Staging Index; `--` ngăn nhầm lẫn đường dẫn với nhánh/cờ (tương thích mọi bản Git). */
