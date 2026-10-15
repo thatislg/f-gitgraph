@@ -5,7 +5,7 @@ Tài liệu này đặc tả chi tiết kiến trúc tầng Backend, các thao t
 > [!NOTE]
 > Mọi nội dung trong tài liệu này tuân thủ nguyên tắc: thiết kế bằng ngôn ngữ tự nhiên (**Design by Word**), tập trung vào kiến trúc hệ thống, luồng dữ liệu, quy chuẩn an toàn và hành vi tương tác; tuyệt đối không sử dụng mã nguồn mẫu dưới bất kỳ hình thức nào.
 >
-> 📌 **GitHub Tracking**: [Epic #12 - Backend Mutator, Status & RPC](https://github.com/thatislg/f-gitgraph/issues/12) (Gồm 10 tasks con: [#13](https://github.com/thatislg/f-gitgraph/issues/13) đến [#22](https://github.com/thatislg/f-gitgraph/issues/22))
+> 📌 **GitHub Tracking**: [Epic #12 - Backend Mutator, Status &amp; RPC](https://github.com/thatislg/f-gitgraph/issues/12) (Gồm 10 tasks con: [#13](https://github.com/thatislg/f-gitgraph/issues/13) đến [#22](https://github.com/thatislg/f-gitgraph/issues/22))
 
 ---
 
@@ -95,14 +95,14 @@ Tất cả các phương thức trong bộ điều phối `GitCliMutator` đư�
    - Kết quả này được lưu trữ trong bộ nhớ đệm (In-Memory Cache) của đối tượng điều phối, bảo đảm các thao tác về sau không tốn thêm bất kỳ tiến trình kiểm tra phiên bản nào.
 3. **Bảng Đối Chiếu Lệnh Hiện Đại vs Lệnh Fallback Cổ Điển**:
 
-| Thao Tác Nghiệp Vụ | Phiên Bản Hiện Đại (Git $\ge$ 2.23) | Fallback Cổ Điển (Mọi Phiên Bản Git) | Ghi Chú Kỹ Thuật & An Toàn |
-| :--- | :--- | :--- | :--- |
-| **Unstage 1 tệp** | `git restore --staged -- <đường_dẫn>` | `git reset -- <đường_dẫn>` | `git reset -- <đường_dẫn>` không bị deprecated, xử lý tốt cả tệp tracked lẫn tệp untracked vừa stage. |
-| **Unstage toàn bộ** | `git restore --staged .` | `git reset` | Đưa toàn bộ Staging Index về lại HEAD mà không làm ảnh hưởng đến tệp trên đĩa. |
-| **Discard 1 tệp đã track** | `git restore -- <đường_dẫn>` | `git checkout -- <đường_dẫn>` | Khôi phục nội dung tệp về trạng thái commit gần nhất. |
-| **Discard toàn bộ tệp đã track** | `git restore .` | `git checkout -- .` | Khôi phục toàn bộ các tệp đã theo dõi trên cây thư mục. |
-| **Discard tệp untracked** | `git clean -f -- <đường_dẫn>` | `git clean -f -- <đường_dẫn>` | Dùng chung cho mọi phiên bản Git (có từ phiên bản Git đầu tiên). |
-| **Stage 1 tệp / Stage All** | `git add -- <đường_dẫn>` / `git add -A` | `git add -- <đường_dẫn>` / `git add -A` | Dùng chung cho mọi phiên bản Git, không cần fallback. |
+| Thao Tác Nghiệp Vụ                       | Phiên Bản Hiện Đại (Git $\ge$ 2.23)      | Fallback Cổ Điển (Mọi Phiên Bản Git)      | Ghi Chú Kỹ Thuật & An Toàn                                                                                        |
+| :------------------------------------------ | :---------------------------------------------- | :---------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| **Unstage 1 tệp**                    | `git restore --staged -- <đường_dẫn>`     | `git reset -- <đường_dẫn>`                | `git reset -- <đường_dẫn>` không bị deprecated, xử lý tốt cả tệp tracked lẫn tệp untracked vừa stage. |
+| **Unstage toàn bộ**                 | `git restore --staged .`                      | `git reset`                                   | Đưa toàn bộ Staging Index về lại HEAD mà không làm ảnh hưởng đến tệp trên đĩa.                      |
+| **Discard 1 tệp đã track**         | `git restore -- <đường_dẫn>`              | `git checkout -- <đường_dẫn>`             | Khôi phục nội dung tệp về trạng thái commit gần nhất.                                                        |
+| **Discard toàn bộ tệp đã track** | `git restore .`                               | `git checkout -- .`                           | Khôi phục toàn bộ các tệp đã theo dõi trên cây thư mục.                                                  |
+| **Discard tệp untracked**            | `git clean -f -- <đường_dẫn>`             | `git clean -f -- <đường_dẫn>`             | Dùng chung cho mọi phiên bản Git (có từ phiên bản Git đầu tiên).                                           |
+| **Stage 1 tệp / Stage All**          | `git add -- <đường_dẫn>` / `git add -A` | `git add -- <đường_dẫn>` / `git add -A` | Dùng chung cho mọi phiên bản Git, không cần fallback.                                                           |
 
 ---
 
@@ -134,13 +134,13 @@ git status --porcelain=v2 --branch --untracked-files=all -c core.quotepath=false
 
 Bảng phân tích mục đích kỹ thuật và lý do bắt buộc của từng cờ tham số:
 
-| Cờ Tham Số | Mục Đích Kỹ Thuật Chi Tiết | Hậu Quả Nghiêm Trọng Nếu Bỏ Qua |
-| :--- | :--- | :--- |
-| `--porcelain=v2` | Định dạng chuẩn máy thế hệ 2 của Git. Cung cấp cấu trúc dữ liệu phẳng có phân định trường rõ ràng, ổn định tuyệt đối giữa mọi bản phát hành Git, không phụ thuộc ngôn ngữ hiển thị hệ điều hành (`LC_ALL`). | Dùng bản v1 hoặc lệnh mặc định sẽ phụ thuộc ngôn ngữ (ví dụ: tiếng Nhật, tiếng Pháp) làm hỏng hoàn toàn parser. |
-| `--branch` | Xuất các dòng siêu dữ liệu tiêu đề (`#`) chứa tên nhánh hiện tại, định danh commit HEAD, tên nhánh remote tracking (`upstream`), và số lượng commit lệch (`ahead`/`behind`). | Phải spawn thêm 2 tiến trình độc lập (`git branch` và `git rev-list`) làm tăng độ trễ thêm từ 60ms đến 150ms trên Windows. |
-| `--untracked-files=all` | Liệt kê chi tiết từng tệp con riêng lẻ bên trong các thư mục chưa theo dõi (thay vì chỉ gom lại thành 1 dòng tên thư mục gốc như chế độ mặc định). | Bảng Staging UI không thể hiển thị cây tệp con chi tiết và người dùng không thể chọn stage từng tệp con trong thư mục mới. |
-| `-c core.quotepath=false` | Ép tiến trình Git giữ nguyên chuỗi UTF-8 nguyên bản cho tên tệp có dấu tiếng Việt, ký tự Kanji/Hanja hoặc ký tự đặc biệt. | Tên tệp tiếng Việt có dấu sẽ bị mã hóa thành chuỗi octal khó đọc (ví dụ `"\304\221\306\260\341\273\235ng.ts"`), gây lỗi hiển thị và lỗi đường dẫn khi gọi lệnh stage. |
-| `-z` | Sử dụng byte NUL (`\0`, mã ASCII số 0) làm ký tự phân tách bản ghi thay cho ký tự ngắt dòng `\n`. | Nếu tệp tin có tên chứa ký tự ngắt dòng hoặc ký tự tab, parser dùng `\n` sẽ bị gãy dòng, làm sai lệch cấu trúc dữ liệu toàn bộ kho. |
+| Cờ Tham Số                | Mục Đích Kỹ Thuật Chi Tiết                                                                                                                                                                                                                          | Hậu Quả Nghiêm Trọng Nếu Bỏ Qua                                                                                                                                                                |
+| :-------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--porcelain=v2`          | Định dạng chuẩn máy thế hệ 2 của Git. Cung cấp cấu trúc dữ liệu phẳng có phân định trường rõ ràng, ổn định tuyệt đối giữa mọi bản phát hành Git, không phụ thuộc ngôn ngữ hiển thị hệ điều hành (`LC_ALL`). | Dùng bản v1 hoặc lệnh mặc định sẽ phụ thuộc ngôn ngữ (ví dụ: tiếng Nhật, tiếng Pháp) làm hỏng hoàn toàn parser.                                                                |
+| `--branch`                | Xuất các dòng siêu dữ liệu tiêu đề (`#`) chứa tên nhánh hiện tại, định danh commit HEAD, tên nhánh remote tracking (`upstream`), và số lượng commit lệch (`ahead`/`behind`).                                               | Phải spawn thêm 2 tiến trình độc lập (`git branch` và `git rev-list`) làm tăng độ trễ thêm từ 60ms đến 150ms trên Windows.                                                     |
+| `--untracked-files=all`   | Liệt kê chi tiết từng tệp con riêng lẻ bên trong các thư mục chưa theo dõi (thay vì chỉ gom lại thành 1 dòng tên thư mục gốc như chế độ mặc định).                                                                           | Bảng Staging UI không thể hiển thị cây tệp con chi tiết và người dùng không thể chọn stage từng tệp con trong thư mục mới.                                                       |
+| `-c core.quotepath=false` | Ép tiến trình Git giữ nguyên chuỗi UTF-8 nguyên bản cho tên tệp có dấu tiếng Việt, ký tự Kanji/Hanja hoặc ký tự đặc biệt.                                                                                                           | Tên tệp tiếng Việt có dấu sẽ bị mã hóa thành chuỗi octal khó đọc (ví dụ `"\304\221\306\260\341\273\235ng.ts"`), gây lỗi hiển thị và lỗi đường dẫn khi gọi lệnh stage. |
+| `-z`                      | Sử dụng byte NUL (`\0`, mã ASCII số 0) làm ký tự phân tách bản ghi thay cho ký tự ngắt dòng `\n`.                                                                                                                                       | Nếu tệp tin có tên chứa ký tự ngắt dòng hoặc ký tự tab, parser dùng `\n` sẽ bị gãy dòng, làm sai lệch cấu trúc dữ liệu toàn bộ kho.                                       |
 
 ---
 
@@ -149,14 +149,18 @@ Bảng phân tích mục đích kỹ thuật và lý do bắt buộc của từn
 Khi sử dụng cờ `-z`, toàn bộ đầu ra từ tiến trình Git là một luồng byte liên tục được phân tách bằng byte NUL (`\0`). Mỗi bản ghi bắt đầu bằng một ký tự nhận diện loại bản ghi duy nhất tại vị trí đầu dòng:
 
 #### 1. Nhóm Bản Ghi Siêu Dữ Liệu Nhánh (Headers - Bắt Đầu Bằng `#`)
+
 Xuất hiện ở phần đầu của luồng dữ liệu, phân cách các trường bằng dấu cách trắng:
+
 - `# branch.oid <committish>`: Chứa mã băm SHA-1 (40 ký tự hex) của commit HEAD hiện tại. Trong trường hợp kho hoàn toàn mới chưa có commit nào (Unborn branch / Initial commit), giá trị này sẽ hiển thị là chuỗi `(initial)`.
 - `# branch.head <branch-name>`: Tên của nhánh hiện tại đang được trỏ tới. Nếu con trỏ HEAD đang ở trạng thái tách rời (Detached HEAD), giá trị sẽ hiển thị là `(detached)`.
 - `# branch.upstream <upstream-name>`: Tên của nhánh từ xa đang theo dõi (ví dụ: `origin/main`). Nếu nhánh cục bộ chưa được cấu hình upstream tracking, dòng này sẽ hoàn toàn vắng mặt.
 - `# branch.ab +<ahead> -<behind>`: Độ lệch số lượng commit giữa nhánh cục bộ và nhánh từ xa (ví dụ `+2 -1` nghĩa là cục bộ đi trước 2 commit và đi sau 1 commit). Nếu không có upstream, dòng này sẽ hoàn toàn vắng mặt.
 
 #### 2. Nhóm Bản Ghi Tệp Biến Động Thông Thường (Bắt Đầu Bằng `1`)
+
 Biểu diễn các tệp tin đã được Git theo dõi từ trước và có thay đổi nội dung, quyền thực thi, hoặc bị xóa:
+
 - Cấu trúc trường: `1 <XY> <sub> <mH> <mI> <mW> <hH> <hI> <path>`
 - Chi tiết 9 trường dữ liệu được phân cách bằng dấu cách trắng:
   1. Trường 1 (`1`): Định danh bản ghi loại 1 (Ordinary changed entry).
@@ -170,7 +174,9 @@ Biểu diễn các tệp tin đã được Git theo dõi từ trước và có t
   9. Trường 9 (`<path>`): Đường dẫn tương đối của tệp tin tính từ gốc kho làm việc. Kết thúc bằng byte NUL (`\0`).
 
 #### 3. Nhóm Bản Ghi Tệp Đổi Tên Hoặc Sao Chép (Bắt Đầu Bằng `2`)
+
 Biểu diễn các tệp tin được Git nhận diện là đã đổi tên đường dẫn hoặc sao chép từ một tệp khác:
+
 - Cấu trúc trường: `2 <XY> <sub> <mH> <mI> <mW> <hH> <hI> <Xscore> <path><NUL><origPath>`
 - Điểm đặc thù sống còn của loại 2: Bản ghi này chiếm **hai phân đoạn NUL liên tiếp**:
   1. Phân đoạn thứ nhất: Chứa các trường thông tin từ mã `2` đến hết đường dẫn mới `<path>`. Trường `<Xscore>` thể hiện loại biến đổi và độ tương đồng phần trăm (ví dụ: `R100` là đổi tên giữ nguyên 100% nội dung, `R92` là đổi tên kèm chỉnh sửa 8% nội dung, `C100` là sao chép tệp).
@@ -178,12 +184,15 @@ Biểu diễn các tệp tin được Git nhận diện là đã đổi tên đ�
   3. *Quy tắc bóc tách*: Khi parser gặp bản ghi bắt đầu bằng ký tự `2`, con trỏ duyệt mảng NUL bắt buộc phải đọc tiếp phần tử ngay sau đó để lấy `origPath` trước khi chuyển sang bản ghi kế tiếp.
 
 #### 4. Nhóm Bản Ghi Tệp Xung Đột Chưa Hợp Nhất (Bắt Đầu Bằng `u`)
+
 Biểu diễn các tệp tin đang bị xung đột (Merge Conflict / Rebase Conflict / Cherry-pick Conflict) chưa được giải quyết:
+
 - Cấu trúc trường: `u <XY> <sub> <m1> <m2> <m3> <mW> <h1> <h2> <h3> <path>`
 - Chi tiết các trường: Chứa 3 mốc quyền tệp (`<m1>`, `<m2>`, `<m3>`) và 3 mã băm SHA (`<h1>`, `<h2>`, `<h3>`) đại diện cho 3 giai đoạn của quá trình 3-way merge: Giai đoạn 1 là tổ tiên chung (Ancestor/Merge Base), Giai đoạn 2 là phiên bản của nhánh hiện tại (`ours`), Giai đoạn 3 là phiên bản của nhánh đang gộp vào (`theirs`).
 - Cặp mã `<XY>` xác định rõ kịch bản xung đột: `UU` (cả hai bên cùng sửa đổi), `AA` (cả hai bên cùng thêm mới tệp cùng tên), `UD` (nhánh mình sửa, nhánh kia xóa), `DU` (nhánh mình xóa, nhánh kia sửa).
 
 #### 5. Nhóm Bản Ghi Tệp Chưa Theo Dõi (Bắt Đầu Bằng `?`) & Bị Bỏ Qua (Bắt Đầu Bằng `!`)
+
 - Bản ghi tệp chưa theo dõi (`?`): Định dạng `? <path>`. Đại diện cho các tệp hoàn toàn mới trên đĩa làm việc chưa từng được đưa vào Git Index.
 - Bản ghi tệp bị bỏ qua (`!`): Định dạng `! <path>`. Đại diện cho các tệp bị loại trừ bởi quy tắc `.gitignore` (chỉ xuất hiện khi truyền cờ `--ignored`).
 
@@ -193,22 +202,22 @@ Biểu diễn các tệp tin đang bị xung đột (Merge Conflict / Rebase Con
 
 Trong mọi bản ghi loại `1`, `2` và `u`, cặp ký tự `XY` phản ánh trạng thái hai tầng của tệp tin. Dưới đây là ma trận ánh xạ nghiệp vụ toàn diện cho mọi tình huống:
 
-| Mã `XY` | Vị Trí X (Staged) | Vị Trí Y (Unstaged) | Bản Ghi Được Đưa Vào Phân Khu Nào? | Hành Vi Hiển Thị & Quy Tắc Nghiệp Vụ |
-| :---: | :---: | :---: | :--- | :--- |
-| `M.` | `M` | `.` | Đưa vào danh sách `stagedFiles` (`status: M`) | Tệp đã được sửa đổi và đưa trọn vẹn vào Staging. Working tree hoàn toàn sạch sẽ. |
-| `.M` | `.` | `M` | Đưa vào danh sách `unstagedFiles` (`status: M`) | Tệp đã có trong commit trước, bị sửa đổi trên đĩa nhưng chưa đưa vào Staging. |
-| **`MM`** | **`M`** | **`M`** | **Tách đôi**: Đưa vào CẢ HAI danh sách `stagedFiles` (`M`) và `unstagedFiles` (`M`) | **Tình huống kép**: Lập trình viên đã sửa tệp và bấm Stage một lần, sau đó lại tiếp tục gõ thêm mã mới trên tệp đó mà chưa Stage lại. Tệp xuất hiện đồng thời ở cả 2 bảng trên giao diện. |
-| `A.` | `A` | `.` | Đưa vào danh sách `stagedFiles` (`status: A`) | Tệp hoàn toàn mới được đưa vào Staging lần đầu tiên. |
-| **`AM`** | **`A`** | **`M`** | **Tách đôi**: Đưa vào `stagedFiles` (`A`) và `unstagedFiles` (`M`) | Tệp mới đã được Stage, nhưng sau đó lập trình viên lại chỉnh sửa tiếp nội dung trên đĩa. |
-| `AD` | `A` | `D` | **Tách đôi**: Đưa vào `stagedFiles` (`A`) và `unstagedFiles` (`D`) | Tệp mới đã được Stage, nhưng sau đó bị xóa vật lý trên đĩa. |
-| `D.` | `D` | `.` | Đưa vào danh sách `stagedFiles` (`status: D`) | Tệp đã bị xóa và thao tác xóa đã được đưa vào Staging. |
-| `.D` | `.` | `D` | Đưa vào danh sách `unstagedFiles` (`status: D`) | Tệp bị xóa vật lý trên đĩa làm việc nhưng chưa thực hiện stage thao tác xóa. |
-| `R.` | `R` | `.` | Đưa vào danh sách `stagedFiles` (`status: R`, kèm `oldPath`) | Tệp đã được đổi tên hoặc di chuyển thư mục và đã đưa vào Staging. |
-| **`RM`** | **`R`** | **`M`** | **Tách đôi**: Đưa vào `stagedFiles` (`R`) và `unstagedFiles` (`M`) | Tệp đổi tên đã được Stage, nhưng sau đó lại có thêm sửa đổi nội dung mới trên đĩa. |
-| `RD` | `R` | `D` | **Tách đôi**: Đưa vào `stagedFiles` (`R`) và `unstagedFiles` (`D`) | Tệp đổi tên đã Stage nhưng sau đó bị xóa bỏ trên đĩa. |
-| `?` | *(Không)* | `U` | Đưa vào danh sách `unstagedFiles` (`status: U`, `isUntracked: true`) | Tệp mới hoàn toàn chưa từng được Git quản lý. |
-| `UU`, `AA` | `U` | `U` | Đưa vào danh sách `conflictedFiles` | Xung đột hợp nhất 2 chiều (cả 2 nhánh cùng sửa hoặc cùng tạo mới). |
-| `UD`, `DU` | `U` | `U` | Đưa vào danh sách `conflictedFiles` | Xung đột sửa/xóa (một nhánh xóa tệp trong khi nhánh kia chỉnh sửa). |
+|    Mã `XY`    | Vị Trí X (Staged) | Vị Trí Y (Unstaged) | Bản Ghi Được Đưa Vào Phân Khu Nào?                                                                | Hành Vi Hiển Thị & Quy Tắc Nghiệp Vụ                                                                                                                                                                                               |
+| :--------------: | :-----------------: | :-------------------: | :--------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|      `M.`      |        `M`        |         `.`         | Đưa vào danh sách `stagedFiles` (`status: M`)                                                      | Tệp đã được sửa đổi và đưa trọn vẹn vào Staging. Working tree hoàn toàn sạch sẽ.                                                                                                                                      |
+|      `.M`      |        `.`        |         `M`         | Đưa vào danh sách `unstagedFiles` (`status: M`)                                                    | Tệp đã có trong commit trước, bị sửa đổi trên đĩa nhưng chưa đưa vào Staging.                                                                                                                                          |
+| **`MM`** |   **`M`**   |    **`M`**    | **Tách đôi**: Đưa vào CẢ HAI danh sách `stagedFiles` (`M`) và `unstagedFiles` (`M`) | **Tình huống kép**: Lập trình viên đã sửa tệp và bấm Stage một lần, sau đó lại tiếp tục gõ thêm mã mới trên tệp đó mà chưa Stage lại. Tệp xuất hiện đồng thời ở cả 2 bảng trên giao diện. |
+|      `A.`      |        `A`        |         `.`         | Đưa vào danh sách `stagedFiles` (`status: A`)                                                      | Tệp hoàn toàn mới được đưa vào Staging lần đầu tiên.                                                                                                                                                                       |
+| **`AM`** |   **`A`**   |    **`M`**    | **Tách đôi**: Đưa vào `stagedFiles` (`A`) và `unstagedFiles` (`M`)                    | Tệp mới đã được Stage, nhưng sau đó lập trình viên lại chỉnh sửa tiếp nội dung trên đĩa.                                                                                                                            |
+|      `AD`      |        `A`        |         `D`         | **Tách đôi**: Đưa vào `stagedFiles` (`A`) và `unstagedFiles` (`D`)                    | Tệp mới đã được Stage, nhưng sau đó bị xóa vật lý trên đĩa.                                                                                                                                                             |
+|      `D.`      |        `D`        |         `.`         | Đưa vào danh sách `stagedFiles` (`status: D`)                                                      | Tệp đã bị xóa và thao tác xóa đã được đưa vào Staging.                                                                                                                                                                   |
+|      `.D`      |        `.`        |         `D`         | Đưa vào danh sách `unstagedFiles` (`status: D`)                                                    | Tệp bị xóa vật lý trên đĩa làm việc nhưng chưa thực hiện stage thao tác xóa.                                                                                                                                             |
+|      `R.`      |        `R`        |         `.`         | Đưa vào danh sách `stagedFiles` (`status: R`, kèm `oldPath`)                                    | Tệp đã được đổi tên hoặc di chuyển thư mục và đã đưa vào Staging.                                                                                                                                                     |
+| **`RM`** |   **`R`**   |    **`M`**    | **Tách đôi**: Đưa vào `stagedFiles` (`R`) và `unstagedFiles` (`M`)                    | Tệp đổi tên đã được Stage, nhưng sau đó lại có thêm sửa đổi nội dung mới trên đĩa.                                                                                                                                |
+|      `RD`      |        `R`        |         `D`         | **Tách đôi**: Đưa vào `stagedFiles` (`R`) và `unstagedFiles` (`D`)                    | Tệp đổi tên đã Stage nhưng sau đó bị xóa bỏ trên đĩa.                                                                                                                                                                     |
+|      `?`      |    *(Không)*    |         `U`         | Đưa vào danh sách `unstagedFiles` (`status: U`, `isUntracked: true`)                             | Tệp mới hoàn toàn chưa từng được Git quản lý.                                                                                                                                                                                 |
+|  `UU`, `AA`  |        `U`        |         `U`         | Đưa vào danh sách `conflictedFiles`                                                                  | Xung đột hợp nhất 2 chiều (cả 2 nhánh cùng sửa hoặc cùng tạo mới).                                                                                                                                                          |
+|  `UD`, `DU`  |        `U`        |         `U`         | Đưa vào danh sách `conflictedFiles`                                                                  | Xung đột sửa/xóa (một nhánh xóa tệp trong khi nhánh kia chỉnh sửa).                                                                                                                                                           |
 
 ---
 
@@ -238,56 +247,61 @@ Header    Entry     Entry    Entry    Entry    (Skip)
 Quy trình tuần tự chi tiết từng bước:
 
 #### Bước 1: Khởi Tạo Cấu Trúc Trả Về Mặc Định
+
 - Khởi tạo danh sách `stagedFiles: StagedFileRecord[] = []`.
 - Khởi tạo danh sách `unstagedFiles: UnstagedFileRecord[] = []`.
 - Khởi tạo đối tượng nhánh: `head = ""`, `upstream = undefined`, `ahead = 0`, `behind = 0`.
 - Khởi tạo biến chỉ mục duyệt: `index = 0`.
 
 #### Bước 2: Phân Tách Mảng Token Theo Ký Tự NUL
+
 - Tách toàn bộ chuỗi đầu ra nhận được từ tiến trình Git thành mảng các chuỗi token dựa trên ký tự phân tách `\0`.
 - Lưu ý: Phần tử cuối cùng của mảng thường là chuỗi rỗng do ký tự NUL kết thúc stream, loại bỏ phần tử rỗng này.
 
 #### Bước 3: Vòng Lặp Máy Trạng Thái Duyệt Mảng Token
+
 Khi `index < tokens.length`, lấy chuỗi `token = tokens[index]`. Nếu `token` rỗng, tăng `index` và chuyển tiếp. Kiểm tra ký tự đầu tiên của `token`:
 
 1. **Trường hợp ký tự đầu là `#` (Siêu dữ liệu nhánh)**:
+
    - Tách chuỗi `token` bằng dấu cách trắng.
    - Nếu phần tử thứ hai là `branch.oid`: Lưu mã commit HEAD. Nếu bằng `(initial)` nghĩa là kho chưa có commit nào.
    - Nếu phần tử thứ hai là `branch.head`: Lưu tên nhánh hiện tại vào `head`. Nếu bằng `(detached)` nghĩa là đang ở trạng thái Detached HEAD.
    - Nếu phần tử thứ hai là `branch.upstream`: Lưu tên nhánh theo dõi từ xa vào `upstream`.
    - Nếu phần tử thứ hai là `branch.ab`: Tách số đi trước `+<ahead>` và số đi sau `-<behind>`, chuyển đổi thành số nguyên dương và gán vào `ahead` và `behind`.
    - Tăng `index` lên 1.
-
 2. **Trường hợp ký tự đầu là `1` (Tệp biến động thông thường)**:
+
    - Tìm vị trí của 8 dấu cách trắng đầu tiên để bóc tách 8 trường cố định: mã loại (`1`), mã trạng thái (`XY`), trạng thái submodule (`<sub>`), và 5 trường mode/hash.
    - Toàn bộ phần còn lại từ sau dấu cách trắng thứ 8 cho đến hết chuỗi `token` chính là đường dẫn tệp (`path`). Cách bóc tách này bảo đảm nếu tên tệp có chứa dấu cách trắng ở giữa, đường dẫn vẫn được giữ nguyên vẹn 100%.
    - Lấy ký tự `X = XY[0]` và ký tự `Y = XY[1]`:
      - *Xử lý Staged*: Nếu `X !== "."`, thêm một bản ghi vào `stagedFiles` với `path`, `status = X` (có thể là `M`, `A`, hoặc `D`).
      - *Xử lý Unstaged*: Nếu `Y !== "."`, thêm một bản ghi vào `unstagedFiles` với `path`, `status = Y` (có thể là `M` hoặc `D`), `isUntracked = false`.
    - Tăng `index` lên 1.
-
 3. **Trường hợp ký tự đầu là `2` (Tệp đổi tên hoặc sao chép)**:
+
    - Tương tự bản ghi loại 1, bóc tách 9 trường cố định đầu tiên bằng dấu cách trắng để lấy mã `XY`, độ tương đồng `<Xscore>`, và đường dẫn mới `<path>`.
    - **Xử lý đặc thù hai phân đoạn**: Tăng chỉ số duyệt lên 1 bước (`index = index + 1`). Chuỗi tại `tokens[index]` kế tiếp chính là đường dẫn gốc ban đầu (`origPath`).
    - Lấy ký tự `X = XY[0]` và ký tự `Y = XY[1]`:
      - *Xử lý Staged*: Nếu `X !== "."`, thêm một bản ghi vào `stagedFiles` với `path`, `status = "R"`, và gán trường `oldPath = origPath`.
      - *Xử lý Unstaged*: Nếu `Y !== "."`, thêm một bản ghi vào `unstagedFiles` với `path`, `status = Y`, `isUntracked = false`.
    - Tăng `index` lên 1.
-
 4. **Trường hợp ký tự đầu là `?` (Tệp chưa theo dõi)**:
+
    - Cắt bỏ 2 ký tự đầu (`"? "`), toàn bộ phần còn lại của `token` là đường dẫn tệp `path`.
    - Thêm bản ghi vào `unstagedFiles` với `path`, `status = "U"`, và đặt cờ `isUntracked = true`.
    - Tăng `index` lên 1.
-
 5. **Trường hợp ký tự đầu là `u` (Tệp xung đột)**:
+
    - Bóc tách lấy mã `XY` và đường dẫn `path`.
    - Đưa vào danh sách tệp xung đột để giao diện hiển thị cảnh báo đỏ và kích hoạt trình giải quyết xung đột Merge Conflict Resolver.
    - Tăng `index` lên 1.
-
 6. **Trường hợp ký tự đầu là `!` (Tệp bị bỏ qua do `.gitignore`)**:
+
    - Bỏ qua, không xử lý. Tăng `index` lên 1.
 
 #### Bước 4: Đánh Giá Cờ Sạch Sẽ (Clean State Evaluation)
+
 - Kiểm tra độ dài của cả hai danh sách: nếu `stagedFiles.length === 0` VÀ `unstagedFiles.length === 0`, đặt cờ `isClean = true`.
 - Nếu có bất kỳ tệp nào tồn tại trong một trong hai danh sách, đặt `isClean = false`.
 - Đóng gói toàn bộ kết quả thành cấu trúc `WorkspaceStatusResult` và trả về cho lời gọi hàm.
@@ -323,17 +337,18 @@ Toàn bộ quá trình giao tiếp giữa Webview (Preact UI) và Extension Host
 
 Tệp `src/types/actions.ts` đóng vai trò là hợp đồng dữ liệu cho mọi thao tác ghi dữ liệu từ giao diện xuống tiến trình Git. Bảng sau đây đặc tả chi tiết Payload của từng hành động:
 
-| Tên Hành Động (Action Command) | Cấu Trúc Khai Báo Payload | Ý Nghĩa Ngữ Nghĩa & Quy Chuẩn Nghiệp Vụ |
-| :--- | :--- | :--- |
-| `stageFile` | `filePath`: Chuỗi ký tự (string) | Đường dẫn tương đối của tệp tin cần đưa vào Staging Index (ví dụ: `src/index.ts`). |
-| `unstageFile` | `filePath`: Chuỗi ký tự (string) | Đường dẫn tương đối của tệp tin cần rút ra khỏi Staging Index. |
-| `stageAll` | Rỗng (`object` / không tham số) | Lệnh đưa toàn bộ tệp biến động vào Staging Index, không cần truyền tham số đường dẫn. |
-| `unstageAll` | Rỗng (`object` / không tham số) | Lệnh rút toàn bộ tệp biến động ra khỏi Staging Index, không cần truyền tham số. |
-| `discardFileChanges` | `filePath`: Chuỗi ký tự (string); `isUntracked`: Giá trị logic (boolean) | Đường dẫn tệp và cờ nhận diện tệp chưa theo dõi (để Backend chọn gọi `clean -f` hay `restore`/`checkout`). |
-| `discardAllChanges` | Rỗng (`object` / không tham số) | Lệnh hoàn tác và dọn sạch toàn bộ thay đổi trong working tree, không cần tham số. |
-| `commitChanges` | `summary`: Chuỗi ký tự (string); `description`: Chuỗi ký tự (string); `amend`: Logic (boolean); `sign`: Logic (boolean) | Bộ 4 tham số phục vụ tạo commit: Tiêu đề dòng đơn (Summary), Mô tả mở rộng (Description), Cờ sửa đổi commit HEAD (Amend), và Cờ ký số bảo mật GPG/SSH (Sign). |
+| Tên Hành Động (Action Command) | Cấu Trúc Khai Báo Payload                                                                                                          | Ý Nghĩa Ngữ Nghĩa & Quy Chuẩn Nghiệp Vụ                                                                                                                                         |
+| :--------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stageFile`                      | `filePath`: Chuỗi ký tự (string)                                                                                                 | Đường dẫn tương đối của tệp tin cần đưa vào Staging Index (ví dụ: `src/index.ts`).                                                                                   |
+| `unstageFile`                    | `filePath`: Chuỗi ký tự (string)                                                                                                 | Đường dẫn tương đối của tệp tin cần rút ra khỏi Staging Index.                                                                                                            |
+| `stageAll`                       | Rỗng (`object` / không tham số)                                                                                                  | Lệnh đưa toàn bộ tệp biến động vào Staging Index, không cần truyền tham số đường dẫn.                                                                                |
+| `unstageAll`                     | Rỗng (`object` / không tham số)                                                                                                  | Lệnh rút toàn bộ tệp biến động ra khỏi Staging Index, không cần truyền tham số.                                                                                           |
+| `discardFileChanges`             | `filePath`: Chuỗi ký tự (string); `isUntracked`: Giá trị logic (boolean)                                                     | Đường dẫn tệp và cờ nhận diện tệp chưa theo dõi (để Backend chọn gọi `clean -f` hay `restore`/`checkout`).                                                       |
+| `discardAllChanges`              | Rỗng (`object` / không tham số)                                                                                                  | Lệnh hoàn tác và dọn sạch toàn bộ thay đổi trong working tree, không cần tham số.                                                                                         |
+| `commitChanges`                  | `summary`: Chuỗi ký tự (string); `description`: Chuỗi ký tự (string); `amend`: Logic (boolean); `sign`: Logic (boolean) | Bộ 4 tham số phục vụ tạo commit: Tiêu đề dòng đơn (Summary), Mô tả mở rộng (Description), Cờ sửa đổi commit HEAD (Amend), và Cờ ký số bảo mật GPG/SSH (Sign). |
 
 #### Cơ Chế Đóng Gói Thông Điệp Yêu Cầu (`ActionRequest`) & Phản Hồi (`ActionResponse`)
+
 1. **Đóng gói yêu cầu (`ActionRequest`)**:
    - Khi Webview gửi một hành động bất kỳ, hệ thống WebviewBridge tự động kết hợp tên lệnh (`command`), đường dẫn gốc kho (`repo: string`), và gói dữ liệu Payload tương ứng thành một thông điệp chuẩn hóa.
    - Ví dụ: Thao tác stage tệp sẽ được đóng gói thành một đối tượng chứa `command: "stageFile"`, `repo: "/path/to/repo"`, và `filePath: "src/app.ts"`.
@@ -348,11 +363,11 @@ Tệp `src/types/actions.ts` đóng vai trò là hợp đồng dữ liệu cho m
 
 Tệp `src/types/queries.ts` quản lý toàn bộ các yêu cầu đọc trạng thái từ Webview lên Backend, bảo đảm tính đối xứng hai chiều giữa tham số hỏi (Request) và dữ liệu trả lời (Response).
 
-| Tên Truy Vấn (Query Command) | Cấu Trúc Request Payload | Cấu Trúc Response Payload | Ý Nghĩa Nghiệp Vụ |
-| :--- | :--- | :--- | :--- |
-| `workspaceStatus` | `repo`: Chuỗi ký tự (string) | `WorkspaceStatusResult` | Yêu cầu Backend chạy lệnh `git status --porcelain=v2` để phân tích và trả về toàn bộ dữ liệu trạng thái Staged, Unstaged, Untracked và nhánh. |
-| `commitDetails` | `repo`: Chuỗi; `commitHash`: Chuỗi | `commitDetails: GitCommitDetails \| null` | Yêu cầu lấy thông tin chi tiết một commit lịch sử (đã có từ Phase 1). |
-| `loadBranches` | `repo`: Chuỗi; `showRemoteBranches`: Boolean; `hard`: Boolean | Danh sách nhánh và HEAD | Yêu cầu nạp danh sách nhánh của kho (đã có từ Phase 1). |
+| Tên Truy Vấn (Query Command) | Cấu Trúc Request Payload                                           | Cấu Trúc Response Payload                | Ý Nghĩa Nghiệp Vụ                                                                                                                                              |
+| :----------------------------- | :------------------------------------------------------------------- | :----------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workspaceStatus`            | `repo`: Chuỗi ký tự (string)                                    | `WorkspaceStatusResult`                  | Yêu cầu Backend chạy lệnh `git status --porcelain=v2` để phân tích và trả về toàn bộ dữ liệu trạng thái Staged, Unstaged, Untracked và nhánh. |
+| `commitDetails`              | `repo`: Chuỗi; `commitHash`: Chuỗi                             | `commitDetails: GitCommitDetails \| null` | Yêu cầu lấy thông tin chi tiết một commit lịch sử (đã có từ Phase 1).                                                                                  |
+| `loadBranches`               | `repo`: Chuỗi; `showRemoteBranches`: Boolean; `hard`: Boolean | Danh sách nhánh và HEAD                 | Yêu cầu nạp danh sách nhánh của kho (đã có từ Phase 1).                                                                                                  |
 
 ---
 
@@ -361,29 +376,32 @@ Tệp `src/types/queries.ts` quản lý toàn bộ các yêu cầu đọc trạn
 Dữ liệu trả về từ truy vấn `workspaceStatus` được chuẩn hóa thành một đối tượng duy nhất gồm các thành phần sau:
 
 #### 1. Cấu Trúc Bản Ghi Dữ Liệu Tệp Đã Stage (`StagedFileRecord`)
-| Tên Trường | Kiểu Dữ Liệu Ngữ Nghĩa | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ |
-| :--- | :--- | :--- |
-| `path` | Chuỗi ký tự đường dẫn | Đường dẫn tương đối của tệp tính từ thư mục gốc của kho làm việc. |
-| `status` | Ký tự phân loại (`A` \| `M` \| `D` \| `R`) | Mã trạng thái trong Staging: `A` (Thêm mới), `M` (Sửa đổi), `D` (Xóa), `R` (Đổi tên). |
-| `oldPath` | Chuỗi ký tự (Tùy chọn) | Đường dẫn ban đầu trước khi tệp được đổi tên (chỉ xuất hiện khi `status` là `R`). |
+
+| Tên Trường | Kiểu Dữ Liệu Ngữ Nghĩa                            | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ                                                                |
+| :------------ | :----------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `path`      | Chuỗi ký tự đường dẫn                           | Đường dẫn tương đối của tệp tính từ thư mục gốc của kho làm việc.                       |
+| `status`    | Ký tự phân loại (`A` \| `M` \| `D` \| `R`) | Mã trạng thái trong Staging: `A` (Thêm mới), `M` (Sửa đổi), `D` (Xóa), `R` (Đổi tên). |
+| `oldPath`   | Chuỗi ký tự (Tùy chọn)                            | Đường dẫn ban đầu trước khi tệp được đổi tên (chỉ xuất hiện khi `status` là `R`).  |
 
 #### 2. Cấu Trúc Bản Ghi Dữ Liệu Tệp Chưa Stage (`UnstagedFileRecord`)
-| Tên Trường | Kiểu Dữ Liệu Ngữ Nghĩa | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ |
-| :--- | :--- | :--- |
-| `path` | Chuỗi ký tự đường dẫn | Đường dẫn tương đối của tệp tính từ thư mục gốc của kho làm việc. |
-| `status` | Ký tự phân loại (`M` \| `D` \| `U`) | Mã trạng thái trên đĩa: `M` (Sửa đổi), `D` (Xóa), `U` (Tệp mới chưa theo dõi). |
-| `isUntracked` | Giá trị logic (boolean) | Đánh dấu `true` nếu tệp hoàn toàn mới chưa từng có trong lịch sử Git. |
+
+| Tên Trường   | Kiểu Dữ Liệu Ngữ Nghĩa                   | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ                                                         |
+| :-------------- | :-------------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| `path`        | Chuỗi ký tự đường dẫn                  | Đường dẫn tương đối của tệp tính từ thư mục gốc của kho làm việc.                |
+| `status`      | Ký tự phân loại (`M` \| `D` \| `U`) | Mã trạng thái trên đĩa: `M` (Sửa đổi), `D` (Xóa), `U` (Tệp mới chưa theo dõi). |
+| `isUntracked` | Giá trị logic (boolean)                     | Đánh dấu `true` nếu tệp hoàn toàn mới chưa từng có trong lịch sử Git.               |
 
 #### 3. Cấu Trúc Tổng Thể Toàn Kho (`WorkspaceStatusResult`)
-| Tên Trường | Kiểu Dữ Liệu Ngữ Nghĩa | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ |
-| :--- | :--- | :--- |
-| `head` | Chuỗi ký tự | Tên của nhánh hiện tại đang được trỏ tới (hoặc mã băm nếu ở trạng thái Detached). |
-| `upstream` | Chuỗi ký tự (Tùy chọn) | Tên nhánh từ xa đang theo dõi (ví dụ: `origin/main`). |
-| `ahead` | Số nguyên không âm | Số lượng commit cục bộ chưa được đẩy lên upstream. |
-| `behind` | Số nguyên không âm | Số lượng commit trên upstream chưa được kéo về cục bộ. |
-| `stagedFiles` | Mảng `StagedFileRecord` | Danh sách toàn bộ các tệp hiện đang nằm trong vùng nhớ đệm Staging. |
-| `unstagedFiles` | Mảng `UnstagedFileRecord` | Danh sách toàn bộ các tệp có biến động nhưng chưa đưa vào Staging. |
-| `isClean` | Giá trị logic (boolean) | Đặt thành `true` khi cả `stagedFiles` và `unstagedFiles` đều rỗng. |
+
+| Tên Trường     | Kiểu Dữ Liệu Ngữ Nghĩa  | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ                                                          |
+| :---------------- | :--------------------------- | :-------------------------------------------------------------------------------------------------- |
+| `head`          | Chuỗi ký tự               | Tên của nhánh hiện tại đang được trỏ tới (hoặc mã băm nếu ở trạng thái Detached). |
+| `upstream`      | Chuỗi ký tự (Tùy chọn)  | Tên nhánh từ xa đang theo dõi (ví dụ: `origin/main`).                                      |
+| `ahead`         | Số nguyên không âm       | Số lượng commit cục bộ chưa được đẩy lên upstream.                                      |
+| `behind`        | Số nguyên không âm       | Số lượng commit trên upstream chưa được kéo về cục bộ.                                  |
+| `stagedFiles`   | Mảng `StagedFileRecord`   | Danh sách toàn bộ các tệp hiện đang nằm trong vùng nhớ đệm Staging.                     |
+| `unstagedFiles` | Mảng `UnstagedFileRecord` | Danh sách toàn bộ các tệp có biến động nhưng chưa đưa vào Staging.                    |
+| `isClean`       | Giá trị logic (boolean)    | Đặt thành `true` khi cả `stagedFiles` và `unstagedFiles` đều rỗng.                    |
 
 ---
 
