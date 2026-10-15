@@ -4,6 +4,8 @@ Tài liệu này đặc tả cơ chế tích hợp đồng bộ hai chiều gi�
 
 > [!NOTE]
 > Mọi nội dung trong tài liệu này tuân thủ nguyên tắc: thiết kế bằng ngôn ngữ tự nhiên (**Design by Word**), tập trung vào kiến trúc tích hợp hệ thống, nguyên tắc bảo toàn hình học, thuật toán điều phối thời gian thực và trải nghiệm luồng làm việc; tuyệt đối không sử dụng mã nguồn mẫu dưới bất kỳ hình thức nào.
+>
+> 📌 **GitHub Tracking**: [Epic #36 - F# DAG Integration & File Watcher](https://github.com/thatislg/f-gitgraph/issues/36) (Gồm 6 tasks con: [#37](https://github.com/thatislg/f-gitgraph/issues/37) đến [#42](https://github.com/thatislg/f-gitgraph/issues/42))
 
 ---
 

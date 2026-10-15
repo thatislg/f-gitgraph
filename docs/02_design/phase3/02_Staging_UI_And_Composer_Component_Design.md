@@ -4,6 +4,8 @@ Tài liệu này đặc tả chi tiết kiến trúc tầng Giao diện Webview,
 
 > [!NOTE]
 > Mọi nội dung trong tài liệu này tuân thủ nguyên tắc: thiết kế bằng ngôn ngữ tự nhiên (**Design by Word**), tập trung vào kiến trúc giao diện, quy chuẩn thẩm mỹ, hành vi thị giác và luồng trải nghiệm người dùng; tuyệt đối không sử dụng mã nguồn mẫu dưới bất kỳ hình thức nào.
+>
+> 📌 **GitHub Tracking**: [Epic #23 - Cyber-Lab UI & Commit Composer](https://github.com/thatislg/f-gitgraph/issues/23) (Gồm 12 tasks con: [#24](https://github.com/thatislg/f-gitgraph/issues/24) đến [#35](https://github.com/thatislg/f-gitgraph/issues/35))
 
 ---
 

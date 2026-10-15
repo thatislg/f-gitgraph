@@ -4,6 +4,8 @@ Tài liệu này đặc tả chi tiết kiến trúc tầng Backend, các thao t
 
 > [!NOTE]
 > Mọi nội dung trong tài liệu này tuân thủ nguyên tắc: thiết kế bằng ngôn ngữ tự nhiên (**Design by Word**), tập trung vào kiến trúc hệ thống, luồng dữ liệu, quy chuẩn an toàn và hành vi tương tác; tuyệt đối không sử dụng mã nguồn mẫu dưới bất kỳ hình thức nào.
+>
+> 📌 **GitHub Tracking**: [Epic #12 - Backend Mutator, Status & RPC](https://github.com/thatislg/f-gitgraph/issues/12) (Gồm 10 tasks con: [#13](https://github.com/thatislg/f-gitgraph/issues/13) đến [#22](https://github.com/thatislg/f-gitgraph/issues/22))
 
 ---
 
