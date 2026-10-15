@@ -1,4 +1,4 @@
-﻿# F-GitGraph Documentation
+# F-GitGraph Documentation
 
 Tài liệu kỹ thuật và kiến trúc cho dự án F-GitGraph.
 
@@ -8,7 +8,7 @@ Tài liệu kỹ thuật và kiến trúc cho dự án F-GitGraph.
 
 Thư mục [`docs/phase1_Avatar/`](phase1_Avatar/README.md) tổng hợp toàn bộ các nghiên cứu, thiết kế và triển khai giao diện F-GitGraph giai đoạn 1:
 
-- **[00. Quy tắc Git & Chiến lược Merge (Git Workflow Rules)](phase1_Avatar/00_GitRules.md)**: Quy định luồng đồng bộ giữa `upstream` -> `main` -> `custom`.
+- **[00. Quy tắc Git & Chiến lược Merge (Git Workflow Rules)](phase1_Avatar/00_GitRules.md)**: Quy định luồng đồng bộ giữa `upstream` -> `upstream-main` -> `main`.
 - **[01. Thiết kế Graph Node Lục giác & Hệ thống Icon](phase1_Avatar/01_GraphNodeDesign.md)**: Thiết kế node lục giác (Hexagon) và hệ thống biểu tượng (Icons) bên trong commit node.
 - **[02. Thiết kế Tích hợp Git Account Avatar vào Hexagon Node](phase1_Avatar/02_CommitAvatarDesign.md)**: Cơ chế băm MD5 Gravatar và trích xuất GitHub avatar cho commit author.
 - **[03. Tối ưu kích thước Hexagon Node & Khắc phục khoảng đen Avatar](phase1_Avatar/03_HexagonSizeAndAvatarFit.md)**: Khắc phục khoảng đen ở các góc bằng Hexagon ClipPath và mở rộng kích thước xấp xỉ 24px.

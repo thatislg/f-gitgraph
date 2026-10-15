@@ -3,13 +3,13 @@ name: CI (Multi-Platform Build & Test)
 on:
   push:
     branches:
-      - custom
+      - main
     paths-ignore:
       - "docs/**"
       - "*.md"
   pull_request:
     branches:
-      - custom
+      - main
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -91,7 +91,7 @@ jobs:
         run: node scripts/build-native.mjs --rid ${{ matrix.rid }}
 
       - name: Package Platform-Specific VSIX
-        run: npx vsce package --no-dependencies --githubBranch custom --target ${{ matrix.target }} --out f-gitgraph-${{ matrix.target }}.vsix
+        run: npx vsce package --no-dependencies --githubBranch main --target ${{ matrix.target }} --out f-gitgraph-${{ matrix.target }}.vsix
 
       - name: Upload Test VSIX Artifact
         uses: actions/upload-artifact@v4

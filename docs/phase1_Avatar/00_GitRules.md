@@ -1,4 +1,4 @@
-﻿# Quy tắc Quản lý Nhánh & Đồng bộ Git (Git Workflow Rules)
+# Quy tắc Quản lý Nhánh & Đồng bộ Git (Git Workflow Rules)
 
 Tài liệu này quy định chiến lược phân nhánh, nguyên tắc đồng bộ từ upstream và quy trình làm việc chuẩn cho dự án **F-GitGraph** (fork của `thatislg`).
 
@@ -30,21 +30,21 @@ git remote set-url --push upstream DISABLED
 
 ## 2. Chiến lược Phân nhánh (Branching Strategy)
 
-### 🌿 Nhánh `main` (Upstream Tracker - Clean Mirror)
+### 🌿 Nhánh `upstream-main` (Upstream Tracker - Clean Mirror)
 
 - **Mục đích:** Chỉ phản chiếu chính xác trạng thái từ `upstream/main`.
 - **Nguyên tắc:**
-  - **TUYỆT ĐỐI KHÔNG** commit code tùy biến trực tiếp lên nhánh `main`.
-  - Mọi cập nhật trên `main` đều phải đến từ `upstream/main` qua fast-forward merge.
-  - Sau khi kéo cập nhật từ `upstream`, đẩy lên `origin/main` để giữ fork luôn cập nhật.
+  - **TUYỆT ĐỐI KHÔNG** commit code tùy biến trực tiếp lên nhánh `upstream-main`.
+  - Mọi cập nhật trên `upstream-main` đều phải đến từ `upstream/main` qua fast-forward merge.
+  - Sau khi kéo cập nhật từ `upstream`, đẩy lên `origin/upstream-main` để lưu trữ bản sao upstream.
 
-### 🚀 Nhánh `custom` (Active Development Branch)
+### 🚀 Nhánh `main` (Active Development & Release Branch)
 
-- **Mục đích:** Nhánh phát triển chính thức chứa các tính năng, tùy biến giao diện và tài liệu riêng của chúng ta.
+- **Mục đích:** Nhánh chính thức chứa toàn bộ tính năng, tùy biến giao diện, tài liệu và mã nguồn phát hành của **F-GitGraph**.
 - **Nguyên tắc:**
-  - Toàn bộ commit tính năng, sửa đổi UI/UX, thêm tài liệu đều thực hiện tại đây.
-  - Luôn được merge từ nhánh `main` mỗi khi `upstream` có thay đổi mới.
-  - Đẩy code lên `origin/custom`.
+  - Toàn bộ commit tính năng, sửa đổi UI/UX, thêm tài liệu đều thực hiện hoặc merge vào đây.
+  - Định kỳ được merge từ nhánh `upstream-main` mỗi khi `upstream` có thay đổi mới.
+  - Đẩy code lên `origin/main` (nhánh mặc định của kho fork).
 
 ---
 
@@ -52,7 +52,7 @@ git remote set-url --push upstream DISABLED
 
 Thực hiện theo 5 bước sau mỗi khi phát hiện hoặc định kỳ đồng bộ từ upstream:
 
-### Bước 1: Lưu trạng thái làm việc hiện tại trên `custom`
+### Bước 1: Lưu trạng thái làm việc hiện tại trên `main`
 
 Đảm bảo thư mục làm việc sạch sẽ trước khi chuyển nhánh:
 
@@ -61,46 +61,46 @@ Thực hiện theo 5 bước sau mỗi khi phát hiện hoặc định kỳ đ�
 git status
 
 # Nếu có công việc đang dang dở chưa muốn commit:
-git stash push -m "WIP on custom before upstream sync"
+git stash push -m "WIP on main before upstream sync"
 ```
 
-### Bước 2: Chuyển sang `main` và kéo cập nhật từ `upstream`
+### Bước 2: Chuyển sang `upstream-main` và kéo cập nhật từ `upstream`
 
 ```bash
-# 1. Chuyển sang main
-git switch main
+# 1. Chuyển sang upstream-main
+git switch upstream-main
 
 # 2. Lấy dữ liệu mới nhất từ cả 2 remote
 git fetch upstream
 git fetch origin
 
-# 3. Đồng bộ main từ upstream (Fast-Forward)
+# 3. Đồng bộ upstream-main từ upstream (Fast-Forward)
 git merge upstream/main --ff-only
 
 # 4. Đẩy cập nhật lên fork của chúng ta
-git push origin main
+git push origin upstream-main
 ```
 
-### Bước 3: Chuyển về nhánh `custom` và merge `main` vào
+### Bước 3: Chuyển về nhánh `main` và merge `upstream-main` vào
 
 ```bash
-# 1. Chuyển lại về nhánh custom
-git switch custom
+# 1. Chuyển lại về nhánh main
+git switch main
 
 # 2. Phục hồi công việc dang dở nếu trước đó có stash
 git stash pop  # (chỉ chạy nếu ở Bước 1 có dùng git stash)
 
-# 3. Merge nhánh main (vừa cập nhật) vào custom
-git merge main
+# 3. Merge nhánh upstream-main (vừa cập nhật) vào main
+git merge upstream-main
 ```
 
 ### Bước 4: Giải quyết xung đột (Conflict Resolution - nếu có)
 
-Nếu có xung đột xảy ra giữa code upstream và code custom của chúng ta:
+Nếu có xung đột xảy ra giữa code upstream và code tùy biến:
 
 1. Mở các file bị conflict trong VS Code và chọn thay đổi phù hợp:
-   - Ưu tiên giữ lại các đoạn code tính năng tùy biến của `custom`.
-   - Tiếp thu các cải tiến/sửa lỗi từ `main`.
+   - Ưu tiên giữ lại các đoạn code tính năng tùy biến của **F-GitGraph**.
+   - Tiếp thu các cải tiến/sửa lỗi từ `upstream-main`.
 2. Kiểm tra biên dịch và kiểm thử:
    ```bash
    pnpm run compile
@@ -110,13 +110,13 @@ Nếu có xung đột xảy ra giữa code upstream và code custom của chúng
 3. Đánh dấu đã giải quyết và hoàn tất merge commit:
    ```bash
    git add .
-   git commit -m "chore(sync): merge upstream/main into custom"
+   git commit -m "chore(sync): merge upstream/main into main"
    ```
 
-### Bước 5: Đẩy code nhánh `custom` lên GitHub
+### Bước 5: Đẩy code nhánh `main` lên GitHub
 
 ```bash
-git push origin custom
+git push origin main
 ```
 
 ---
@@ -124,24 +124,24 @@ git push origin custom
 ## 4. Tóm tắt Cheatsheet nhanh
 
 ```bash
-# 1. Cập nhật main từ upstream
-git switch main
+# 1. Cập nhật upstream-main từ upstream
+git switch upstream-main
 git fetch upstream
 git merge upstream/main --ff-only
-git push origin main
+git push origin upstream-main
 
-# 2. Cập nhật custom từ main
-git switch custom
-git merge main
+# 2. Cập nhật main từ upstream-main
+git switch main
+git merge upstream-main
 
 # 3. Kiểm tra & Đẩy lên origin
 pnpm run compile
-git push origin custom
+git push origin main
 ```
 
 ---
 
-## 5. Quy tắc Commit trên nhánh `custom`
+## 5. Quy tắc Commit trên nhánh `main`
 
 Tuân thủ định dạng **Conventional Commits**:
 

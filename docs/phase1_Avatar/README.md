@@ -1,4 +1,4 @@
-﻿# Phase 1: Avatar, Hexagon Node, Hover & Commit Message Panel
+# Phase 1: Avatar, Hexagon Node, Hover & Commit Message Panel
 
 Tài liệu chi tiết về quá trình nghiên cứu, thiết kế và cài đặt toàn bộ hệ thống Avatar lục giác, hiệu ứng Neon Ambient, tương tác Zoom và Panel hiển thị Commit Message trong F-GitGraph.
 
@@ -7,7 +7,7 @@ Tài liệu chi tiết về quá trình nghiên cứu, thiết kế và cài đ�
 ## Danh Sách Tài Liệu Kỹ Thuật (00 - 14)
 
 - **[00. Quy tắc Git & Chiến lược Merge (Git Workflow Rules)](00_GitRules.md)**:
-  Quy định chuẩn luồng làm việc giữa `upstream` -> `main` -> `custom`.
+  Quy định chuẩn luồng làm việc giữa `upstream` -> `upstream-main` -> `main`.
 
 - **[01. Thiết kế Graph Node Lục giác & Hệ thống Icon](01_GraphNodeDesign.md)**:
   Thiết kế node hình lục giác (Hexagon) và hệ thống biểu tượng (Icons) bên trong commit node lấy cảm hứng từ GitLens.

@@ -66,7 +66,7 @@ jobs:
         run: node scripts/build-native.mjs --rid ${{ matrix.rid }}
 
       - name: Package Platform-Specific VSIX
-        run: npx vsce package --no-dependencies --githubBranch custom --target ${{ matrix.target }} --out f-gitgraph-${{ matrix.target }}.vsix
+        run: npx vsce package --no-dependencies --githubBranch main --target ${{ matrix.target }} --out f-gitgraph-${{ matrix.target }}.vsix
 
       - name: Upload Platform VSIX
         uses: actions/upload-artifact@v4
@@ -136,7 +136,7 @@ jobs:
           path: ./dist
 
       - name: Package Universal VSIX (All Platforms)
-        run: npx vsce package --no-dependencies --githubBranch custom --out ./dist/f-gitgraph-universal.vsix
+        run: npx vsce package --no-dependencies --githubBranch main --out ./dist/f-gitgraph-universal.vsix
 
       - name: Generate SHA-256 Checksums
         working-directory: ./dist
