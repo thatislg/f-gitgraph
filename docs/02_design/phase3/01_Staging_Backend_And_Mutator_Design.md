@@ -313,47 +313,117 @@ Khi lập trình viên thao tác liên tục (như gõ phím nhanh, bấm stage 
 
 ## 4. Đặc Tả Từ Điển Dữ Liệu & Hợp Đồng Giao Tiếp RPC
 
-### 4.1. Cấu Trúc Bản Ghi Dữ Liệu Tệp Đã Stage (`StagedFileRecord`)
+## 4. Đặc Tả Từ Điển Dữ Liệu & Hợp Đồng Khai Báo Payload (Type-Safe RPC Contracts)
 
-| Tên Trường Dữ Liệu | Kiểu Ngữ Nghĩa | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ |
+Toàn bộ quá trình giao tiếp giữa Webview (Preact UI) và Extension Host (Node.js Backend) được quản lý thông qua hệ thống RPC định kiểu tĩnh (Type-Safe RPC). Mọi lệnh gửi đi bắt buộc phải có phần dữ liệu kèm theo (Payload) được khai báo tường minh trong hai tệp định kiểu trung tâm: `src/types/actions.ts` (cho các lệnh ghi/thay đổi trạng thái) và `src/types/queries.ts` (cho các yêu cầu đọc trạng thái).
+
+---
+
+### 4.1. Bản Đặc Tả Hợp Đồng Action Payloads (`src/types/actions.ts`)
+
+Tệp `src/types/actions.ts` đóng vai trò là hợp đồng dữ liệu cho mọi thao tác ghi dữ liệu từ giao diện xuống tiến trình Git. Bảng sau đây đặc tả chi tiết Payload của từng hành động:
+
+| Tên Hành Động (Action Command) | Cấu Trúc Khai Báo Payload | Ý Nghĩa Ngữ Nghĩa & Quy Chuẩn Nghiệp Vụ |
+| :--- | :--- | :--- |
+| `stageFile` | `filePath`: Chuỗi ký tự (string) | Đường dẫn tương đối của tệp tin cần đưa vào Staging Index (ví dụ: `src/index.ts`). |
+| `unstageFile` | `filePath`: Chuỗi ký tự (string) | Đường dẫn tương đối của tệp tin cần rút ra khỏi Staging Index. |
+| `stageAll` | Rỗng (`object` / không tham số) | Lệnh đưa toàn bộ tệp biến động vào Staging Index, không cần truyền tham số đường dẫn. |
+| `unstageAll` | Rỗng (`object` / không tham số) | Lệnh rút toàn bộ tệp biến động ra khỏi Staging Index, không cần truyền tham số. |
+| `discardFileChanges` | `filePath`: Chuỗi ký tự (string); `isUntracked`: Giá trị logic (boolean) | Đường dẫn tệp và cờ nhận diện tệp chưa theo dõi (để Backend chọn gọi `clean -f` hay `restore`/`checkout`). |
+| `discardAllChanges` | Rỗng (`object` / không tham số) | Lệnh hoàn tác và dọn sạch toàn bộ thay đổi trong working tree, không cần tham số. |
+| `commitChanges` | `summary`: Chuỗi ký tự (string); `description`: Chuỗi ký tự (string); `amend`: Logic (boolean); `sign`: Logic (boolean) | Bộ 4 tham số phục vụ tạo commit: Tiêu đề dòng đơn (Summary), Mô tả mở rộng (Description), Cờ sửa đổi commit HEAD (Amend), và Cờ ký số bảo mật GPG/SSH (Sign). |
+
+#### Cơ Chế Đóng Gói Thông Điệp Yêu Cầu (`ActionRequest`) & Phản Hồi (`ActionResponse`)
+1. **Đóng gói yêu cầu (`ActionRequest`)**:
+   - Khi Webview gửi một hành động bất kỳ, hệ thống WebviewBridge tự động kết hợp tên lệnh (`command`), đường dẫn gốc kho (`repo: string`), và gói dữ liệu Payload tương ứng thành một thông điệp chuẩn hóa.
+   - Ví dụ: Thao tác stage tệp sẽ được đóng gói thành một đối tượng chứa `command: "stageFile"`, `repo: "/path/to/repo"`, và `filePath: "src/app.ts"`.
+2. **Đóng gói phản hồi (`ActionResponse`)**:
+   - Sau khi `GitCliMutator` hoàn tất thực thi lệnh Git tương ứng, Backend gửi phản hồi về Webview chứa: tên lệnh (`command`) và trạng thái kết quả (`status: GitCommandStatus`).
+   - Nếu thao tác thành công: `status` trả về giá trị `null`.
+   - Nếu thao tác thất bại: `status` trả về một chuỗi thông báo lỗi có định dạng thân thiện (ví dụ: lỗi khóa tệp `.git/index.lock` hoặc lỗi từ chối commit).
+
+---
+
+### 4.2. Bản Đặc Tả Hợp Đồng Query Payloads (`src/types/queries.ts`)
+
+Tệp `src/types/queries.ts` quản lý toàn bộ các yêu cầu đọc trạng thái từ Webview lên Backend, bảo đảm tính đối xứng hai chiều giữa tham số hỏi (Request) và dữ liệu trả lời (Response).
+
+| Tên Truy Vấn (Query Command) | Cấu Trúc Request Payload | Cấu Trúc Response Payload | Ý Nghĩa Nghiệp Vụ |
+| :--- | :--- | :--- | :--- |
+| `workspaceStatus` | `repo`: Chuỗi ký tự (string) | `WorkspaceStatusResult` | Yêu cầu Backend chạy lệnh `git status --porcelain=v2` để phân tích và trả về toàn bộ dữ liệu trạng thái Staged, Unstaged, Untracked và nhánh. |
+| `commitDetails` | `repo`: Chuỗi; `commitHash`: Chuỗi | `commitDetails: GitCommitDetails \| null` | Yêu cầu lấy thông tin chi tiết một commit lịch sử (đã có từ Phase 1). |
+| `loadBranches` | `repo`: Chuỗi; `showRemoteBranches`: Boolean; `hard`: Boolean | Danh sách nhánh và HEAD | Yêu cầu nạp danh sách nhánh của kho (đã có từ Phase 1). |
+
+---
+
+### 4.3. Cấu Trúc Chi Tiết Từ Điển Dữ Liệu `WorkspaceStatusResult`
+
+Dữ liệu trả về từ truy vấn `workspaceStatus` được chuẩn hóa thành một đối tượng duy nhất gồm các thành phần sau:
+
+#### 1. Cấu Trúc Bản Ghi Dữ Liệu Tệp Đã Stage (`StagedFileRecord`)
+| Tên Trường | Kiểu Dữ Liệu Ngữ Nghĩa | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ |
 | :--- | :--- | :--- |
 | `path` | Chuỗi ký tự đường dẫn | Đường dẫn tương đối của tệp tính từ thư mục gốc của kho làm việc. |
-| `status` | Ký tự phân loại | Mã loại thay đổi trong chỉ mục: `A` (Thêm mới), `M` (Sửa đổi), `D` (Đã xóa), `R` (Đổi tên). |
+| `status` | Ký tự phân loại (`A` \| `M` \| `D` \| `R`) | Mã trạng thái trong Staging: `A` (Thêm mới), `M` (Sửa đổi), `D` (Xóa), `R` (Đổi tên). |
 | `oldPath` | Chuỗi ký tự (Tùy chọn) | Đường dẫn ban đầu trước khi tệp được đổi tên (chỉ xuất hiện khi `status` là `R`). |
 
-### 4.2. Cấu Trúc Bản Ghi Dữ Liệu Tệp Chưa Stage (`UnstagedFileRecord`)
-
-| Tên Trường Dữ Liệu | Kiểu Ngữ Nghĩa | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ |
+#### 2. Cấu Trúc Bản Ghi Dữ Liệu Tệp Chưa Stage (`UnstagedFileRecord`)
+| Tên Trường | Kiểu Dữ Liệu Ngữ Nghĩa | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ |
 | :--- | :--- | :--- |
 | `path` | Chuỗi ký tự đường dẫn | Đường dẫn tương đối của tệp tính từ thư mục gốc của kho làm việc. |
-| `status` | Ký tự phân loại | Mã loại thay đổi trên đĩa: `M` (Sửa đổi), `D` (Đã xóa), `U` (Tệp mới chưa theo dõi). |
-| `isUntracked` | Giá trị logic (Đúng/Sai) | Đánh dấu tệp hoàn toàn mới chưa từng được Git quản lý trong lịch sử. |
+| `status` | Ký tự phân loại (`M` \| `D` \| `U`) | Mã trạng thái trên đĩa: `M` (Sửa đổi), `D` (Xóa), `U` (Tệp mới chưa theo dõi). |
+| `isUntracked` | Giá trị logic (boolean) | Đánh dấu `true` nếu tệp hoàn toàn mới chưa từng có trong lịch sử Git. |
 
-### 4.3. Cấu Trúc Toàn Bộ Trạng Thái Kho Làm Việc (`WorkspaceStatusResult`)
-
-| Tên Trường Dữ Liệu | Kiểu Ngữ Nghĩa | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ |
+#### 3. Cấu Trúc Tổng Thể Toàn Kho (`WorkspaceStatusResult`)
+| Tên Trường | Kiểu Dữ Liệu Ngữ Nghĩa | Mô Tả Ý Nghĩa & Quy Chuẩn Nghiệp Vụ |
 | :--- | :--- | :--- |
-| `head` | Chuỗi ký tự hoặc Rỗng | Tên của nhánh hiện tại đang được trỏ tới bởi HEAD (hoặc mã băm nếu ở trạng thái Detached). |
-| `upstream` | Chuỗi ký tự hoặc Rỗng | Tên nhánh từ xa đang theo dõi (ví dụ: `origin/main`). |
-| `ahead` | Số nguyên dương | Số lượng commit mới trên nhánh cục bộ chưa được đẩy lên nhánh từ xa. |
-| `behind` | Số nguyên dương | Số lượng commit mới trên nhánh từ xa chưa được kéo về nhánh cục bộ. |
-| `stagedFiles` | Danh sách bản ghi | Tập hợp toàn bộ các tệp hiện đang nằm trong vùng nhớ đệm Staging. |
-| `unstagedFiles` | Danh sách bản ghi | Tập hợp toàn bộ các tệp có biến động nhưng chưa đưa vào Staging. |
-| `isClean` | Giá trị logic (Đúng/Sai) | Cờ thông báo kho mã nguồn đang sạch sẽ hoàn toàn (không có tệp biến động). |
+| `head` | Chuỗi ký tự | Tên của nhánh hiện tại đang được trỏ tới (hoặc mã băm nếu ở trạng thái Detached). |
+| `upstream` | Chuỗi ký tự (Tùy chọn) | Tên nhánh từ xa đang theo dõi (ví dụ: `origin/main`). |
+| `ahead` | Số nguyên không âm | Số lượng commit cục bộ chưa được đẩy lên upstream. |
+| `behind` | Số nguyên không âm | Số lượng commit trên upstream chưa được kéo về cục bộ. |
+| `stagedFiles` | Mảng `StagedFileRecord` | Danh sách toàn bộ các tệp hiện đang nằm trong vùng nhớ đệm Staging. |
+| `unstagedFiles` | Mảng `UnstagedFileRecord` | Danh sách toàn bộ các tệp có biến động nhưng chưa đưa vào Staging. |
+| `isClean` | Giá trị logic (boolean) | Đặt thành `true` khi cả `stagedFiles` và `unstagedFiles` đều rỗng. |
 
-### 4.4. Danh Mục Thông Điệp Hành Động (Action Request Message Registry)
+---
 
-Các thông điệp yêu cầu thực thi được gửi từ Webview sang Extension Host:
+### 4.4. Cơ Chế Đăng Ký & Điều Phối Message Handlers (`src/extension/services/messageHandler.ts`)
 
-| Mã Hành Động (Action) | Danh Sách Tham Số Đi Kèm | Hành Vi Nghiệp Vụ Được Kích Hoạt |
-| :--- | :--- | :--- |
-| `stageFile` | `filePath`: Đường dẫn tệp cần stage | Gọi phương thức `stageFile` đưa tệp vào Staging Index. |
-| `unstageFile` | `filePath`: Đường dẫn tệp cần unstage | Gọi phương thức `unstageFile` rút tệp khỏi Staging Index. |
-| `stageAll` | *(Không có tham số)* | Gọi phương thức `stageAll` đưa toàn bộ tệp vào Staging. |
-| `unstageAll` | *(Không có tham số)* | Gọi phương thức `unstageAll` rút toàn bộ tệp khỏi Staging. |
-| `discardFileChanges` | `filePath`: Đường dẫn tệp; `isUntracked`: Cờ tệp chưa theo dõi | Gọi phương thức `discardFileChanges` hoàn tác thay đổi tệp. |
-| `discardAllChanges` | *(Không có tham số)* | Gọi phương thức `discardAllChanges` làm sạch toàn bộ kho. |
-| `commitChanges` | `summary`: Tiêu đề; `description`: Mô tả; `amend`: Cờ sửa commit; `sign`: Cờ ký số | Gọi phương thức `commit` tạo đối tượng commit mới trong kho. |
+Tệp `messageHandler.ts` đóng vai trò là tổng đài điều hướng thông điệp trung tâm tại Extension Host Backend:
+
+```
+[Webview postMessage] 
+        │
+        ▼
+[MessageHandler Router]
+   ├── Action Request? ────► Kiểm tra repo ────► Chuyển tới GitCliMutator (stage, commit...)
+   │                                                     │
+   │                                                     ▼
+   │                                             (Thao tác thành công)
+   │                                                     │
+   │                                                     ▼
+   │                                         (Tự động gửi Refresh Event)
+   │
+   └── Query Request? ─────► Kiểm tra repo ────► Chuyển tới workspaceStatus(repo)
+                                                         │
+                                                         ▼
+                                               (Trả kết quả về Webview)
+```
+
+1. **Điều Hướng Action Requests**:
+   - Khi tiếp nhận một thông điệp thuộc loại Action, bộ điều phối trích xuất trường `command` và kiểm tra đường dẫn `repo`.
+   - Gọi phương thức tương ứng trên thực thể `GitCliMutator` với các tham số lấy ra từ `ActionPayload`:
+     - Nhận `stageFile` $\rightarrow$ gọi `mutator.stageFile(payload.filePath)`.
+     - Nhận `unstageFile` $\rightarrow$ gọi `mutator.unstageFile(payload.filePath)`.
+     - Nhận `stageAll` $\rightarrow$ gọi `mutator.stageAll()`.
+     - Nhận `unstageAll` $\rightarrow$ gọi `mutator.unstageAll()`.
+     - Nhận `discardFileChanges` $\rightarrow$ gọi `mutator.discardFileChanges(payload.filePath, payload.isUntracked)`.
+     - Nhận `discardAllChanges` $\rightarrow$ gọi `mutator.discardAllChanges()`.
+     - Nhận `commitChanges` $\rightarrow$ gọi `mutator.commit(payload.summary, payload.description, payload.amend, payload.sign)`.
+2. **Kích Hoạt Chu Trình Tự Động Làm Mới (Auto Refresh Cycle)**:
+   - Ngay sau khi bất kỳ thao tác Action nào của `GitCliMutator` hoàn tất thành công mà không phát sinh lỗi, `messageHandler` sẽ tự động kích hoạt một sự kiện cập nhật (`refreshStatusEvent`) để Webview và File Watcher đồng bộ trạng thái mới nhất mà người dùng không cần phải bấm nút F5/Refresh thủ công.
+3. **Điều Hướng Query Requests**:
+   - Khi tiếp nhận truy vấn `workspaceStatus`, bộ điều phối chuyển tiếp yêu cầu tới hàm `getWorkspaceStatus(payload.repo)` và gửi gói kết quả `WorkspaceStatusResult` trở lại Webview.
 
 ---
 
