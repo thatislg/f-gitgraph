@@ -2,6 +2,7 @@ import { batch } from "@preact/signals";
 import type { ComponentChildren } from "preact";
 
 import type { ActionRequest, CommitOrdering, GitFileChange } from "@/types";
+import { UNCOMMITTED_CHANGES } from "@/webview/constants";
 import {
   branchList,
   commitDetails,
@@ -10,6 +11,7 @@ import {
   dialog,
   expandedCommit,
   headBranch,
+  inspectorMode,
   repoStates,
   selectedBranch,
   selectedRepo,
@@ -140,6 +142,7 @@ export function refresh() {
   }
 
   requestBranches(repo);
+  refreshStatus();
   void graphWindowStore.loadGraph(repo, selectedBranch.value, commitOrdering.value);
 }
 
@@ -148,6 +151,33 @@ export function closeCommitDetails() {
     expandedCommit.value = null;
     commitDetails.value = null;
   });
+}
+
+/**
+ * Mở/tắt khung Staging Area cho dòng mầm (`*`). Khi đã mở, gửi truy vấn trạng thái
+ * kho để nạp danh sách tệp staged/unstaged tức thời vào `stagingStore`.
+ */
+export function toggleStaging() {
+  if (inspectorMode.value === "staging") {
+    closeCommitDetails();
+    return;
+  }
+
+  batch(() => {
+    expandedCommit.value = UNCOMMITTED_CHANGES;
+    commitDetails.value = null;
+  });
+  refreshStatus();
+}
+
+/** Yêu cầu Backend gửi ảnh chụp trạng thái kho mới nhất để làm tươi danh sách tệp. */
+export function refreshStatus() {
+  const repo = selectedRepo.value;
+  if (repo === undefined) {
+    return;
+  }
+
+  vscode.postMessage({ command: "workspaceStatus", repo });
 }
 
 /** Open the details view of a commit, or close it when it is already open. */

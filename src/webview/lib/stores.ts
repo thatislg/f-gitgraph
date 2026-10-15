@@ -1,6 +1,7 @@
 import { computed, signal } from "@preact/signals";
 
 import type { CommitOrdering, GitCommitDetails, GitCommitNode, GitRepoSet } from "@/types";
+import { UNCOMMITTED_CHANGES } from "@/webview/constants";
 import type { CommitBranchType, ContextMenuState, DialogState } from "@/webview/types";
 import { isColumnWidths } from "@/webview/utils/columns";
 
@@ -19,6 +20,22 @@ export const uncommittedChanges = signal<number>(0);
 export const expandedCommit = signal<string | null>(null);
 /** Details of `expandedCommit`, or `null` while they load. */
 export const commitDetails = signal<GitCommitDetails | null>(null);
+
+/** Chế độ của khung Inspector nổi phụ thuộc dòng đang chọn. */
+export type InspectorMode = "none" | "staging" | "commit-details";
+
+/**
+ * Bộ điều phối khung nổi: trả về `staging` khi dòng mầm (`*`) được chọn, `commit-details`
+ * khi chọn một commit lịch sử, và `none` khi không mở gì. Dùng chung tín hiệu
+ * `expandedCommit` làm nguồn chân trị duy nhất của dòng đang chọn.
+ */
+export const inspectorMode = computed<InspectorMode>(() => {
+  const hash = expandedCommit.value;
+  if (hash === null) {
+    return "none";
+  }
+  return hash === UNCOMMITTED_CHANGES ? "staging" : "commit-details";
+});
 
 /** The open context menu, or `null` when none is open. Only one opens at a time. */
 export const contextMenu = signal<ContextMenuState | null>(null);

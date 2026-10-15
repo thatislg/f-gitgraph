@@ -66,7 +66,7 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 | **Integration**  | `src/webview/components/commit/CommitTable.tsx` | Mở khóa click dòng `UNCOMMITTED_CHANGES` (`*`), hiển thị `<StagingArea />` trong Overlay Inspector. |
 | **Integration**  | `src/extension/watchers/git-repo.watcher.ts` | Tích hợp thuật toán Debounce 150ms bắn thông báo cập nhật `workspaceStatus`. |
 | **Integr. Test** | `tests/extension/watchers/gitRepoWatcher.debounce.test.ts` | Test cơ chế Debounce 150ms gom bão sự kiện thành đúng 1 lần gọi `workspaceStatus`. |
-| **Integr. Test** | `tests/webview/components/commit/CommitTable.staging.test.tsx` | Test click chọn dòng `UNCOMMITTED_CHANGES` mở đúng `<StagingArea />` không làm lệch bảng DAG. |
+| **Integr. Test** | `tests/webview/components/commit/CommitTable.staging.test.ts` | Test click chọn dòng `UNCOMMITTED_CHANGES` mở đúng `<StagingArea />` không làm lệch bảng DAG. |
 
 ---
 
@@ -199,19 +199,19 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ### 📋 Nhóm Việc 4: Tích Hợp Đồ Thị DAG & Bộ Giám Sát Thời Gian Thực — [Epic #36](https://github.com/thatislg/f-gitgraph/issues/36)
 *Tài liệu tham chiếu thiết kế*: [03_WorkingTree_Sync_And_Watcher_Integration.md](../../02_design/phase3/03_WorkingTree_Sync_And_Watcher_Integration.md).
 
-- [ ] **Nhiệm vụ 4.1: Đồng bộ dòng Uncommitted Changes trên đồ thị `src/webview/components/commit/CommitTable.tsx`**
-  - [ ] **4.1.1 ([#37](https://github.com/thatislg/f-gitgraph/issues/37))**: Mở khóa sự kiện click trên dòng `UNCOMMITTED_CHANGES` (`*`) trong `CommitTable.tsx` khi có thay đổi trong Working Tree.
-  - [ ] **4.1.2 ([#37](https://github.com/thatislg/f-gitgraph/issues/37))**: Điều phối hiển thị bảng Inspector nổi: Nếu click chọn commit lịch sử thì hiển thị `<CommitDetails />`; nếu click chọn dòng `*` thì hiển thị `<StagingArea />`.
-  - [ ] **4.1.3 ([#38](https://github.com/thatislg/f-gitgraph/issues/38))**: Bảo đảm 100% không làm lệch tọa độ hay chiều cao dòng của bảng commit, bảo toàn bất biến tuyệt đối các đường cong Bézier và avatar clipPath của nhân F# Core (zero layout shift bằng 0px).
+- [x] **Nhiệm vụ 4.1: Đồng bộ dòng Uncommitted Changes trên đồ thị `src/webview/components/commit/CommitTable.tsx`**
+  - [x] **4.1.1 ([#37](https://github.com/thatislg/f-gitgraph/issues/37))**: Mở khóa sự kiện click trên dòng `UNCOMMITTED_CHANGES` (`*`) trong `CommitTable.tsx` khi có thay đổi trong Working Tree.
+  - [x] **4.1.2 ([#37](https://github.com/thatislg/f-gitgraph/issues/37))**: Điều phối hiển thị bảng Inspector nổi: Nếu click chọn commit lịch sử thì hiển thị `<CommitDetails />`; nếu click chọn dòng `*` thì hiển thị `<StagingArea />`.
+  - [x] **4.1.3 ([#38](https://github.com/thatislg/f-gitgraph/issues/38))**: Bảo đảm 100% không làm lệch tọa độ hay chiều cao dòng của bảng commit, bảo toàn bất biến tuyệt đối các đường cong Bézier và avatar clipPath của nhân F# Core (zero layout shift bằng 0px).
 
-- [ ] **Nhiệm vụ 4.2: Tích hợp File Watcher và đồng bộ thời gian thực trong `src/extension/watchers/git-repo.watcher.ts`**
-  - [ ] **4.2.1 ([#39](https://github.com/thatislg/f-gitgraph/issues/39))**: Thiết lập bộ đếm thời gian Debounce 150ms cho các sự kiện biến động từ hệ thống tệp để tránh hiện tượng nghẽn tiến trình khi lưu hàng loạt tệp tin.
-  - [ ] **4.2.2 ([#39](https://github.com/thatislg/f-gitgraph/issues/39))**: Lọc bỏ toàn bộ các thư mục rác và tạm (`node_modules`, `dist`, `bin`, `obj`, `.git/objects`).
-  - [ ] **4.2.3 ([#40](https://github.com/thatislg/f-gitgraph/issues/40))**: Khi hết thời gian chờ 150ms ổn định, tự động kích hoạt truy vấn `workspaceStatus` và phát thông báo cập nhật sang Webview để làm mới danh sách tệp biến động trong thời gian thực.
+- [x] **Nhiệm vụ 4.2: Tích hợp File Watcher và đồng bộ thời gian thực trong `src/extension/watchers/git-repo.watcher.ts`**
+  - [x] **4.2.1 ([#39](https://github.com/thatislg/f-gitgraph/issues/39))**: Thiết lập bộ đếm thời gian Debounce 150ms cho các sự kiện biến động từ hệ thống tệp để tránh hiện tượng nghẽn tiến trình khi lưu hàng loạt tệp tin.
+  - [x] **4.2.2 ([#39](https://github.com/thatislg/f-gitgraph/issues/39))**: Lọc bỏ toàn bộ các thư mục rác và tạm (`node_modules`, `dist`, `bin`, `obj`, `.git/objects`).
+  - [x] **4.2.3 ([#40](https://github.com/thatislg/f-gitgraph/issues/40))**: Khi hết thời gian chờ 150ms ổn định, tự động kích hoạt truy vấn `workspaceStatus` và phát thông báo cập nhật sang Webview để làm mới danh sách tệp biến động trong thời gian thực.
 
-- [ ] **Nhiệm vụ 4.3 (TEST NHÓM 4) ([#41](https://github.com/thatislg/f-gitgraph/issues/41)): Bộ Kiểm Thử Tích Hợp Đồ Thị & File Watcher**
-  - [ ] **4.3.1**: Tạo `tests/extension/watchers/gitRepoWatcher.debounce.test.ts`: Test bắn 10 sự kiện tệp gom lại đúng 1 lần sau 150ms, test bộ lọc bỏ qua thư mục rác.
-  - [ ] **4.3.2**: Tạo `tests/webview/components/commit/CommitTable.staging.test.tsx`: Test click dòng `*` mở StagingArea, click commit thường mở CommitDetails, test kiểm tra không làm lệch chiều cao dòng.
+- [x] **Nhiệm vụ 4.3 (TEST NHÓM 4) ([#41](https://github.com/thatislg/f-gitgraph/issues/41)): Bộ Kiểm Thử Tích Hợp Đồ Thị & File Watcher**
+  - [x] **4.3.1**: Tạo `tests/extension/watchers/gitRepoWatcher.debounce.test.ts`: Test bắn 10 sự kiện tệp gom lại đúng 1 lần sau 150ms, test bộ lọc bỏ qua thư mục rác.
+  - [x] **4.3.2**: Tạo `tests/webview/components/commit/CommitTable.staging.test.tsx`: Test click dòng `*` mở StagingArea, click commit thường mở CommitDetails, test kiểm tra không làm lệch chiều cao dòng.
 
 ---
 
@@ -298,3 +298,4 @@ Quá trình lập trình được tiến hành theo thứ tự 5 bước khép k
 - **2026-10-15**: Hoàn thành lại Nhiệm vụ 1.3 theo thiết kế cập nhật (máy trạng thái NUL-delimiter, `--untracked-files=all -z`, `conflictedFiles`, trạng thái kép `MM`/`AM`/`AD`/`RM`/`RD`), Nhiệm vụ 1.4 (types RPC + message handlers) và Nhiệm vụ 1.5 (bộ test `workspaceStatus` + `stagingMessageHandler`). Kiểm thử `workspaceStatus` 20/20, `stagingMessageHandler` 5/5, typecheck + oxlint + oxfmt sạch.
 - **2026-10-15**: Hoàn thành Nhóm Việc 2 — Triển Khai Các Khối Giao Diện Cơ Bản: `CornerCrossFrame.tsx` (Nhiệm vụ 2.1), `StagingFileItem.tsx` (Nhiệm vụ 2.2), `DiscardConfirmModal.tsx` (Nhiệm vụ 2.3) và bộ unit test độc lập (Nhiệm vụ 2.4). Kiểm thử webview 21/21 test mới pass, typecheck sạch, compile (esbuild) thành công. Báo cáo nghiệm thu: `docs/04_reports/phase3/003_phase3_1_ui_building_blocks_report.md`.
 - **2026-10-16**: Hoàn thành Nhóm Việc 3 — Triển Khai Phân Vùng Staging, Composer & Quản Lý Trạng Thái: `StagingPanel.tsx` (Nhiệm vụ 3.1), `CommitComposer.tsx` (Nhiệm vụ 3.2), `staging.store.ts` (Nhiệm vụ 3.3), `StagingArea.tsx` (Nhiệm vụ 3.4) và bộ unit test độc lập (Nhiệm vụ 3.5). Bổ sung action RPC `commitAndPush` (sửa lỗi thiết kế [DESIGN_DEFECT]: UI thiết kế `commitAndPush()` nhưng hợp đồng RPC thiếu action này). Kiểm thử webview 111/111 pass, typecheck + oxlint sạch, compile (esbuild) thành công. Báo cáo nghiệm thu: `docs/04_reports/phase3/004_phase3_1_staging_composer_report.md`.
+- **2026-10-16**: Hoàn thành Nhóm Việc 4 — Tích Hợp Đồ Thị DAG & File Watcher Thời Gian Thực: mở khóa click dòng `UNCOMMITTED_CHANGES` (`*`) và điều phối Inspector `StagingArea`/`CommitDetails` qua computed `inspectorMode` (Nhiệm vụ 4.1), Debounce 150ms + bộ lọc thư mục rác + đồng bộ `repo.updated` → `refresh()`/`refreshStatus()` (Nhiệm vụ 4.2), cùng 2 bộ test tích hợp (Nhiệm vụ 4.3). Sửa [DESIGN_DEFECT] đuôi `.test.tsx` → `.test.ts` trong design 03. Kiểm thử extension 21/21, webview 115/115 pass, typecheck + oxlint + oxfmt sạch, compile thành công. Báo cáo nghiệm thu: `docs/04_reports/phase3/005_phase3_1_dag_watcher_integration_report.md`.

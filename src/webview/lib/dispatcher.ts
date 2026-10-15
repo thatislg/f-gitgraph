@@ -6,6 +6,7 @@ import { handleCommitResult } from "./handler/commit-result";
 import { handleLoadBranches } from "./handler/load-branches";
 import { handleRefresh } from "./handler/refresh";
 import { handleViewDiff } from "./handler/view-diff";
+import { handleWorkspaceStatus } from "./handler/workspace-status";
 
 type Command = ResponseMessage["command"];
 
@@ -32,7 +33,8 @@ const handlers: Handlers = {
   commitAndPush: handleCommitResult,
   loadBranches: handleLoadBranches,
   refresh: handleRefresh,
-  viewDiff: handleViewDiff
+  viewDiff: handleViewDiff,
+  workspaceStatus: handleWorkspaceStatus
 };
 
 export function initDispatcher() {

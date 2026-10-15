@@ -13,6 +13,7 @@ import { CommitHoverPanel } from "@/webview/components/commit/CommitHoverPanel";
 import { CommitRow } from "@/webview/components/commit/CommitRow";
 import type { ColumnResize } from "@/webview/components/commit/useColumnResize";
 import { useColumnResize } from "@/webview/components/commit/useColumnResize";
+import { StagingArea } from "@/webview/components/staging/StagingArea";
 import {
   COMMIT_DETAILS_HEIGHT,
   GRAPH_PADDING,
@@ -20,11 +21,12 @@ import {
   LANE_WIDTH,
   PANEL_GAP,
   ROW_HEIGHT,
+  STAGING_AREA_HEIGHT,
   TABLE_HEADER_HEIGHT,
   UNCOMMITTED_CHANGES
 } from "@/webview/constants";
-import { toggleCommitDetails } from "@/webview/lib/actions";
-import { columnWidths, commitDetails, expandedCommit } from "@/webview/lib/stores";
+import { toggleCommitDetails, toggleStaging } from "@/webview/lib/actions";
+import { columnWidths, commitDetails, expandedCommit, inspectorMode } from "@/webview/lib/stores";
 import {
   BUFFER_SIZE,
   graphWindowStore,
@@ -192,6 +194,9 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
   const topSpacer = from * ROW_HEIGHT;
   const bottomSpacer = Math.max(0, (total - (from + rows.length)) * ROW_HEIGHT);
 
+  const panelHeight =
+    inspectorMode.value === "staging" ? STAGING_AREA_HEIGHT : COMMIT_DETAILS_HEIGHT;
+
   // Position the details panel directly below the selected row, offset by a fixed
   // PANEL_GAP so the row and panel neon borders sit adjacent without overlapping.
   // The gap is applied explicitly and uniformly (both below and above the row),
@@ -207,10 +212,10 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
           const rowBottom = rowTop + ROW_HEIGHT;
           const belowTop = rowBottom + PANEL_GAP;
           const rowsBelow = total - (from + expandedRow + 1);
-          if (rowsBelow * ROW_HEIGHT >= COMMIT_DETAILS_HEIGHT) {
+          if (rowsBelow * ROW_HEIGHT >= panelHeight) {
             return belowTop;
           }
-          const aboveTop = rowTop - COMMIT_DETAILS_HEIGHT - PANEL_GAP;
+          const aboveTop = rowTop - panelHeight - PANEL_GAP;
           return Math.max(TABLE_HEADER_HEIGHT, aboveTop);
         })();
 
@@ -287,10 +292,10 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
                   onHoverDwell={handleHoverDwell}
                   onHoverLeave={handleHoverLeave}
                   onAvatarClick={handleAvatarClick}
-                  onSelect={
+                  onSelect={() =>
                     row.hash === UNCOMMITTED_CHANGES
-                      ? undefined
-                      : () => toggleCommitDetails(row.hash)
+                      ? toggleStaging()
+                      : toggleCommitDetails(row.hash)
                   }
                 />
               </Fragment>
@@ -300,16 +305,22 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
         </tbody>
       </table>
 
-      {/* Overlay Inspector Panel: commit details float below the selected row
-          without expanding the table, keeping the graph geometry 100% intact
-          (BUG-EXPAND-01/02). It starts after the graph column so the branch
+      {/* Overlay Inspector Panel: commit details or the Staging Area float below the
+          selected row without expanding the table, keeping the graph geometry 100%
+          intact (BUG-EXPAND-01/02). It starts after the graph column so the branch
           lines stay visible. */}
       {expandedRow !== -1 && (
         <div
-          class="absolute right-0 z-10"
+          class="absolute right-0 z-40"
           style={`left: var(--col-graph); top: ${detailsPanelTop}px`}
         >
-          <CommitDetails details={commitDetails.value} />
+          {inspectorMode.value === "staging" ? (
+            <div style={`height: ${STAGING_AREA_HEIGHT}px; overflow-y: auto;`}>
+              <StagingArea />
+            </div>
+          ) : (
+            <CommitDetails details={commitDetails.value} />
+          )}
         </div>
       )}
 

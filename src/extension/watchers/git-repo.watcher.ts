@@ -5,8 +5,14 @@ import * as vscode from "vscode";
 import { rpcNotify } from "@/extension/rpc/rpc-notify";
 import { logger } from "@/extension/util/logger";
 
-const REFRESH_DELAY = 250;
+const REFRESH_DELAY = 150;
 const GIT_DATA = /^(HEAD|config|index|packed-refs|refs(?:\/.*)?)$/;
+
+// Bộ lọc thư mục rác & tệp tạm theo thiết kế Mục 3.2. Mỗi biến động trong các nhánh này
+// không mang thông tin trạng thái làm việc trực tiếp, chỉ gây bão sự kiện vô ích.
+const EXCLUDED_DIRS =
+  /(^|\/)(node_modules|vendor|packages|bin|obj|dist|out|target|\.vs|\.cache|\.tmp)(\/|$)/;
+const EXCLUDED_FILES = /(^|\/)(\.DS_Store|Thumbs\.db)$|\.tmp$/;
 
 let selectRepo: ((repo: string) => void) | undefined;
 let muteDepth = 0;
@@ -43,7 +49,9 @@ export function watchGitRepo(): vscode.Disposable {
       const relativePath = path.relative(repo, uri.fsPath).split(path.sep).join("/");
       if (
         relativePath.startsWith("../") ||
-        (relativePath.startsWith(".git/") && !GIT_DATA.test(relativePath.slice(5)))
+        (relativePath.startsWith(".git/") && !GIT_DATA.test(relativePath.slice(5))) ||
+        EXCLUDED_DIRS.test(relativePath) ||
+        EXCLUDED_FILES.test(relativePath)
       ) {
         return;
       }

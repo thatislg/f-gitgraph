@@ -13,6 +13,9 @@ export const TABLE_HEADER_HEIGHT = 32;
 /** Height of the commit details view. The graph is stretched by it when open. */
 export const COMMIT_DETAILS_HEIGHT = 250;
 
+/** Chiều cao tối đa của khung Staging Area khi hiển thị dưới dạng lớp phủ nổi. */
+export const STAGING_AREA_HEIGHT = 480;
+
 /**
  * Vertical gap kept between the selected commit row and the floating details
  * panel so their neon borders sit adjacent without overlapping. Applied
