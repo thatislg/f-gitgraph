@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { mergeGraphWindow } from "@/extension/sidecar/graph-merge";
+import {
+  buildUncommittedRow,
+  mergeGraphWindow,
+  shiftPathD,
+  UNCOMMITTED_CHANGES_HASH
+} from "@/extension/sidecar/graph-merge";
 import type { GitCommitNode } from "@/types";
 
 const node = (overrides: Partial<{ x: number; lane: number; color: number }> = {}) => ({
@@ -49,5 +54,42 @@ describe("mergeGraphWindow", () => {
     const rows = mergeGraphWindow(commits, new Map(), [node(), node()], 2);
     expect(rows[0]!.hash).toBe("c");
     expect(rows[1]!.hash).toBe("d");
+  });
+});
+
+describe("buildUncommittedRow", () => {
+  it("creates the synthetic uncommitted row at lane 0", () => {
+    const row = buildUncommittedRow();
+    expect(row.hash).toBe(UNCOMMITTED_CHANGES_HASH);
+    expect(row.metadata?.hash).toBe(UNCOMMITTED_CHANGES_HASH);
+    expect(row.lane).toBe(0);
+    expect(row.color).toBe(0);
+    expect(row.isMerge).toBe(false);
+    expect(row.isRoot).toBe(false);
+  });
+});
+
+describe("shiftPathD", () => {
+  it("shifts y coordinates of a vertical path down", () => {
+    const shifted = shiftPathD("M 16 18 V 42", 24);
+    expect(shifted).toBe("M 16 42 V 66");
+  });
+
+  it("shifts y coordinates of an orthogonal bend-at-child path", () => {
+    const shifted = shiftPathD("M 16 18 H 28 Q 36 18 36 24 V 42", 24);
+    expect(shifted).toBe("M 16 42 H 28 Q 36 42 36 48 V 66");
+  });
+
+  it("shifts y coordinates of an orthogonal bend-at-parent path", () => {
+    const shifted = shiftPathD("M 16 18 V 36 Q 16 42 22 42 H 36", 24);
+    expect(shifted).toBe("M 16 42 V 60 Q 16 66 22 66 H 36");
+  });
+
+  it("returns the string unchanged for a zero offset", () => {
+    expect(shiftPathD("M 16 18 V 42", 0)).toBe("M 16 18 V 42");
+  });
+
+  it("returns the string unchanged when empty", () => {
+    expect(shiftPathD("", 24)).toBe("");
   });
 });

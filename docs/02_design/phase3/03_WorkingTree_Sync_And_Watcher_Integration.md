@@ -114,6 +114,16 @@ Trong kiến trúc hiển thị của F-GitGraph, khi kho làm việc xuất hi�
   - Được vẽ bằng nét đứt kỹ thuật (`stroke-dasharray: 3 3`), tông màu xám chì kim loại (`#64748b` ở chế độ sáng và `#94a3b8` ở chế độ tối).
   - Biểu thị trạng thái "mầm" (Uncommitted Work-in-Progress) — một đối tượng đang chờ được đóng dấu thành commit chính thức.
 
+#### 2.1.1. Cơ Chế Chèn Dòng Mầm Từ Backend (Backend Injection)
+
+Dòng mầm `*` **không phải là commit thật** và **không nằm trong lịch sử commit** mà nhân F# Core Engine đọc được. Nó là một dòng tổng hợp do tầng cầu nối dữ liệu Extension Host (`GraphDataBridge`) tạo ra và chèn vào đỉnh danh sách commit trước khi trả về Webview. Cơ chế này phải tuân thủ nghiêm ngặt các nguyên tắc sau:
+
+1. **Điều kiện kích hoạt (Trigger Condition)**: Cầu nối đồng thời gọi bộ truy vấn trạng thái kho làm việc (Working Tree Status) ngay khi nạp hoặc làm mới đồ thị. Nếu kết quả trả về trạng thái **không sạch** (`isClean = false`, tức tồn tại ít nhất một tệp đã stage, chưa stage hoặc đang xung đột), cầu nối bật cờ `hasUncommitted` và chèn dòng `*`; ngược lại, khi kho sạch, cầu nối trả về đúng danh sách commit thật mà không chèn gì.
+2. **Vị trí và chỉ số (Placement & Indexing)**: Dòng `*` chiếm **hàng 0** (đỉnh đồ thị), làn 0, màu 0. Tổng số dòng (`commitCount`) trả về cho Webview được tăng thêm đúng **1** so với số commit thật. Toàn bộ commit thật bị dịch xuống đúng một dòng.
+3. **Bảo toàn hình học (Geometric Invariance)**: Nhân F# chỉ tính hình học cho commit thật. Vì vậy cầu nối phải tự dịch toàn bộ tọa độ Y của nút và chuỗi đường nối SVG xuống đúng **một chiều cao dòng (24 px)** để giữ nguyên quan hệ tương đối giữa các commit thật — tuyệt đối không sửa đổi nhân F# hay thay đổi tọa độ tương đối giữa chúng.
+4. **Dịch chỉ số cửa sổ (Window Index Translation)**: Khi Webview yêu cầu một cửa sổ dòng bằng chỉ số đã bao gồm dòng `*`, cầu nối phải dịch ngược chỉ số về hệ tọa độ commit thật trước khi gọi nhân F#, rồi chèn lại dòng `*` ở đầu khi cửa sổ bắt đầu từ hàng 0.
+5. **Metadata tổng hợp (Synthetic Metadata)**: Dòng `*` mang metadata tối thiểu có mã băm `*` để Webview nhận diện đúng loại nút `uncommitted` (biểu tượng bút chì) và hiển thị nhãn "Uncommitted Changes".
+
 ---
 
 ### 2.2. Cơ Chế Mở Khóa Tương Tác Click Trong `CommitTable` & `CommitRow`
@@ -470,6 +480,8 @@ Hạng mục này giải quyết trực tiếp yêu cầu của **Task 3.5: Test
 | `tests/extension/watchers/git-repo.watcher.test.ts`                | `git-repo.watcher.ts`                 | 1. **Kiểm thử 3 kênh lắng nghe**: Đảm bảo bắt chính xác sự kiện khi tệp trong `.git/index`, `.git/HEAD` và thư mục làm việc thay đổi.2. **Kiểm thử bộ lọc thư mục rác**: Tạo biến động trong `node_modules` và `.git/objects`, xác minh không có sự kiện nào lọt qua bộ lọc.3. **Kiểm thử cơ chế Debounce 150ms**: Phát sinh đồng thời 100 sự kiện tệp dồn dập trong khoảng thời gian 50ms; xác minh chỉ có đúng duy nhất 1 thông báo `repo.updated` được phát ra sau 150ms tính từ sự kiện cuối.4. **Kiểm thử Cổng Chặn MuteGate**: Gọi `muteGitRepoWatcher()`, kích hoạt sự kiện tệp; xác minh sự kiện bị hủy bỏ hoàn toàn.5. **Kiểm thử thời gian làm dịu (Cooling Window)**: Gọi `unmuteGitRepoWatcher()`; xác minh sự kiện phát sinh trong vòng 1500ms sau đó vẫn bị chặn an toàn. |
 | `tests/webview/components/commit/CommitTable.integration.test.tsx` | `CommitTable.tsx` & `CommitRow.tsx` | 1. **Mở khóa click dòng mầm**: Giả lập nhấp chuột vào dòng `UNCOMMITTED_CHANGES`; xác minh callback `onSelect` được kích hoạt và mở bảng Staging.2. **Kiểm thử tính bất biến hình học (Zero Distortion)**: Đo đạc tọa độ tâm nút lục giác và chuỗi đường cong Bézier SVG trước và sau khi nhấp mở bảng Staging; xác nhận sai lệch bằng 0 pixel tuyệt đối.3. **Chuyển đổi hai chế độ Inspector**: Click dòng mầm (hiện Staging), sau đó click dòng commit thường (chuyển sang CommitDetails), sau đó click lại dòng mầm (quay lại Staging trơn tru).4. **Điều hướng phím tắt**: Dùng phím Mũi tên di chuyển lên dòng mầm, bấm `Enter` để mở, bấm `Esc` để đóng bảng an toàn.                                                                                                                               |
 | `tests/integration/core-dev-loop.e2e.test.ts`                      | Toàn bộ vòng lặp Core Dev Loop      | 1. **Kịch bản E2E hoàn chỉnh**: Tạo tệp mới trên đĩa $\rightarrow$ Watcher phát hiện sau 150ms $\rightarrow$ Dòng mầm xuất hiện trên Webview $\rightarrow$ Click mở Staging $\rightarrow$ Bấm nút Stage tệp $\rightarrow$ Nhập tiêu đề commit $\rightarrow$ Bấm `Ctrl + Enter` $\rightarrow$ Tiến trình commit hoàn tất an toàn $\rightarrow$ Node commit mới xuất hiện trên đỉnh nhánh $\rightarrow$ Dòng mầm tự biến mất.2. **Kiểm thử an toàn dữ liệu**: Đảm bảo toàn bộ lệnh ghi đều có cờ `--`, không xảy ra hiện tượng Command Injection ngay cả khi tên tệp chứa khoảng trắng hoặc ký tự Unicode đặc biệt.                                                                                                                                                                                                                  |
+| `tests/backend/sidecar/graph-data-bridge.test.ts`                | `GraphDataBridge` (chèn dòng `*`)    | 1. **Kho bẩn**: Xác minh `initialize` chèn dòng `*` và tăng `commitCount` thêm 1 khi trạng thái kho không sạch.2. **Kho sạch**: Xác minh không chèn dòng `*` khi kho sạch.3. **Dời hình học**: Xác minh dòng `*` ở hàng 0, các commit thật dời xuống đúng 24px, đường nối SVG dời xuống đúng một dòng.4. **Dịch chỉ số cửa sổ**: Xác minh cửa sổ bắt đầu từ chỉ số khác 0 dịch đúng chỉ số commit thật và không chèn dòng `*`. |
+| `tests/backend/sidecar/graph-merge.test.ts` (mở rộng)          | `buildUncommittedRow` & `shiftPathD` | 1. **Dòng tổng hợp**: Xác minh `buildUncommittedRow` trả về hash `*`, làn 0, màu 0.2. **Dịch tọa độ Y**: Xác minh `shiftPathD` dịch đúng tọa độ Y cho chuỗi `M`/`V`/`Q`, giữ nguyên `H`, trả nguyên văn khi độ dời bằng 0. |
 
 ---
 
@@ -498,3 +510,11 @@ Hạng mục này giải quyết trực tiếp yêu cầu của **Task 3.5: Test
 |  8  | **Hover-to-Reveal rõ ràng**        | Cụm nút tác vụ ẩn ở trạng thái tĩnh, chỉ hiện khi rê chuột để chống ô nhiễm thị giác.    | **ĐẠT** |
 |  9  | **Bảo toàn hình học SVG 100%**   | Chiều cao dòng bảng commit cố định 24px, bảng Inspector nổi dạng absolute overlay.                  | **ĐẠT** |
 | 10 | **Có ma trận Unit Test chi tiết** | Liệt kê đầy đủ kịch bản kiểm thử từ unit test watcher đến tích hợp UI và luồng E2E.         | **ĐẠT** |
+
+---
+
+## 9. Lịch Sử Sửa Đổi (Revision History)
+
+| Ngày | Lý Do / Defect | Phần Bị Ảnh Hưởng |
+| :--- | :--- | :--- |
+| 2026-10-16 | `[DESIGN_DEFECT]` — Bản thiết kế gốc chỉ mô tả "backend cấp hash `*`" cho dòng Uncommitted Changes nhưng không đặc tả cơ chế chèn. Trong quá trình di trú đồ thị sang nhân F# (commit `94907ff`), logic `commits.unshift({ hash: "*", ... })` của `loadCommits.ts` đã bị xóa và không được tái hiện ở pipeline F# sidecar, khiến dòng `*` không bao giờ xuất hiện → UI không hiện Staging Area. | Mục 2.1 — bổ sung mục 2.1.1 mô tả cơ chế chèn dòng `*` từ tầng `GraphDataBridge` (trigger condition, placement/indexing, bảo toàn hình học 24px, dịch chỉ số cửa sổ, metadata tổng hợp). |

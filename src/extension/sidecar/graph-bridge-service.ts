@@ -2,6 +2,7 @@ import { simpleGit, type SimpleGit } from "simple-git";
 import * as vscode from "vscode";
 
 import { getCommitMetadata } from "@/backend/queries/commitMetadata";
+import { getWorkspaceStatus } from "@/backend/queries/workspaceStatus";
 import { config } from "@/extension/config";
 import { rpcNotify } from "@/extension/rpc/rpc-notify";
 import { getSidecar } from "@/extension/sidecar/graph-service";
@@ -41,8 +42,17 @@ export async function loadGraph(
   });
   const metadataProvider: MetadataProvider = (hashes) =>
     getCommitMetadata(git, hashes, config.dateType(), true);
+  const statusProvider = async () => {
+    const status = await getWorkspaceStatus(git);
+    // Tôn trọng cấu hình showUncommittedChanges: khi tắt, xem kho như sạch để
+    // không chèn dòng "Uncommitted Changes" (giảm thời gian nạp trên kho lớn).
+    if (!config.showUncommittedChanges()) {
+      return { ...status, isClean: true };
+    }
+    return status;
+  };
 
-  bridge = new GraphDataBridge(getSidecar(), metadataProvider);
+  bridge = new GraphDataBridge(getSidecar(), metadataProvider, statusProvider);
   const result = await bridge.initialize(repo, branch ?? undefined, commitOrdering ?? undefined);
 
   if (refWatcher === undefined) {
