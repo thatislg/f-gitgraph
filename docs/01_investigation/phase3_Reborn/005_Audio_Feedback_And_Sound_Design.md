@@ -2,7 +2,7 @@
 
 > **Dự án**: F-GitGraph Reborn  
 > **Ngôn ngữ âm thanh**: **"Cyber-Lab Micro-Acoustics"** — Phản hồi âm thanh vi mô tinh tế, dịu tai, đậm chất xúc giác cơ khí công nghệ cao (Tactile & High-Tech Lab Instrument).  
-> **Trạng thái**: Bản thảo sơ khởi (Concept Draft) — Dự kiến hoàn thiện và tích hợp sau khi nền tảng Phase 3.1 & 3.2 đi vào vận hành ổn định.
+> **Trạng thái**: Đã được chuẩn hóa thành tài liệu thiết kế kỹ thuật chính thức tại: [docs/02_design/phase3/04_Audio_Feedback_And_Sound_Design.md](../../02_design/phase3/04_Audio_Feedback_And_Sound_Design.md) (tuân thủ triết lý Design by Word, Zero Code Samples).
 
 ---
 
@@ -50,102 +50,20 @@ Trong trải nghiệm người dùng hiện đại (được tiên phong bởi c
 
 ---
 
-## 4. Đoạn Mã Mẫu Bộ Tổng Hợp Âm Thanh Bằng Web Audio API (Draft Code)
+## 4. Nguyên Lý Kỹ Thuật Tổng Hợp Âm Thanh Web Audio API (Chuẩn Hóa Design by Word)
 
-```typescript
-// src/webview/utils/soundEffects.ts
-// Bộ tổng hợp âm thanh vi mô bằng Web Audio API - Zero External Files
+> [!IMPORTANT]
+> **Tuân thủ quy chuẩn RULE-TECHNICAL-DESIGN-BY-WORD**: Đoạn mã nháp (Draft Code) trước đây đã được gỡ bỏ hoàn toàn khỏi tài liệu. Toàn bộ giải thuật tổng hợp âm thanh được mô hình hóa bằng nguyên lý kỹ thuật và toán học sóng âm:
 
-class SoundFxEngine {
-  private ctx: AudioContext | null = null;
-  private enabled = true;
-  private volume = 0.35;
+1. **Khởi Tạo Lười & Cơ Chế Phục Hồi Ngữ Cảnh (Lazy AudioContext & Resume)**:
+   - Ngữ cảnh `AudioContext` không được tạo sẵn mà chỉ khởi tạo khi nhận cử chỉ tương tác đầu tiên của người dùng trên Webview nhằm tuân thủ chính sách Autoplay Policy của trình duyệt.
+   - Khi trạng thái ngữ cảnh bị tạm đình chỉ (`state === "suspended"`), hệ thống chủ động gọi phương thức kích hoạt lại (`resume`) trước khi kết nối các nút dao động.
+2. **Cấu Trúc Điều Biến Tần Số & Phong Bì Biên Độ (Frequency & Gain Modulation)**:
+   - Thay vì nạp tệp âm thanh ghi sẵn, âm thanh được tạo ra bằng các nút dao động sóng Sine và sóng Triangle kết hợp bộ lọc thông thấp (`BiquadFilterNode`).
+   - Đường cong biên độ sử dụng hàm số mũ (`exponentialRampToValueAtTime`) đưa âm lượng về mức cận 0 ($0.001$) trong thời lượng từ $25\text{ms}$ đến $190\text{ms}$, triệt tiêu hoàn toàn tiếng nổ lách tách do ngắt sóng đột ngột.
+3. **Đặc Tả Chi Tiết Từng Âm Thanh**:
+   - Vui lòng xem bản thiết kế kỹ thuật chuẩn hóa đầy đủ tại: [04. Thiết Kế Phản Hồi Âm Thanh & Âm Học Vi Mô Cyber-Lab](../../02_design/phase3/04_Audio_Feedback_And_Sound_Design.md).
 
-  private getContext(): AudioContext | null {
-    if (!this.enabled) return null;
-    if (!this.ctx && typeof window !== "undefined") {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AudioCtx) this.ctx = new AudioCtx();
-    }
-    if (this.ctx && this.ctx.state === "suspended") {
-      void this.ctx.resume();
-    }
-    return this.ctx;
-  }
-
-  /** Âm thanh chốt cơ khí khi Commit thành công */
-  playCommitSuccess() {
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const now = ctx.currentTime;
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(750, now);
-    osc.frequency.exponentialRampToValueAtTime(180, now + 0.08);
-
-    gain.gain.setValueAtTime(this.volume * 0.8, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 0.08);
-  }
-
-  /** Âm thanh thăng hoa khi Push code lên server thành công */
-  playPushSuccess() {
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    const now = ctx.currentTime;
-    [523.25, 783.99].forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const startTime = now + idx * 0.07;
-
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, startTime);
-
-      gain.gain.setValueAtTime(this.volume * 0.6, startTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.12);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(startTime);
-      osc.stop(startTime + 0.12);
-    });
-  }
-
-  /** Cảnh báo trầm ấm khi gặp xung đột (Merge Conflict) */
-  playConflictWarning() {
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    const now = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(146.83, now); // D3
-
-    gain.gain.setValueAtTime(this.volume * 0.9, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 0.25);
-  }
-}
-
-export const soundFx = new SoundFxEngine();
-```
 
 ---
 

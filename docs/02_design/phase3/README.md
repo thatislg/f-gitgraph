@@ -30,3 +30,9 @@ Thư mục này lưu trữ toàn bộ hệ thống tài liệu thiết kế kỹ
 3. **[03. Tích Hợp Đồng Bộ Working Tree & File Watcher (03_WorkingTree_Sync_And_Watcher_Integration.md)](03_WorkingTree_Sync_And_Watcher_Integration.md)**:
    - Cơ chế click chọn dòng "Uncommitted changes" trên đồ thị để mở Staging Area & Composer mà không phá vỡ hình học SVG.
    - Tích hợp bộ lắng nghe sự kiện `git-repo.watcher.ts` với cơ chế Debounce 150ms chống quá tải khi lưu nhiều tệp.
+
+4. **[04. Thiết Kế Phản Hồi Âm Thanh & Âm Học Vi Mô Cyber-Lab (04_Audio_Feedback_And_Sound_Design.md)](04_Audio_Feedback_And_Sound_Design.md)**:
+   - Kiến trúc bộ tổng hợp sóng âm vi mô không tệp tin ngoại vi (Zero-Asset Overhead Web Audio Engine) cư trú thuần túy trong Webview UI.
+   - Bản đồ sự kiện âm thanh "xúc giác kỹ thuật số": Chốt cơ khí Leica (`commit.success`), hợp âm thăng hoa quãng 5 (`push.success`), gắp vật lý (`file.stage`), và xung trầm ấm (`conflict.detected`).
+   - Cài đặt VS Code (`f-gitgraph.soundEffects.enabled`, `f-gitgraph.soundEffects.volume`), nút ngắt âm nhanh trên UI và cơ chế chống ô nhiễm âm thanh (Cooldown 120ms, Polyphony limit = 2).
+
