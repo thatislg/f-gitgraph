@@ -8,7 +8,7 @@
 
 ---
 
-## 1. 7 Nguyên Tắc Bất Biến Trong Thiết Kế Kỹ Thuật (7 Invariant Design Principles)
+## 1. 8 Nguyên Tắc Bất Biến Trong Thiết Kế Kỹ Thuật (8 Invariant Design Principles)
 
 ### Nguyên Tắc 1: Triết Lý "Design by Word" Tuyệt Đối (No Code In Specs)
 - **Đặc tả bằng ngôn ngữ tự nhiên**: Mọi tài liệu thiết kế phải tập trung giải thích kiến trúc phân tầng, ranh giới an toàn, hành vi nghiệp vụ, mô hình dữ liệu, sơ đồ tuần tự và tương tác người dùng bằng ngôn ngữ tự nhiên chuẩn xác, rõ ràng và mạch lạc.
@@ -68,6 +68,18 @@ Khi quá trình triển khai hoặc kiểm thử phát hiện lỗi bắt nguồ
 1. **Cập nhật trực tiếp bản thiết kế**: Mở file thiết kế liên quan trong `docs/02_design/`, sửa lại đặc tả cho đúng và khả thi.
 2. **Ghi nhật ký thay đổi (Change Log)**: Ghi rõ tại đầu tệp thiết kế ngày giờ, lý do sửa đổi, vấn đề kỹ thuật đã phát hiện và phiên bản tài liệu.
 3. **Đồng bộ hợp đồng**: Cập nhật đồng bộ các file kiểu dữ liệu (`src/types/`) và ma trận test trước khi viết lại mã nguồn.
+
+### Nguyên Tắc 8: Thiết Kế Dựa Trên Hợp Đồng I/O (Contract-First Design) & Tính Truy Vết Ngược (Traceability)
+- **Tư duy Hộp Đen (Black-Box I/O)**: Mọi chức năng, module, hoặc Task kỹ thuật phải được định nghĩa bằng ranh giới Input/Output rõ ràng (kiểu dữ liệu tham số đầu vào, kiểu dữ liệu trả về, các kiểu lỗi) trước khi bất kỳ dòng code logic nào được viết.
+- **Tính Truy Vết Hai Chiều (Bidirectional Traceability)**:
+  - *Thiết kế sinh ra Task*: Mọi Task trong bảng tiến độ (`docs/03_progess/`) hoặc GitHub Issue phải chỉ rõ `Design Ref` (liên kết đến đúng Mục/Chương trong tài liệu thiết kế).
+  - *Code phục vụ Task*: Mọi hàm, component và test suite trong mã nguồn phải truy vết ngược được về đúng Task và Thiết kế đã sinh ra nó.
+  - Tuyệt đối không code những tính năng không có trong thiết kế, và không viết thiết kế mà không truy vết được tới mục tiêu của Milestone.
+- **Đường Ống Khép Kín (Closed-Loop Pipeline)**:
+  $$\text{Yêu cầu Task} \;\xrightarrow{\text{I/O là gì?}}\; \text{Đối chiếu Thiết kế} \;\xrightarrow{\text{Đã đủ chưa?}}\; \text{Viết Test Cases} \;\xrightarrow{\text{MCP Tools}}\; \text{Code F\# / TS} \;\longrightarrow\; \text{Report}$$
+  - **Không bao giờ code nếu chưa có Test.**
+  - **Không bao giờ viết Test nếu Thiết kế chưa rõ Input/Output.**
+  - **Không bao giờ triển khai Task nếu Thiết kế chưa bao quát hết bài toán.**
 
 ---
 
@@ -141,12 +153,74 @@ Liệt kê các tiêu chuẩn định lượng bắt buộc để nghiệm thu b
 
 ---
 
-## 3. Bảng Tiêu Chí Đánh Giá Chất Lượng Thiết Kế (Design Quality Gate)
+## 3. Quy Trình Thẩm Định Thiết Kế & Chuẩn Hóa Task Hộp Đen (Design Verification Gate & SOP)
 
-Trước khi chuyển một bản thiết kế sang giai đoạn lập trình (Implementation), AI Thiết Kế hoặc Kỹ Sư phải tự kiểm tra theo Checklist 10 điểm sau:
+Quy trình chuẩn (SOP) này giải quyết triệt để bài toán: **AI làm lệch hướng, code thừa thãi, hoặc thiết kế một đằng làm một nẻo**.
+
+### Bước 1: Chuẩn Hóa Mỗi Progress Task Thành Một "Hộp Đen I/O" (Black-Box Task Format)
+Khi lập kế hoạch hoặc chia nhỏ tiến độ trong `docs/03_progess/` hoặc tạo GitHub Issues, **tuyệt đối không viết chung chung**. Bắt buộc định nghĩa Task theo đúng format hộp đen 4 thành phần:
+
+```markdown
+### Task X.Y: [Tên Công Việc Cụ Thể]
+- **Mục tiêu:** [Mô tả ngắn gọn kết quả cần đạt được của hàm/component/module].
+- **Input:** 
+  - `param1`: `Type1` (Mô tả dữ liệu đầu vào và ràng buộc).
+  - `param2`: `Type2` (Mô tả dữ liệu đầu vào và ràng buộc).
+- **Output:** 
+  - `Result<SuccessType, ErrorType>` (Kiểu dữ liệu trả về và toàn bộ lỗi có thể xảy ra).
+- **Thiết kế tham chiếu (Design Ref):** Mục X.Y trong file `docs/02_design/...` (Bảng hợp đồng, thuật toán, ranh giới an toàn).
+```
+
+> [!CRITICAL]
+> **Điểm Mấu Chốt**: Nếu một Task trong tiến độ mà **chưa điền được Input và Output cụ thể**, nghĩa là Task đó **chưa đủ độ chín để thực thi**. Nghiêm cấm bắt tay vào code! Phải quay lại làm rõ thiết kế trước.
+
+---
+
+### Bước 2: Trạm Thẩm Định Thiết Kế (Design Verification Gate)
+Trước khi cho phép AI hoặc kỹ sư bắt đầu viết code cho bất kỳ Task nào, bắt buộc phải tự đối chiếu thiết kế và trả lời **3 câu hỏi kiểm định**:
+
+1. **Đã có đủ Type (Kiểu dữ liệu) để biểu diễn Input và Output chưa?**
+   - Đã định nghĩa đầy đủ các Interface, Type, Union Types, Error Types trong `src/types/` chưa?
+2. **Thiết kế đã xử lý hết các trường hợp biên (Edge Cases) chưa?**
+   - Đã tính đến trường hợp: số âm, chuỗi rỗng, NUL byte (`\0`), danh sách rỗng, tệp nhị phân, timeout, mất kết nối mạng, khóa tệp (`.git/index.lock`), ký tự đặc biệt/Unicode chưa?
+3. **Thiết kế có yêu cầu gọi dữ liệu/hàm nào mà hệ thống HIỆN TẠI chưa có không?**
+   - Các API, module phụ thuộc đã tồn tại và sẵn sàng chưa? Nếu chưa có, đã có Task nào tạo phụ thuộc đó trước chưa?
+
+**XỬ LÝ KẾT QUẢ THẨM ĐỊNH**:
+- ❌ **NẾU CÒN THIẾU**: DỪNG LẠI NGAY LẬP TỨC! Không được viết code! Lập tức báo cáo điểm thiếu của Thiết kế và đề xuất bổ sung vào file thiết kế tương ứng.
+- ✅ **NẾU ĐÃ ĐỦ**: Mới được phép bắt tay vào viết Test cases theo phương pháp TDD!
+
+---
+
+### Bước 3: Sức Mạnh Cộng Hưởng Với F# & TypeScript (Type-Driven Development)
+Tận dụng hệ thống Type mạnh mẽ của **F#** (và TypeScript Strict Mode) để thiết kế bằng Type trước khi code hàm:
+
+1. **Thiết kế chữ ký kiểu dữ liệu (Type Signature First)**:
+   Viết chữ ký hàm I/O thuần túy, chưa cần code logic:
+   - Trong F#:
+     ```fsharp
+     // Bản thiết kế I/O thuần túy
+     type CalculateFee = MemberCard -> Order -> Result<Fee, BillingError>
+     type SolveDagLayout = CommitHistory -> LayoutOptions -> Result<DagMatrix, LayoutError>
+     ```
+   - Trong TypeScript:
+     ```typescript
+     type StageFileAction = (repoPath: string, filePath: string) => Promise<Result<void, GitCliError>>;
+     ```
+2. **Đối chiếu Task & Type**:
+   - Nhìn vào Task: *"Cần tính toán DAG layout"*.
+   - Đối chiếu với Type: *"Input cần `CommitHistory` và `LayoutOptions`, Output trả về `Result<DagMatrix, LayoutError>`. Thiết kế này đã phủ kín các lỗi tiềm ẩn chưa? Đã đủ rồi!"*
+3. **Thực thi logic**:
+   - Sau khi đối chiếu hoàn tất, chỉ việc điền phần thân hàm để thỏa mãn đúng "khung" I/O đã thiết kế.
+
+---
+
+## 4. Bảng Tiêu Chí Đánh Giá Chất Lượng Thiết Kế (Design Quality Gate 12 Tiêu Chí)
+
+Trước khi chuyển một bản thiết kế sang giai đoạn lập trình (Implementation), AI Thiết Kế hoặc Kỹ Sư phải tự kiểm tra theo Checklist 12 điểm sau:
 
 | STT | Tiêu Chí Kiểm Tra (Checklist) | Yêu Cầu Đạt Chuẩn | Trạng Thái |
-| :-: | :--- | :--- | :---: |
+| :-: | :--- | :--- | :--- |
 | 1 | **Không có code mẫu** | Toàn bộ tài liệu viết bằng ngôn ngữ tự nhiên, không có snippet code mẫu nào. | Đạt / Chưa |
 | 2 | **Ranh giới Webview sạch** | Không yêu cầu Webview gọi bất kỳ API hệ điều hành hay module Node.js nào. | Đạt / Chưa |
 | 3 | **Ủy thác Git CLI an toàn** | 100% lệnh ghi gọi qua `git.exe`, luôn có cờ `--`, không ghi trực tiếp `.git/`. | Đạt / Chưa |
@@ -157,5 +231,8 @@ Trước khi chuyển một bản thiết kế sang giai đoạn lập trình (I
 | 8 | **Hover-to-Reveal rõ ràng** | Các nút tác vụ phụ được quy định ẩn khi tĩnh, chỉ hiện khi rê chuột. | Đạt / Chưa |
 | 9 | **Bảo toàn hình học SVG** | Tính năng mới không can thiệp vào kích thước, tọa độ các node đồ thị cũ. | Đạt / Chưa |
 | 10 | **Có ma trận Unit Test** | Đã liệt kê chi tiết từng kịch bản kiểm thử cho từng component trong ma trận. | Đạt / Chưa |
+| 11 | **Contract-First I/O** | 100% các task con được đặc tả theo format Hộp Đen (Input, Output, Types rõ ràng). | Đạt / Chưa |
+| 12 | **Đạt trạm thẩm định (Gate)** | Đã vượt qua 3 câu hỏi kiểm định: đủ Types, bao quát Edge cases, sẵn sàng dependencies. | Đạt / Chưa |
 
-*Chỉ khi đạt đủ 10/10 tiêu chí trên, tài liệu thiết kế mới được phê duyệt để bắt đầu triển khai mã nguồn.*
+*Chỉ khi đạt đủ 12/12 tiêu chí trên, tài liệu thiết kế mới được phê duyệt để bắt đầu triển khai mã nguồn.*
+

@@ -5,14 +5,16 @@ Tài liệu này đặc tả chi tiết kiến trúc tích hợp hệ thống, c
 > [!NOTE]
 > Mọi nội dung trong tài liệu này tuân thủ nguyên tắc: thiết kế bằng ngôn ngữ tự nhiên (**Design by Word**), tập trung vào kiến trúc tích hợp hệ thống, nguyên tắc bảo toàn hình học, thuật toán điều phối thời gian thực và trải nghiệm luồng làm việc; tuyệt đối không sử dụng mã nguồn mẫu dưới bất kỳ hình thức nào.
 >
-> 📌 **GitHub Tracking**: [Epic #36 - F# DAG Integration & File Watcher](https://github.com/thatislg/f-gitgraph/issues/36) (Gồm 6 tasks con: [#37](https://github.com/thatislg/f-gitgraph/issues/37) đến [#42](https://github.com/thatislg/f-gitgraph/issues/42))
+> 📌 **GitHub Tracking**: [Epic #36 - F# DAG Integration &amp; File Watcher](https://github.com/thatislg/f-gitgraph/issues/36) (Gồm 6 tasks con: [#37](https://github.com/thatislg/f-gitgraph/issues/37) đến [#42](https://github.com/thatislg/f-gitgraph/issues/42))
 
 ---
 
 ## 1. Tầm Nhìn, Mục Tiêu & Ranh Giới An Toàn 4 Tầng
 
 ### 1.1. Mục Tiêu Cốt Lõi Của Bản Thiết Kế
+
 Trong quy trình làm việc hàng ngày của lập trình viên, vòng lặp phát triển cốt lõi (Core Dev Loop) diễn ra liên tục:
+
 1. Chỉnh sửa tệp mã nguồn trong trình soạn thảo.
 2. Lưu tệp và quan sát biến động phản ánh tức thời lên giao diện Git Client mà không cần thao tác bấm nút làm mới thủ công (Manual Refresh).
 3. Nhấp chọn dòng thay đổi chưa commit để mở không gian làm việc Staging.
@@ -88,6 +90,7 @@ graph TD
 
 > [!IMPORTANT]
 > **Nguyên Tắc Bất Khả Xâm Phạm Về Hình Học Đồ Thị**:
+>
 > - Toàn bộ hệ thống đồ thị SVG đã được hoàn thiện từ Phase 1 — bao gồm nút lục giác `HexagonNode.tsx`, đường viền cắt ảnh đại diện tác giả (`clipPath`), tương tác phóng to vi mô 1.15× khi rê chuột, tương tác phóng to cực đại 5.0× khi nhấp chuột, vầng sáng Neon Ambient Gradient mềm mại và các đường cong rẽ nhánh Bézier do nhân F# Core Engine tính toán — **phải được bảo toàn nguyên vẹn 100%**.
 > - Tuyệt đối không chèn thêm phần tử DOM dạng dòng bảng (Table Row) có chiều cao biến động làm đẩy xô lệch các dòng commit bên dưới.
 > - Khối `StagingArea` & `CommitComposer` bắt buộc phải hoạt động dưới cơ chế **Bảng Lớp Phủ Nổi Tuyệt Đối (Absolute Overlay Inspector Panel)**:
@@ -102,7 +105,9 @@ graph TD
 Hạng mục này giải quyết trực tiếp yêu cầu của **Task 3.1: Mở khóa click dòng UNCOMMITTED_CHANGES** ([Issue #37](https://github.com/thatislg/f-gitgraph/issues/37)) và **Task 3.2: Kiểm soát bất biến hình học đồ thị DAG** ([Issue #38](https://github.com/thatislg/f-gitgraph/issues/38)).
 
 ### 2.1. Bản Chất Kỹ Thuật Của Dòng Mầm Trên Đồ Thị
+
 Trong kiến trúc hiển thị của F-GitGraph, khi kho làm việc xuất hiện ít nhất một tệp tin bị chỉnh sửa, thêm mới hoặc xóa bỏ chưa được đóng gói vào commit, hệ thống sẽ chèn một dòng đặc biệt trên đỉnh đồ thị:
+
 - **Định danh băm (Hash Identifier)**: Sử dụng chuỗi ký tự hằng số đặc biệt là dấu sao (`*`), được định nghĩa qua hằng số toàn cục `UNCOMMITTED_CHANGES = "*"`.
 - **Hình thái hiển thị nút đồ thị**:
   - Nút lục giác tại dòng này không mang ảnh đại diện của tác giả hay mã commit SHA rút gọn.
@@ -197,6 +202,7 @@ stateDiagram-v2
 Hạng mục này giải quyết trực tiếp yêu cầu của **Task 3.3: Debounce 150ms trong git-repo.watcher.ts** ([Issue #39](https://github.com/thatislg/f-gitgraph/issues/39)).
 
 ### 3.1. Ba Kênh Lắng Nghe Sự Kiện Cốt Lõi (Core Watch Channels)
+
 Bộ giám sát tệp tin đóng vai trò là hệ thần kinh thụ cảm của F-GitGraph, theo dõi biến động hệ thống thông qua `vscode.workspace.createFileSystemWatcher` với mẫu bao phủ toàn diện:
 
 1. **Kênh 1: Giám Sát Chỉ Mục Git (`.git/index`)**:
@@ -217,26 +223,29 @@ Bộ giám sát tệp tin đóng vai trò là hệ thần kinh thụ cảm của
 
 Để bảo đảm hiệu năng tối đa và ngăn ngừa hiện tượng kích hoạt thông báo giả, bộ giám sát cài đặt bộ lọc đường dẫn nghiêm ngặt:
 
-| Nhóm Tệp / Thư Mục                  | Danh Mục Mẫu Loại Trừ (Ignore Patterns)                                                | Lý Do Kỹ Thuật Bắt Buộc Phải Loại Trừ                                                                            |
-| :----------------------------------- | :-------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
-| **Thư viện phụ thuộc**               | `**/node_modules/**`, `**/vendor/**`, `**/packages/**`                                 | Chứa hàng chục nghìn tệp mã nguồn bên ngoài, gây bão sự kiện làm đóng băng tiến trình khi chạy lệnh cài đặt gói.  |
-| **Dữ liệu nội bộ Git không cần thiết** | `.git/objects/**`, `.git/logs/**`, `.git/hooks/**`                                      | Các đối tượng blob/tree nén sinh ra liên tục khi thao tác Git, không chứa thông tin trạng thái làm việc trực tiếp.|
-| **Tệp xuất bản & tệp nhị phân build**| `**/bin/**`, `**/obj/**`, `**/dist/**`, `**/out/**`, `**/target/**`, `**/.vs/**`        | Trình biên dịch tạo mới và ghi đè liên tục trong quá trình build dự án.                                           |
-| **Tệp tạm hệ thống & IDE**           | `**/.cache/**`, `**/.tmp/**`, `**/.DS_Store`, `**/Thumbs.db`, `**/*.tmp`                | Các tệp rác của hệ điều hành tự động sinh ra và tự biến mất.                                                      |
+| Nhóm Tệp / Thư Mục                              | Danh Mục Mẫu Loại Trừ (Ignore Patterns)                                                  | Lý Do Kỹ Thuật Bắt Buộc Phải Loại Trừ                                                                                             |
+| :-------------------------------------------------- | :------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Thư viện phụ thuộc**                    | `**/node_modules/**`, `**/vendor/**`, `**/packages/**`                                 | Chứa hàng chục nghìn tệp mã nguồn bên ngoài, gây bão sự kiện làm đóng băng tiến trình khi chạy lệnh cài đặt gói. |
+| **Dữ liệu nội bộ Git không cần thiết** | `.git/objects/**`, `.git/logs/**`, `.git/hooks/**`                                     | Các đối tượng blob/tree nén sinh ra liên tục khi thao tác Git, không chứa thông tin trạng thái làm việc trực tiếp.      |
+| **Tệp xuất bản & tệp nhị phân build**   | `**/bin/**`, `**/obj/**`, `**/dist/**`, `**/out/**`, `**/target/**`, `**/.vs/**` | Trình biên dịch tạo mới và ghi đè liên tục trong quá trình build dự án.                                                     |
+| **Tệp tạm hệ thống & IDE**                | `**/.cache/**`, `**/.tmp/**`, `**/.DS_Store`, `**/Thumbs.db`, `**/*.tmp`           | Các tệp rác của hệ điều hành tự động sinh ra và tự biến mất.                                                               |
 
 ---
 
 ### 3.3. Thuật Toán Debounce 150ms Chống Bão Sự Kiện (Anti-Event Storm Algorithm)
 
 #### 1. Bài Toán Kỹ Thuật (Event Storm Problem)
+
 Khi lập trình viên thực hiện thao tác lưu toàn bộ tệp mở (`Ctrl + K, S` / `Save All`), chạy công cụ định dạng mã nguồn tự động (`Prettier`), hoặc khi tiến trình `git rebase` áp dụng hàng chục commit liên tiếp, hệ thống tệp có thể phát sinh hàng trăm sự kiện `changed`/`created` dồn dập chỉ trong vòng 20 - 50 mili-giây.
 
 Nếu mỗi sự kiện đơn lẻ đều kích hoạt một lệnh truy vấn `git status` độc lập:
+
 - Extension Host sẽ bị nghẽn hàng đợi tiến trình (Process Starvation).
 - CPU tăng vọt 100%, gây đơ giật hoàn toàn trải nghiệm cuộn và vẽ đồ thị trên Webview.
 - Xảy ra hiện tượng tranh chấp đọc ghi dữ liệu tệp nhị phân `.git/index.lock`.
 
 #### 2. Giải Thuật Debounce 150ms Bằng Ngôn Ngữ Tự Nhiên
+
 Hệ thống thiết lập một máy trạng thái đồng hồ đếm ngược với khoảng thời gian ổn định là **150 mili-giây**:
 
 ```
@@ -265,6 +274,7 @@ Kích hoạt:      ────────────────────�
 
 > [!TIP]
 > **Tại Sao Lại Là 150ms? (The Sweet Spot)**:
+>
 > - Dưới 100ms: Quá ngắn, chưa đủ gom hết các đợt ghi tệp dồn dập của trình biên dịch hoặc thao tác `Save All`.
 > - Trên 300ms: Quá dài, lập trình viên sẽ cảm nhận được độ trễ thị giác khi chuyển cửa sổ từ trình soạn thảo sang F-GitGraph.
 > - **150ms** là ngưỡng tối ưu hoàn hảo giữa tính phản hồi tức thời của con người (< 200ms) và năng lực gom sự kiện triệt để của hệ thống.
@@ -274,6 +284,7 @@ Kích hoạt:      ────────────────────�
 ### 3.4. Thuật Toán Chặn Đứng Vòng Lặp Tự Kích Hoạt (Anti-Self-Triggering Event Loop)
 
 Một vấn đề chí mạng trong các ứng dụng Git Client là hiện tượng **vòng lặp phản hồi vô tận (Self-Event Feedback Loop)**:
+
 - Người dùng bấm nút Stage trên giao diện F-GitGraph $\rightarrow$ `GitCliMutator` chạy lệnh `git add` $\rightarrow$ Tệp `.git/index` bị ghi đè $\rightarrow$ File Watcher phát hiện biến động trên `.git/index` $\rightarrow$ Watcher kích hoạt truy vấn `git status` $\rightarrow$ Webview render lại $\rightarrow$ Lập trình viên tương tác tiếp $\rightarrow$ Vòng lặp kéo dài làm lãng phí chu kỳ xử lý vô ích.
 
 Để loại bỏ triệt để hiện tượng này, F-GitGraph triển khai cơ chế **Cổng Chặn Độ Sâu (Mute Depth Gate)** phối hợp với **Thời Gian Làm Dịu (Cooling Window)**:
@@ -326,29 +337,29 @@ Hạng mục này giải quyết trực tiếp yêu cầu của **Task 3.4: Đ�
 
 ### 4.1. Hợp Đồng Thông Báo Sự Kiện Backend $\rightarrow$ Webview (Server Events)
 
-| Tên Định Danh Thông Báo (Event Name) | Cấu Trúc Dữ Liệu Payload                                                                                                                                                                          | Điều Kiện Kích Hoạt                                                                                                                                  | Hành Vi Xử Lý Tương Ứng Của Tầng Webview                                                                                             |
-| :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
-| `repo.updated`                       | - `path`: Chuỗi đường dẫn tuyệt đối đến thư mục gốc của kho làm việc (`string`).                                                                                                                 | Phát sinh khi File Watcher hoàn tất chu kỳ Debounce 150ms sau biến động nhánh hoặc chỉ mục.                                                          | Webview kiểm tra nếu kho hiện tại trùng khớp, tự động phát lệnh yêu cầu nạp lại trạng thái mới nhất.                                  |
-| `workspace.statusChanged`            | - `repoPath`: Chuỗi đường dẫn kho (`string`)<br>- `branch`: Thông tin nhánh (`BranchMetadata`)<br>- `staged`: Mảng tệp Staged (`WorkspaceFileRecord[]`)<br>- `unstaged`: Mảng tệp Unstaged (`WorkspaceFileRecord[]`) | Phát sinh khi có kết quả bóc tách từ lệnh `workspaceStatus`.                                                                                         | Cập nhật trực tiếp `stagingStore`: tính lại số lượng tệp, cập nhật giao diện Staging Area và ẩn/hiện dòng mầm `UNCOMMITTED_CHANGES`.  |
+| Tên Định Danh Thông Báo (Event Name) | Cấu Trúc Dữ Liệu Payload                                                                                                                                                                                                        | Điều Kiện Kích Hoạt                                                                               | Hành Vi Xử Lý Tương Ứng Của Tầng Webview                                                                                                           |
+| :---------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `repo.updated`                          | - `path`: Chuỗi đường dẫn tuyệt đối đến thư mục gốc của kho làm việc (`string`).                                                                                                                                | Phát sinh khi File Watcher hoàn tất chu kỳ Debounce 150ms sau biến động nhánh hoặc chỉ mục. | Webview kiểm tra nếu kho hiện tại trùng khớp, tự động phát lệnh yêu cầu nạp lại trạng thái mới nhất.                                    |
+| `workspace.statusChanged`               | - `repoPath`: Chuỗi đường dẫn kho (`string`)- `branch`: Thông tin nhánh (`BranchMetadata`)- `staged`: Mảng tệp Staged (`WorkspaceFileRecord[]`)- `unstaged`: Mảng tệp Unstaged (`WorkspaceFileRecord[]`) | Phát sinh khi có kết quả bóc tách từ lệnh `workspaceStatus`.                                 | Cập nhật trực tiếp `stagingStore`: tính lại số lượng tệp, cập nhật giao diện Staging Area và ẩn/hiện dòng mầm `UNCOMMITTED_CHANGES`. |
 
 ---
 
 ### 4.2. Hợp Đồng Yêu Cầu Hành Động Webview $\rightarrow$ Backend (Action Requests)
 
-| Tên Định Danh Hành Động (Action Name) | Cấu Trúc Tham Số Đầu Vào (Payload)                                                                                    | Cấu Trúc Dữ Liệu Trả Về (Response)                                                                         | Mô Tả Nghiệp Vụ                                                                                                                                                     |
-| :------------------------------------ | :--------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `getWorkspaceStatus`                  | - `repoPath`: Chuỗi đường dẫn thư mục gốc kho làm việc (`string`).                                                    | - `success`: Trạng thái logic (`boolean`)<br>- `status`: Đối tượng dữ liệu trạng thái (`WorkspaceStatusResult`) | Truy vấn ảnh chụp trạng thái tức thời của thư mục làm việc và vùng đệm Staging.                                                                                    |
-| `openFileDiff`                        | - `repoPath`: Đường dẫn gốc kho (`string`)<br>- `filePath`: Đường dẫn tương đối tệp (`string`)<br>- `isStaged`: Cờ logic (`boolean`) | - `success`: Trạng thái logic (`boolean`)<br>- `error`: Thông báo lỗi nếu có (`string \| undefined`)         | Mở trình so sánh Diff trực quan của VS Code (`vscode.diff`) giữa tệp trên đĩa làm việc với phiên bản trong Staging Index (hoặc giữa Staging Index với commit HEAD). |
+| Tên Định Danh Hành Động (Action Name) | Cấu Trúc Tham Số Đầu Vào (Payload)                                                                                                                | Cấu Trúc Dữ Liệu Trả Về (Response)                                                                                      | Mô Tả Nghiệp Vụ                                                                                                                                                                     |
+| :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getWorkspaceStatus`                      | - `repoPath`: Chuỗi đường dẫn thư mục gốc kho làm việc (`string`).                                                                        | - `success`: Trạng thái logic (`boolean`)- `status`: Đối tượng dữ liệu trạng thái (`WorkspaceStatusResult`) | Truy vấn ảnh chụp trạng thái tức thời của thư mục làm việc và vùng đệm Staging.                                                                                         |
+| `openFileDiff`                            | - `repoPath`: Đường dẫn gốc kho (`string`)- `filePath`: Đường dẫn tương đối tệp (`string`)- `isStaged`: Cờ logic (`boolean`) | - `success`: Trạng thái logic (`boolean`)- `error`: Thông báo lỗi nếu có (`string \| undefined`)                | Mở trình so sánh Diff trực quan của VS Code (`vscode.diff`) giữa tệp trên đĩa làm việc với phiên bản trong Staging Index (hoặc giữa Staging Index với commit HEAD). |
 
 ---
 
 ### 4.3. Bảng Chuẩn Hóa Lỗi & Ngoại Lệ Tích Hợp (Error Handling)
 
-| Mã Lỗi Kỹ Thuật (Error Code)   | Nguyên Nhân Gốc                                                                                    | Hành Vi Xử Lý Tự Động Của Hệ Thống                                                                                    | Trải Nghiệm Hiển Thị Phía Người Dùng                                                                               |
-| :------------------------------ | :------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
-| `ERR_INDEX_LOCKED`              | Tệp `.git/index.lock` đang tồn tại do một tiến trình Git khác đang thực thi ghi dở dang.            | Tự động thử lại tối đa 3 lần, mỗi lần cách nhau 200ms. Nếu vẫn khóa, thông báo cho người dùng.                       | Hiển thị thanh cảnh báo viền vàng mỏng: "Chỉ mục Git đang bị khóa bởi tiến trình khác. Đang tự động kết nối lại..."|
-| `ERR_REPO_PATH_INVALID`         | Thư mục dự án đã bị xóa hoặc di chuyển trên hệ điều hành trong lúc F-GitGraph đang mở.             | Hủy bỏ toàn bộ watcher liên quan, giải phóng tài nguyên tiến trình.                                                   | Hiển thị thông báo màu đỏ: "Không tìm thấy kho mã nguồn tại đường dẫn đã chỉ định."                                |
-| `ERR_DIFF_BINARY_FILE`          | Người dùng yêu cầu xem Diff của tệp tin định dạng nhị phân (ảnh PNG, tệp nén ZIP, tệp thư viện DLL).| Chặn mở trình diff văn bản của VS Code để tránh làm treo trình biên tập.                                              | Hiển thị thông báo nhẹ nhàng dạng thanh Toast: "Không thể so sánh nội dung tệp nhị phân."                          |
+| Mã Lỗi Kỹ Thuật (Error Code) | Nguyên Nhân Gốc                                                                                                     | Hành Vi Xử Lý Tự Động Của Hệ Thống                                                                       | Trải Nghiệm Hiển Thị Phía Người Dùng                                                                                               |
+| :------------------------------- | :--------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| `ERR_INDEX_LOCKED`             | Tệp `.git/index.lock` đang tồn tại do một tiến trình Git khác đang thực thi ghi dở dang.                  | Tự động thử lại tối đa 3 lần, mỗi lần cách nhau 200ms. Nếu vẫn khóa, thông báo cho người dùng. | Hiển thị thanh cảnh báo viền vàng mỏng: "Chỉ mục Git đang bị khóa bởi tiến trình khác. Đang tự động kết nối lại..." |
+| `ERR_REPO_PATH_INVALID`        | Thư mục dự án đã bị xóa hoặc di chuyển trên hệ điều hành trong lúc F-GitGraph đang mở.               | Hủy bỏ toàn bộ watcher liên quan, giải phóng tài nguyên tiến trình.                                    | Hiển thị thông báo màu đỏ: "Không tìm thấy kho mã nguồn tại đường dẫn đã chỉ định."                                  |
+| `ERR_DIFF_BINARY_FILE`         | Người dùng yêu cầu xem Diff của tệp tin định dạng nhị phân (ảnh PNG, tệp nén ZIP, tệp thư viện DLL). | Chặn mở trình diff văn bản của VS Code để tránh làm treo trình biên tập.                             | Hiển thị thông báo nhẹ nhàng dạng thanh Toast: "Không thể so sánh nội dung tệp nhị phân."                                    |
 
 ---
 
@@ -413,12 +424,13 @@ Kiến trúc giao diện phân định rạch ròi giữa Tín hiệu gốc (`si
 
 Hệ thống hỗ trợ thao tác bàn phím toàn diện nhằm tối ưu hóa năng suất làm việc của lập trình viên:
 
-| Phím Tắt (Windows / macOS) | Ngữ Cảnh Tương Tác (Context)                   | Hành Vi Thực Thi Chi Tiết                                                                                                                                                 |
-| :------------------------- | :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`Mũi Tên Lên / Xuống`**  | Bảng CommitTable đang có tiêu điểm             | Di chuyển dòng chọn lên hoặc xuống. Cho phép di chuyển thẳng lên dòng `UNCOMMITTED_CHANGES` trên đỉnh cùng.                                                               |
-| **`Enter` / `Phím Cách`**  | Đang đứng tại dòng `UNCOMMITTED_CHANGES`       | Mở hoặc đóng chuyển đổi (Toggle) Bảng Inspector nổi hiển thị phân vùng Staging Area.                                                                                      |
-| **`Esc`**                  | Bảng Staging Area đang mở                     | Thu gọn ngay lập tức Bảng Inspector nổi và trả tiêu điểm bàn phím về chính dòng `UNCOMMITTED_CHANGES` trên bảng đồ thị.                                                   |
-| **`Ctrl + Enter`**         | Con trỏ đang đứng trong ô nhập Commit Composer | Kiểm tra điều kiện (`canCommit = true`): Gửi lệnh commit ngay lập tức, phát âm thanh chốt cơ khí vi mô, và đóng gọn bảng Staging sau khi commit thành công.                |
+| Phím Tắt (Windows / macOS)          | Ngữ Cảnh Tương Tác (Context)                    | Hành Vi Thực Thi Chi Tiết                                                                                                                                                       |
+| :------------------------------------ | :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Mũi Tên Lên / Xuống`** | Bảng CommitTable đang có tiêu điểm             | Di chuyển dòng chọn lên hoặc xuống. Cho phép di chuyển thẳng lên dòng `UNCOMMITTED_CHANGES` trên đỉnh cùng.                                                       |
+| **`Enter` / `Phím Cách`** | Đang đứng tại dòng `UNCOMMITTED_CHANGES`      | Mở hoặc đóng chuyển đổi (Toggle) Bảng Inspector nổi hiển thị phân vùng Staging Area.                                                                                  |
+| **`Esc`**                     | Bảng Staging Area đang mở                         | Thu gọn ngay lập tức Bảng Inspector nổi và trả tiêu điểm bàn phím về chính dòng `UNCOMMITTED_CHANGES` trên bảng đồ thị.                                      |
+| **`Ctrl + Enter`**            | Con trỏ đang đứng trong ô nhập Commit Composer | Kiểm tra điều kiện (`canCommit = true`): Gửi lệnh commit ngay lập tức, phát âm thanh chốt cơ khí vi mô, và đóng gọn bảng Staging sau khi commit thành công. |
+|                                       |                                                      |                                                                                                                                                                                    |
 
 ---
 
@@ -441,7 +453,9 @@ Dòng mầm đại diện cho trạng thái thay đổi chưa commit được th
 ---
 
 ### 6.2. Quy Chuẩn Khung Viền Đinh Tán Chữ Thập Góc (`CornerCrossFrame`)
+
 Khung Inspector nổi bọc toàn bộ khối Staging Area và Commit Composer tuân thủ chuẩn thẩm mỹ Cyber-Lab:
+
 - Bốn ký tự chữ thập (`+`) bằng phông Monospace kích thước 11px đặt tại 4 góc nhọn với độ lệch âm `-6px`.
 - **Trạng thái Active**: Khi bảng Staging được mở, cả 4 đinh tán góc lập tức bừng sáng sắc tím Neon rực rỡ (`#a855f7`) kèm hiệu ứng đổ bóng phát quang 6px (`drop-shadow(0 0 6px rgba(168, 85, 247, 0.6))`).
 
@@ -451,17 +465,18 @@ Khung Inspector nổi bọc toàn bộ khối Staging Area và Commit Composer t
 
 Hạng mục này giải quyết trực tiếp yêu cầu của **Task 3.5: Test tích hợp: Watcher debounce & CommitTable toggle** ([Issue #41](https://github.com/thatislg/f-gitgraph/issues/41)) và **Task 3.6: E2E Core Dev Loop & an toàn dữ liệu** ([Issue #42](https://github.com/thatislg/f-gitgraph/issues/42)).
 
-| Tệp Kiểm Thử Độc Lập | Module / Component Mục Tiêu | Danh Mục Kịch Bản Kiểm Thử Bắt Buộc |
-| :--- | :--- | :--- |
-| `tests/extension/watchers/gitRepoWatcher.debounce.test.ts` | `git-repo.watcher.ts` | 1. **Kiểm thử 3 kênh lắng nghe**: Đảm bảo bắt chính xác sự kiện khi tệp trong `.git/index`, `.git/HEAD` và thư mục làm việc thay đổi.<br>2. **Kiểm thử bộ lọc thư mục rác**: Tạo biến động trong `node_modules` và `.git/objects`, xác minh không có sự kiện nào lọt qua bộ lọc.<br>3. **Kiểm thử cơ chế Debounce 150ms**: Phát sinh đồng thời 100 sự kiện tệp dồn dập trong khoảng thời gian 50ms; xác minh chỉ có đúng duy nhất 1 thông báo `repo.updated` được phát ra sau 150ms tính từ sự kiện cuối.<br>4. **Kiểm thử Cổng Chặn MuteGate**: Gọi `muteGitRepoWatcher()`, kích hoạt sự kiện tệp; xác minh sự kiện bị hủy bỏ hoàn toàn.<br>5. **Kiểm thử thời gian làm dịu (Cooling Window)**: Gọi `unmuteGitRepoWatcher()`; xác minh sự kiện phát sinh trong vòng 1500ms sau đó vẫn bị chặn an toàn. |
-| `tests/webview/components/commit/CommitTable.staging.test.ts` | `CommitTable.tsx` & `CommitRow.tsx` | 1. **Mở khóa click dòng mầm**: Giả lập nhấp chuột vào dòng `UNCOMMITTED_CHANGES`; xác minh callback `onSelect` được kích hoạt và mở bảng Staging.<br>2. **Kiểm thử tính bất biến hình học (Zero Distortion)**: Đo đạc tọa độ tâm nút lục giác và chuỗi đường cong Bézier SVG trước và sau khi nhấp mở bảng Staging; xác nhận sai lệch bằng 0 pixel tuyệt đối.<br>3. **Chuyển đổi hai chế độ Inspector**: Click dòng mầm (hiện Staging), sau đó click dòng commit thường (chuyển sang CommitDetails), sau đó click lại dòng mầm (quay lại Staging trơn tru).<br>4. **Điều hướng phím tắt**: Dùng phím Mũi tên di chuyển lên dòng mầm, bấm `Enter` để mở, bấm `Esc` để đóng bảng an toàn. |
-| `tests/integration/core-dev-loop.e2e.test.ts` | Toàn bộ vòng lặp Core Dev Loop | 1. **Kịch bản E2E hoàn chỉnh**: Tạo tệp mới trên đĩa $\rightarrow$ Watcher phát hiện sau 150ms $\rightarrow$ Dòng mầm xuất hiện trên Webview $\rightarrow$ Click mở Staging $\rightarrow$ Bấm nút Stage tệp $\rightarrow$ Nhập tiêu đề commit $\rightarrow$ Bấm `Ctrl + Enter` $\rightarrow$ Tiến trình commit hoàn tất an toàn $\rightarrow$ Node commit mới xuất hiện trên đỉnh nhánh $\rightarrow$ Dòng mầm tự biến mất.<br>2. **Kiểm thử an toàn dữ liệu**: Đảm bảo toàn bộ lệnh ghi đều có cờ `--`, không xảy ra hiện tượng Command Injection ngay cả khi tên tệp chứa khoảng trắng hoặc ký tự Unicode đặc biệt. |
+| Tệp Kiểm Thử Độc Lập                                           | Module / Component Mục Tiêu           | Danh Mục Kịch Bản Kiểm Thử Bắt Buộc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| :------------------------------------------------------------------- | :-------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/extension/watchers/git-repo.watcher.test.ts`                | `git-repo.watcher.ts`                 | 1. **Kiểm thử 3 kênh lắng nghe**: Đảm bảo bắt chính xác sự kiện khi tệp trong `.git/index`, `.git/HEAD` và thư mục làm việc thay đổi.2. **Kiểm thử bộ lọc thư mục rác**: Tạo biến động trong `node_modules` và `.git/objects`, xác minh không có sự kiện nào lọt qua bộ lọc.3. **Kiểm thử cơ chế Debounce 150ms**: Phát sinh đồng thời 100 sự kiện tệp dồn dập trong khoảng thời gian 50ms; xác minh chỉ có đúng duy nhất 1 thông báo `repo.updated` được phát ra sau 150ms tính từ sự kiện cuối.4. **Kiểm thử Cổng Chặn MuteGate**: Gọi `muteGitRepoWatcher()`, kích hoạt sự kiện tệp; xác minh sự kiện bị hủy bỏ hoàn toàn.5. **Kiểm thử thời gian làm dịu (Cooling Window)**: Gọi `unmuteGitRepoWatcher()`; xác minh sự kiện phát sinh trong vòng 1500ms sau đó vẫn bị chặn an toàn. |
+| `tests/webview/components/commit/CommitTable.integration.test.tsx` | `CommitTable.tsx` & `CommitRow.tsx` | 1. **Mở khóa click dòng mầm**: Giả lập nhấp chuột vào dòng `UNCOMMITTED_CHANGES`; xác minh callback `onSelect` được kích hoạt và mở bảng Staging.2. **Kiểm thử tính bất biến hình học (Zero Distortion)**: Đo đạc tọa độ tâm nút lục giác và chuỗi đường cong Bézier SVG trước và sau khi nhấp mở bảng Staging; xác nhận sai lệch bằng 0 pixel tuyệt đối.3. **Chuyển đổi hai chế độ Inspector**: Click dòng mầm (hiện Staging), sau đó click dòng commit thường (chuyển sang CommitDetails), sau đó click lại dòng mầm (quay lại Staging trơn tru).4. **Điều hướng phím tắt**: Dùng phím Mũi tên di chuyển lên dòng mầm, bấm `Enter` để mở, bấm `Esc` để đóng bảng an toàn.                                                                                                                               |
+| `tests/integration/core-dev-loop.e2e.test.ts`                      | Toàn bộ vòng lặp Core Dev Loop      | 1. **Kịch bản E2E hoàn chỉnh**: Tạo tệp mới trên đĩa $\rightarrow$ Watcher phát hiện sau 150ms $\rightarrow$ Dòng mầm xuất hiện trên Webview $\rightarrow$ Click mở Staging $\rightarrow$ Bấm nút Stage tệp $\rightarrow$ Nhập tiêu đề commit $\rightarrow$ Bấm `Ctrl + Enter` $\rightarrow$ Tiến trình commit hoàn tất an toàn $\rightarrow$ Node commit mới xuất hiện trên đỉnh nhánh $\rightarrow$ Dòng mầm tự biến mất.2. **Kiểm thử an toàn dữ liệu**: Đảm bảo toàn bộ lệnh ghi đều có cờ `--`, không xảy ra hiện tượng Command Injection ngay cả khi tên tệp chứa khoảng trắng hoặc ký tự Unicode đặc biệt.                                                                                                                                                                                                                  |
 
 ---
 
 ## 8. Tiêu Chí Nghiệm Thu Kỹ Thuật (Acceptance Criteria & Quality Gate)
 
 ### 8.1. Các Chỉ Số Định Lượng Nghiệm Thu
+
 1. **Sai lệch hình học**: Độ lệch tọa độ hình học của các nút lục giác và đường cong Bézier SVG trước, trong và sau khi mở bảng Staging Area là **0 pixel tuyệt đối**.
 2. **Hiệu năng Debounce**: Khả năng gom 100% sự kiện tệp phát sinh dồn dập trong khoảng lặng 150ms thành đúng 1 lần gọi trạng thái tổng thể duy nhất.
 3. **Độ trễ phản hồi giao diện**: Thời gian từ khi nhấp chuột vào dòng `UNCOMMITTED_CHANGES` đến khi bảng Staging hiển thị hoàn tất **nhỏ hơn 50 mili-giây**.
@@ -471,23 +486,15 @@ Hạng mục này giải quyết trực tiếp yêu cầu của **Task 3.5: Test
 
 ### 8.2. Bảng Tiêu Chí Đánh Giá Chất Lượng Thiết Kế (Design Quality Gate 10/10)
 
-| STT | Tiêu Chí Kiểm Tra (Checklist) | Yêu Cầu Đạt Chuẩn | Trạng Thái |
-| :-: | :--- | :--- | :---: |
-| 1 | **Không có mã nguồn mẫu** | Toàn bộ tài liệu đặc tả bằng ngôn ngữ tự nhiên, bảng biểu và sơ đồ; không có code mẫu. | **ĐẠT** |
-| 2 | **Ranh giới Webview sạch sẽ** | Webview hoàn toàn không gọi `fs` hay `child_process`, chỉ trao đổi dữ liệu qua RPC. | **ĐẠT** |
-| 3 | **Ủy thác Git CLI an toàn** | 100% thao tác ghi gọi qua `git.exe` với cờ phân tách `--`, không sửa trực tiếp `.git/`. | **ĐẠT** |
-| 4 | **Tương thích đa phiên bản** | Phối hợp đồng bộ với chiến lược Version Probe & Fallback đã quy chuẩn tại Document 01. | **ĐẠT** |
-| 5 | **Đầy đủ hợp đồng RPC** | Bảng hợp đồng sự kiện và yêu cầu hành động chỉ rõ tên trường, kiểu dữ liệu và mã lỗi. | **ĐẠT** |
-| 6 | **Tương thích Preact Signals** | Phân định rạch ròi giữa tín hiệu gốc (`signal`) và tín hiệu dẫn xuất (`computed`). | **ĐẠT** |
-| 7 | **Đồng bộ Token Cyber-Lab** | Chuẩn hóa màu sắc huy hiệu, đinh tán góc `+`, và hiệu ứng phát quang cả Dark & Light. | **ĐẠT** |
-| 8 | **Hover-to-Reveal rõ ràng** | Cụm nút tác vụ ẩn ở trạng thái tĩnh, chỉ hiện khi rê chuột để chống ô nhiễm thị giác. | **ĐẠT** |
-| 9 | **Bảo toàn hình học SVG 100%** | Chiều cao dòng bảng commit cố định 24px, bảng Inspector nổi dạng absolute overlay. | **ĐẠT** |
-| 10 | **Có ma trận Unit Test chi tiết** | Liệt kê đầy đủ kịch bản kiểm thử từ unit test watcher đến tích hợp UI và luồng E2E. | **ĐẠT** |
-
----
-
-## 9. Lịch Sử Hiệu Chỉnh (Revision History)
-
-| Ngày | Lý Do Hiệu Chỉnh | Mục Bị Ảnh Hưởng |
-| :--- | :--- | :--- |
-| 2026-10-16 | `[DESIGN_DEFECT]` Chuẩn hóa đuôi tệp kiểm thử về `.test.ts` (thay vì `.test.tsx`) và đồng bộ tên tệp với bộ thu thập `vitest.config.ts` (`include: tests/webview/**/*.test.ts`). Component `CommitTable` được kiểm thử bằng `h()`/`render()` của Preact, không dùng JSX. | §7 (Ma Trận Kiểm Thử) |
+| STT | Tiêu Chí Kiểm Tra (Checklist)           | Yêu Cầu Đạt Chuẩn                                                                                       |  Trạng Thái  |
+| :-: | :----------------------------------------- | :----------------------------------------------------------------------------------------------------------- | :-------------: |
+|  1  | **Không có mã nguồn mẫu**       | Toàn bộ tài liệu đặc tả bằng ngôn ngữ tự nhiên, bảng biểu và sơ đồ; không có code mẫu.  | **ĐẠT** |
+|  2  | **Ranh giới Webview sạch sẽ**     | Webview hoàn toàn không gọi `fs` hay `child_process`, chỉ trao đổi dữ liệu qua RPC.             | **ĐẠT** |
+|  3  | **Ủy thác Git CLI an toàn**       | 100% thao tác ghi gọi qua `git.exe` với cờ phân tách `--`, không sửa trực tiếp `.git/`.      | **ĐẠT** |
+|  4  | **Tương thích đa phiên bản**   | Phối hợp đồng bộ với chiến lược Version Probe & Fallback đã quy chuẩn tại Document 01.          | **ĐẠT** |
+|  5  | **Đầy đủ hợp đồng RPC**       | Bảng hợp đồng sự kiện và yêu cầu hành động chỉ rõ tên trường, kiểu dữ liệu và mã lỗi. | **ĐẠT** |
+|  6  | **Tương thích Preact Signals**    | Phân định rạch ròi giữa tín hiệu gốc (`signal`) và tín hiệu dẫn xuất (`computed`).         | **ĐẠT** |
+|  7  | **Đồng bộ Token Cyber-Lab**       | Chuẩn hóa màu sắc huy hiệu, đinh tán góc `+`, và hiệu ứng phát quang cả Dark & Light.         | **ĐẠT** |
+|  8  | **Hover-to-Reveal rõ ràng**        | Cụm nút tác vụ ẩn ở trạng thái tĩnh, chỉ hiện khi rê chuột để chống ô nhiễm thị giác.    | **ĐẠT** |
+|  9  | **Bảo toàn hình học SVG 100%**   | Chiều cao dòng bảng commit cố định 24px, bảng Inspector nổi dạng absolute overlay.                  | **ĐẠT** |
+| 10 | **Có ma trận Unit Test chi tiết** | Liệt kê đầy đủ kịch bản kiểm thử từ unit test watcher đến tích hợp UI và luồng E2E.         | **ĐẠT** |

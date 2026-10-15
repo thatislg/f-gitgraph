@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.0] - 2026-10-16
+
+### Added
+
+- **Phase 3.1 — Staging Area & Commit Composer**: a new Cyber-Lab styled staging workflow with a 4-corner rivet frame (`CornerCrossFrame`), neon status badges (Added/Modified/Deleted/Renamed/Untracked), hover-to-reveal row actions, and a `DiscardConfirmModal` safety dialog.
+- **Commit Composer** with title/description fields, a 50-character title counter, amend & GPG-sign options, and `Ctrl/Cmd + Enter` submit shortcut.
+- **Backend Git mutation layer** (`GitCliMutator`): stage / unstage / discard / commit operations routed through the native Git CLI with `--` path separators, plus a Git version probe and `git restore` fallback for Git < 2.23.
+- **`workspaceStatus` parser**: `git status --porcelain=v2 -z` NUL-delimited state machine producing `WorkspaceStatusResult` with branch header and file records.
+- **DAG click integration**: the `UNCOMMITTED_CHANGES` row now opens the staging panel, with geometric invariance guarantees for existing DAG layout.
+- **Watcher debounce (150ms)** with RPC sync to the webview.
+
 ## [1.0.0] - 2026-10-05
 
 ### Added
@@ -95,7 +106,9 @@
 
 Initial release
 
-[Unreleased]: https://github.com/thatislg/f-gitgraph/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/thatislg/f-gitgraph/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/thatislg/f-gitgraph/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/thatislg/f-gitgraph/compare/v0.6.0...v1.0.0
 [0.6.0]: https://github.com/thatislg/f-gitgraph/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/thatislg/f-gitgraph/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/thatislg/f-gitgraph/compare/v0.3.0...v0.4.0

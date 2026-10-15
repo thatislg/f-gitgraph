@@ -29,6 +29,15 @@ Dự án áp dụng mô hình phân cấp 3 tầng chuẩn công nghiệp để 
 1. **Tầng 1 - Cột Mốc (Milestone)**: Đại diện cho cả một Phase lớn (ví dụ `Phase 3.1`). Nơi GitHub tự động tính toán tổng tỷ lệ phần trăm hoàn thành của toàn chặng.
 2. **Tầng 2 - Sử Thi (Epic Issue)**: Đại diện cho một phân hệ kiến trúc (Backend, UI, hoặc Integration). Mỗi Epic chứa một bảng checklist trực tiếp tới các task con.
 3. **Tầng 3 - Công Việc Vi Mô (Atomic Task Issue)**: Mỗi đầu việc kỹ thuật cụ thể (1 hàm, 1 component, 1 test suite) là một thẻ công việc độc lập kéo dài từ 30 đến 90 phút.
+   - **Bắt buộc chuẩn hóa định dạng Hộp Đen (Black-Box I/O)**:
+     ```markdown
+     ### Task X.Y: [Tiêu Đề Công Việc]
+     - **Mục tiêu:** [Mô tả ngắn gọn kết quả cần đạt được]
+     - **Input:** `param1: Type1`, `param2: Type2`
+     - **Output:** `Result<SuccessType, ErrorType>`
+     - **Thiết kế tham chiếu (Design Ref):** Mục X.Y trong `docs/02_design/...`
+     ```
+   - ⚠️ **Nguyên tắc**: Task nào **chưa có Input và Output cụ thể** là **chưa đủ độ chín để thực thi**. Phải làm rõ thiết kế trước khi đưa vào hàng đợi.
 
 ---
 
@@ -70,17 +79,33 @@ Khi xem danh sách thông thường tại tab `Issues`:
 
 ---
 
-## 3. Quy Trình Làm Việc Hàng Ngày (Core Dev Workflow)
+## 3. Quy Trình Làm Việc Hàng Ngày (Core Dev Workflow - Closed-Loop SOP)
+
+Toàn bộ quy trình tuân thủ đường ống khép kín của Software Architect:
+$$\text{Yêu cầu Task} \;\xrightarrow{\text{I/O là gì?}}\; \text{Đối chiếu Thiết kế} \;\xrightarrow{\text{Đã đủ chưa?}}\; \text{Viết Test Cases} \;\xrightarrow{\text{MCP Tools}}\; \text{Code F\# / TS} \;\longrightarrow\; \text{Report}$$
 
 ### Bước 1: Chọn Task & Chuyển Trạng Thái
 - Vào **GitHub Projects**, kéo thẻ task chuẩn bị làm (ví dụ `#13: [Task 1.1]`) từ cột `Todo` sang cột `In Progress`.
+- Xác định mục tiêu, các tham số đầu vào (Input), kết quả mong muốn (Output) và liên kết `Design Ref`.
 
-### Bước 2: Lập Trình & Kiểm Thử Cục Bộ
-- Đọc tài liệu thiết kế tham chiếu được gắn link ngay bên trong thân Issue.
-- Viết mã nguồn và bộ kiểm thử tương ứng. Chạy test suite xác nhận pass 100%.
+### Bước 2: Thẩm Định Thiết Kế (Design Verification Gate - Bắt Buộc)
+Trước khi viết bất kỳ dòng test hay code nào, tự đối chiếu Thiết kế và trả lời **3 câu hỏi kiểm định**:
+1. **Types Ready?** Đã có đủ Type để biểu diễn Input và Output trong `src/types/` hoặc F# types chưa?
+2. **Edge Cases Covered?** Thiết kế đã xử lý hết các trường hợp biên (số âm, chuỗi rỗng, NUL byte, danh sách rỗng, lỗi mạng, lock file) chưa?
+3. **Dependencies Exist?** Hệ thống hiện tại đã có sẵn các API/hàm phụ thuộc mà task này cần gọi chưa?
 
-### Bước 3: Đóng Task Tự Động Bằng Lệnh Git Commit
-Khi hoàn tất task, thêm từ khóa `closes #<số_issue>` hoặc `fixes #<số_issue>` vào commit message:
+> ⛔ **NẾU CÒN THIẾU**: Dừng lại ngay! Báo cáo điểm thiếu của Thiết kế và đề xuất bổ sung vào file thiết kế trong `docs/02_design/`.  
+> ✅ **NẾU ĐÃ ĐỦ**: Mới được phép chuyển sang Bước 3.
+
+### Bước 3: Lập Trình Theo Chuẩn TDD (Test-Driven Development)
+- **Quy tắc bất khả xâm phạm**:
+  - Không bao giờ code nếu chưa có Test.
+  - Không bao giờ viết Test nếu Thiết kế chưa rõ Input/Output.
+  - Không bao giờ triển khai Task nếu Thiết kế chưa bao quát hết bài toán.
+- Viết test suite tương ứng trước (Red), sau đó viết thân hàm để thỏa mãn chữ ký kiểu dữ liệu (Green), và chạy diagnostic gates (`typecheck`, `lint`, `compile`, `test`).
+
+### Bước 4: Đóng Task Tự Động Bằng Lệnh Git Commit
+Khi hoàn tất task và 100% test pass, thêm từ khóa `closes #<số_issue>` hoặc `fixes #<số_issue>` vào commit message:
 
 ```bash
 git commit -m "feat(backend): implement git version probe and cache (closes #13)"
