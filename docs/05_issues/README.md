@@ -8,7 +8,7 @@ Thư mục này ghi nhận toàn bộ các vấn đề kỹ thuật, lỗi phát
 
 | Mã Issue | Tiêu Đề Sự Cố | Module Tác Động | Mức Độ | Trạng Thái | GitHub Issue Link |
 | :---: | :--- | :--- | :---: | :---: | :---: |
-| **[ISSUE-001](001_vitest_hook_timeout_windows.md)** | Vitest hookTimeout 10s bị ngắt khi chạy `beforeAll` khởi tạo kho Git (`makeRepo`) trên Windows | `Test Runner / Backend Tests` | Thấp (Chỉ ảnh hưởng test) | 🔴 **Chưa giải quyết (OPEN)** | *Chờ đồng bộ* |
+| **[ISSUE-001](001_vitest_hook_timeout_windows.md)** | Vitest hookTimeout 10s bị ngắt khi chạy `beforeAll` khởi tạo kho Git (`makeRepo`) trên Windows | `Test Runner / Backend Tests` | Thấp (Chỉ ảnh hưởng test) | 🔴 **Chưa giải quyết (OPEN)** | [#11](https://github.com/thatislg/f-gitgraph/issues/11) |
 
 ---
 

@@ -77,7 +77,7 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ### 📋 Nhóm Việc 1: Mở Rộng Backend GitCliMutator, Bộ Truy Vấn & RPC Protocol (Kèm Test Độc Lập)
 *Tài liệu tham chiếu thiết kế*: [01_Staging_Backend_And_Mutator_Design.md](../../02_design/phase3/01_Staging_Backend_And_Mutator_Design.md).
 
-- [x] **Nhiệm vụ 1.1: Hiện thực cơ chế tương thích đa phiên bản Git & các lệnh Staging trong `src/extension/mutator/gitCliMutator.ts`**
+- [x] **Nhiệm vụ 1.1: Hiện thực cơ chế tương thích đa phiên bản Git & các lệnh Staging trong `src/extension/mutator/gitCliMutator.ts`** ([#1](https://github.com/thatislg/f-gitgraph/issues/1))
   - [x] **1.1.0**: Hiện thực hàm thăm dò phiên bản một lần `canUseRestore()`: Thực thi `git version`, bóc tách chỉ số Major/Minor (Git >= 2.23), lưu cờ `supportsRestore` vào in-memory cache để không tốn thêm tiến trình ở các lần gọi sau.
   - [x] **1.1.1**: Hiện thực hàm `stageFile(filePath: string)`: Gọi lệnh `git add -- <filePath>`, bảo đảm ký tự phân tách `--` luôn hiện diện để ngăn nhầm lẫn đường dẫn với nhánh. Tương thích 100% mọi phiên bản Git.
   - [x] **1.1.2**: Hiện thực hàm `unstageFile(filePath: string)`: Rẽ nhánh an toàn theo phiên bản Git:
@@ -96,13 +96,13 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
     - Bước 1: Rẽ nhánh khôi phục tệp tracked: gọi `git restore .` (Git >= 2.23) hoặc `git checkout -- .` (Git < 2.23). Dừng ngay nếu bước 1 thất bại.
     - Bước 2: Gọi `git clean -fd` xóa sạch tệp và thư mục chưa theo dõi.
 
-- [x] **Nhiệm vụ 1.2: Nâng cấp hàm `commit` trong `src/extension/mutator/gitCliMutator.ts`**
+- [x] **Nhiệm vụ 1.2: Nâng cấp hàm `commit` trong `src/extension/mutator/gitCliMutator.ts`** ([#2](https://github.com/thatislg/f-gitgraph/issues/2))
   - [x] **1.2.1**: Mở rộng tham số nhận diện cờ sửa đổi commit gần nhất `--amend` mà không tạo commit mới.
   - [x] **1.2.2**: Mở rộng tham số nhận diện cờ ký số bảo mật `-S` (GPG/SSH Commit Signing).
   - [x] **1.2.3**: Phân tách rõ ràng giữa dòng tiêu đề (Summary) và khối mô tả mở rộng (Description): Truyền 2 cờ `-m` độc lập vào tiến trình `git.exe` để Git tự động chèn dòng trống ngăn cách chuẩn quy ước.
   - [x] **1.2.4**: Bắt và chuẩn hóa các thông báo lỗi đặc thù: Xung đột khóa tệp `.git/index.lock`, lỗi thiếu danh tính tác giả (`user.name` / `user.email`).
 
-- [ ] **Nhiệm vụ 1.3: Xây dựng bộ truy vấn trạng thái kho `src/backend/queries/workspaceStatus.ts`**
+- [ ] **Nhiệm vụ 1.3: Xây dựng bộ truy vấn trạng thái kho `src/backend/queries/workspaceStatus.ts`** ([#3](https://github.com/thatislg/f-gitgraph/issues/3))
   - [ ] **1.3.1**: Khởi tạo hàm thực thi `git status --porcelain=v2 --branch -uall -c core.quotepath=false` để lấy toàn bộ dữ liệu trạng thái phẳng UTF-8 không mã hóa octal.
   - [ ] **1.3.2**: Hiện thực bộ bóc tách các dòng header thông tin nhánh:
     - Bóc tách `# branch.head` lưu tên nhánh hiện tại.
@@ -115,12 +115,12 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
   - [ ] **1.3.5**: Hiện thực bộ bóc tách dòng tệp đổi tên (bắt đầu bằng `2 <XY> ... <path>\t<oldPath>`): Đưa vào mảng `stagedFiles` với mã `R` và lưu kèm `oldPath`.
   - [ ] **1.3.6**: Tính toán cờ trạng thái kho sạch sẽ: Đặt `isClean = true` khi cả 2 danh sách đều rỗng.
 
-- [ ] **Nhiệm vụ 1.4: Định nghĩa kiểu dữ liệu & Đăng ký Message Handlers**
+- [ ] **Nhiệm vụ 1.4: Định nghĩa kiểu dữ liệu & Đăng ký Message Handlers** ([#4](https://github.com/thatislg/f-gitgraph/issues/4))
   - [ ] **1.4.1**: Cập nhật `src/types/actions.ts`: Khai báo các payload cho `stageFile`, `unstageFile`, `stageAll`, `unstageAll`, `discardFileChanges`, `discardAllChanges`, `commitChanges`.
   - [ ] **1.4.2**: Cập nhật `src/types/queries.ts`: Khai báo query payload cho `workspaceStatus` với cấu trúc `WorkspaceStatusResult`.
   - [ ] **1.4.3**: Cập nhật `src/extension/services/messageHandler.ts`: Đăng ký tiếp nhận và chuyển tiếp các action và query mới tới `GitCliMutator` và `workspaceStatus`.
 
-- [ ] **Nhiệm vụ 1.5 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend**
+- [ ] **Nhiệm vụ 1.5 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend** ([#5](https://github.com/thatislg/f-gitgraph/issues/5))
   - [ ] **1.5.1**: Tạo `tests/extension/mutator/stagingMutator.test.ts`:
     - Kiểm thử cơ chế `canUseRestore()`: Bóc tách chính xác phiên bản Git từ các chuỗi chuẩn (`git version 2.43.0`, `git version 2.22.0`, `git version 3.0.0`, `git version 1.8.3`), lưu cache sau lần gọi đầu tiên.
     - Kiểm thử `stageFile` gọi đúng lệnh `["add", "--", path]`.
@@ -141,7 +141,7 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 
 ---
 
-### 📋 Nhóm Việc 2: Triển Khai Các Khối Giao Diện Cơ Bản (UI Building Blocks Kèm Test Độc Lập)
+### 📋 Nhóm Việc 2: Triển Khai Các Khối Giao Diện Cơ Bản (UI Building Blocks Kèm Test Độc Lập) — Outline: [#6](https://github.com/thatislg/f-gitgraph/issues/6)
 *Tài liệu tham chiếu thiết kế*: [02_Staging_UI_And_Composer_Component_Design.md](../../02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md).
 
 - [ ] **Nhiệm vụ 2.1: Xây dựng khung kỹ thuật đinh tán góc `src/webview/components/ui/CornerCrossFrame.tsx`**
@@ -186,7 +186,7 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 
 ---
 
-### 📋 Nhóm Việc 3: Triển Khai Phân Vùng Staging, Composer & Quản Lý Trạng Thái (Kèm Test Độc Lập)
+### 📋 Nhóm Việc 3: Triển Khai Phân Vùng Staging, Composer & Quản Lý Trạng Thái (Kèm Test Độc Lập) — Outline: [#6](https://github.com/thatislg/f-gitgraph/issues/6)
 *Tài liệu tham chiếu thiết kế*: [02_Staging_UI_And_Composer_Component_Design.md](../../02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md) và [005_Audio_Feedback_And_Sound_Design.md](../../01_investigation/phase3_Reborn/005_Audio_Feedback_And_Sound_Design.md).
 
 - [ ] **Nhiệm vụ 3.1: Xây dựng bảng hiển thị tệp `src/webview/components/staging/StagingPanel.tsx`**
@@ -238,7 +238,7 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 
 ---
 
-### 📋 Nhóm Việc 4: Tích Hợp Đồ Thị DAG & Bộ Giám Sát Thời Gian Thực (Kèm Test Tích Hợp)
+### 📋 Nhóm Việc 4: Tích Hợp Đồ Thị DAG & Bộ Giám Sát Thời Gian Thực (Kèm Test Tích Hợp) — Outline: [#7](https://github.com/thatislg/f-gitgraph/issues/7)
 *Tài liệu tham chiếu thiết kế*: [03_WorkingTree_Sync_And_Watcher_Integration.md](../../02_design/phase3/03_WorkingTree_Sync_And_Watcher_Integration.md).
 
 - [ ] **Nhiệm vụ 4.1: Đồng bộ dòng Uncommitted Changes trên đồ thị `src/webview/components/commit/CommitTable.tsx`**

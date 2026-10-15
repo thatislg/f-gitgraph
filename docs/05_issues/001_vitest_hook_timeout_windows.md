@@ -6,7 +6,7 @@
 - **Ngày ghi nhận**: 2026-10-15
 - **Mức độ ảnh hưởng**: Thấp (Chỉ xuất hiện khi chạy test runner, **hoàn toàn 0% ảnh hưởng đến runtime extension**)
 - **Module liên quan**: `vitest.config.ts`, `tests/backend/helpers.ts`, `tests/backend/*.test.ts`
-- **GitHub Issue Link**: *(Chờ đẩy lên repo thatislg/f-gitgraph)*
+- **GitHub Issue Link**: [#11](https://github.com/thatislg/f-gitgraph/issues/11)
 
 ---
 
