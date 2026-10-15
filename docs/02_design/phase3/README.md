@@ -17,6 +17,7 @@ Thư mục này lưu trữ toàn bộ hệ thống tài liệu thiết kế kỹ
 
 1. **[01. Thiết Kế Tầng Backend & Mutator Cho Staging (01_Staging_Backend_And_Mutator_Design.md)](01_Staging_Backend_And_Mutator_Design.md)**:
    - Mở rộng `GitCliMutator.ts` hỗ trợ các lệnh: `stageFile`, `unstageFile`, `stageAll`, `unstageAll`, `discardFileChanges`, `commit(amend, sign)`.
+   - Chiến lược thăm dò phiên bản một lần (One-Time Version Probe) và rẽ nhánh Fallback lệnh cổ điển (`git reset`, `git checkout`) cho các bản Git < 2.23 (trước khi có `git restore`).
    - Thuật toán phân tích cú pháp `git status --porcelain=v2` thành mô hình dữ liệu `WorkspaceStatusResult`.
    - Cấu trúc giao thức RPC và các thông điệp trao đổi qua `WebviewBridge`.
 

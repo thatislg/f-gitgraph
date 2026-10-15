@@ -60,11 +60,39 @@ export class GitCliMutator {
     return result.ok;
   }
 
+  private supportsRestore: boolean | null = null;
+
+  /**
+   * Thăm dò phiên bản Git 1 lần duy nhất để kiểm tra hỗ trợ `git restore` (từ Git 2.23.0 trở lên).
+   * Cache kết quả in-memory để không spawn thêm tiến trình ở các lần gọi sau.
+   */
+  async canUseRestore(): Promise<boolean> {
+    if (this.supportsRestore !== null) {
+      return this.supportsRestore;
+    }
+    const { stdout } = await this.run(["version"]);
+    const m = stdout.match(/^git version (\d+)\.(\d+)/);
+    this.supportsRestore =
+      m !== null && (Number(m[1]) > 2 || (Number(m[1]) === 2 && Number(m[2]) >= 23));
+    return this.supportsRestore;
+  }
+
   async commit(
     message: string,
-    options: { sign?: boolean; all?: boolean } = {}
+    options: {
+      sign?: boolean;
+      all?: boolean;
+      amend?: boolean;
+      description?: string;
+    } = {}
   ): Promise<MutatorResult> {
     const args = ["commit", "-m", message];
+    if (options.description && options.description.trim().length > 0) {
+      args.push("-m", options.description.trim());
+    }
+    if (options.amend) {
+      args.push("--amend");
+    }
     if (options.sign) {
       args.push("-S");
     }
@@ -72,6 +100,57 @@ export class GitCliMutator {
       args.push("-a");
     }
     return this.run(args);
+  }
+
+  /** Đưa một tệp vào Staging Index; `--` ngăn nhầm lẫn đường dẫn với nhánh/cờ (tương thích mọi bản Git). */
+  async stageFile(filePath: string): Promise<MutatorResult> {
+    return this.run(["add", "--", filePath]);
+  }
+
+  /** Rút một tệp khỏi Staging Index; tự động fallback `git reset --` trên Git < 2.23. */
+  async unstageFile(filePath: string): Promise<MutatorResult> {
+    if (await this.canUseRestore()) {
+      return this.run(["restore", "--staged", "--", filePath]);
+    }
+    return this.run(["reset", "--", filePath]);
+  }
+
+  /** Đưa toàn bộ tệp mới, sửa đổi và bị xóa vào Staging Index (tương thích mọi bản Git). */
+  async stageAll(): Promise<MutatorResult> {
+    return this.run(["add", "-A"]);
+  }
+
+  /** Rút toàn bộ tệp khỏi Staging Index về lại working tree; fallback `git reset` trên Git < 2.23. */
+  async unstageAll(): Promise<MutatorResult> {
+    if (await this.canUseRestore()) {
+      return this.run(["restore", "--staged", "."]);
+    }
+    return this.run(["reset"]);
+  }
+
+  /** Hoàn tác thay đổi một tệp: untracked -> clean -f, tracked -> restore (hoặc fallback checkout). */
+  async discardFileChanges(
+    filePath: string,
+    isUntracked: boolean
+  ): Promise<MutatorResult> {
+    if (isUntracked) {
+      return this.run(["clean", "-f", "--", filePath]);
+    }
+    if (await this.canUseRestore()) {
+      return this.run(["restore", "--", filePath]);
+    }
+    return this.run(["checkout", "--", filePath]);
+  }
+
+  /** Làm sạch toàn bộ working tree; fallback `git checkout -- .` trên Git < 2.23, sau đó clean -fd. */
+  async discardAllChanges(): Promise<MutatorResult> {
+    const restore = (await this.canUseRestore())
+      ? await this.run(["restore", "."])
+      : await this.run(["checkout", "--", "."]);
+    if (!restore.ok) {
+      return restore;
+    }
+    return this.run(["clean", "-fd"]);
   }
 
   async createBranch(name: string, commitHash: string): Promise<MutatorResult> {

@@ -79,7 +79,32 @@ Tất cả các phương thức trong bộ điều phối `GitCliMutator` đư�
      - Bước 1: Thực thi `git restore .` để khôi phục toàn bộ tệp đã theo dõi. Nếu bước này gặp lỗi, tiến trình dừng ngay lập tức và báo lỗi cho người dùng.
      - Bước 2: Thực thi `git clean -fd` để xóa sạch toàn bộ tệp và thư mục mới chưa được theo dõi.
 
-### 2.2. Nâng Cấp Phương Thức Tạo Commit (`commit`)
+### 2.2. Chiến Lược Tương Thích Đa Phiên Bản Git (Git Version Probe & Fallback Strategy)
+
+1. **Bối Cảnh Kỹ Thuật**:
+   - Lệnh `git restore` chỉ bắt đầu xuất hiện từ phiên bản Git **2.23.0** (phát hành tháng 08/2019).
+   - Đối với các môi trường phát triển sử dụng các phiên bản Git cũ hơn 2.23 (Git < 2.23), việc gọi `git restore` sẽ bị lỗi lệnh không tồn tại.
+   - Trước Git 2.23, các thao tác Unstage và Discard được thực hiện bởi hai lệnh Git cổ điển: `git reset` và `git checkout`. Các lệnh này vẫn được Git duy trì và hỗ trợ ổn định 100% đến tận ngày nay.
+2. **Cơ Chế Thăm Dò Phiên Bản Một Lần (One-Time Version Probe & Cache)**:
+   - Khi khởi tạo hoặc khi lần đầu tiên thực hiện một thao tác unstage/discard, hệ thống thực thi lệnh `git version` một lần duy nhất.
+   - Bóc tách chỉ số phiên bản chính (Major) và phiên bản phụ (Minor) từ chuỗi kết quả:
+     - Nếu `Major > 2` HOẶC `(Major == 2 và Minor >= 23)`: Xác định hệ thống hỗ trợ lệnh hiện đại, đánh dấu cờ `supportsRestore = true`.
+     - Ngược lại: Đánh dấu cờ `supportsRestore = false`.
+   - Kết quả này được lưu trữ trong bộ nhớ đệm (In-Memory Cache) của đối tượng điều phối, bảo đảm các thao tác về sau không tốn thêm bất kỳ tiến trình kiểm tra phiên bản nào.
+3. **Bảng Đối Chiếu Lệnh Hiện Đại vs Lệnh Fallback Cổ Điển**:
+
+| Thao Tác Nghiệp Vụ | Phiên Bản Hiện Đại (Git $\ge$ 2.23) | Fallback Cổ Điển (Mọi Phiên Bản Git) | Ghi Chú Kỹ Thuật & An Toàn |
+| :--- | :--- | :--- | :--- |
+| **Unstage 1 tệp** | `git restore --staged -- <đường_dẫn>` | `git reset -- <đường_dẫn>` | `git reset -- <đường_dẫn>` không bị deprecated, xử lý tốt cả tệp tracked lẫn tệp untracked vừa stage. |
+| **Unstage toàn bộ** | `git restore --staged .` | `git reset` | Đưa toàn bộ Staging Index về lại HEAD mà không làm ảnh hưởng đến tệp trên đĩa. |
+| **Discard 1 tệp đã track** | `git restore -- <đường_dẫn>` | `git checkout -- <đường_dẫn>` | Khôi phục nội dung tệp về trạng thái commit gần nhất. |
+| **Discard toàn bộ tệp đã track** | `git restore .` | `git checkout -- .` | Khôi phục toàn bộ các tệp đã theo dõi trên cây thư mục. |
+| **Discard tệp untracked** | `git clean -f -- <đường_dẫn>` | `git clean -f -- <đường_dẫn>` | Dùng chung cho mọi phiên bản Git (có từ phiên bản Git đầu tiên). |
+| **Stage 1 tệp / Stage All** | `git add -- <đường_dẫn>` / `git add -A` | `git add -- <đường_dẫn>` / `git add -A` | Dùng chung cho mọi phiên bản Git, không cần fallback. |
+
+---
+
+### 2.3. Nâng Cấp Phương Thức Tạo Commit (`commit`)
 
 Phương thức tạo commit được thiết kế lại toàn diện để hỗ trợ đầy đủ các quy chuẩn tạo commit chuyên nghiệp trong Git:
 

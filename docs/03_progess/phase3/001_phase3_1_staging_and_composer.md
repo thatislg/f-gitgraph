@@ -77,15 +77,24 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ### 📋 Nhóm Việc 1: Mở Rộng Backend GitCliMutator, Bộ Truy Vấn & RPC Protocol (Kèm Test Độc Lập)
 *Tài liệu tham chiếu thiết kế*: [01_Staging_Backend_And_Mutator_Design.md](../../02_design/phase3/01_Staging_Backend_And_Mutator_Design.md).
 
-- [ ] **Nhiệm vụ 1.1: Hiện thực các lệnh Staging trong `src/extension/mutator/gitCliMutator.ts`**
-  - [ ] **1.1.1**: Hiện thực hàm `stageFile(filePath: string)`: Gọi lệnh `git add -- <filePath>`, bảo đảm ký tự phân tách `--` luôn hiện diện để ngăn nhầm lẫn đường dẫn với nhánh.
-  - [ ] **1.1.2**: Hiện thực hàm `unstageFile(filePath: string)`: Gọi lệnh `git restore --staged -- <filePath>`. Xử lý an toàn cho cả tệp đã track lẫn tệp untracked mới add.
-  - [ ] **1.1.3**: Hiện thực hàm `stageAll()`: Gọi lệnh `git add -A` để đưa toàn bộ tệp mới, tệp sửa đổi và tệp xóa trên toàn bộ kho vào chỉ mục.
-  - [ ] **1.1.4**: Hiện thực hàm `unstageAll()`: Gọi lệnh `git restore --staged .` để rút sạch Staging Index về lại working tree.
-  - [ ] **1.1.5**: Hiện thực hàm `discardFileChanges(filePath: string, isUntracked: boolean)`: Phân định rõ 2 nhánh logic:
-    - Nếu `isUntracked` là true: Gọi `git clean -f -- <filePath>` để xóa tệp mới khỏi đĩa.
-    - Nếu `isUntracked` là false: Gọi `git restore -- <filePath>` để khôi phục nội dung tệp từ index/HEAD.
-  - [ ] **1.1.6**: Hiện thực hàm `discardAllChanges()`: Thực thi tuần tự 2 bước: bước 1 gọi `git restore .`, nếu thành công tiếp tục bước 2 gọi `git clean -fd`. Bắt lỗi và dừng ngay nếu bước 1 thất bại.
+- [ ] **Nhiệm vụ 1.1: Hiện thực cơ chế tương thích đa phiên bản Git & các lệnh Staging trong `src/extension/mutator/gitCliMutator.ts`**
+  - [ ] **1.1.0**: Hiện thực hàm thăm dò phiên bản một lần `canUseRestore()`: Thực thi `git version`, bóc tách chỉ số Major/Minor (Git >= 2.23), lưu cờ `supportsRestore` vào in-memory cache để không tốn thêm tiến trình ở các lần gọi sau.
+  - [ ] **1.1.1**: Hiện thực hàm `stageFile(filePath: string)`: Gọi lệnh `git add -- <filePath>`, bảo đảm ký tự phân tách `--` luôn hiện diện để ngăn nhầm lẫn đường dẫn với nhánh. Tương thích 100% mọi phiên bản Git.
+  - [ ] **1.1.2**: Hiện thực hàm `unstageFile(filePath: string)`: Rẽ nhánh an toàn theo phiên bản Git:
+    - Nếu Git hỗ trợ `restore` (Git >= 2.23): Gọi `git restore --staged -- <filePath>`.
+    - Nếu Git cũ (Git < 2.23): Fallback gọi `git reset -- <filePath>` (an toàn cho cả tệp tracked lẫn untracked vừa add).
+  - [ ] **1.1.3**: Hiện thực hàm `stageAll()`: Gọi lệnh `git add -A` đưa toàn bộ tệp mới, tệp sửa đổi và tệp xóa vào chỉ mục. Tương thích 100% mọi phiên bản Git.
+  - [ ] **1.1.4**: Hiện thực hàm `unstageAll()`: Rẽ nhánh an toàn:
+    - Nếu Git hỗ trợ `restore` (Git >= 2.23): Gọi `git restore --staged .`.
+    - Nếu Git cũ (Git < 2.23): Fallback gọi `git reset`.
+  - [ ] **1.1.5**: Hiện thực hàm `discardFileChanges(filePath: string, isUntracked: boolean)`:
+    - Nếu `isUntracked` là true: Gọi `git clean -f -- <filePath>` (tương thích mọi phiên bản Git).
+    - Nếu `isUntracked` là false (tệp tracked): Rẽ nhánh:
+      - Git >= 2.23: Gọi `git restore -- <filePath>`.
+      - Git < 2.23: Fallback gọi `git checkout -- <filePath>`.
+  - [ ] **1.1.6**: Hiện thực hàm `discardAllChanges()`: Thực thi tuần tự 2 bước:
+    - Bước 1: Rẽ nhánh khôi phục tệp tracked: gọi `git restore .` (Git >= 2.23) hoặc `git checkout -- .` (Git < 2.23). Dừng ngay nếu bước 1 thất bại.
+    - Bước 2: Gọi `git clean -fd` xóa sạch tệp và thư mục chưa theo dõi.
 
 - [ ] **Nhiệm vụ 1.2: Nâng cấp hàm `commit` trong `src/extension/mutator/gitCliMutator.ts`**
   - [ ] **1.2.1**: Mở rộng tham số nhận diện cờ sửa đổi commit gần nhất `--amend` mà không tạo commit mới.
@@ -113,9 +122,12 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 
 - [ ] **Nhiệm vụ 1.5 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend**
   - [ ] **1.5.1**: Tạo `tests/extension/mutator/stagingMutator.test.ts`:
-    - Kiểm thử gọi đúng lệnh dòng lệnh mảng cho `stageFile` (`["add", "--", path]`).
-    - Kiểm thử gọi đúng lệnh cho `unstageFile` (`["restore", "--staged", "--", path]`).
-    - Kiểm thử `discardFileChanges` gọi `restore` khi tracked và `clean` khi untracked.
+    - Kiểm thử cơ chế `canUseRestore()`: Bóc tách chính xác phiên bản Git từ các chuỗi chuẩn (`git version 2.43.0`, `git version 2.22.0`, `git version 3.0.0`, `git version 1.8.3`), lưu cache sau lần gọi đầu tiên.
+    - Kiểm thử `stageFile` gọi đúng lệnh `["add", "--", path]`.
+    - Kiểm thử `unstageFile`: Gọi `restore --staged` khi Git >= 2.23 và gọi `reset --` khi Git < 2.23.
+    - Kiểm thử `unstageAll`: Gọi `restore --staged .` khi Git >= 2.23 và gọi `reset` khi Git < 2.23.
+    - Kiểm thử `discardFileChanges`: Gọi `clean -f` khi untracked; Gọi `restore` khi tracked trên Git >= 2.23; Gọi `checkout --` khi tracked trên Git < 2.23.
+    - Kiểm thử `discardAllChanges`: Gọi `restore .` (hoặc `checkout -- .`) rồi gọi `clean -fd`.
     - Kiểm thử `commit` ghép nối đúng 2 cờ `-m` khi có description, truyền cờ `--amend`, truyền cờ `-S`.
     - Kiểm thử bắt và bóc tách lỗi khóa tệp `.git/index.lock` trả về lỗi thân thiện.
   - [ ] **1.5.2**: Tạo `tests/backend/queries/workspaceStatus.test.ts`:
