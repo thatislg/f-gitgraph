@@ -1,102 +1,167 @@
 <div align="center">
-  <img src="./resources/icon.png" height="128"/>
+  <img src="./resources/icon.png" height="128" alt="F-GitGraph Logo"/>
   <samp>
-    <h1>F-GitGraph</h1>
-    <h3>High-performance Git history visualization for VS Code, powered by an F# Native AOT core.</h3>
+    <h1>F-GitGraph: Reborn</h1>
+    <h3>Next-generation Git Client & History Visualizer for VS Code, powered by an F# Native AOT core and Cyber-Lab Design System.</h3>
   </samp>
 </div>
 
 <p align="center">
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/thatislg/f-gitgraph" alt="License"></a>
-  <a href="https://github.com/thatislg/f-gitgraph/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/thatislg/f-gitgraph"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/thatislg/f-gitgraph?style=flat-square" alt="License"></a>
+  <a href="https://github.com/thatislg/f-gitgraph/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/thatislg/f-gitgraph?style=flat-square"></a>
+  <img src="https://img.shields.io/badge/architecture-F%23%20Native%20AOT%20%2B%20Preact-purple?style=flat-square" alt="Architecture">
+  <img src="https://img.shields.io/badge/design-Neo--Brutalist%20Cyber--Lab-06b6d4?style=flat-square" alt="Design">
 </p>
 
 <p>&nbsp;</p>
 
-## About
+## Overview: The Reborn Era
 
-**F-GitGraph** is a next-generation Git history visualizer built for large repositories, originally forked from the MIT-licensed **Git Graph** extension (via the **Neo-Git-Graph** fork). It combines a lightweight Preact webview with a native **F# Native AOT core engine** (`f-gitgraph-core.exe`) that reads Git data directly and computes the graph layout in parallel — no dependency on a .NET runtime, and dramatically faster than previous single-threaded TypeScript implementations.
+**F-GitGraph** is an ultra-fast, feature-rich Git Client UI and interactive DAG history visualizer built directly into VS Code. 
 
-Maintained and published by **LMO-LAB**.
+Originally forked from the popular MIT-licensed **Git Graph** (via **Neo-Git-Graph**), the project has undergone a complete transformation in the **Reborn Era**:
+1. **Engine Rebirth**: Replacing legacy single-threaded JavaScript `git log` regex parsing with a standalone, blazing-fast **F# Native AOT Core Engine** (`f-gitgraph-core`) that communicates via a binary MessagePack streaming IPC daemon (<5ms cold start, zero-allocation memory-mapped file access).
+2. **Visual Rebirth**: Introducing the **Neo-Brutalist Cyber-Lab** visual identity — inspired by LMO Lab's high-precision blueprint framing with **corner crosshair rivets (`+`)**, high-tech **Hexagon SVG commit nodes**, clip-path avatars, ambient neon gradients, and a clean, uncluttered layout that delivers deep visual appeal without the chaotic overcrowding found in tools like GitLens.
+3. **Workspace Rebirth**: Evolving from a pure commit-history viewer into a comprehensive **3-Pane Git Client Workspace** with native Staging, a specialized Commit Composer, full Stash Inspector, Visual Interactive Rebase, and In-Flight Conflict Resolution.
 
-## Key Highlights
+Maintained and published by **[LMO-LAB](https://github.com/thatislg)**.
 
-- **Dual-core architecture** — a lightweight Preact UI drives a self-contained F# Native AOT engine that runs directly on the metal.
-- **Direct Git access** — reads the binary `commit-graph` through memory-mapped files and the in-process LibGit2 C binding, 30–50× faster than shelling out to the Git CLI.
-- **Parallel DAG layout** — sorts commits and allocates graph lanes across multiple CPU threads, pre-computing SVG geometry before the UI renders.
-- **Streaming IPC** — a stdio RPC daemon with a binary MessagePack protocol answers windowed queries in under 5 ms for silky virtual scrolling.
-- **Signature-safe writes** — every mutating operation (commit, branch, merge, rebase, cherry-pick, tag, push, pull) is delegated to the native `git.exe`, preserving GPG/SSH signing and Git Credential Manager.
-- **Modern neon UI** — hexagon SVG commit nodes, ambient neon glow, 5× avatar zoom preview, and a full commit-message panel.
+---
 
-## Features
+## Key Highlights & Core Pillars
 
-- **Graph view** — branches, tags, and uncommitted changes in a single hexagonal graph.
-- **Commit details** — click a commit to inspect the message, changed files, and diffs.
-- **Branch actions** — create, checkout, rename, delete, and merge.
-- **Tag actions** — create, delete, and push tags.
-- **Commit actions** — checkout, cherry-pick, revert, and reset.
-- **Avatar preview** — hover-to-zoom avatar preview (fetching avatars is deprecated in v0.6.0).
-- **Multi-repo** — work with several repositories in one workspace.
+- ⚡ **F# Native AOT Core Engine** — Pure machine code compiled directly for target platforms (`win-x64`, `linux-x64`, `osx-arm64`). Runs on the bare metal with zero dependencies on the .NET SDK or runtime.
+- 🚀 **Memory-Mapped Direct Git Access** — Reads the binary `.git/objects/info/commit-graph` via memory-mapped files and in-process LibGit2 C bindings. Parses repositories with 50,000 – 100,000+ commits in milliseconds.
+- 🧬 **Parallel DAG Layout Solver** — Computes topological commit order, left-compact lane pools, and SVG Bézier curves in parallel across multi-core CPUs.
+- 📐 **Neo-Brutalist Cyber-Lab Aesthetic** — Technical blueprint panel framing punctuated by signature **corner crosshair rivets (`+`)**, providing a focused, structured, and aesthetic experience.
+- 💎 **Hexagon Nodes & Avatar Micro-Interactions** — SVG Hexagon commit nodes with clip-path avatars, smooth **Micro Hover Zoom (1.15×)**, and **Click Deep Zoom (5.0× Top-Layer)** with HD profile previews.
+- 🎨 **Neon Ambient Gradient & Flameshot Purple Border** — Shimmering branch-colored neon ambient glow fanning from commit avatars, coupled with signature Flameshot purple selection highlights.
+- 🛡️ **100% Signature-Safe Mutations** — Every mutating operation (`commit`, `branch`, `tag`, `merge`, `rebase`, `cherry-pick`, `revert`, `reset`, `stash`, `push`, `pull`) is strictly delegated to the user's native `git.exe` CLI, ensuring 100% data integrity, GPG/SSH commit signing, Git Credential Manager authentication, and git hooks execution.
+- 🌗 **Seamless Dark & Light Harmony** — Deep integration with VS Code's active theme variables (`--vscode-*`), featuring calibrated neon accents for dark mode and soft, non-glare blueprint contrast for light mode.
 
-## Architecture
+---
 
-Traditional implementations (including the upstream **Git Graph** and **Neo-Git-Graph** codebases) parsed `git log` output with regular expressions and computed the graph layout in a single JavaScript thread — creating severe performance bottlenecks on large repositories.
+## 3-Pane Workspace Architecture
 
-F-GitGraph decouples the system into a **hybrid architecture**: a responsive TypeScript/Preact shell, a high-performance **F# Native AOT core engine** for read-heavy graph computation, and **native Git CLI delegation** for 100% signature-safe mutating operations.
+F-GitGraph organizes your repository into an intuitive, responsive, and non-cluttered 3-pane layout:
 
-![Architecture](./resources/architecture.png)
+```
++──────────────────────────────────────────────────────────────────────────────────────────+
+│ [↻ Fetch]  [↓ Pull 2]  [↑ Push 1]  [📦 Stash]  │  [ 🔍 Filter commits... (Ctrl+F) ]      │
++─────────────────────────+──────────────────────────────────────+─────────────────────────+
+│ 📁 LEFT SIDEBAR         │ 📊 CENTER DAG GRAPH CANVAS           │ 📝 RIGHT INSPECTOR PANE │
+│                         │                                      │                         │
+│  ▼ WORKING TREE         │   ●─── [main] Commit message 1       │  ▼ STAGING AREA         │
+│     Changes (3)         │   │ ●─ [feat] Add new button         │     Staged (1) [-]      │
+│                         │   ● │  Merge pull request #42        │     Changes (2) [+]     │
+│  ▼ LOCAL BRANCHES       │   │ │                                │                         │
+│   • main (HEAD)         │   ... (Virtualized Windowing DAG)    │  ▼ COMMIT COMPOSER      │
+│   • feature-reborn      │                                      │  ┌────────────────────┐ │
+│                         │ ──────────────────────────────────── │  │ Summary (42/50)    │ │
+│  ▼ REMOTES (origin)     │ [Commit Details Overlay Inspector]   │  ├────────────────────┤ │
+│     main, dev           │ Full message, author, file changes,  │  │ Extended desc...   │ │
+│                         │ side-by-side diff via vscode.diff.   │  └────────────────────┘ │
+│  ▼ TAGS & STASHES       │                                      │  [x] Amend  [x] Sign    │
+│     v1.0.0, stash@{0}   │                                      │  [ Button: Commit (1) ] │
++─────────────────────────+──────────────────────────────────────+─────────────────────────+
+```
 
-| Concern             | Before (TypeScript)               | After (F# Native AOT)                             |
-| :------------------ | :-------------------------------- | :------------------------------------------------ |
-| Read commits / refs | `git log` + regex parsing (spawn) | Memory-mapped `commit-graph` + LibGit2 in-process |
-| Topological sort    | Single-threaded JS                | Parallel Kahn sort with priority queue            |
-| Lane allocation     | Single-threaded JS                | Left-compact lane pool, multi-threaded            |
-| Geometry generation | JS at render time                 | Pre-computed SVG in `Parallel.For`                |
-| Transport           | JSON `postMessage`                | Binary MessagePack over stdio RPC daemon          |
+1. **Top Global Toolbar**: Quick access to `Fetch`, `Pull` (with ahead/behind badges), `Push`, `Stash`, and instant `Ctrl+F` commit search.
+2. **Left Sidebar Navigator**: Clean hierarchical tree of Working Tree status, Local Branches, Remote tracking branches, Tags, and Stashes with double-click checkout and right-click context menus.
+3. **Center DAG Graph Canvas**: Virtualized infinite scrolling commit table rendering hexagon nodes, branch curves, author avatars, and rich dwell hover popovers without dropping frames.
+4. **Right / Bottom Inspector Pane**:
+   - **Working Tree Mode**: Staging Area (Unstaged vs Staged files, file & hunk staging, discard changes) and Commit Composer (50-char counter, body description, amend toggle, GPG sign toggle).
+   - **Commit History Mode**: Overlay Commit Details drawer displaying author metadata, changed files, and integrated `vscode.diff`.
 
-Mutating operations intentionally remain on the Git CLI to guarantee signature and credential safety.
+---
 
-## Roadmap
+## Technical Architecture & Performance Comparison
 
-The engine ships platform-by-platform, starting on Windows and expanding to a universal release:
+Traditional Git extensions shell out to `git log` with regular expressions and compute layout graphs in a single JavaScript thread, causing severe UI freezes and high RAM consumption on large repositories.
 
-- **Phase 1 — Windows** _(in progress)_: F# Native AOT core, domain model, fast Git reader, parallel layout solver, stdio IPC, benchmarking, and VSIX packaging.
-- **Phase 2 — Linux**: port the core to Ubuntu/Fedora/Debian, resolve `glibc` compatibility, and stress-test against the Linux kernel repository.
-- **Phase 3 — macOS**: Apple Silicon (M-series ARM64) and Intel x64, Gatekeeper handling, and Retina display verification.
-- **Phase 4 — Release**: multi-platform CI/CD and a universal VSIX bundling all native binaries.
+F-GitGraph decouples the system into a **Hybrid High-Performance Pipeline**:
 
-## Installation
+```mermaid
+graph TD
+    UI[Preact Webview - Virtualized Dumb Renderer] <===>|VS Code IPC postMessage| Ext[TypeScript Backend Host]
+    Ext <===>|Stdio RPC Binary MessagePack Frame| Core[F# Native AOT Core Daemon]
+    Ext -.->|Spawn CLI Mutations| GitCLI[git.exe / Native Git CLI]
+    Core -.->|Direct Read File / LibGit2| GitRepo[(Git Repository .git/)]
+```
 
-Search for `f-gitgraph` in the Extensions view, or install from:
+| Concern | Legacy Single-Threaded JS | F-GitGraph Reborn (F# Native AOT) |
+| :--- | :--- | :--- |
+| **Commit & Ref Access** | `git log` spawn process + regex string split | Direct memory-mapped `commit-graph` + in-process LibGit2 |
+| **Memory Allocation** | Tens of thousands of JS objects (GC thrashing) | Zero-allocation `Span<byte>` binary slices |
+| **DAG Topological Sort** | Single-threaded JavaScript | Multi-threaded parallel topological graph solver |
+| **SVG Path Generation** | Render-time JavaScript path math | Pre-computed Bézier curves via `Array.Parallel` |
+| **IPC Communication** | Large JSON stringify/parse | Binary MessagePack framing over Stdio streaming |
+| **Mutation Safety** | Library-based Git mutations | 100% Native Git CLI delegation (GPG, SSH, Hooks preserved) |
 
-- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=lmo-lab.f-gitgraph)
-- [Open VSX Registry](https://open-vsx.org/extension/lmo-lab/f-gitgraph)
+---
 
-## Configuration
+## Project Evolution & Roadmap
 
-All settings use the `f-gitgraph` prefix.
+The development of F-GitGraph is organized into milestone phases:
 
-| Setting                       | Default         | Description                                                            |
-| ----------------------------- | --------------- | ---------------------------------------------------------------------- |
-| `autoCenterCommitDetailsView` | `true`          | Center commit details when opened                                      |
-| `dateFormat`                  | `"Date & Time"` | `"Date & Time"`, `"Date Only"`, or `"Relative"`                        |
-| `dateType`                    | `"Author Date"` | `"Author Date"` or `"Commit Date"`                                     |
-| `fetchAvatars`                | `false`         | Fetch avatars (sends email to external services); deprecated in v0.6.0 |
-| `graphColours`                | 12 defaults     | Colors for graph lines                                                 |
-| `graphStyle`                  | `"rounded"`     | `"rounded"` or `"angular"`                                             |
-| `initialLoadCommits`          | `300`           | Commits to load on open                                                |
-| `loadMoreCommits`             | `100`           | Commits to load on demand                                              |
-| `maxDepthOfRepoSearch`        | `0`             | Folder depth for repo search                                           |
-| `showCurrentBranchByDefault`  | `false`         | Show only current branch on open                                       |
-| `showUncommittedChanges`      | `true`          | Show uncommitted changes node                                          |
-| `tabIconColourTheme`          | `"colour"`      | `"colour"` or `"grey"`                                                 |
+- **Phase 1: F# Core Foundation** _(Completed & Packaged)_:
+  - F# Native AOT independent engine (`win-x64`, cold-start <5ms).
+  - Parallel DAG layout solver & memory-mapped commit-graph reader.
+  - Hexagon SVG nodes, clip-path avatars, 1.15× micro hover zoom, and 5.0× click deep zoom.
+  - Rich hover panel (550ms dwell timer) and non-breaking commit details overlay inspector.
+  - Topological and Date commit ordering toggle.
+- **Phase 3: Reborn — Full Git Client App UI** _(Active Development)_:
+  - **[Milestone 3.1: Staging Area & Commit Composer](docs/03_progess/phase3/001_phase3_1_staging_and_composer.md)**: Staged/Unstaged file lists, file staging, commit composer with 50-char counter, amend, and GPG signing.
+  - **[Milestone 3.2: 3-Pane Workspace & Remote Synchronization](docs/03_progess/phase3/002_phase3_2_3pane_workspace.md)**: Left sidebar navigator, global toolbar with ahead/behind counters (`↑ahead` / `↓behind`), search & filter bar.
+  - **[Milestone 3.3: Stash Management & Multi-Commit Diff](docs/03_progess/phase3/003_phase3_3_stash_and_multi_diff.md)**: Stash preview drawer, cross-commit comparison (`Ctrl` select 2 nodes), partial hunk staging.
+  - **[Milestone 3.4: Visual Interactive Rebase & Conflict Resolver](docs/03_progess/phase3/004_phase3_4_rebase_and_conflict.md)**: Drag-and-drop commit reordering, visual squash/fixup/reword/drop buttons, and 3-way in-flight conflict resolver.
 
-## Contributing
+Comprehensive technical design specifications and investigation reports can be found in the [`docs/`](docs/) directory:
+- [Phase 3 Reborn Overview & Taxonomy](docs/phase3_Reborn/README.md)
+- [Design System & Cyber-Lab Visual Identity](docs/phase3_Reborn/004_Design_System_And_Visual_Identity.md)
+- [Phase 3 Worklogs & Milestone Progress](docs/03_progess/phase3/README.md)
 
-Please use [Issues](https://github.com/thatislg/f-gitgraph/issues) for bug reports, feature requests, and discussion. See the [Roadmap](#roadmap) for the current direction.
+---
 
-## License
+## Configuration Settings
 
-MIT — see [LICENSE](LICENSE).
+All settings are prefixed with `f-gitgraph` and can be customized via VS Code Settings:
 
-> F-GitGraph builds upon the MIT-licensed **Git Graph** extension by [mhutchie](https://github.com/mhutchie/vscode-git-graph) and the **Neo-Git-Graph** fork ([asispts/neo-git-graph](https://github.com/asispts/neo-git-graph)). It is maintained and published by LMO-LAB.
+| Setting | Default | Description |
+| :--- | :---: | :--- |
+| `f-gitgraph.autoCenterCommitDetailsView` | `true` | Automatically center the selected commit details view in viewport. |
+| `f-gitgraph.dateFormat` | `"Date & Time"` | Timestamp display format (`"Date & Time"`, `"Date Only"`, or `"Relative"`). |
+| `f-gitgraph.dateType` | `"Author Date"` | Source date for commits (`"Author Date"` or `"Commit Date"`). |
+| `f-gitgraph.graphColours` | 12 defaults | Curated neon & pastel palette for branch graph lanes. |
+| `f-gitgraph.graphStyle` | `"rounded"` | Visual curve style for branch lanes (`"rounded"` or `"angular"`). |
+| `f-gitgraph.initialLoadCommits` | `300` | Number of initial commits loaded on open. |
+| `f-gitgraph.loadMoreCommits` | `100` | Chunk size of commits to load during virtual scrolling. |
+| `f-gitgraph.maxDepthOfRepoSearch` | `0` | Subdirectory depth for scanning repositories in workspace. |
+| `f-gitgraph.showCurrentBranchByDefault` | `false` | Filter to only current checked out branch on view launch. |
+| `f-gitgraph.showUncommittedChanges` | `true` | Display the uncommitted changes row at the top of the graph. |
+| `f-gitgraph.tabIconColourTheme` | `"colour"` | Icon appearance theme in tab bar (`"colour"` or `"grey"`). |
+
+---
+
+## Contributing & Community
+
+Contributions, suggestions, and issue reports are warmly welcomed!
+- File bug reports and feature requests via [GitHub Issues](https://github.com/thatislg/f-gitgraph/issues).
+- Check the [Phase 3 Roadmap](docs/phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md) for planned features and technical specifications.
+
+---
+
+## License & Copyright Attributions
+
+F-GitGraph is open-source software licensed under the **[MIT License](LICENSE)**.
+
+```text
+MIT License
+
+Copyright (c) 2019 mhutchie. Fork (c) 2026-present LMO-LAB
+```
+
+### Historical Acknowledgments & Ancestry
+- **Original Foundation**: Built upon the MIT-licensed **Git Graph** extension created by **[mhutchie](https://github.com/mhutchie/vscode-git-graph)**. We honor mhutchie's pioneering work in bringing interactive commit graphs to VS Code.
+- **Neo-Git-Graph Fork**: Inherits early modernization refactoring from the **Neo-Git-Graph** project ([asispts/neo-git-graph](https://github.com/asispts/neo-git-graph)).
+- **F-GitGraph Reborn**: Conceived, architected with an F# Native AOT parallel computing engine, designed under the Cyber-Lab aesthetic, and actively developed by **[LMO-LAB](https://github.com/thatislg)**.

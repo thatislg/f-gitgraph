@@ -50,11 +50,22 @@ Thư mục [`docs/phase2_Investigation/`](phase2_Investigation/README.md) chứa
 
 ---
 
+### 🚀 Phase 3: Reborn - Tiến Hóa Thành Ứng Dụng Git UI Hoàn Chỉnh
+
+Thư mục [`docs/phase3_Reborn/`](phase3_Reborn/README.md) tập trung điều tra hệ thống tính năng Git, kiểm toán hiện trạng F-GitGraph và xây dựng lộ trình biến F-GitGraph thành một **Full-Featured Git Client App UI**:
+
+- **[001. Khảo Sát Toàn Diện Hệ Sinh Thái Tính Năng Git (Taxonomy)](phase3_Reborn/001_Git_Features_Comprehensive_Taxonomy.md)**: Phân rã 12 trụ cột chức năng của Git CLI và chuẩn mực của các Git GUI hàng đầu thế giới (Fork, GitKraken, Sublime Merge, Tower).
+- **[002. Kiểm Toán Chi Tiết Năng Lực Hiện Có Của FpGitGraph (Audit)](phase3_Reborn/002_Fpgitgraph_Current_Capabilities_Audit.md)**: Kiểm toán chi tiết 3 tầng (F# Core, TS Backend, Preact UI) và bảng rà soát 45 tiêu chí chức năng.
+- **[003. Phân Tích Độ Lệch & Bản Thiết Kế Tiến Hóa Lên Full Git App (Blueprint)](phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md)**: Ma trận phân tích độ lệch (Gap Matrix), mô hình không gian làm việc 3-Pane (Sidebar - DAG Canvas - Staging/Inspector), và lộ trình 4 bước phát triển.
+- **[004. Hệ Thống Thiết Kế & Nhận Diện Hình Ảnh (Design System)](phase3_Reborn/004_Design_System_And_Visual_Identity.md)**: Định vị ngôn ngữ thiết kế Cyber-Lab tối giản (Simple & Breatheable, không ôm đồm rối mắt như GitLens), khung viền đinh tán chữ thập góc (`+`) và hệ màu toàn diện cho Dark/Light theme.
+
+---
+
 ### 📐 Thiết Kế Kỹ Thuật & Nhật Ký Tiến Độ
 
 - **[02. Thiết Kế Kỹ Thuật (Design Specifications)](02_design/README.md)**:
   - **[001_windows](02_design/001_windows/README.md)**: Hệ thống 7 bản thiết kế chi tiết cho Phase 1 Windows (Cấu trúc & Native AOT, Domain Model & Bảng mã lỗi, Fast Reader, Parallel Layout, Stdio IPC, Webview & Mutator, Benchmark Plan).
-- **[03. Nhật Ký Tiến Độ (Progress & Worklogs)](03_progess/README.md)**: Thư mục theo dõi tiến độ phát triển chi tiết cho 4 giai đoạn (001_windows, 002_linux, 003_macos, 004_release).
+- **[03. Nhật Ký Tiến Độ (Progress & Worklogs)](03_progess/README.md)**: Thư mục theo dõi tiến độ phát triển: [Phase 1](03_progess/phase1/README.md) (Nền móng nhân F# Core Engine - Đã hoàn thành & đóng gói) và [Phase 3](03_progess/phase3/README.md) (Reborn: Tiến hóa thành Full Git Client App UI với 4 chặng 3.1 -> 3.4).
 - **[04. Báo Cáo Nghiệm Thu & Đo Đạc (Reports & Verification)](04_reports/README.md)**:
   - **[001_windows](04_reports/001_windows/README.md)**: Báo cáo đo đạc hiệu năng, kiểm thử tương đương đồ thị và an toàn dữ liệu trên Windows.
   - **[002_linux](04_reports/002_linux/README.md)**: Báo cáo tương thích `glibc`, kiểm thử stress-test kho Linux kernel và tự cấp quyền `chmod +x`.
