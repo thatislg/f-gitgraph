@@ -34,7 +34,7 @@ Khu vực Staging và Soạn thảo Commit được phân rã thành các thành
 
 ## 2. Ngôn Ngữ Thẩm Mỹ Cyber-Lab & Thiết Kế Đinh Tán Chữ Thập Góc (`+`)
 
-Kế thừa và chuẩn hóa trực tiếp từ quy chuẩn thiết kế hệ thống tại [004_Design_System_And_Visual_Identity.md](../../phase3_Reborn/004_Design_System_And_Visual_Identity.md):
+Kế thừa và chuẩn hóa trực tiếp từ quy chuẩn thiết kế hệ thống tại [004_Design_System_And_Visual_Identity.md](../../01_investigation/phase3_Reborn/004_Design_System_And_Visual_Identity.md):
 
 ### 2.1. Quy Chuẩn Đinh Tán Chữ Thập Góc (`CornerCrossFrame`)
 

@@ -3,7 +3,10 @@
 Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi tiết (Task Outlines), tiêu chuẩn nghiệm thu và nhật ký thực hiện cho **Phase 3.3: Quản lý Stash chuyên sâu & So sánh vi sai đa commit**.
 
 > [!NOTE]
-> **Tài liệu tham chiếu thiết kế**: [docs/phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md](../../phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md) (Mục 4.3).
+> **Hồ sơ thiết kế tham chiếu**:
+> - [003_Gap_Analysis_And_Evolution_Blueprint.md (Mục 4.3: Quản lý Stash & Multi-Commit Diff)](../../01_investigation/phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md).
+> - [004_Design_System_And_Visual_Identity.md (Quy chuẩn bố cục Cyber-Lab & Đinh tán góc)](../../01_investigation/phase3_Reborn/004_Design_System_And_Visual_Identity.md).
+> - [docs/02_design/phase3/ (Mục lục hồ sơ thiết kế kỹ thuật Phase 3)](../../02_design/phase3/README.md).
 
 ---
 

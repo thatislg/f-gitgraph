@@ -3,7 +3,10 @@
 Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi tiết (Task Outlines), tiêu chuẩn nghiệm thu và nhật ký thực hiện cho **Phase 3.4: Tái cấu trúc lịch sử (Visual Interactive Rebase) & Trình giải quyết xung đột trực quan (Conflict Resolver)**.
 
 > [!NOTE]
-> **Tài liệu tham chiếu thiết kế**: [docs/phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md](../../phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md) (Mục 4.4).
+> **Hồ sơ thiết kế tham chiếu**:
+> - [003_Gap_Analysis_And_Evolution_Blueprint.md (Mục 4.4: Rebase & Conflict Resolver)](../../01_investigation/phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md).
+> - [004_Design_System_And_Visual_Identity.md (Quy chuẩn bố cục Cyber-Lab & Đinh tán góc)](../../01_investigation/phase3_Reborn/004_Design_System_And_Visual_Identity.md).
+> - [docs/02_design/phase3/ (Mục lục hồ sơ thiết kế kỹ thuật Phase 3)](../../02_design/phase3/README.md).
 
 ---
 

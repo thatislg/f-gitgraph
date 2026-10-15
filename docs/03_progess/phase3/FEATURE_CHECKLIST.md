@@ -7,6 +7,7 @@ Tài liệu này là **Bảng Điều Khiển Trung Tâm (Single Source of Truth
 > - Bảng này hoàn toàn độc lập với các checklist đầu việc kỹ thuật (tasks) nằm trong từng file tiến độ `001_phase3_1_...`.
 > - Khi một tính năng được hoàn thành và nghiệm thu hoạt động trơn tru trên giao diện, đánh dấu `[x]` kèm ngày hoàn thành.
 > - Bảng giúp lập trình viên và người dùng có cái nhìn bao quát 100% về độ sẵn sàng phát hành của sản phẩm mà không cần mở từng tệp chi tiết.
+> - **Tài liệu thiết kế tham chiếu**: Xem toàn bộ bản thiết kế kỹ thuật tại [docs/02_design/phase3/](../../02_design/phase3/README.md) và thiết kế giao diện tại [004_Design_System_And_Visual_Identity.md](../../01_investigation/phase3_Reborn/004_Design_System_And_Visual_Identity.md).
 
 ---
 
