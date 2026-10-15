@@ -4,6 +4,7 @@ Thư mục này lưu trữ toàn bộ hệ thống tài liệu thiết kế kỹ
 
 > [!IMPORTANT]
 > **Nguyên tắc thiết kế cốt lõi**:
+> - **Thiết kế bằng ngôn ngữ tự nhiên (Design by Word)**: Toàn bộ hệ thống tài liệu thiết kế được đặc tả bằng ngôn ngữ tự nhiên, tập trung vào kiến trúc hệ thống, ranh giới an toàn, bảng từ điển dữ liệu, sơ đồ tuần tự và quy chuẩn thẩm mỹ; tuyệt đối không sử dụng mã nguồn mẫu dưới bất kỳ hình thức nào.
 > - **An toàn dữ liệu tuyệt đối**: F# Core Engine đọc trạng thái nhanh; 100% thao tác thay đổi trạng thái kho (stage, unstage, commit, push...) được ủy thác cho Native Git CLI (`git.exe`).
 > - **Bảo toàn bất biến 100%**: Tuyệt đối không thay đổi hay làm xô lệch cấu trúc `HexagonNode.tsx`, avatar clip-path, zoom 5x, vầng neon ambient, hay thuật toán đồ thị F# đã hoàn thiện ở Phase 1. Các tính năng mới đóng vai trò là module bao bọc (Wrapper) bên ngoài.
 > - **Ngôn ngữ thẩm mỹ Cyber-Lab**: Khung kỹ thuật với **đinh tán chữ thập góc (`+`)** chuẩn LMO Lab, tối giản (Simple), thoáng mắt, hover-to-reveal (tránh rối mắt như GitLens) nhưng vẫn bắt mắt với các điểm nhấn Neon sắc nét.
