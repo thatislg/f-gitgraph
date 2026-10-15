@@ -51,18 +51,19 @@ Tái hiện cơ chế chèn dòng `*` ở tầng cầu nối Extension Host (`Gr
 | 4 | Vòng 1 | `src/extension/sidecar/graph-data-bridge.ts` | Lint | `import-js(order)`: `@/backend` phải đứng trước `@/types` | `[DEV_BUG]` | Đặt nhóm import sai thứ tự | Sắp xếp lại nhóm import | ✅ Đã khắc phục |
 | 5 | Vòng 1 | `src/extension/sidecar/graph-data-bridge.ts` | Lint | `import-js(order)`: type import `./protocol` phải đứng trước `./sidecar-manager` | `[DEV_BUG]` | Đặt nhóm import sai thứ tự | Sắp xếp lại nhóm import | ✅ Đã khắc phục |
 | 6 | Vòng 2 | `tests/backend/sidecar/graph-data-bridge.test.ts` | Lint | `import-js(order)`: `@/backend` phải đứng trước `@/extension` | `[DEV_BUG]` | Đặt nhóm import sai thứ tự trong tệp test mới | Sắp xếp lại nhóm import | ✅ Đã khắc phục |
+| 7 | Vòng 3 | `src/webview/lib/dispatcher.ts` | E2E (runtime) | Sau khi stage/unstage/discard, Staging Area không cập nhật realtime (phải tắt/bật lại dòng `*` mới thấy) | `[DEV_BUG]` | 6 action staging (`stageFile`/`unstageFile`/`stageAll`/`unstageAll`/`discardFileChanges`/`discardAllChanges`) chưa được đăng ký trong `dispatcher`, nên phản hồi thành công không kích hoạt `refresh()` | Đăng ký 6 action vào `handlers` map → `handleActionResult` | ✅ Đã khắc phục |
 
 ### 4.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
 | Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
 | :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **2 vòng** | Vòng 1 (lint 5 lỗi) → Vòng 2 (lint tệp test mới 1 lỗi) |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **6 lỗi** | $E_{design} + E_{dev}$ |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **3 vòng** | Vòng 1 (lint 5 lỗi) → Vòng 2 (lint tệp test mới) → Vòng 3 (realtime sync) |
+| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **7 lỗi** | $E_{design} + E_{dev}$ |
 | **Số lỗi do Thiết Kế** | $E_{design}$ | **1 lỗi** | Thiếu đặc tả cơ chế chèn dòng `*` (gốc rễ của defect) |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **5 lỗi** | 5 lỗi lint import/spread trong quá trình triển khai |
+| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **6 lỗi** | 5 lỗi lint import/spread + 1 lỗi thiếu đăng ký dispatcher |
 | **Số sự cố Môi Trường/Tool** | $E_{env}$ | **0 sự cố** (không tính `Hook timed out` có sẵn) | Loại trừ khỏi tỷ lệ |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **16.7%** | $\frac{1}{6} \times 100\%$ |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **83.3%** | $\frac{5}{6} \times 100\%$ |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **14.3%** | $\frac{1}{7} \times 100\%$ |
+| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **85.7%** | $\frac{6}{7} \times 100\%$ |
 | **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend target): OK |
 
 ---
@@ -83,4 +84,4 @@ Tái hiện cơ chế chèn dòng `*` ở tầng cầu nối Extension Host (`Gr
 
 ## 6. Kết Luận
 
-Dòng "Uncommitted Changes" (`*`) giờ được backend chèn đúng khi working tree có thay đổi, đồng thời bảo toàn hình học của các commit thật (dời đều xuống đúng 24px). Sau khi đóng gói lại VSIX, người dùng có thể click dòng `*` để mở Staging Area và kiểm thử tiếp Nhóm Việc 5 (E2E Core Dev Loop).
+Dòng "Uncommitted Changes" (`*`) giờ được backend chèn đúng khi working tree có thay đổi, đồng thời bảo toàn hình học của các commit thật (dời đều xuống đúng 24px). Đồng thời đăng ký đủ 6 action staging vào dispatcher để sau mỗi thao tác stage/unstage/discard, Webview tự động làm mới trạng thái (realtime). Sau khi đóng gói lại VSIX, người dùng có thể click dòng `*` để mở Staging Area và kiểm thử tiếp Nhóm Việc 5 (E2E Core Dev Loop).
