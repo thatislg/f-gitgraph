@@ -346,6 +346,7 @@ Tệp `src/types/actions.ts` đóng vai trò là hợp đồng dữ liệu cho m
 | `discardFileChanges`             | `filePath`: Chuỗi ký tự (string); `isUntracked`: Giá trị logic (boolean)                                                     | Đường dẫn tệp và cờ nhận diện tệp chưa theo dõi (để Backend chọn gọi `clean -f` hay `restore`/`checkout`).                                                       |
 | `discardAllChanges`              | Rỗng (`object` / không tham số)                                                                                                  | Lệnh hoàn tác và dọn sạch toàn bộ thay đổi trong working tree, không cần tham số.                                                                                         |
 | `commitChanges`                  | `summary`: Chuỗi ký tự (string); `description`: Chuỗi ký tự (string); `amend`: Logic (boolean); `sign`: Logic (boolean) | Bộ 4 tham số phục vụ tạo commit: Tiêu đề dòng đơn (Summary), Mô tả mở rộng (Description), Cờ sửa đổi commit HEAD (Amend), và Cờ ký số bảo mật GPG/SSH (Sign). |
+| `commitAndPush`                  | `summary`: Chuỗi ký tự (string); `description`: Chuỗi ký tự (string); `amend`: Logic (boolean); `sign`: Logic (boolean) | Cùng bộ 4 tham số như `commitChanges`, nhưng sau khi commit thành công sẽ tự động gọi `git push` để đẩy nhánh hiện tại lên nhánh theo dõi từ xa (upstream). |
 
 #### Cơ Chế Đóng Gói Thông Điệp Yêu Cầu (`ActionRequest`) & Phản Hồi (`ActionResponse`)
 
@@ -438,6 +439,7 @@ Tệp `messageHandler.ts` đóng vai trò là tổng đài điều hướng thô
      - Nhận `discardFileChanges` $\rightarrow$ gọi `mutator.discardFileChanges(payload.filePath, payload.isUntracked)`.
      - Nhận `discardAllChanges` $\rightarrow$ gọi `mutator.discardAllChanges()`.
      - Nhận `commitChanges` $\rightarrow$ gọi `mutator.commit(payload.summary, payload.description, payload.amend, payload.sign)`.
+     - Nhận `commitAndPush` $\rightarrow$ gọi `mutator.commitAndPush(payload.summary, payload.description, payload.amend, payload.sign)`.
 2. **Kích Hoạt Chu Trình Tự Động Làm Mới (Auto Refresh Cycle)**:
    - Ngay sau khi bất kỳ thao tác Action nào của `GitCliMutator` hoàn tất thành công mà không phát sinh lỗi, `messageHandler` sẽ tự động kích hoạt một sự kiện cập nhật (`refreshStatusEvent`) để Webview và File Watcher đồng bộ trạng thái mới nhất mà người dùng không cần phải bấm nút F5/Refresh thủ công.
 3. **Điều Hướng Query Requests**:

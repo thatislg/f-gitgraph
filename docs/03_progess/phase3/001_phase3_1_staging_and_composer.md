@@ -163,36 +163,36 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ### 📋 Nhóm Việc 3: Triển Khai Phân Vùng Staging, Composer & Quản Lý Trạng Thái — [Epic #23](https://github.com/thatislg/f-gitgraph/issues/23)
 *Tài liệu tham chiếu thiết kế*: [02_Staging_UI_And_Composer_Component_Design.md](../../02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md) và [005_Audio_Feedback_And_Sound_Design.md](../../01_investigation/phase3_Reborn/005_Audio_Feedback_And_Sound_Design.md).
 
-- [ ] **Nhiệm vụ 3.1 ([#28](https://github.com/thatislg/f-gitgraph/issues/28)): Xây dựng bảng hiển thị tệp `src/webview/components/staging/StagingPanel.tsx`**
-  - [ ] **3.1.1**: Phân chia giao diện thành 2 phân khu danh sách có tiêu đề rõ ràng: "Staged Changes" và "Changes (Unstaged)".
-  - [ ] **3.1.2**: Hiển thị số lượng tệp tự động cập nhật bên cạnh mỗi tiêu đề nhóm (ví dụ: `Staged Changes (3)`).
-  - [ ] **3.1.3**: Thanh tác vụ hàng loạt trên tiêu đề: Nút "Unstage All" (`-`) ở nhóm Staged; Nút "Stage All" (`+`) và "Discard All" (`🗑`) ở nhóm Changes.
-  - [ ] **3.1.4**: Giao diện Empty State thông báo tinh tế và hướng dẫn thao tác khi không có bất kỳ tệp nào biến động.
+- [x] **Nhiệm vụ 3.1 ([#28](https://github.com/thatislg/f-gitgraph/issues/28)): Xây dựng bảng hiển thị tệp `src/webview/components/staging/StagingPanel.tsx`**
+  - [x] **3.1.1**: Phân chia giao diện thành 2 phân khu danh sách có tiêu đề rõ ràng: "Staged Changes" và "Changes (Unstaged)".
+  - [x] **3.1.2**: Hiển thị số lượng tệp tự động cập nhật bên cạnh mỗi tiêu đề nhóm (ví dụ: `Staged Changes (3)`).
+  - [x] **3.1.3**: Thanh tác vụ hàng loạt trên tiêu đề: Nút "Unstage All" (`-`) ở nhóm Staged; Nút "Stage All" (`+`) và "Discard All" (`🗑`) ở nhóm Changes.
+  - [x] **3.1.4**: Giao diện Empty State thông báo tinh tế và hướng dẫn thao tác khi không có bất kỳ tệp nào biến động.
 
-- [ ] **Nhiệm vụ 3.2: Xây dựng bộ soạn thảo commit `src/webview/components/staging/CommitComposer.tsx`**
-  - [ ] **3.2.1 ([#29](https://github.com/thatislg/f-gitgraph/issues/29))**: Thiết kế ô nhập tiêu đề commit (Subject Input) một dòng chiều cao chuẩn 34px kèm văn bản gợi ý kỹ thuật `Commit summary (Ctrl+Enter to commit)`, hỗ trợ phím `Enter` tự động nhảy xuống ô mô tả.
-  - [ ] **3.2.2 ([#29](https://github.com/thatislg/f-gitgraph/issues/29))**: Hiện thực bộ đếm 50 ký tự thông minh đặt ở góc phải ô Subject, tự động chuyển 3 mức màu phản quang: 1-50 ký tự (màu xám bạc kỹ thuật `#94a3b8`), 51-72 ký tự (vàng hổ phách `#f59e0b`), trên 72 ký tự (đỏ hồng Neon `#ef4444`).
-  - [ ] **3.2.3 ([#30](https://github.com/thatislg/f-gitgraph/issues/30))**: Thiết kế Textarea mô tả chi tiết mở rộng (Body Description Input) với cơ chế tự động co giãn chiều cao (Auto-grow) từ tối thiểu 60px đến tối đa 160px kèm thanh cuộn mỏng Cyber-Lab tùy biến.
-  - [ ] **3.2.4 ([#30](https://github.com/thatislg/f-gitgraph/issues/30))**: Hiện thực ô chọn Cyber Checkbox "Amend previous commit": Khi bật cờ, tự động nạp tiêu đề và mô tả của commit HEAD gần nhất vào ô soạn thảo; khi tắt cờ, khôi phục lại nội dung nháp trước đó của người dùng.
-  - [ ] **3.2.5 ([#30](https://github.com/thatislg/f-gitgraph/issues/30))**: Hiện thực ô chọn Cyber Checkbox "Sign commit (GPG/SSH)": Bật/tắt cờ ký số bảo mật `-S`, lưu trạng thái lựa chọn vào cấu hình người dùng.
-  - [ ] **3.2.6 ([#31](https://github.com/thatislg/f-gitgraph/issues/31))**: Hiện thực nút hành động chính `Commit`: Hiển thị động nhãn theo ngữ cảnh (ví dụ `Commit 3 files` hoặc `Amend commit`), nền tím Neon phát sáng, tự động vô hiệu hóa (`disabled`) khi chưa đủ điều kiện `canCommit`, hiển thị trạng thái loading spinner khi đang xử lý.
-  - [ ] **3.2.7 ([#31](https://github.com/thatislg/f-gitgraph/issues/31))**: Hiện thực nút hành động phụ `Commit & Push`: Đặt cạnh nút Commit, hỗ trợ lập trình viên commit và đẩy ngay thay đổi lên remote tracking branch trong 1 bước duy nhất.
-  - [ ] **3.2.8 ([#31](https://github.com/thatislg/f-gitgraph/issues/31))**: Bắt và xử lý tổ hợp phím tắt toàn cục `Ctrl + Enter` (hoặc `Cmd + Enter` trên macOS) từ bất kỳ ô nhập liệu nào trong Composer để kích hoạt commit tức thì với độ trễ dưới 200ms.
-  - [ ] **3.2.9 ([#31](https://github.com/thatislg/f-gitgraph/issues/31))**: Tích hợp bộ tổng hợp âm thanh vi mô qua Web Audio API: Phát âm thanh xung kép giả lập tiếng chốt cơ khí (Dual Sine Oscillator 1200Hz và 850Hz trong 15ms) khi commit thành công mà không nạp tệp âm thanh ngoài.
+- [x] **Nhiệm vụ 3.2: Xây dựng bộ soạn thảo commit `src/webview/components/staging/CommitComposer.tsx`**
+  - [x] **3.2.1 ([#29](https://github.com/thatislg/f-gitgraph/issues/29))**: Thiết kế ô nhập tiêu đề commit (Subject Input) một dòng chiều cao chuẩn 34px kèm văn bản gợi ý kỹ thuật `Commit summary (Ctrl+Enter to commit)`, hỗ trợ phím `Enter` tự động nhảy xuống ô mô tả.
+  - [x] **3.2.2 ([#29](https://github.com/thatislg/f-gitgraph/issues/29))**: Hiện thực bộ đếm 50 ký tự thông minh đặt ở góc phải ô Subject, tự động chuyển 3 mức màu phản quang: 1-50 ký tự (màu xám bạc kỹ thuật `#94a3b8`), 51-72 ký tự (vàng hổ phách `#f59e0b`), trên 72 ký tự (đỏ hồng Neon `#ef4444`).
+  - [x] **3.2.3 ([#30](https://github.com/thatislg/f-gitgraph/issues/30))**: Thiết kế Textarea mô tả chi tiết mở rộng (Body Description Input) với cơ chế tự động co giãn chiều cao (Auto-grow) từ tối thiểu 60px đến tối đa 160px kèm thanh cuộn mỏng Cyber-Lab tùy biến.
+  - [x] **3.2.4 ([#30](https://github.com/thatislg/f-gitgraph/issues/30))**: Hiện thực ô chọn Cyber Checkbox "Amend previous commit": Khi bật cờ, tự động nạp tiêu đề và mô tả của commit HEAD gần nhất vào ô soạn thảo; khi tắt cờ, khôi phục lại nội dung nháp trước đó của người dùng.
+  - [x] **3.2.5 ([#30](https://github.com/thatislg/f-gitgraph/issues/30))**: Hiện thực ô chọn Cyber Checkbox "Sign commit (GPG/SSH)": Bật/tắt cờ ký số bảo mật `-S`, lưu trạng thái lựa chọn vào cấu hình người dùng.
+  - [x] **3.2.6 ([#31](https://github.com/thatislg/f-gitgraph/issues/31))**: Hiện thực nút hành động chính `Commit`: Hiển thị động nhãn theo ngữ cảnh (ví dụ `Commit 3 files` hoặc `Amend commit`), nền tím Neon phát sáng, tự động vô hiệu hóa (`disabled`) khi chưa đủ điều kiện `canCommit`, hiển thị trạng thái loading spinner khi đang xử lý.
+  - [x] **3.2.7 ([#31](https://github.com/thatislg/f-gitgraph/issues/31))**: Hiện thực nút hành động phụ `Commit & Push`: Đặt cạnh nút Commit, hỗ trợ lập trình viên commit và đẩy ngay thay đổi lên remote tracking branch trong 1 bước duy nhất.
+  - [x] **3.2.8 ([#31](https://github.com/thatislg/f-gitgraph/issues/31))**: Bắt và xử lý tổ hợp phím tắt toàn cục `Ctrl + Enter` (hoặc `Cmd + Enter` trên macOS) từ bất kỳ ô nhập liệu nào trong Composer để kích hoạt commit tức thì với độ trễ dưới 200ms.
+  - [x] **3.2.9 ([#31](https://github.com/thatislg/f-gitgraph/issues/31))**: Tích hợp bộ tổng hợp âm thanh vi mô qua Web Audio API: Phát âm thanh xung kép giả lập tiếng chốt cơ khí (Dual Sine Oscillator 1200Hz và 850Hz trong 15ms) khi commit thành công mà không nạp tệp âm thanh ngoài.
 
-- [ ] **Nhiệm vụ 3.3 ([#32](https://github.com/thatislg/f-gitgraph/issues/32)): Quản lý trạng thái bằng Preact Signals trong `src/webview/lib/stores/staging.store.ts`**
-  - [ ] **3.3.1**: Khởi tạo các tín hiệu cơ sở: `stagedFiles`, `unstagedFiles`, `commitSubject`, `commitDescription`, `isAmend`, `isSign`, `isCommitting`.
-  - [ ] **3.3.2**: Khởi tạo tín hiệu dẫn xuất `canCommit`: Tự động tính toán trạng thái nút Commit theo bảng chân trị (Truth Table).
-  - [ ] **3.3.3**: Hiện thực các hàm điều phối hành động giao diện: `stageFile`, `unstageFile`, `stageAll`, `unstageAll`, `discardFile`, `commit`.
+- [x] **Nhiệm vụ 3.3 ([#32](https://github.com/thatislg/f-gitgraph/issues/32)): Quản lý trạng thái bằng Preact Signals trong `src/webview/lib/stores/staging.store.ts`**
+  - [x] **3.3.1**: Khởi tạo các tín hiệu cơ sở: `stagedFiles`, `unstagedFiles`, `commitSubject`, `commitDescription`, `isAmend`, `isSign`, `isCommitting`.
+  - [x] **3.3.2**: Khởi tạo tín hiệu dẫn xuất `canCommit`: Tự động tính toán trạng thái nút Commit theo bảng chân trị (Truth Table).
+  - [x] **3.3.3**: Hiện thực các hàm điều phối hành động giao diện: `stageFile`, `unstageFile`, `stageAll`, `unstageAll`, `discardFile`, `commit`.
 
-- [ ] **Nhiệm vụ 3.4 ([#33](https://github.com/thatislg/f-gitgraph/issues/33)): Xây dựng Container tích hợp `src/webview/components/staging/StagingArea.tsx`**
-  - [ ] **3.4.1**: Tích hợp `StagingPanel` và `CommitComposer` thành một khối thống nhất, bọc toàn bộ bên trong `CornerCrossFrame`.
-  - [ ] **3.4.2**: Quản lý trạng thái mở/đóng của `DiscardConfirmModal` một cách tập trung.
+- [x] **Nhiệm vụ 3.4 ([#33](https://github.com/thatislg/f-gitgraph/issues/33)): Xây dựng Container tích hợp `src/webview/components/staging/StagingArea.tsx`**
+  - [x] **3.4.1**: Tích hợp `StagingPanel` và `CommitComposer` thành một khối thống nhất, bọc toàn bộ bên trong `CornerCrossFrame`.
+  - [x] **3.4.2**: Quản lý trạng thái mở/đóng của `DiscardConfirmModal` một cách tập trung.
 
-- [ ] **Nhiệm vụ 3.5 (TEST NHÓM 3) ([#35](https://github.com/thatislg/f-gitgraph/issues/35)): Bộ Unit Tests Độc Lập Cho Store & Bộ Soạn Thảo**
-  - [ ] **3.5.1**: Tạo `tests/webview/lib/stores/staging.store.test.ts`: Test tín hiệu `canCommit`, amend commit khi danh sách rỗng, cập nhật tệp từ Backend.
-  - [ ] **3.5.2**: Tạo `tests/webview/components/staging/CommitComposer.test.tsx`: Test bộ đếm 3 màu, disabled khi rỗng tiêu đề, phím `Ctrl + Enter`.
-  - [ ] **3.5.3**: Tạo `tests/webview/components/staging/StagingPanel.test.tsx`: Test render tệp, click Stage All / Unstage All, Empty State.
+- [x] **Nhiệm vụ 3.5 (TEST NHÓM 3) ([#35](https://github.com/thatislg/f-gitgraph/issues/35)): Bộ Unit Tests Độc Lập Cho Store & Bộ Soạn Thảo**
+  - [x] **3.5.1**: Tạo `tests/webview/lib/stores/staging.store.test.ts`: Test tín hiệu `canCommit`, amend commit khi danh sách rỗng, cập nhật tệp từ Backend.
+  - [x] **3.5.2**: Tạo `tests/webview/components/staging/CommitComposer.test.ts`: Test bộ đếm 3 màu, disabled khi rỗng tiêu đề, phím `Ctrl + Enter`.
+  - [x] **3.5.3**: Tạo `tests/webview/components/staging/StagingPanel.test.ts`: Test render tệp, click Stage All / Unstage All, Empty State.
 
 ---
 
@@ -297,3 +297,4 @@ Quá trình lập trình được tiến hành theo thứ tự 5 bước khép k
 - **2026-10-15**: Hoàn thành Nhiệm vụ 1.1 (6 lệnh staging + cơ chế thăm dò phiên bản `canUseRestore` và fallback đa phiên bản Git) và Nhiệm vụ 1.2 (nâng cấp `commit` hỗ trợ `--amend`, `-S`, tách summary/description, chuẩn hóa lỗi `index.lock`/danh tính). Kiểm thử backend 11/11 pass. Báo cáo nghiệm thu: `docs/04_reports/phase3/001_phase3_1_staging_mutator_report.md`.
 - **2026-10-15**: Hoàn thành lại Nhiệm vụ 1.3 theo thiết kế cập nhật (máy trạng thái NUL-delimiter, `--untracked-files=all -z`, `conflictedFiles`, trạng thái kép `MM`/`AM`/`AD`/`RM`/`RD`), Nhiệm vụ 1.4 (types RPC + message handlers) và Nhiệm vụ 1.5 (bộ test `workspaceStatus` + `stagingMessageHandler`). Kiểm thử `workspaceStatus` 20/20, `stagingMessageHandler` 5/5, typecheck + oxlint + oxfmt sạch.
 - **2026-10-15**: Hoàn thành Nhóm Việc 2 — Triển Khai Các Khối Giao Diện Cơ Bản: `CornerCrossFrame.tsx` (Nhiệm vụ 2.1), `StagingFileItem.tsx` (Nhiệm vụ 2.2), `DiscardConfirmModal.tsx` (Nhiệm vụ 2.3) và bộ unit test độc lập (Nhiệm vụ 2.4). Kiểm thử webview 21/21 test mới pass, typecheck sạch, compile (esbuild) thành công. Báo cáo nghiệm thu: `docs/04_reports/phase3/003_phase3_1_ui_building_blocks_report.md`.
+- **2026-10-16**: Hoàn thành Nhóm Việc 3 — Triển Khai Phân Vùng Staging, Composer & Quản Lý Trạng Thái: `StagingPanel.tsx` (Nhiệm vụ 3.1), `CommitComposer.tsx` (Nhiệm vụ 3.2), `staging.store.ts` (Nhiệm vụ 3.3), `StagingArea.tsx` (Nhiệm vụ 3.4) và bộ unit test độc lập (Nhiệm vụ 3.5). Bổ sung action RPC `commitAndPush` (sửa lỗi thiết kế [DESIGN_DEFECT]: UI thiết kế `commitAndPush()` nhưng hợp đồng RPC thiếu action này). Kiểm thử webview 111/111 pass, typecheck + oxlint sạch, compile (esbuild) thành công. Báo cáo nghiệm thu: `docs/04_reports/phase3/004_phase3_1_staging_composer_report.md`.

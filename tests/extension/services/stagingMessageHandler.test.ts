@@ -30,6 +30,7 @@ function setup() {
     discardFileChanges: vi.fn().mockResolvedValue(OK),
     discardAllChanges: vi.fn().mockResolvedValue(OK),
     commit: vi.fn().mockResolvedValue(OK),
+    commitAndPush: vi.fn().mockResolvedValue(OK),
     setRepo: vi.fn()
   } as unknown as GitCliMutator;
 
@@ -105,6 +106,25 @@ describe("registerMessageHandlers (staging & commit routing)", () => {
       description: "body",
       amend: true,
       sign: false
+    });
+  });
+
+  it("routes commitAndPush to mutator.commitAndPush with all options", async () => {
+    const { mutator, receive } = setup();
+
+    await receive({
+      command: "commitAndPush",
+      repo: "/repo",
+      summary: "title",
+      description: "body",
+      amend: false,
+      sign: true
+    });
+
+    expect(mutator.commitAndPush).toHaveBeenCalledWith("title", {
+      description: "body",
+      amend: false,
+      sign: true
     });
   });
 

@@ -1,4 +1,5 @@
 import type { WorkspaceStatusResult } from "@/backend/queries/workspaceStatus";
+
 import type { GitCommitDetails } from "./git";
 
 type QueryPayloads = {

@@ -136,6 +136,26 @@ export class GitCliMutator {
     return this.normalizeError(await this.run(args));
   }
 
+  /**
+   * Commit rồi tự động push nhánh hiện tại lên nhánh theo dõi từ xa (upstream) trong
+   * một bước duy nhất. `git push` không tham số đẩy nhánh hiện tại theo cấu hình
+   * `push.default` (mặc định `simple`).
+   */
+  async commitAndPush(
+    message: string,
+    options: {
+      sign?: boolean;
+      amend?: boolean;
+      description?: string;
+    } = {}
+  ): Promise<MutatorResult> {
+    const commitResult = await this.commit(message, options);
+    if (!commitResult.ok) {
+      return commitResult;
+    }
+    return this.run(["push"]);
+  }
+
   /** Đưa một tệp vào Staging Index; `--` ngăn nhầm lẫn đường dẫn với nhánh/cờ (tương thích mọi bản Git). */
   async stageFile(filePath: string): Promise<MutatorResult> {
     return this.run(["add", "--", filePath]);
@@ -163,10 +183,7 @@ export class GitCliMutator {
   }
 
   /** Hoàn tác thay đổi một tệp: untracked -> clean -f, tracked -> restore (hoặc fallback checkout). */
-  async discardFileChanges(
-    filePath: string,
-    isUntracked: boolean
-  ): Promise<MutatorResult> {
+  async discardFileChanges(filePath: string, isUntracked: boolean): Promise<MutatorResult> {
     if (isUntracked) {
       return this.run(["clean", "-f", "--", filePath]);
     }

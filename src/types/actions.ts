@@ -23,6 +23,7 @@ type ActionPayloads = {
   discardFileChanges: { filePath: string; isUntracked: boolean };
   discardAllChanges: object;
   commitChanges: { summary: string; description: string; amend: boolean; sign: boolean };
+  commitAndPush: { summary: string; description: string; amend: boolean; sign: boolean };
 };
 
 export type ActionRequest = {

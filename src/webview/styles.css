@@ -77,6 +77,11 @@
   --color-cross-idle: light-dark(#a1a1aa, #71717a);
   --color-cross-active: light-dark(#7c3aed, #a855f7);
   --color-cross-warning: light-dark(#dc2626, #ef4444);
+
+  /* Subject counter 3-level warning colours (≤50 / 51–72 / >72). */
+  --color-counter-idle: light-dark(#a1a1aa, #71717a);
+  --color-counter-warn: light-dark(#d97706, #f59e0b);
+  --color-counter-danger: light-dark(#dc2626, #ef4444);
 }
 
 @keyframes scroll-shadow {

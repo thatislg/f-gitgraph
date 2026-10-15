@@ -57,6 +57,14 @@ function viewDiff(
   });
 }
 
+/** Chuyển đổi kết quả `MutatorResult` thành lỗi ném ra để `registerAction` bắt được. */
+async function runMutation(result: Promise<MutatorResult>): Promise<void> {
+  const r = await result;
+  if (!r.ok) {
+    throw new Error(r.stderr || "Thao tác Git thất bại");
+  }
+}
+
 export function registerMessageHandlers(
   bridge: WebviewBridge,
   deps: {
@@ -98,14 +106,6 @@ export function registerMessageHandlers(
     });
   }
 
-  /** Chuyển đổi kết quả `MutatorResult` thành lỗi ném ra để `registerAction` bắt được. */
-  async function runMutation(result: Promise<MutatorResult>): Promise<void> {
-    const r = await result;
-    if (!r.ok) {
-      throw new Error(r.stderr || "Thao tác Git thất bại");
-    }
-  }
-
   // --- Action handlers ---
 
   registerAction("addTag", (msg) => addTag(gitClient.getInstance(), msg));
@@ -135,6 +135,15 @@ export function registerMessageHandlers(
   registerAction("commitChanges", (msg) =>
     runMutation(
       gitMutator.commit(msg.summary, {
+        description: msg.description,
+        amend: msg.amend,
+        sign: msg.sign
+      })
+    )
+  );
+  registerAction("commitAndPush", (msg) =>
+    runMutation(
+      gitMutator.commitAndPush(msg.summary, {
         description: msg.description,
         amend: msg.amend,
         sign: msg.sign

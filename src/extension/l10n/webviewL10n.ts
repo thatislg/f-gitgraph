@@ -59,6 +59,7 @@ export function getWebviewLocalizedStrings() {
     unableToDiscardFileChanges: vscode.l10n.t("Unable to Discard File Changes"),
     unableToDiscardAllChanges: vscode.l10n.t("Unable to Discard All Changes"),
     unableToCommitChanges: vscode.l10n.t("Unable to Commit Changes"),
+    unableToCommitAndPush: vscode.l10n.t("Unable to Commit and Push Changes"),
     invalidCharacters: vscode.l10n.t("Unable to {0}, one or more invalid characters entered."),
 
     // Actions
