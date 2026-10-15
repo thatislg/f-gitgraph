@@ -4,6 +4,14 @@ Thư mục này ghi nhận toàn bộ tiến trình triển khai thực tế c�
 
 ---
 
+## 📌 Quy Trình & Hướng Dẫn Vận Hành
+- **[000. Hướng Dẫn Quản Lý Công Việc & Đồng Bộ Tiến Độ Bằng GitHub Issues & Projects](000_huong_dan_quan_ly_task_github.md)**:
+  - Hướng dẫn cấu trúc phân cấp: Milestone $\rightarrow$ Epics $\rightarrow$ Atomic Sub-tasks.
+  - Hướng dẫn Sắp xếp (Sort) theo thứ tự lộ trình logic trên GitHub Projects và Issues.
+  - Hướng dẫn quy trình tự động đóng task bằng lệnh commit `closes #<ID>`.
+
+---
+
 ## 1. Danh Mục Các Giai Đoạn Phát Triển
 
 ### 📦 [Phase 1: Xây Dựng Nền Móng Nhân F# Core Engine (ĐÃ HOÀN THÀNH & ĐÓNG GÓI)](phase1/README.md)
