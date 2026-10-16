@@ -1,8 +1,11 @@
+import { useState } from "preact/hooks";
+
 import { StagingFileItem, type StagingFile } from "@/webview/components/staging/StagingFileItem";
 
 /**
  * Bảng hiển thị tệp biến động, chia thành hai phân khu "Staged Changes" và
- * "Changes (Unstaged)", kèm thanh thao tác hàng loạt và trạng thái trống.
+ * "Changes (Unstaged)", kèm thanh thao tác hàng loạt, khả năng thu gọn/mở rộng
+ * từng phân khu và trạng thái trống.
  *
  * Tham khảo thiết kế:
  * docs/02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md (Mục 3.2).
@@ -23,6 +26,9 @@ export type StagingPanelProps = {
 const HEADER_CLASS =
   "flex h-7 shrink-0 items-center justify-between px-2 font-semibold uppercase tracking-wide text-[11px] opacity-80";
 
+const TOGGLE_CLASS =
+  "flex items-center gap-1 text-[11px] font-semibold normal-case tracking-normal text-left hover:opacity-100 focus:outline-1 focus:outline-focus";
+
 const BULK_BUTTON_CLASS =
   "rounded-full border border-line bg-btn px-2 py-0.5 text-[11px] font-semibold normal-case tracking-normal hover:bg-btn-hover focus:outline-1 focus:outline-focus";
 
@@ -39,11 +45,24 @@ export function StagingPanel({
   onUnstageAll,
   onDiscardAll
 }: StagingPanelProps) {
+  const [stagedOpen, setStagedOpen] = useState(true);
+  const [unstagedOpen, setUnstagedOpen] = useState(true);
+
   return (
     <div class="flex flex-col gap-1">
       <div class="flex flex-col">
         <div class={HEADER_CLASS} data-panel="staged">
-          <span data-count>Staged Changes ({stagedFiles.length})</span>
+          <button
+            type="button"
+            class={TOGGLE_CLASS}
+            data-toggle="staged"
+            onClick={() => setStagedOpen((value) => !value)}
+          >
+            <span data-chevron aria-hidden="true">
+              {stagedOpen ? "▾" : "▸"}
+            </span>
+            <span data-count>Staged Changes ({stagedFiles.length})</span>
+          </button>
           <button
             type="button"
             class={BULK_BUTTON_CLASS}
@@ -54,30 +73,41 @@ export function StagingPanel({
             - Unstage All
           </button>
         </div>
-        {stagedFiles.length === 0 ? (
-          <div class={EMPTY_CLASS} data-empty="staged">
-            No staged changes
-          </div>
-        ) : (
-          <div data-list="staged">
-            {stagedFiles.map((file) => (
-              <StagingFileItem
-                key={file.path}
-                file={file}
-                isStaged
-                onStage={onStage}
-                onUnstage={onUnstage}
-                onDiscard={onDiscard}
-                onDiff={onDiff}
-              />
-            ))}
-          </div>
-        )}
+        {stagedOpen &&
+          (stagedFiles.length === 0 ? (
+            <div class={EMPTY_CLASS} data-empty="staged">
+              No staged changes
+            </div>
+          ) : (
+            <div data-list="staged">
+              {stagedFiles.map((file) => (
+                <StagingFileItem
+                  key={file.path}
+                  file={file}
+                  isStaged
+                  onStage={onStage}
+                  onUnstage={onUnstage}
+                  onDiscard={onDiscard}
+                  onDiff={onDiff}
+                />
+              ))}
+            </div>
+          ))}
       </div>
 
       <div class="flex flex-col">
         <div class={HEADER_CLASS} data-panel="unstaged">
-          <span data-count>Changes ({unstagedFiles.length})</span>
+          <button
+            type="button"
+            class={TOGGLE_CLASS}
+            data-toggle="unstaged"
+            onClick={() => setUnstagedOpen((value) => !value)}
+          >
+            <span data-chevron aria-hidden="true">
+              {unstagedOpen ? "▾" : "▸"}
+            </span>
+            <span data-count>Changes ({unstagedFiles.length})</span>
+          </button>
           <span class="flex items-center gap-1">
             <button
               type="button"
@@ -99,25 +129,26 @@ export function StagingPanel({
             </button>
           </span>
         </div>
-        {unstagedFiles.length === 0 ? (
-          <div class={EMPTY_CLASS} data-empty="unstaged">
-            Working tree clean
-          </div>
-        ) : (
-          <div data-list="unstaged">
-            {unstagedFiles.map((file) => (
-              <StagingFileItem
-                key={file.path}
-                file={file}
-                isStaged={false}
-                onStage={onStage}
-                onUnstage={onUnstage}
-                onDiscard={onDiscard}
-                onDiff={onDiff}
-              />
-            ))}
-          </div>
-        )}
+        {unstagedOpen &&
+          (unstagedFiles.length === 0 ? (
+            <div class={EMPTY_CLASS} data-empty="unstaged">
+              Working tree clean
+            </div>
+          ) : (
+            <div data-list="unstaged">
+              {unstagedFiles.map((file) => (
+                <StagingFileItem
+                  key={file.path}
+                  file={file}
+                  isStaged={false}
+                  onStage={onStage}
+                  onUnstage={onUnstage}
+                  onDiscard={onDiscard}
+                  onDiff={onDiff}
+                />
+              ))}
+            </div>
+          ))}
       </div>
     </div>
   );

@@ -76,7 +76,7 @@ export function CommitComposer() {
         <input
           type="text"
           class={SUBJECT_INPUT_CLASS}
-          placeholder="Commit message (Ctrl+Enter to commit)..."
+          placeholder="Commit header (Ctrl+Enter to commit)..."
           data-subject-input
           value={subject}
           onInput={(event) => {
@@ -104,7 +104,7 @@ export function CommitComposer() {
       <textarea
         ref={descriptionRef}
         class={DESCRIPTION_INPUT_CLASS}
-        placeholder="Optional extended description (Markdown supported)..."
+        placeholder={`Commit content — becomes git commit -m "summary" -m "description"...`}
         data-description-input
         value={description}
         onInput={(event) => {

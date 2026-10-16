@@ -30,25 +30,22 @@ describe("CornerCrossFrame", () => {
     expect(container.querySelector("#child")?.textContent).toBe("content");
   });
 
-  it("uses the green neon plate by default and the active purple neon plate when active", () => {
+  it("uses the green neon glow by default and the active purple neon glow when active", () => {
     container = document.createElement("div");
     render(h(CornerCrossFrame, {}), container);
     const idleCross = container.querySelector("[data-cross]");
-    expect(idleCross?.classList.contains("bg-cross-neon")).toBe(true);
-    expect(idleCross?.getAttribute("style")).toContain("drop-shadow");
+    expect(idleCross?.getAttribute("style")).toContain("--color-cross-neon");
 
     container = document.createElement("div");
     render(h(CornerCrossFrame, { active: true }), container);
     const activeCross = container.querySelector("[data-cross]");
-    expect(activeCross?.classList.contains("bg-cross-active")).toBe(true);
-    expect(activeCross?.getAttribute("style")).toContain("drop-shadow");
+    expect(activeCross?.getAttribute("style")).toContain("--color-cross-active");
   });
 
-  it("uses the warning red plate when the variant is red", () => {
+  it("uses the warning red glow when the variant is red", () => {
     container = document.createElement("div");
     render(h(CornerCrossFrame, { variant: "red" }), container);
     const cross = container.querySelector("[data-cross]");
-    expect(cross?.classList.contains("bg-cross-warning")).toBe(true);
-    expect(cross?.getAttribute("style")).toContain("drop-shadow");
+    expect(cross?.getAttribute("style")).toContain("--color-cross-warning");
   });
 });
