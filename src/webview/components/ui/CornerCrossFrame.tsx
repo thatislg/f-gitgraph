@@ -2,8 +2,9 @@ import type { ComponentChildren } from "preact";
 
 /**
  * Khung viền kỹ thuật mang 4 đinh tán chữ thập góc (`+`) theo phong cách Cyber-Lab.
- * Đinh tán được đặt lệch 6px ra ngoài mỗi góc để tâm ký tự trùng khớp giao điểm hai
- * đường viền. Trạng thái bừng sáng được điều khiển bởi `active` và `variant`.
+ * Đinh tán nằm đúng tại 4 góc khung, mỗi đinh tán là một huy hiệu vuông Neon phát quang
+ * chứa ký tự `+` trắng đậm để nổi bật trên nền tối. Màu nền huy hiệu chuyển theo trạng
+ * thái: xanh lá Neon (idle), tím Neon (active), đỏ (cảnh báo).
  *
  * Tham khảo thiết kế:
  * docs/02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md (Mục 2.1).
@@ -20,10 +21,10 @@ export type CornerCrossFrameProps = {
 };
 
 const CROSS_POSITIONS = [
-  "-top-1.5 -left-1.5",
-  "-top-1.5 -right-1.5",
-  "-bottom-1.5 -left-1.5",
-  "-bottom-1.5 -right-1.5"
+  "top-0 left-0",
+  "top-0 right-0",
+  "bottom-0 left-0",
+  "bottom-0 right-0"
 ] as const;
 
 function crossTone(variant: CornerCrossVariant, active: boolean): "idle" | "active" | "warning" {
@@ -38,23 +39,23 @@ export function CornerCrossFrame({
 }: CornerCrossFrameProps) {
   const tone = crossTone(variant, active);
 
-  const toneClass =
+  const plateClass =
     tone === "idle"
-      ? "text-cross-idle opacity-50 group-hover:opacity-80"
+      ? "bg-cross-neon"
       : tone === "active"
-        ? "text-cross-active opacity-100"
-        : "text-cross-warning opacity-100";
+        ? "bg-cross-active"
+        : "bg-cross-warning";
 
   const glow =
     tone === "active"
       ? "drop-shadow(0 0 6px rgba(168, 85, 247, 0.6))"
       : tone === "warning"
         ? "drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))"
-        : undefined;
+        : "drop-shadow(0 0 6px rgba(16, 185, 129, 0.8))";
 
   return (
     <div
-      class={["group relative", className].filter(Boolean).join(" ")}
+      class={["group relative border border-line", className].filter(Boolean).join(" ")}
       data-variant={variant}
       data-active={active}
     >
@@ -62,8 +63,8 @@ export function CornerCrossFrame({
         <span
           key={position}
           data-cross
-          class={`absolute ${position} font-mono text-[11px] leading-none select-none pointer-events-none ${toneClass}`}
-          {...(glow === undefined ? {} : { style: { filter: glow } })}
+          class={`absolute ${position} flex size-[18px] items-center justify-center rounded-[2px] font-mono text-[14px] font-bold leading-none text-white select-none pointer-events-none ${plateClass}`}
+          style={{ filter: glow }}
         >
           +
         </span>

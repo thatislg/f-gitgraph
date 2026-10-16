@@ -30,25 +30,25 @@ describe("CornerCrossFrame", () => {
     expect(container.querySelector("#child")?.textContent).toBe("content");
   });
 
-  it("uses the idle tone by default and the active purple neon tone when active", () => {
+  it("uses the green neon plate by default and the active purple neon plate when active", () => {
     container = document.createElement("div");
     render(h(CornerCrossFrame, {}), container);
     const idleCross = container.querySelector("[data-cross]");
-    expect(idleCross?.classList.contains("text-cross-idle")).toBe(true);
-    expect(idleCross?.getAttribute("style")).toBeNull();
+    expect(idleCross?.classList.contains("bg-cross-neon")).toBe(true);
+    expect(idleCross?.getAttribute("style")).toContain("drop-shadow");
 
     container = document.createElement("div");
     render(h(CornerCrossFrame, { active: true }), container);
     const activeCross = container.querySelector("[data-cross]");
-    expect(activeCross?.classList.contains("text-cross-active")).toBe(true);
+    expect(activeCross?.classList.contains("bg-cross-active")).toBe(true);
     expect(activeCross?.getAttribute("style")).toContain("drop-shadow");
   });
 
-  it("uses the warning red tone when the variant is red", () => {
+  it("uses the warning red plate when the variant is red", () => {
     container = document.createElement("div");
     render(h(CornerCrossFrame, { variant: "red" }), container);
     const cross = container.querySelector("[data-cross]");
-    expect(cross?.classList.contains("text-cross-warning")).toBe(true);
+    expect(cross?.classList.contains("bg-cross-warning")).toBe(true);
     expect(cross?.getAttribute("style")).toContain("drop-shadow");
   });
 });

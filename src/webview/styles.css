@@ -77,6 +77,8 @@
   --color-cross-idle: light-dark(#a1a1aa, #71717a);
   --color-cross-active: light-dark(#7c3aed, #a855f7);
   --color-cross-warning: light-dark(#dc2626, #ef4444);
+  /* Nền xanh lá neon cho đinh tán góc, nổi bật trên nền tối. */
+  --color-cross-neon: light-dark(#059669, #10b981);
 
   /* Subject counter 3-level warning colours (≤50 / 51–72 / >72). */
   --color-counter-idle: light-dark(#a1a1aa, #71717a);

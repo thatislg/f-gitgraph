@@ -315,7 +315,7 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
           style={`left: var(--col-graph); top: ${detailsPanelTop}px`}
         >
           {inspectorMode.value === "staging" ? (
-            <div style={`height: ${STAGING_AREA_HEIGHT}px; overflow-y: auto;`}>
+            <div class="p-2" style={`height: ${STAGING_AREA_HEIGHT}px; overflow-y: auto;`}>
               <StagingArea />
             </div>
           ) : (
