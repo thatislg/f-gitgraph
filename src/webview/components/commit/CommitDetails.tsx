@@ -1,8 +1,8 @@
 import type { ComponentChildren } from "preact";
-import { useMemo } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 
 import type { GitCommitDetails } from "@/types";
-import { FileTree } from "@/webview/components/commit/FileTree";
+import { FileTree, type FileTreeMode } from "@/webview/components/commit/FileTree";
 import { Icon } from "@/webview/components/ui/Icons";
 import { Loading } from "@/webview/components/ui/Loading";
 import { COMMIT_DETAILS_HEIGHT } from "@/webview/constants";
@@ -55,6 +55,7 @@ export function CommitDetails({ details }: { details: GitCommitDetails | null })
     () => (details === null ? [] : buildFileTree(details.fileChanges)),
     [details]
   );
+  const [viewMode, setViewMode] = useState<FileTreeMode>("tree");
 
   return (
     <div
@@ -69,7 +70,7 @@ export function CommitDetails({ details }: { details: GitCommitDetails | null })
             <Summary details={details} />
             {/* The right margin keeps the scrollbar clear of the close button. */}
             <div class="mr-8 grow overflow-x-hidden overflow-y-scroll border-r border-line py-1">
-              <FileTree nodes={nodes} commitHash={details.hash} />
+              <FileTree nodes={nodes} commitHash={details.hash} mode={viewMode} />
             </div>
           </div>
         )}
@@ -84,6 +85,26 @@ export function CommitDetails({ details }: { details: GitCommitDetails | null })
         <Icon class="size-6" viewBox="0 0 12 16">
           <path d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z" />
         </Icon>
+      </button>
+      <button
+        type="button"
+        class="absolute top-8 right-1 flex size-6 cursor-pointer items-center justify-center rounded-[3px] opacity-60 transition-opacity duration-150 hover:bg-btn-hover hover:opacity-100 focus:outline-1 focus:outline-focus"
+        title={viewMode === "tree" ? "Show files as list" : "Show files as tree"}
+        aria-label={viewMode === "tree" ? "Show files as list" : "Show files as tree"}
+        aria-pressed={viewMode === "tree"}
+        data-action="toggle-view"
+        data-view-mode={viewMode}
+        onClick={() => setViewMode((value) => (value === "list" ? "tree" : "list"))}
+      >
+        {viewMode === "tree" ? (
+          <Icon class="size-4 fill-fg">
+            <path d="M2 2h12v2H2zM2 7h12v2H2zM2 12h12v2H2z" />
+          </Icon>
+        ) : (
+          <Icon class="size-4 fill-fg">
+            <path d="M2 3h4l1.5 2H14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+          </Icon>
+        )}
       </button>
     </div>
   );

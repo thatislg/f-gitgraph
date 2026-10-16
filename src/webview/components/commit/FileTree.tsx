@@ -161,12 +161,31 @@ function Tree({ nodes, commitHash, closed, onToggle, root = false }: TreeProps) 
 }
 
 /** The files a commit changed, as a folder tree. Folders open by default. */
+export type FileTreeMode = "tree" | "list";
+
+/** Flatten a folder tree back into an ordered list of files, folders-first order lost. */
+function flattenFiles(
+  nodes: Array<FileTreeNode>
+): Array<{ name: string; file: GitFileChange }> {
+  const result: Array<{ name: string; file: GitFileChange }> = [];
+  for (const node of nodes) {
+    if (node.type === "file") {
+      result.push({ name: node.name, file: node.file });
+    } else {
+      result.push(...flattenFiles(node.children));
+    }
+  }
+  return result;
+}
+
 export function FileTree({
   nodes,
-  commitHash
+  commitHash,
+  mode = "tree"
 }: {
   nodes: Array<FileTreeNode>;
   commitHash: string;
+  mode?: FileTreeMode;
 }) {
   const [closed, setClosed] = useState<ReadonlySet<string>>(() => new Set());
 
@@ -178,6 +197,19 @@ export function FileTree({
       }
       return next;
     });
+  }
+
+  if (mode === "list") {
+    const files = flattenFiles(nodes);
+    return (
+      <ul class="list-none pl-2.5">
+        {files.map(({ name, file }) => (
+          <li key={file.newFilePath} class="mt-1 overflow-hidden">
+            <FileEntry name={name} file={file} commitHash={commitHash} />
+          </li>
+        ))}
+      </ul>
+    );
   }
 
   return <Tree nodes={nodes} commitHash={commitHash} closed={closed} onToggle={toggle} root />;

@@ -132,6 +132,11 @@ export function unstage(filePath: string): void {
   runAction({ command: "unstageFile", filePath });
 }
 
+/** Yêu cầu Backend mở tệp trong trình soạn thảo VS Code (không phải diff). */
+export function openFile(filePath: string): void {
+  runAction({ command: "openFile", filePath });
+}
+
 export function stageAll(): void {
   runAction({ command: "stageAll" });
 }

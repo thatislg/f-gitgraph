@@ -61,6 +61,7 @@ export function StagingFileItem({
   return (
     <div
       class="group flex h-7 cursor-pointer items-center gap-2 px-2 py-0.5 select-none hover:bg-row-hover"
+      title={file.path}
       data-file-item
       data-status={file.status}
       data-staged={isStaged}

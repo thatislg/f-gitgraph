@@ -30,6 +30,7 @@ function renderItem(file: StagingFile, props: Partial<StagingFileItemProps> = {}
       onUnstage: vi.fn(),
       onDiscard: vi.fn(),
       onDiff: vi.fn(),
+      onOpenFile: vi.fn(),
       ...props
     }),
     container
@@ -108,5 +109,25 @@ describe("StagingFileItem", () => {
     const row = container.querySelector<HTMLElement>("[data-file-item]");
     row?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(onDiff).toHaveBeenCalledWith("src/App.tsx");
+  });
+
+  it("calls onOpenFile when the open-file button is clicked without triggering diff", () => {
+    const onOpenFile = vi.fn();
+    const onDiff = vi.fn();
+    const file: StagingFile = { path: "src/App.tsx", status: "M", isUntracked: false };
+    renderItem(file, { onOpenFile, onDiff });
+
+    container.querySelector<HTMLButtonElement>("[data-action='open-file']")?.click();
+    expect(onOpenFile).toHaveBeenCalledWith("src/App.tsx");
+    expect(onDiff).not.toHaveBeenCalled();
+  });
+
+  it("exposes the full path as a hover tooltip", () => {
+    const file: StagingFile = { path: "src/webview/App.tsx", status: "M", isUntracked: false };
+    renderItem(file);
+
+    expect(container.querySelector("[data-file-item]")?.getAttribute("title")).toBe(
+      "src/webview/App.tsx"
+    );
   });
 });

@@ -35,6 +35,7 @@ function renderPanel(
       onUnstage: vi.fn(),
       onDiscard: vi.fn(),
       onDiff: vi.fn(),
+      onOpenFile: vi.fn(),
       onStageAll: vi.fn(),
       onUnstageAll: vi.fn(),
       onDiscardAll: vi.fn(),
