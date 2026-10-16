@@ -4,6 +4,7 @@ Thư mục này lưu trữ toàn bộ hệ thống tài liệu thiết kế kỹ
 
 > [!IMPORTANT]
 > **Quy chuẩn thiết kế áp dụng**: Toàn bộ hồ sơ thiết kế Phase 3 bắt buộc tuân thủ chặt chẽ [Quy Chuẩn Thiết Kế Kỹ Thuật "Design by Word" (RULES_DESIGN_SPECIFICATION.md)](../RULES_DESIGN_SPECIFICATION.md):
+>
 > - **Thiết kế bằng ngôn ngữ tự nhiên (Design by Word)**: Toàn bộ hệ thống tài liệu thiết kế được đặc tả bằng ngôn ngữ tự nhiên, tập trung vào kiến trúc hệ thống, ranh giới an toàn, bảng từ điển dữ liệu, sơ đồ tuần tự và quy chuẩn thẩm mỹ; tuyệt đối không sử dụng mã nguồn mẫu dưới bất kỳ hình thức nào.
 > - **An toàn dữ liệu tuyệt đối**: F# Core Engine đọc trạng thái nhanh; 100% thao tác thay đổi trạng thái kho (stage, unstage, commit, push...) được ủy thác cho Native Git CLI (`git.exe`).
 > - **Bảo toàn bất biến 100%**: Tuyệt đối không thay đổi hay làm xô lệch cấu trúc `HexagonNode.tsx`, avatar clip-path, zoom 5x, vầng neon ambient, hay thuật toán đồ thị F# đã hoàn thiện ở Phase 1. Các tính năng mới đóng vai trò là module bao bọc (Wrapper) bên ngoài.
@@ -35,4 +36,3 @@ Thư mục này lưu trữ toàn bộ hệ thống tài liệu thiết kế kỹ
    - Kiến trúc bộ tổng hợp sóng âm vi mô không tệp tin ngoại vi (Zero-Asset Overhead Web Audio Engine) cư trú thuần túy trong Webview UI.
    - Bản đồ sự kiện âm thanh "xúc giác kỹ thuật số": Chốt cơ khí Leica (`commit.success`), hợp âm thăng hoa quãng 5 (`push.success`), gắp vật lý (`file.stage`), và xung trầm ấm (`conflict.detected`).
    - Cài đặt VS Code (`f-gitgraph.soundEffects.enabled`, `f-gitgraph.soundEffects.volume`), nút ngắt âm nhanh trên UI và cơ chế chống ô nhiễm âm thanh (Cooldown 120ms, Polyphony limit = 2).
-

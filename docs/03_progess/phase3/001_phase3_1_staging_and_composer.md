@@ -34,39 +34,40 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ## 1. Tổng Quan Giai Đoạn & Danh Mục Tệp Tin Tác Động
 
 ### 1.1. Tầm Nhìn & Mục Tiêu Cốt Lõi
+
 - **Mục tiêu**: Hoàn thiện vòng lặp phát triển cốt lõi của lập trình viên (Xem tệp thay đổi $\rightarrow$ Stage/Unstage $\rightarrow$ Soạn thảo thông điệp $\rightarrow$ Commit mã nguồn $\rightarrow$ Commit & Push) ngay trên F-GitGraph, loại bỏ sự phụ thuộc vào tab Source Control mặc định của VS Code.
 - **Nguyên tắc triển khai độc lập kèm kiểm thử**: Mỗi module thành phần được phát triển và kiểm thử độc lập, có bộ test suite tương ứng xác nhận tính đúng đắn trước khi ghép nối vào hệ thống chung.
 - **Tiến độ tổng thể**: 0% hoàn thành (Sẵn sàng triển khai mã nguồn).
 
 ### 1.2. Bảng Kiểm Kê Tệp Tin Tác Động (Impacted Files Inventory)
 
-| Phân Loại | Đường Dẫn Tệp Tin | Trách Nhiệm Kỹ Thuật Chính |
-| :--- | :--- | :--- |
-| **Backend Core** | `src/extension/mutator/gitCliMutator.ts` | Bổ sung: `stageFile`, `unstageFile`, `stageAll`, `unstageAll`, `discardFileChanges`, nâng cấp `commit`. |
-| **Backend Query**| `src/backend/queries/workspaceStatus.ts` | Bóc tách `git status --porcelain=v2`, xuất cấu trúc `WorkspaceStatusResult`. |
-| **Backend Types**| `src/types/actions.ts` | Bổ sung các kiểu action payloads cho thao tác staging và commit. |
-| **Backend Types**| `src/types/queries.ts` | Bổ sung kiểu query payload cho `workspaceStatus`. |
-| **Backend IPC**  | `src/extension/services/messageHandler.ts` | Đăng ký bộ xử lý action request và query request mới từ Webview. |
-| **Backend Test** | `tests/extension/mutator/stagingMutator.test.ts` | Bộ unit test kiểm thử các phương thức staging và commit trong `GitCliMutator`. |
-| **Backend Test** | `tests/backend/queries/workspaceStatus.test.ts` | Bộ unit test bóc tách chuỗi porcelain v2 (A, M, D, R, U, branch info, unicode). |
-| **Backend Test** | `tests/extension/services/stagingMessageHandler.test.ts` | Bộ unit test kiểm thử điều phối thông điệp RPC qua `messageHandler`. |
-| **UI Component** | `src/webview/components/ui/CornerCrossFrame.tsx` | Khung viền kỹ thuật mang 4 đinh tán chữ thập góc (`+`) với hiệu ứng bừng sáng focus. |
-| **UI Component** | `src/webview/components/staging/StagingFileItem.tsx` | Dòng hiển thị tệp tin, badge vuông neon, tên tệp, đường dẫn mờ, hover-to-reveal actions. |
-| **UI Component** | `src/webview/components/staging/DiscardConfirmModal.tsx` | Hộp thoại modal cảnh báo an toàn trước khi xóa vĩnh viễn tệp biến động. |
-| **UI Component** | `src/webview/components/staging/StagingPanel.tsx` | Quản lý 2 phân nhóm Staged Changes và Changes (Unstaged), nút hành động hàng loạt. |
-| **UI Component** | `src/webview/components/staging/CommitComposer.tsx` | Ô nhập tiêu đề, bộ đếm 50 chars, ô mô tả mở rộng, tùy chọn amend/sign, nút Commit & Push. |
-| **UI Component** | `src/webview/components/staging/StagingArea.tsx` | Container bao bọc toàn bộ phân vùng Staging & Composer đặt trong `CornerCrossFrame`. |
-| **UI State**     | `src/webview/lib/stores/staging.store.ts` | Quản lý toàn bộ trạng thái phản ứng bằng Preact Signals. |
-| **UI Test**      | `tests/webview/components/ui/CornerCrossFrame.test.tsx` | Unit test render 4 đinh tán `+`, hiệu ứng chuyển đổi trạng thái active, và hỗ trợ theme. |
-| **UI Test**      | `tests/webview/components/staging/StagingFileItem.test.tsx` | Unit test màu sắc badge A/M/D/R/U, hover-to-reveal nút bấm, sự kiện click diff/stage/discard. |
-| **UI Test**      | `tests/webview/components/staging/DiscardConfirmModal.test.tsx`| Unit test hiển thị cảnh báo, phím tắt Esc hủy bỏ, xác nhận Discard. |
-| **UI Test**      | `tests/webview/lib/stores/staging.store.test.ts` | Unit test logic tín hiệu `canCommit`, đồng bộ danh sách tệp, chuyển đổi cờ amend/sign. |
-| **UI Test**      | `tests/webview/components/staging/CommitComposer.test.tsx` | Unit test bộ đếm 50 ký tự (trắng -> vàng -> đỏ), phím tắt `Ctrl + Enter`, trạng thái nút bấm. |
-| **UI Test**      | `tests/webview/components/staging/StagingPanel.test.tsx` | Unit test render 2 phân nhóm, số lượng tệp đếm, nút Stage All, Unstage All, Discard All. |
-| **Integration**  | `src/webview/components/commit/CommitTable.tsx` | Mở khóa click dòng `UNCOMMITTED_CHANGES` (`*`), hiển thị `<StagingArea />` trong Overlay Inspector. |
-| **Integration**  | `src/extension/watchers/git-repo.watcher.ts` | Tích hợp thuật toán Debounce 150ms bắn thông báo cập nhật `workspaceStatus`. |
-| **Integr. Test** | `tests/extension/watchers/gitRepoWatcher.debounce.test.ts` | Test cơ chế Debounce 150ms gom bão sự kiện thành đúng 1 lần gọi `workspaceStatus`. |
-| **Integr. Test** | `tests/webview/components/commit/CommitTable.staging.test.ts` | Test click chọn dòng `UNCOMMITTED_CHANGES` mở đúng `<StagingArea />` không làm lệch bảng DAG. |
+| Phân Loại         | Đường Dẫn Tệp Tin                                               | Trách Nhiệm Kỹ Thuật Chính                                                                              |
+| :---------------- | :-------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| **Backend Core**  | `src/extension/mutator/gitCliMutator.ts`                        | Bổ sung: `stageFile`, `unstageFile`, `stageAll`, `unstageAll`, `discardFileChanges`, nâng cấp `commit`. |
+| **Backend Query** | `src/backend/queries/workspaceStatus.ts`                        | Bóc tách `git status --porcelain=v2`, xuất cấu trúc `WorkspaceStatusResult`.                            |
+| **Backend Types** | `src/types/actions.ts`                                          | Bổ sung các kiểu action payloads cho thao tác staging và commit.                                        |
+| **Backend Types** | `src/types/queries.ts`                                          | Bổ sung kiểu query payload cho `workspaceStatus`.                                                       |
+| **Backend IPC**   | `src/extension/services/messageHandler.ts`                      | Đăng ký bộ xử lý action request và query request mới từ Webview.                                        |
+| **Backend Test**  | `tests/extension/mutator/stagingMutator.test.ts`                | Bộ unit test kiểm thử các phương thức staging và commit trong `GitCliMutator`.                          |
+| **Backend Test**  | `tests/backend/queries/workspaceStatus.test.ts`                 | Bộ unit test bóc tách chuỗi porcelain v2 (A, M, D, R, U, branch info, unicode).                         |
+| **Backend Test**  | `tests/extension/services/stagingMessageHandler.test.ts`        | Bộ unit test kiểm thử điều phối thông điệp RPC qua `messageHandler`.                                    |
+| **UI Component**  | `src/webview/components/ui/CornerCrossFrame.tsx`                | Khung viền kỹ thuật mang 4 đinh tán chữ thập góc (`+`) với hiệu ứng bừng sáng focus.                    |
+| **UI Component**  | `src/webview/components/staging/StagingFileItem.tsx`            | Dòng hiển thị tệp tin, badge vuông neon, tên tệp, đường dẫn mờ, hover-to-reveal actions.                |
+| **UI Component**  | `src/webview/components/staging/DiscardConfirmModal.tsx`        | Hộp thoại modal cảnh báo an toàn trước khi xóa vĩnh viễn tệp biến động.                                 |
+| **UI Component**  | `src/webview/components/staging/StagingPanel.tsx`               | Quản lý 2 phân nhóm Staged Changes và Changes (Unstaged), nút hành động hàng loạt.                      |
+| **UI Component**  | `src/webview/components/staging/CommitComposer.tsx`             | Ô nhập tiêu đề, bộ đếm 50 chars, ô mô tả mở rộng, tùy chọn amend/sign, nút Commit & Push.               |
+| **UI Component**  | `src/webview/components/staging/StagingArea.tsx`                | Container bao bọc toàn bộ phân vùng Staging & Composer đặt trong `CornerCrossFrame`.                    |
+| **UI State**      | `src/webview/lib/stores/staging.store.ts`                       | Quản lý toàn bộ trạng thái phản ứng bằng Preact Signals.                                                |
+| **UI Test**       | `tests/webview/components/ui/CornerCrossFrame.test.tsx`         | Unit test render 4 đinh tán `+`, hiệu ứng chuyển đổi trạng thái active, và hỗ trợ theme.                |
+| **UI Test**       | `tests/webview/components/staging/StagingFileItem.test.tsx`     | Unit test màu sắc badge A/M/D/R/U, hover-to-reveal nút bấm, sự kiện click diff/stage/discard.           |
+| **UI Test**       | `tests/webview/components/staging/DiscardConfirmModal.test.tsx` | Unit test hiển thị cảnh báo, phím tắt Esc hủy bỏ, xác nhận Discard.                                     |
+| **UI Test**       | `tests/webview/lib/stores/staging.store.test.ts`                | Unit test logic tín hiệu `canCommit`, đồng bộ danh sách tệp, chuyển đổi cờ amend/sign.                  |
+| **UI Test**       | `tests/webview/components/staging/CommitComposer.test.tsx`      | Unit test bộ đếm 50 ký tự (trắng -> vàng -> đỏ), phím tắt `Ctrl + Enter`, trạng thái nút bấm.           |
+| **UI Test**       | `tests/webview/components/staging/StagingPanel.test.tsx`        | Unit test render 2 phân nhóm, số lượng tệp đếm, nút Stage All, Unstage All, Discard All.                |
+| **Integration**   | `src/webview/components/commit/CommitTable.tsx`                 | Mở khóa click dòng `UNCOMMITTED_CHANGES` (`*`), hiển thị `<StagingArea />` trong Overlay Inspector.     |
+| **Integration**   | `src/extension/watchers/git-repo.watcher.ts`                    | Tích hợp thuật toán Debounce 150ms bắn thông báo cập nhật `workspaceStatus`.                            |
+| **Integr. Test**  | `tests/extension/watchers/gitRepoWatcher.debounce.test.ts`      | Test cơ chế Debounce 150ms gom bão sự kiện thành đúng 1 lần gọi `workspaceStatus`.                      |
+| **Integr. Test**  | `tests/webview/components/commit/CommitTable.staging.test.ts`   | Test click chọn dòng `UNCOMMITTED_CHANGES` mở đúng `<StagingArea />` không làm lệch bảng DAG.           |
 
 ---
 
@@ -75,7 +76,8 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ---
 
 ### 📋 Nhóm Việc 1: Mở Rộng Backend GitCliMutator, Bộ Truy Vấn & RPC Protocol — [Epic #12](https://github.com/thatislg/f-gitgraph/issues/12)
-*Tài liệu tham chiếu thiết kế*: [01_Staging_Backend_And_Mutator_Design.md](../../02_design/phase3/01_Staging_Backend_And_Mutator_Design.md).
+
+_Tài liệu tham chiếu thiết kế_: [01_Staging_Backend_And_Mutator_Design.md](../../02_design/phase3/01_Staging_Backend_And_Mutator_Design.md).
 
 - [x] **Nhiệm vụ 1.1: Hiện thực cơ chế tương thích đa phiên bản Git & các lệnh Staging trong `src/extension/mutator/gitCliMutator.ts`**
   - [x] **1.1.0 ([#13](https://github.com/thatislg/f-gitgraph/issues/13))**: Hiện thực hàm thăm dò phiên bản một lần `canUseRestore()`: Thực thi `git version`, bóc tách chỉ số Major/Minor (Git >= 2.23), lưu cờ `supportsRestore` vào in-memory cache để không tốn thêm tiến trình ở các lần gọi sau.
@@ -113,14 +115,15 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ---
 
 ### 📋 Nhóm Việc 2: Triển Khai Các Khối Giao Diện Cơ Bản (UI Building Blocks) — [Epic #23](https://github.com/thatislg/f-gitgraph/issues/23)
-*Tài liệu tham chiếu thiết kế*: [02_Staging_UI_And_Composer_Component_Design.md](../../02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md).
+
+_Tài liệu tham chiếu thiết kế_: [02_Staging_UI_And_Composer_Component_Design.md](../../02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md).
 
 - [x] **Nhiệm vụ 2.1 ([#24](https://github.com/thatislg/f-gitgraph/issues/24)): Xây dựng khung kỹ thuật đinh tán góc `src/webview/components/ui/CornerCrossFrame.tsx`**
   - [x] **2.1.1**: Định vị chính xác 4 ký tự chữ thập (`+`) tại 4 góc của khung viền (top-left, top-right, bottom-left, bottom-right) với khoảng cách dịch chuyển tọa độ âm -6px so với cạnh container, phông chữ đơn cách (Courier New / Fira Code), `user-select: none`, z-index 10.
   - [x] **2.1.2**: Quản lý 3 trạng thái bừng sáng của đinh tán:
-    - *Trạng thái chờ (Idle)*: Độ mờ 50% (`opacity: 0.5`), màu xám viền kỹ thuật, không có đổ bóng.
-    - *Trạng thái rê chuột (Hover)*: Độ mờ 80% (`opacity: 0.8`), viền sáng nhẹ.
-    - *Trạng thái kích hoạt (Active/Focus)*: Độ mờ 100% (`opacity: 1`), bừng sáng sắc tím Neon (`#a855f7`) với hiệu ứng phát quang `drop-shadow(0 0 6px rgba(168, 85, 247, 0.6))`.
+    - _Trạng thái chờ (Idle)_: Độ mờ 50% (`opacity: 0.5`), màu xám viền kỹ thuật, không có đổ bóng.
+    - _Trạng thái rê chuột (Hover)_: Độ mờ 80% (`opacity: 0.8`), viền sáng nhẹ.
+    - _Trạng thái kích hoạt (Active/Focus)_: Độ mờ 100% (`opacity: 1`), bừng sáng sắc tím Neon (`#a855f7`) với hiệu ứng phát quang `drop-shadow(0 0 6px rgba(168, 85, 247, 0.6))`.
   - [x] **2.1.3**: Thiết lập tương thích hoàn hảo giữa 2 chế độ Dark Mode và Light Mode theo bảng token Cyber-Lab: Nền tối đậm `#0f172a` viền `#334155` ở Dark Mode; Nền sáng `#f8fafc` viền `#cbd5e1` ở Light Mode; luôn hiển thị mượt mà phần tử con (children).
 
 - [x] **Nhiệm vụ 2.2: Xây dựng Component hiển thị dòng tệp `src/webview/components/staging/StagingFileItem.tsx`**
@@ -136,7 +139,7 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
     - Tên tệp tin (File Name) đặt ở vị trí nổi bật phía trước: Phông chữ cỡ 12.5px, màu chữ sáng rõ (`#f8fafc` Dark Mode / `#0f172a` Light Mode).
     - Đường dẫn thư mục phụ (Folder Path) đặt ở phía sau: Phông chữ cỡ 11px, màu xám mờ (`#94a3b8` Dark Mode / `#64748b` Light Mode) để phân biệt rõ ràng cấp độ quan trọng.
     - Tích hợp cơ chế cắt ngắn đường dẫn ở giữa (Middle Ellipsis: ví dụ `src/.../components/StagingFileItem.tsx`) khi chiều ngang Inspector bị thu hẹp, bảo đảm tên tệp quan trọng không bao giờ bị che khuất.
-  - [x] **2.2.3 ([#26](https://github.com/thatislg/f-gitgraph/issues/26))**: Hiện thực cơ chế *Hover-to-Reveal Actions* (Chống ô nhiễm thị giác):
+  - [x] **2.2.3 ([#26](https://github.com/thatislg/f-gitgraph/issues/26))**: Hiện thực cơ chế _Hover-to-Reveal Actions_ (Chống ô nhiễm thị giác):
     - Trạng thái mặc định (Idle): Cụm nút thao tác bên phải ẩn hoàn toàn (`opacity: 0`, `pointer-events: none`), giúp danh sách tệp biến động nhìn tinh gọn, sạch sẽ, không bị rối mắt như giao diện GitLens.
     - Trạng thái rê chuột (Hover): Cụm nút thao tác mượt mà xuất hiện (`opacity: 1`, `pointer-events: auto`) với hiệu ứng chuyển tiếp CSS Transition 150ms `cubic-bezier(0.4, 0, 0.2, 1)`.
   - [x] **2.2.4 ([#26](https://github.com/thatislg/f-gitgraph/issues/26))**: Tích hợp các nút thao tác vi mô trực tiếp trên dòng tệp theo phân nhóm ngữ cảnh:
@@ -161,7 +164,8 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ---
 
 ### 📋 Nhóm Việc 3: Triển Khai Phân Vùng Staging, Composer & Quản Lý Trạng Thái — [Epic #23](https://github.com/thatislg/f-gitgraph/issues/23)
-*Tài liệu tham chiếu thiết kế*: [02_Staging_UI_And_Composer_Component_Design.md](../../02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md) và [005_Audio_Feedback_And_Sound_Design.md](../../01_investigation/phase3_Reborn/005_Audio_Feedback_And_Sound_Design.md).
+
+_Tài liệu tham chiếu thiết kế_: [02_Staging_UI_And_Composer_Component_Design.md](../../02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md) và [005_Audio_Feedback_And_Sound_Design.md](../../01_investigation/phase3_Reborn/005_Audio_Feedback_And_Sound_Design.md).
 
 - [x] **Nhiệm vụ 3.1 ([#28](https://github.com/thatislg/f-gitgraph/issues/28)): Xây dựng bảng hiển thị tệp `src/webview/components/staging/StagingPanel.tsx`**
   - [x] **3.1.1**: Phân chia giao diện thành 2 phân khu danh sách có tiêu đề rõ ràng: "Staged Changes" và "Changes (Unstaged)".
@@ -197,7 +201,8 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ---
 
 ### 📋 Nhóm Việc 4: Tích Hợp Đồ Thị DAG & Bộ Giám Sát Thời Gian Thực — [Epic #36](https://github.com/thatislg/f-gitgraph/issues/36)
-*Tài liệu tham chiếu thiết kế*: [03_WorkingTree_Sync_And_Watcher_Integration.md](../../02_design/phase3/03_WorkingTree_Sync_And_Watcher_Integration.md).
+
+_Tài liệu tham chiếu thiết kế_: [03_WorkingTree_Sync_And_Watcher_Integration.md](../../02_design/phase3/03_WorkingTree_Sync_And_Watcher_Integration.md).
 
 - [x] **Nhiệm vụ 4.1: Đồng bộ dòng Uncommitted Changes trên đồ thị `src/webview/components/commit/CommitTable.tsx`**
   - [x] **4.1.1 ([#37](https://github.com/thatislg/f-gitgraph/issues/37))**: Mở khóa sự kiện click trên dòng `UNCOMMITTED_CHANGES` (`*`) trong `CommitTable.tsx` khi có thay đổi trong Working Tree.
@@ -216,7 +221,8 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ---
 
 ### 📋 Nhóm Việc 5: Kiểm Thử Nghiệm Thu Tổng Hợp Toàn Quy Trình & An Toàn Dữ Liệu — [Epic #36](https://github.com/thatislg/f-gitgraph/issues/36)
-*Tài liệu tham chiếu thiết kế*: Mục 5 trong cả 3 bản thiết kế kỹ thuật.
+
+_Tài liệu tham chiếu thiết kế_: Mục 5 trong cả 3 bản thiết kế kỹ thuật.
 
 - [x] **Nhiệm vụ 5.1 ([#42](https://github.com/thatislg/f-gitgraph/issues/42)): Kiểm thử End-to-End chu trình phát triển cốt lõi**
   - [x] **5.1.1**: Thử nghiệm E2E toàn bộ vòng lặp: Sửa tệp -> Watcher bắt sự kiện -> Click dòng WIP trên đồ thị -> Stage tệp -> Soạn thảo commit -> Bấm Commit -> Đồ thị DAG tự động nạp commit mới.
@@ -233,7 +239,7 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 
 - [ ] **Nhiệm vụ 5.4 ([#42](https://github.com/thatislg/f-gitgraph/issues/42)): Kiểm định tương thích hiển thị giao diện đa chủ đề**
   - [x] **5.4.1**: Kiểm tra hiển thị chuẩn sắc nét trên Dark Theme: Nền tối sâu, đinh tán tím Neon, huy hiệu tương phản cao.
-  - [ ] **5.4.2**: Kiểm tra hiển thị chuẩn thanh lịch trên Light Theme: Nền sáng nhẹ, đinh tán tím đậm, chữ và đường viền dễ đọc. *(Nợ kỹ thuật — đánh dấu deferred: hiệu ứng neon/glow đang được tinh chỉnh cho Dark Theme, hiển thị trên Light Theme khả dụng nhưng chưa thanh lịch; sẽ xử lý ở nhịp sau)*
+  - [ ] **5.4.2**: Kiểm tra hiển thị chuẩn thanh lịch trên Light Theme: Nền sáng nhẹ, đinh tán tím đậm, chữ và đường viền dễ đọc. _(Nợ kỹ thuật — đánh dấu deferred: hiệu ứng neon/glow đang được tinh chỉnh cho Dark Theme, hiển thị trên Light Theme khả dụng nhưng chưa thanh lịch; sẽ xử lý ở nhịp sau)_
 
 ---
 

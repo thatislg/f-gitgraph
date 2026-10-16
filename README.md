@@ -17,9 +17,10 @@
 
 ## Overview: The Reborn Era
 
-**F-GitGraph** is an ultra-fast, feature-rich Git Client UI and interactive DAG history visualizer built directly into VS Code. 
+**F-GitGraph** is an ultra-fast, feature-rich Git Client UI and interactive DAG history visualizer built directly into VS Code.
 
 Originally forked from the popular MIT-licensed **Git Graph** (via **Neo-Git-Graph**), the project has undergone a complete transformation in the **Reborn Era**:
+
 1. **Engine Rebirth**: Replacing legacy single-threaded JavaScript `git log` regex parsing with a standalone, blazing-fast **F# Native AOT Core Engine** (`f-gitgraph-core`) that communicates via a binary MessagePack streaming IPC daemon (<5ms cold start, zero-allocation memory-mapped file access).
 2. **Visual Rebirth**: Introducing the **Neo-Brutalist Cyber-Lab** visual identity — inspired by LMO Lab's high-precision blueprint framing with **corner crosshair rivets (`+`)**, high-tech **Hexagon SVG commit nodes**, clip-path avatars, ambient neon gradients, and a clean, uncluttered layout that delivers deep visual appeal without the chaotic overcrowding found in tools like GitLens.
 3. **Workspace Rebirth**: Evolving from a pure commit-history viewer into a comprehensive **3-Pane Git Client Workspace** with native Staging, a specialized Commit Composer, full Stash Inspector, Visual Interactive Rebase, and In-Flight Conflict Resolution.
@@ -89,14 +90,14 @@ graph TD
     Core -.->|Direct Read File / LibGit2| GitRepo[(Git Repository .git/)]
 ```
 
-| Concern | Legacy Single-Threaded JS | F-GitGraph Reborn (F# Native AOT) |
-| :--- | :--- | :--- |
-| **Commit & Ref Access** | `git log` spawn process + regex string split | Direct memory-mapped `commit-graph` + in-process LibGit2 |
-| **Memory Allocation** | Tens of thousands of JS objects (GC thrashing) | Zero-allocation `Span<byte>` binary slices |
-| **DAG Topological Sort** | Single-threaded JavaScript | Multi-threaded parallel topological graph solver |
-| **SVG Path Generation** | Render-time JavaScript path math | Pre-computed Bézier curves via `Array.Parallel` |
-| **IPC Communication** | Large JSON stringify/parse | Binary MessagePack framing over Stdio streaming |
-| **Mutation Safety** | Library-based Git mutations | 100% Native Git CLI delegation (GPG, SSH, Hooks preserved) |
+| Concern                  | Legacy Single-Threaded JS                      | F-GitGraph Reborn (F# Native AOT)                          |
+| :----------------------- | :--------------------------------------------- | :--------------------------------------------------------- |
+| **Commit & Ref Access**  | `git log` spawn process + regex string split   | Direct memory-mapped `commit-graph` + in-process LibGit2   |
+| **Memory Allocation**    | Tens of thousands of JS objects (GC thrashing) | Zero-allocation `Span<byte>` binary slices                 |
+| **DAG Topological Sort** | Single-threaded JavaScript                     | Multi-threaded parallel topological graph solver           |
+| **SVG Path Generation**  | Render-time JavaScript path math               | Pre-computed Bézier curves via `Array.Parallel`            |
+| **IPC Communication**    | Large JSON stringify/parse                     | Binary MessagePack framing over Stdio streaming            |
+| **Mutation Safety**      | Library-based Git mutations                    | 100% Native Git CLI delegation (GPG, SSH, Hooks preserved) |
 
 ---
 
@@ -117,6 +118,7 @@ The development of F-GitGraph is organized into milestone phases:
   - **[Milestone 3.4: Visual Interactive Rebase & Conflict Resolver](docs/03_progess/phase3/004_phase3_4_rebase_and_conflict.md)**: Drag-and-drop commit reordering, visual squash/fixup/reword/drop buttons, and 3-way in-flight conflict resolver.
 
 Comprehensive technical design specifications and investigation reports can be found in the [`docs/`](docs/) directory:
+
 - [Phase 3 Reborn Overview & Taxonomy](docs/phase3_Reborn/README.md)
 - [Design System & Cyber-Lab Visual Identity](docs/phase3_Reborn/004_Design_System_And_Visual_Identity.md)
 - [Phase 3 Worklogs & Milestone Progress](docs/03_progess/phase3/README.md)
@@ -127,25 +129,26 @@ Comprehensive technical design specifications and investigation reports can be f
 
 All settings are prefixed with `f-gitgraph` and can be customized via VS Code Settings:
 
-| Setting | Default | Description |
-| :--- | :---: | :--- |
-| `f-gitgraph.autoCenterCommitDetailsView` | `true` | Automatically center the selected commit details view in viewport. |
-| `f-gitgraph.dateFormat` | `"Date & Time"` | Timestamp display format (`"Date & Time"`, `"Date Only"`, or `"Relative"`). |
-| `f-gitgraph.dateType` | `"Author Date"` | Source date for commits (`"Author Date"` or `"Commit Date"`). |
-| `f-gitgraph.graphColours` | 12 defaults | Curated neon & pastel palette for branch graph lanes. |
-| `f-gitgraph.graphStyle` | `"rounded"` | Visual curve style for branch lanes (`"rounded"` or `"angular"`). |
-| `f-gitgraph.initialLoadCommits` | `300` | Number of initial commits loaded on open. |
-| `f-gitgraph.loadMoreCommits` | `100` | Chunk size of commits to load during virtual scrolling. |
-| `f-gitgraph.maxDepthOfRepoSearch` | `0` | Subdirectory depth for scanning repositories in workspace. |
-| `f-gitgraph.showCurrentBranchByDefault` | `false` | Filter to only current checked out branch on view launch. |
-| `f-gitgraph.showUncommittedChanges` | `true` | Display the uncommitted changes row at the top of the graph. |
-| `f-gitgraph.tabIconColourTheme` | `"colour"` | Icon appearance theme in tab bar (`"colour"` or `"grey"`). |
+| Setting                                  |     Default     | Description                                                                 |
+| :--------------------------------------- | :-------------: | :-------------------------------------------------------------------------- |
+| `f-gitgraph.autoCenterCommitDetailsView` |     `true`      | Automatically center the selected commit details view in viewport.          |
+| `f-gitgraph.dateFormat`                  | `"Date & Time"` | Timestamp display format (`"Date & Time"`, `"Date Only"`, or `"Relative"`). |
+| `f-gitgraph.dateType`                    | `"Author Date"` | Source date for commits (`"Author Date"` or `"Commit Date"`).               |
+| `f-gitgraph.graphColours`                |   12 defaults   | Curated neon & pastel palette for branch graph lanes.                       |
+| `f-gitgraph.graphStyle`                  |   `"rounded"`   | Visual curve style for branch lanes (`"rounded"` or `"angular"`).           |
+| `f-gitgraph.initialLoadCommits`          |      `300`      | Number of initial commits loaded on open.                                   |
+| `f-gitgraph.loadMoreCommits`             |      `100`      | Chunk size of commits to load during virtual scrolling.                     |
+| `f-gitgraph.maxDepthOfRepoSearch`        |       `0`       | Subdirectory depth for scanning repositories in workspace.                  |
+| `f-gitgraph.showCurrentBranchByDefault`  |     `false`     | Filter to only current checked out branch on view launch.                   |
+| `f-gitgraph.showUncommittedChanges`      |     `true`      | Display the uncommitted changes row at the top of the graph.                |
+| `f-gitgraph.tabIconColourTheme`          |   `"colour"`    | Icon appearance theme in tab bar (`"colour"` or `"grey"`).                  |
 
 ---
 
 ## Contributing & Community
 
 Contributions, suggestions, and issue reports are warmly welcomed!
+
 - File bug reports and feature requests via [GitHub Issues](https://github.com/thatislg/f-gitgraph/issues).
 - Check the [Phase 3 Roadmap](docs/phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md) for planned features and technical specifications.
 
@@ -162,6 +165,7 @@ Copyright (c) 2019 mhutchie. Fork (c) 2026-present LMO-LAB
 ```
 
 ### Historical Acknowledgments & Ancestry
+
 - **Original Foundation**: Built upon the MIT-licensed **Git Graph** extension created by **[mhutchie](https://github.com/mhutchie/vscode-git-graph)**. We honor mhutchie's pioneering work in bringing interactive commit graphs to VS Code.
 - **Neo-Git-Graph Fork**: Inherits early modernization refactoring from the **Neo-Git-Graph** project ([asispts/neo-git-graph](https://github.com/asispts/neo-git-graph)).
 - **F-GitGraph Reborn**: Conceived, architected with an F# Native AOT parallel computing engine, designed under the Cyber-Lab aesthetic, and actively developed by **[LMO-LAB](https://github.com/thatislg)**.

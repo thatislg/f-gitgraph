@@ -12,7 +12,9 @@ Tài liệu này đặc tả chi tiết kiến trúc hệ thống âm học vi m
 ## 1. Tầm Nhìn, Triết Lý & Ranh Giới An Toàn 4 Tầng
 
 ### 1.1. Triết Lý "Xúc Giác Kỹ Thuật Số" (Digital Tactility)
+
 Trong các phần mềm cao cấp tiên phong về trải nghiệm người dùng hiện đại (như Linear, Raycast, và các thiết bị âm thanh phần cứng của Teenage Engineering), **âm thanh phản hồi vi mô (micro-audio feedback)** đóng vai trò như một "chứng chỉ xúc giác" khẳng định hành vi an toàn của hệ thống:
+
 - Khi lập trình viên nhấn tổ hợp phím tắt `Ctrl + Enter` để commit thành công: Một tiếng chốt cơ khí êm dịu vang lên xác nhận rằng mã nguồn đã được bảo vệ vững chắc vào phả hệ Git.
 - Khi người dùng bấm nút đưa tệp vào Staging: Một tiếng gắp vật lý siêu ngắn phản hồi ngay lập tức dưới đầu ngón tay.
 - Khi xảy ra lỗi hoặc xung đột: Một xung âm trầm ấm cảnh báo vừa đủ để người dùng chú ý mà không gây giật mình hay ức chế tinh thần.
@@ -75,6 +77,7 @@ graph TD
 ### 1.3. Nguyên Tắc Quyền Kiểm Soát Thuộc Về Người Dùng (User Sovereignty)
 
 Âm thanh là một trải nghiệm mang tính cá nhân hóa sâu sắc; một số lập trình viên yêu thích phản hồi xúc giác âm học, trong khi những người khác đòi hỏi môi trường tĩnh lặng tuyệt đối. Do đó:
+
 - **Tùy chọn Bật/Tắt Toàn Cục**: Cung cấp tùy chọn cấu hình master cho phép vô hiệu hóa 100% mọi âm thanh trong một click.
 - **Thanh Trượt Âm Lượng Tinh Tế**: Mức âm lượng mặc định được giới hạn ở ngưỡng **35%**, tạo cảm giác êm dịu, không lấn át nhạc nền hoặc âm thanh cuộc họp.
 - **Tự Động Im Lặng Khi Mất Tiêu Điểm (Focus-Aware Silence)**: Khi cửa sổ VS Code bị thu nhỏ hoặc người dùng chuyển tab sang ứng dụng khác, hệ thống tự động khóa cổng âm thanh để ngăn ngừa việc phát âm thanh nền bất ngờ.
@@ -144,16 +147,16 @@ Trình duyệt web và Webview của VS Code áp dụng chính sách bảo mật
 
 Mỗi sự kiện trong hệ thống F-GitGraph mang một "cá tính âm học" (Acoustic Persona) riêng biệt, được mô hình hóa bằng các tham số vật lý chính xác:
 
-| Sự Kiện Hệ Thống (Sound Event) | Thời Lượng | Dạng Sóng Cơ Bản | Quỹ Đạo Tần Số (Frequency Profile) | Phong Bì Biên Độ (Gain Envelope) | Cảm Giác Âm Học Mô Phỏng |
-| :--- | :---: | :---: | :--- | :--- | :--- |
-| **Commit Thành Công** (`commit.success`) | $80\text{ms}$ | Sóng Sine + Nhiễu Trắng | Trượt số mũ từ $750\text{Hz}$ xuống $180\text{Hz}$ trong $80\text{ms}$. Đồng thời phát một xung nhiễu trắng $10\text{ms}$. | Khởi đầu tại $80\%$ âm lượng tổng, suy giảm số mũ về $0.001$ sau $80\text{ms}$. | Tiếng chốt cơ khí chính xác của lẫy máy ảnh Leica / Công tắc cơ cao cấp. |
-| **Đẩy Mã Nguồn Thành Công** (`push.success`) | $190\text{ms}$ | Sóng Sine kép | Hai nốt thăng hoa cách nhau quãng 5 đúng: Nốt 1 ($523.25\text{Hz}$ - Đô 5) phát tại $0\text{ms}$; Nốt 2 ($783.99\text{Hz}$ - Sol 5) phát tại $70\text{ms}$. | Mỗi nốt có biên độ $60\%$, duy trì $40\text{ms}$ rồi suy giảm mềm mại sau $120\text{ms}$. | Cảm giác thăng hoa, nhẹ nhõm khi mã nguồn đã được bảo vệ trên máy chủ từ xa. |
-| **Đồng Bộ / Kéo Mã Nguồn** (`pull.sync`) | $120\text{ms}$ | Sóng Triangle | Trượt hình parabol: Từ $330\text{Hz}$ lướt lên $440\text{Hz}$ rồi trượt êm về $330\text{Hz}$. | Mở chậm (Attack $20\text{ms}$), suy giảm dần về $0$ trong $100\text{ms}$. | Gợn sóng dữ liệu lướt qua thiết bị thu nhận. |
-| **Chuyển Nhánh Làm Việc** (`branch.checkout`) | $45\text{ms}$ | Sóng Sine | Trượt nhanh từ $900\text{Hz}$ xuống $300\text{Hz}$ trong $45\text{ms}$. | Biên độ $70\%$, suy giảm dứt khoát trong $45\text{ms}$. | Tiếng bật công tắc cơ học hai trạng thái (Toggle Switch). |
-| **Cất Thay Đổi Vào Stash** (`stash.store`) | $150\text{ms}$ | Sóng Sine | Trượt tần số đi xuống: Từ $400\text{Hz}$ hạ dần về $150\text{Hz}$ qua bộ lọc thông thấp. | Biên độ $75\%$, đuôi âm ngân nhẹ trong $150\text{ms}$. | Tiếng trượt êm ái khi đóng ngăn kéo kim loại vào tủ lưu trữ. |
-| **Bung Thay Đổi Từ Stash** (`stash.pop`) | $150\text{ms}$ | Sóng Sine | Trượt tần số đi lên: Từ $180\text{Hz}$ nâng dần lên $480\text{Hz}$. | Biên độ $75\%$, đuôi âm mở rộng tạo cảm giác giải phóng. | Tiếng mở lẫy kim loại lấy vật phẩm ra ngoài. |
-| **Cảnh Báo Xung Đột** (`conflict.detected`) | $250\text{ms}$ | Sóng Triangle kép | Hợp âm trầm ấm tần số đôi: $146.83\text{Hz}$ (Nốt Rê 3) và $220.00\text{Hz}$ (Nốt La 3). | Mở âm êm ái (Attack $30\text{ms}$), duy trì $100\text{ms}$, suy giảm êm trong $120\text{ms}$. | Tiếng xung âm trầm ấm, thu hút sự chú ý nhưng tuyệt đối không gây ức chế hay giật mình. |
-| **Stage / Unstage Tệp** (`file.stage` & `file.unstage`) | $25\text{ms}$ | Sóng Sine | Trượt siêu tốc từ $1200\text{Hz}$ xuống $600\text{Hz}$ trong $25\text{ms}$. | Biên độ nhỏ $40\%$, tắt tức thì tại mốc $25\text{ms}$. | Tiếng gắp vật lý vi mô (Micro Snap) tạo phản hồi xúc giác cho đầu ngón tay. |
+| Sự Kiện Hệ Thống (Sound Event)                          |   Thời Lượng   |    Dạng Sóng Cơ Bản     | Quỹ Đạo Tần Số (Frequency Profile)                                                                                                                          | Phong Bì Biên Độ (Gain Envelope)                                                              | Cảm Giác Âm Học Mô Phỏng                                                                |
+| :------------------------------------------------------ | :------------: | :---------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
+| **Commit Thành Công** (`commit.success`)                | $80\text{ms}$  | Sóng Sine + Nhiễu Trắng | Trượt số mũ từ $750\text{Hz}$ xuống $180\text{Hz}$ trong $80\text{ms}$. Đồng thời phát một xung nhiễu trắng $10\text{ms}$.                                  | Khởi đầu tại $80\%$ âm lượng tổng, suy giảm số mũ về $0.001$ sau $80\text{ms}$.               | Tiếng chốt cơ khí chính xác của lẫy máy ảnh Leica / Công tắc cơ cao cấp.                |
+| **Đẩy Mã Nguồn Thành Công** (`push.success`)            | $190\text{ms}$ |      Sóng Sine kép      | Hai nốt thăng hoa cách nhau quãng 5 đúng: Nốt 1 ($523.25\text{Hz}$ - Đô 5) phát tại $0\text{ms}$; Nốt 2 ($783.99\text{Hz}$ - Sol 5) phát tại $70\text{ms}$. | Mỗi nốt có biên độ $60\%$, duy trì $40\text{ms}$ rồi suy giảm mềm mại sau $120\text{ms}$.     | Cảm giác thăng hoa, nhẹ nhõm khi mã nguồn đã được bảo vệ trên máy chủ từ xa.            |
+| **Đồng Bộ / Kéo Mã Nguồn** (`pull.sync`)                | $120\text{ms}$ |      Sóng Triangle      | Trượt hình parabol: Từ $330\text{Hz}$ lướt lên $440\text{Hz}$ rồi trượt êm về $330\text{Hz}$.                                                               | Mở chậm (Attack $20\text{ms}$), suy giảm dần về $0$ trong $100\text{ms}$.                     | Gợn sóng dữ liệu lướt qua thiết bị thu nhận.                                            |
+| **Chuyển Nhánh Làm Việc** (`branch.checkout`)           | $45\text{ms}$  |        Sóng Sine        | Trượt nhanh từ $900\text{Hz}$ xuống $300\text{Hz}$ trong $45\text{ms}$.                                                                                     | Biên độ $70\%$, suy giảm dứt khoát trong $45\text{ms}$.                                       | Tiếng bật công tắc cơ học hai trạng thái (Toggle Switch).                               |
+| **Cất Thay Đổi Vào Stash** (`stash.store`)              | $150\text{ms}$ |        Sóng Sine        | Trượt tần số đi xuống: Từ $400\text{Hz}$ hạ dần về $150\text{Hz}$ qua bộ lọc thông thấp.                                                                    | Biên độ $75\%$, đuôi âm ngân nhẹ trong $150\text{ms}$.                                        | Tiếng trượt êm ái khi đóng ngăn kéo kim loại vào tủ lưu trữ.                            |
+| **Bung Thay Đổi Từ Stash** (`stash.pop`)                | $150\text{ms}$ |        Sóng Sine        | Trượt tần số đi lên: Từ $180\text{Hz}$ nâng dần lên $480\text{Hz}$.                                                                                         | Biên độ $75\%$, đuôi âm mở rộng tạo cảm giác giải phóng.                                      | Tiếng mở lẫy kim loại lấy vật phẩm ra ngoài.                                            |
+| **Cảnh Báo Xung Đột** (`conflict.detected`)             | $250\text{ms}$ |    Sóng Triangle kép    | Hợp âm trầm ấm tần số đôi: $146.83\text{Hz}$ (Nốt Rê 3) và $220.00\text{Hz}$ (Nốt La 3).                                                                    | Mở âm êm ái (Attack $30\text{ms}$), duy trì $100\text{ms}$, suy giảm êm trong $120\text{ms}$. | Tiếng xung âm trầm ấm, thu hút sự chú ý nhưng tuyệt đối không gây ức chế hay giật mình. |
+| **Stage / Unstage Tệp** (`file.stage` & `file.unstage`) | $25\text{ms}$  |        Sóng Sine        | Trượt siêu tốc từ $1200\text{Hz}$ xuống $600\text{Hz}$ trong $25\text{ms}$.                                                                                 | Biên độ nhỏ $40\%$, tắt tức thì tại mốc $25\text{ms}$.                                        | Tiếng gắp vật lý vi mô (Micro Snap) tạo phản hồi xúc giác cho đầu ngón tay.             |
 
 ---
 
@@ -163,10 +166,10 @@ Mỗi sự kiện trong hệ thống F-GitGraph mang một "cá tính âm học"
 
 Hệ thống bổ sung nhánh cấu hình âm học chuẩn hóa vào sơ đồ đóng góp cấu hình (Configuration Contributions) của tiện ích mở rộng:
 
-| Khóa Cấu Hình (Setting Key) | Kiểu Dữ Liệu | Giá Trị Mặc Định | Miền Giá Trị Hợp Lệ | Mô Tả Ý Nghĩa Nghiệp Vụ |
-| :--- | :---: | :---: | :---: | :--- |
-| `f-gitgraph.soundEffects.enabled` | Logic (`boolean`) | `true` | `true` \| `false` | Bật hoặc tắt toàn bộ hiệu ứng âm thanh phản hồi vi mô Cyber-Lab trong F-GitGraph. |
-| `f-gitgraph.soundEffects.volume` | Số nguyên (`number`) | `35` | Từ `0` đến `100` (Bước nhảy: `5`) | Mức âm lượng phát của các hiệu ứng âm thanh vi mô (tính theo phần trăm). |
+| Khóa Cấu Hình (Setting Key)       |     Kiểu Dữ Liệu     | Giá Trị Mặc Định |        Miền Giá Trị Hợp Lệ        | Mô Tả Ý Nghĩa Nghiệp Vụ                                                           |
+| :-------------------------------- | :------------------: | :--------------: | :-------------------------------: | :-------------------------------------------------------------------------------- |
+| `f-gitgraph.soundEffects.enabled` |  Logic (`boolean`)   |      `true`      |         `true` \| `false`         | Bật hoặc tắt toàn bộ hiệu ứng âm thanh phản hồi vi mô Cyber-Lab trong F-GitGraph. |
+| `f-gitgraph.soundEffects.volume`  | Số nguyên (`number`) |       `35`       | Từ `0` đến `100` (Bước nhảy: `5`) | Mức âm lượng phát của các hiệu ứng âm thanh vi mô (tính theo phần trăm).          |
 
 ---
 
@@ -207,6 +210,7 @@ sequenceDiagram
 ## 5. Quy Chuẩn Giao Diện Điều Khiển & Trải Nghiệm Người Dùng (Cyber-Lab UI Integration)
 
 ### 5.1. Nút Ngắt Âm Nhanh (Sound Quick-Toggle Icon)
+
 Bên cạnh bảng cài đặt hệ thống của VS Code, giao diện Webview tích hợp một nút chuyển đổi trạng thái âm thanh trực quan đặt tại góc phải của khung điều khiển Commit Composer:
 
 ```
@@ -243,16 +247,17 @@ Bên cạnh bảng cài đặt hệ thống của VS Code, giao diện Webview t
 
 Mọi module âm thanh đều phải được kiểm chứng thông qua ma trận kiểm thử tự động, sử dụng môi trường giả lập Web Audio API độc lập:
 
-| Tệp Kiểm Thử Độc Lập | Module / Hàm Mục Tiêu | Danh Mục Kịch Bản Kiểm Thử Bắt Buộc |
-| :--- | :--- | :--- |
-| `tests/webview/utils/soundEffects.test.ts` | `SoundFxEngine` | 1. **Khởi tạo lười (Lazy Init)**: Xác minh không có `AudioContext` nào được tạo ra trước khi có thao tác người dùng đầu tiên.<br>2. **Vô hiệu hóa toàn diện**: Thiết lập `enabled = false`; xác minh khi gọi các hàm phát âm (`playCommitSuccess`, `playFileStage`), không có bất kỳ nút dao động `OscillatorNode` nào được khởi tạo.<br>3. **Độ chính xác phong bì âm lượng**: Xác minh giá trị độ lợi trên `GainNode` phản ánh chính xác công thức tỉ lệ âm lượng cài đặt nhân ngưỡng trần an toàn.<br>4. **Cơ chế Cooldown chống ồn**: Kích hoạt hàm `playFileStage` 10 lần liên tục trong vòng 20ms; xác minh chỉ có đúng 1 nút dao động duy nhất được tạo ra.<br>5. **Đánh thức trạng thái đình chỉ**: Giả lập `AudioContext.state === "suspended"`; xác minh engine tự động kích hoạt `ctx.resume()` trước khi phát âm.<br>6. **An toàn trong môi trường Headless**: Chạy test trong môi trường CI/Node không có cửa sổ âm thanh (`window.AudioContext = undefined`); xác minh mã nguồn không bị quăng ngoại lệ (Zero Uncaught Exceptions). |
-| `tests/webview/components/staging/CommitComposer.sound.test.tsx` | Tích hợp giao diện `CommitComposer.tsx` | 1. **Phát âm khi commit thành công**: Giả lập người dùng bấm `Ctrl + Enter` và Backend phản hồi commit thành công; xác nhận hàm `playCommitSuccess` được kích hoạt.<br>2. **Im lặng khi commit thất bại**: Giả lập Backend phản hồi lỗi commit (ví dụ commit hook thất bại); xác minh tuyệt đối không phát âm thanh chốt cơ khí.<br>3. **Tương tác nút Quick-Toggle**: Nhấp vào icon loa ngắt âm; xác minh trạng thái chuyển sang Muted và các thao tác commit tiếp theo diễn ra trong im lặng. |
+| Tệp Kiểm Thử Độc Lập                                             | Module / Hàm Mục Tiêu                   | Danh Mục Kịch Bản Kiểm Thử Bắt Buộc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| :--------------------------------------------------------------- | :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tests/webview/utils/soundEffects.test.ts`                       | `SoundFxEngine`                         | 1. **Khởi tạo lười (Lazy Init)**: Xác minh không có `AudioContext` nào được tạo ra trước khi có thao tác người dùng đầu tiên.<br>2. **Vô hiệu hóa toàn diện**: Thiết lập `enabled = false`; xác minh khi gọi các hàm phát âm (`playCommitSuccess`, `playFileStage`), không có bất kỳ nút dao động `OscillatorNode` nào được khởi tạo.<br>3. **Độ chính xác phong bì âm lượng**: Xác minh giá trị độ lợi trên `GainNode` phản ánh chính xác công thức tỉ lệ âm lượng cài đặt nhân ngưỡng trần an toàn.<br>4. **Cơ chế Cooldown chống ồn**: Kích hoạt hàm `playFileStage` 10 lần liên tục trong vòng 20ms; xác minh chỉ có đúng 1 nút dao động duy nhất được tạo ra.<br>5. **Đánh thức trạng thái đình chỉ**: Giả lập `AudioContext.state === "suspended"`; xác minh engine tự động kích hoạt `ctx.resume()` trước khi phát âm.<br>6. **An toàn trong môi trường Headless**: Chạy test trong môi trường CI/Node không có cửa sổ âm thanh (`window.AudioContext = undefined`); xác minh mã nguồn không bị quăng ngoại lệ (Zero Uncaught Exceptions). |
+| `tests/webview/components/staging/CommitComposer.sound.test.tsx` | Tích hợp giao diện `CommitComposer.tsx` | 1. **Phát âm khi commit thành công**: Giả lập người dùng bấm `Ctrl + Enter` và Backend phản hồi commit thành công; xác nhận hàm `playCommitSuccess` được kích hoạt.<br>2. **Im lặng khi commit thất bại**: Giả lập Backend phản hồi lỗi commit (ví dụ commit hook thất bại); xác minh tuyệt đối không phát âm thanh chốt cơ khí.<br>3. **Tương tác nút Quick-Toggle**: Nhấp vào icon loa ngắt âm; xác minh trạng thái chuyển sang Muted và các thao tác commit tiếp theo diễn ra trong im lặng.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ---
 
 ## 7. Tiêu Chí Nghiệm Thu Kỹ Thuật (Acceptance Criteria & Quality Gate)
 
 ### 7.1. Các Chỉ Số Định Lượng Nghiệm Thu
+
 1. **Dung lượng bổ sung**: Tổng trọng lượng mã nguồn của toàn bộ module âm thanh **nhỏ hơn 4 Kilobytes**, hoàn toàn không bổ sung bất kỳ tệp tin `.mp3`, `.wav` hay `.ogg` nào vào gói cài đặt VSIX (**Zero External Asset Overhead**).
 2. **Độ trễ kích hoạt âm thanh**: Thời gian từ khi nhận sự kiện người dùng/RPC đến khi phát xung âm thanh trên phần cứng **dưới 5 mili-giây** (phản hồi tức thời).
 3. **Mức tiêu thụ tài nguyên máy tính**: Tỷ lệ chiếm dụng CPU trung bình của Webview trong suốt quá trình phát âm thanh $80\text{ms}$ **không vượt quá 0.2%**.
@@ -262,15 +267,15 @@ Mọi module âm thanh đều phải được kiểm chứng thông qua ma trậ
 
 ### 7.2. Bảng Tiêu Chí Đánh Giá Chất Lượng Thiết Kế (Design Quality Gate 10/10)
 
-| STT | Tiêu Chí Kiểm Tra (Checklist) | Yêu Cầu Đạt Chuẩn | Trạng Thái |
-| :-: | :--- | :--- | :---: |
-| 1 | **Không có mã nguồn mẫu** | Toàn bộ tài liệu đặc tả bằng ngôn ngữ tự nhiên, bảng tần số toán học và sơ đồ khối; không có code mẫu. | **ĐẠT** |
-| 2 | **Ranh giới Webview sạch sẽ** | Web Audio API chạy thuần túy trong Webview, không gọi bất kỳ API hệ điều hành hay module Node.js nào. | **ĐẠT** |
-| 3 | **Ủy thác Git CLI an toàn** | Âm thanh chỉ phát sau khi `GitCliMutator` hoàn tất lệnh Git an toàn, không can thiệp vào tầng ghi. | **ĐẠT** |
-| 4 | **Tương thích đa môi trường** | Có cơ chế phòng vệ an toàn khi chạy trên hệ điều hành không có thiết bị âm thanh hoặc chế độ headless CI. | **ĐẠT** |
-| 5 | **Đầy đủ hợp đồng cấu hình** | Định nghĩa chi tiết khóa cấu hình trong `package.json`, luồng đồng bộ RPC và ánh xạ trạng thái Signals. | **ĐẠT** |
-| 6 | **Tương thích Preact Signals** | Phân định rạch ròi giữa tín hiệu gốc (`isSoundEnabled`, `volumeSetting`) và tín hiệu dẫn xuất (`effectiveMasterVolume`). | **ĐẠT** |
-| 7 | **Đồng bộ Thẩm Mỹ Cyber-Lab** | Thiết kế nút Quick-Toggle loa cơ học với điểm nhấn Neon tím và trạng thái gạch chéo kỹ thuật. | **ĐẠT** |
-| 8 | **Chống ô nhiễm âm thanh** | Cài đặt cơ chế Cooldown chống phát dồn dập (120ms) và giới hạn tối đa 2 kênh phát đồng thời. | **ĐẠT** |
-| 9 | **Bảo toàn hình học SVG 100%** | Việc phát âm thanh hoàn toàn độc lập với việc kết xuất đồ họa, không gây xô lệch bất kỳ tọa độ DAG nào. | **ĐẠT** |
-| 10 | **Có ma trận Unit Test chi tiết** | Liệt kê đầy đủ các kịch bản kiểm thử từ giả lập Web Audio API đến tích hợp nút giao diện. | **ĐẠT** |
+| STT | Tiêu Chí Kiểm Tra (Checklist)     | Yêu Cầu Đạt Chuẩn                                                                                                        | Trạng Thái |
+| :-: | :-------------------------------- | :----------------------------------------------------------------------------------------------------------------------- | :--------: |
+|  1  | **Không có mã nguồn mẫu**         | Toàn bộ tài liệu đặc tả bằng ngôn ngữ tự nhiên, bảng tần số toán học và sơ đồ khối; không có code mẫu.                   |  **ĐẠT**   |
+|  2  | **Ranh giới Webview sạch sẽ**     | Web Audio API chạy thuần túy trong Webview, không gọi bất kỳ API hệ điều hành hay module Node.js nào.                    |  **ĐẠT**   |
+|  3  | **Ủy thác Git CLI an toàn**       | Âm thanh chỉ phát sau khi `GitCliMutator` hoàn tất lệnh Git an toàn, không can thiệp vào tầng ghi.                       |  **ĐẠT**   |
+|  4  | **Tương thích đa môi trường**     | Có cơ chế phòng vệ an toàn khi chạy trên hệ điều hành không có thiết bị âm thanh hoặc chế độ headless CI.                |  **ĐẠT**   |
+|  5  | **Đầy đủ hợp đồng cấu hình**      | Định nghĩa chi tiết khóa cấu hình trong `package.json`, luồng đồng bộ RPC và ánh xạ trạng thái Signals.                  |  **ĐẠT**   |
+|  6  | **Tương thích Preact Signals**    | Phân định rạch ròi giữa tín hiệu gốc (`isSoundEnabled`, `volumeSetting`) và tín hiệu dẫn xuất (`effectiveMasterVolume`). |  **ĐẠT**   |
+|  7  | **Đồng bộ Thẩm Mỹ Cyber-Lab**     | Thiết kế nút Quick-Toggle loa cơ học với điểm nhấn Neon tím và trạng thái gạch chéo kỹ thuật.                            |  **ĐẠT**   |
+|  8  | **Chống ô nhiễm âm thanh**        | Cài đặt cơ chế Cooldown chống phát dồn dập (120ms) và giới hạn tối đa 2 kênh phát đồng thời.                             |  **ĐẠT**   |
+|  9  | **Bảo toàn hình học SVG 100%**    | Việc phát âm thanh hoàn toàn độc lập với việc kết xuất đồ họa, không gây xô lệch bất kỳ tọa độ DAG nào.                  |  **ĐẠT**   |
+| 10  | **Có ma trận Unit Test chi tiết** | Liệt kê đầy đủ các kịch bản kiểm thử từ giả lập Web Audio API đến tích hợp nút giao diện.                                |  **ĐẠT**   |

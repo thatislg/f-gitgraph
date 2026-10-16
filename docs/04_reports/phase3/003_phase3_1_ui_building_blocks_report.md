@@ -24,15 +24,15 @@ Phạm vi gồm:
 
 ## 2. Cấu Trúc Mã Nguồn Tác Động
 
-| File | Nội dung |
-| :--- | :--- |
-| `src/webview/components/ui/CornerCrossFrame.tsx` | Khung viền đinh tán góc với `active`/`variant` (`purple`/`red`), 4 ký tự `+` đặt lệch -6px, glow tím Neon khi focus. |
-| `src/webview/components/staging/StagingFileItem.tsx` | Dòng tệp: huy hiệu `A/M/D/R/U` 18px, tên tệp nổi bật + đường dẫn mờ, cụm nút hover-to-reveal (Stage/Unstage/Discard) và click mở Diff. |
-| `src/webview/components/staging/DiscardConfirmModal.tsx` | Modal xác nhận hủy, bọc trong `CornerCrossFrame variant="red"`, mặc định focus Cancel, `Esc` hủy. |
-| `src/webview/styles.css` | Bổ sung design token màu Neon badge (`--color-badge-*`) và đinh tán (`--color-cross-*`) dùng `light-dark()`. |
-| `tests/webview/components/ui/CornerCrossFrame.test.ts` | Test 4 đinh tán, trạng thái idle/active/warning, children. |
-| `tests/webview/components/staging/StagingFileItem.test.ts` | Test 5 huy hiệu màu, hover-to-reveal, callback stage/unstage/discard/diff. |
-| `tests/webview/components/staging/DiscardConfirmModal.test.ts` | Test tên tệp cảnh báo, `Esc`/Cancel/Discard. |
+| File                                                           | Nội dung                                                                                                                               |
+| :------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/webview/components/ui/CornerCrossFrame.tsx`               | Khung viền đinh tán góc với `active`/`variant` (`purple`/`red`), 4 ký tự `+` đặt lệch -6px, glow tím Neon khi focus.                   |
+| `src/webview/components/staging/StagingFileItem.tsx`           | Dòng tệp: huy hiệu `A/M/D/R/U` 18px, tên tệp nổi bật + đường dẫn mờ, cụm nút hover-to-reveal (Stage/Unstage/Discard) và click mở Diff. |
+| `src/webview/components/staging/DiscardConfirmModal.tsx`       | Modal xác nhận hủy, bọc trong `CornerCrossFrame variant="red"`, mặc định focus Cancel, `Esc` hủy.                                      |
+| `src/webview/styles.css`                                       | Bổ sung design token màu Neon badge (`--color-badge-*`) và đinh tán (`--color-cross-*`) dùng `light-dark()`.                           |
+| `tests/webview/components/ui/CornerCrossFrame.test.ts`         | Test 4 đinh tán, trạng thái idle/active/warning, children.                                                                             |
+| `tests/webview/components/staging/StagingFileItem.test.ts`     | Test 5 huy hiệu màu, hover-to-reveal, callback stage/unstage/discard/diff.                                                             |
+| `tests/webview/components/staging/DiscardConfirmModal.test.ts` | Test tên tệp cảnh báo, `Esc`/Cancel/Discard.                                                                                           |
 
 ---
 
@@ -64,15 +64,15 @@ Phạm vi gồm:
 
 ## 4. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/webview/components/ui/CornerCrossFrame.test.ts` | ✅ 4/4 pass |
-| `tests/webview/components/staging/StagingFileItem.test.ts` | ✅ 11/11 pass |
-| `tests/webview/components/staging/DiscardConfirmModal.test.ts` | ✅ 6/6 pass |
-| Typecheck (`pnpm run typecheck`) | ✅ sạch (toàn workspace) |
-| Lint (`oxlint`) trên các tệp Nhóm Việc 2 | ✅ 0 error / 0 warning |
-| Compile (`node esbuild.js`) | ✅ thành công |
-| Format (`oxfmt --check`) trên các tệp Nhóm Việc 2 | ✅ sạch |
+| Hạng mục                                                       | Kết quả                  |
+| :------------------------------------------------------------- | :----------------------- |
+| `tests/webview/components/ui/CornerCrossFrame.test.ts`         | ✅ 4/4 pass              |
+| `tests/webview/components/staging/StagingFileItem.test.ts`     | ✅ 11/11 pass            |
+| `tests/webview/components/staging/DiscardConfirmModal.test.ts` | ✅ 6/6 pass              |
+| Typecheck (`pnpm run typecheck`)                               | ✅ sạch (toàn workspace) |
+| Lint (`oxlint`) trên các tệp Nhóm Việc 2                       | ✅ 0 error / 0 warning   |
+| Compile (`node esbuild.js`)                                    | ✅ thành công            |
+| Format (`oxfmt --check`) trên các tệp Nhóm Việc 2              | ✅ sạch                  |
 
 > Ghi chú: `pnpm run lint` toàn cục vẫn còn 2 lỗi `oxlint` nằm ngoài phạm vi Nhóm Việc 2 (xem Mục 6). `pnpm run test` toàn cục gặp `Hook timed out` ở vài suite backend do cold-start `git` trên Windows (đã ghi nhận tại `docs/05_issues/001_vitest_hook_timeout_windows.md`), không liên quan tới thay đổi này.
 
@@ -80,23 +80,23 @@ Phạm vi gồm:
 
 ## 5. Nhật Ký Lỗi Biên Dịch & Chẩn Đoán (Compilation & Diagnostic Error Log)
 
-| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa | Kết Quả Sau Sửa |
-| :-: | :---: | :--- | :---: | :--- | :---: | :--- | :--- | :---: |
-| 1 | Vòng 1 | `tests/webview/components/**/*.test.tsx` | Unit Test | `No test files found` (vitest không nhận diện tệp `.test.tsx`) | `[DESIGN_DEFECT]` | Tài liệu thiết kế (progress 2.4.x & design 02 §6.1) đặt tên `.test.tsx`, trong khi quy ước repo + `vitest.config.ts`/`tsconfig` chỉ nhận `*.test.ts` | Đổi tên 3 tệp test sang `.test.ts` (khớp quy ước repo) | ✅ Đã khắc phục |
-| 2 | Vòng 2 | `tests/webview/components/staging/DiscardConfirmModal.test.ts` | Unit Test | `AssertionError: expected "vi.fn()" to be called 1 times, but got 0` (Esc) | `[DEV_BUG]` | Test gửi phím `Esc` đồng bộ trước khi `useEffect` của Preact đăng ký listener `keydown` | Thêm `await setTimeout(150)` trước khi dispatch để listener kịp đăng ký | ✅ Đã khắc phục |
+| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động                                               | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt                                                |     Phân Loại     | Nguyên Nhân Gốc                                                                                                                                      | Giải Pháp Đã Sửa                                                        | Kết Quả Sau Sửa |
+| :-: | :------------: | :------------------------------------------------------------- | :------------: | :------------------------------------------------------------------------- | :---------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------------: |
+|  1  |     Vòng 1     | `tests/webview/components/**/*.test.tsx`                       |   Unit Test    | `No test files found` (vitest không nhận diện tệp `.test.tsx`)             | `[DESIGN_DEFECT]` | Tài liệu thiết kế (progress 2.4.x & design 02 §6.1) đặt tên `.test.tsx`, trong khi quy ước repo + `vitest.config.ts`/`tsconfig` chỉ nhận `*.test.ts` | Đổi tên 3 tệp test sang `.test.ts` (khớp quy ước repo)                  | ✅ Đã khắc phục |
+|  2  |     Vòng 2     | `tests/webview/components/staging/DiscardConfirmModal.test.ts` |   Unit Test    | `AssertionError: expected "vi.fn()" to be called 1 times, but got 0` (Esc) |    `[DEV_BUG]`    | Test gửi phím `Esc` đồng bộ trước khi `useEffect` của Preact đăng ký listener `keydown`                                                              | Thêm `await setTimeout(150)` trước khi dispatch để listener kịp đăng ký | ✅ Đã khắc phục |
 
 ### 5.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
-| Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
-| :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **2 vòng** | Vòng 1 (1 lỗi) → Vòng 2 (1 lỗi) → Sạch lỗi |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **2 lỗi** | $E_{design} + E_{dev}$ |
-| **Số lỗi do Thiết Kế** | $E_{design}$ | **1 lỗi** | Đặt tên tệp test sai quy ước repo |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **1 lỗi** | Test chưa chờ hiệu ứng async |
-| **Số sự cố Môi Trường/Tool** | $E_{env}$ | **0 sự cố** | Loại trừ khỏi tỷ lệ |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **50.0%** | $\frac{1}{2} \times 100\%$ |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **50.0%** | $\frac{1}{2} \times 100\%$ |
-| **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint (scope 2): OK \| Compile: OK \| Test: OK |
+| Chỉ Số Định Lượng                         |   Ký Hiệu    | Giá Trị Thực Tế | Ghi Chú / Đánh Giá                                             |
+| :---------------------------------------- | :----------: | :-------------: | :------------------------------------------------------------- |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)**   |     $C$      |   **2 vòng**    | Vòng 1 (1 lỗi) → Vòng 2 (1 lỗi) → Sạch lỗi                     |
+| **Tổng số lỗi kỹ thuật**                  | $E_{total}$  |    **2 lỗi**    | $E_{design} + E_{dev}$                                         |
+| **Số lỗi do Thiết Kế**                    | $E_{design}$ |    **1 lỗi**    | Đặt tên tệp test sai quy ước repo                              |
+| **Số lỗi do Triển Khai (Bug Dev)**        |  $E_{dev}$   |    **1 lỗi**    | Test chưa chờ hiệu ứng async                                   |
+| **Số sự cố Môi Trường/Tool**              |  $E_{env}$   |   **0 sự cố**   | Loại trừ khỏi tỷ lệ                                            |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** |  **$DDR$**   |    **50.0%**    | $\frac{1}{2} \times 100\%$                                     |
+| **TỶ LỆ BUG KHI DEV (IBR)**               |  **$IBR$**   |    **50.0%**    | $\frac{1}{2} \times 100\%$                                     |
+| **Trạng thái cổng chẩn đoán cuối cùng**   |      -       |  **100% PASS**  | Typecheck: OK \| Lint (scope 2): OK \| Compile: OK \| Test: OK |
 
 ---
 
@@ -113,10 +113,10 @@ Phạm vi gồm:
 
 ## 7. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Khung đinh tán góc 4 trạng thái phát quang | ✅ Đạt |
-| Huy hiệu Neon 5 trạng thái (A/M/D/R/U) + hover-to-reveal | ✅ Đạt |
-| Modal an toàn với focus trap + `Esc` | ✅ Đạt |
-| Unit test 3 component | ✅ 21/21 |
-| Typecheck + lint (scope 2) + compile + format | ✅ Đạt |
+| Tiêu chí                                                 | Trạng thái |
+| :------------------------------------------------------- | :--------: |
+| Khung đinh tán góc 4 trạng thái phát quang               |   ✅ Đạt   |
+| Huy hiệu Neon 5 trạng thái (A/M/D/R/U) + hover-to-reveal |   ✅ Đạt   |
+| Modal an toàn với focus trap + `Esc`                     |   ✅ Đạt   |
+| Unit test 3 component                                    |  ✅ 21/21  |
+| Typecheck + lint (scope 2) + compile + format            |   ✅ Đạt   |

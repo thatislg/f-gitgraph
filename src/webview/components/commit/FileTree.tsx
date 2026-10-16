@@ -164,9 +164,7 @@ function Tree({ nodes, commitHash, closed, onToggle, root = false }: TreeProps) 
 export type FileTreeMode = "tree" | "list";
 
 /** Flatten a folder tree back into an ordered list of files, folders-first order lost. */
-function flattenFiles(
-  nodes: Array<FileTreeNode>
-): Array<{ name: string; file: GitFileChange }> {
+function flattenFiles(nodes: Array<FileTreeNode>): Array<{ name: string; file: GitFileChange }> {
   const result: Array<{ name: string; file: GitFileChange }> = [];
   for (const node of nodes) {
     if (node.type === "file") {

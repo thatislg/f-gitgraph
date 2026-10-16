@@ -23,16 +23,16 @@ Phạm vi gồm:
 
 ## 2. Cấu Trúc Mã Nguồn Tác Động
 
-| File | Nội dung |
-| :--- | :--- |
-| `src/backend/queries/workspaceStatus.ts` | Viết lại parser theo máy trạng thái NUL; thêm `ConflictedFileRecord`/`conflictedFiles`; câu lệnh `--untracked-files=all -z`. |
-| `src/types/actions.ts` | Khai báo payload cho `stageFile`, `unstageFile`, `stageAll`, `unstageAll`, `discardFileChanges`, `discardAllChanges`, `commitChanges`. |
-| `src/types/queries.ts` | Khai báo query payload `workspaceStatus` trả về `WorkspaceStatusResult`. |
-| `src/extension/mutator/gitCliMutator.ts` | Bổ sung `setRepo(repoPath)` để đồng bộ kho khi chuyển repo. |
-| `src/extension/services/messageHandler.ts` | Đăng ký 7 action staging/commit + query `workspaceStatus`. |
-| `src/extension/legacy.ts` | Khởi tạo `GitCliMutator` và truyền `gitMutator` vào handler. |
-| `tests/backend/queries/workspaceStatus.test.ts` | Unit test parser (porcelain v2 NUL, tên tiếng Việt, xung đột, trạng thái kép, isClean). |
-| `tests/extension/services/stagingMessageHandler.test.ts` | Unit test định tuyến RPC (action → mutator, query → `getWorkspaceStatus`). |
+| File                                                     | Nội dung                                                                                                                               |
+| :------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/backend/queries/workspaceStatus.ts`                 | Viết lại parser theo máy trạng thái NUL; thêm `ConflictedFileRecord`/`conflictedFiles`; câu lệnh `--untracked-files=all -z`.           |
+| `src/types/actions.ts`                                   | Khai báo payload cho `stageFile`, `unstageFile`, `stageAll`, `unstageAll`, `discardFileChanges`, `discardAllChanges`, `commitChanges`. |
+| `src/types/queries.ts`                                   | Khai báo query payload `workspaceStatus` trả về `WorkspaceStatusResult`.                                                               |
+| `src/extension/mutator/gitCliMutator.ts`                 | Bổ sung `setRepo(repoPath)` để đồng bộ kho khi chuyển repo.                                                                            |
+| `src/extension/services/messageHandler.ts`               | Đăng ký 7 action staging/commit + query `workspaceStatus`.                                                                             |
+| `src/extension/legacy.ts`                                | Khởi tạo `GitCliMutator` và truyền `gitMutator` vào handler.                                                                           |
+| `tests/backend/queries/workspaceStatus.test.ts`          | Unit test parser (porcelain v2 NUL, tên tiếng Việt, xung đột, trạng thái kép, isClean).                                                |
+| `tests/extension/services/stagingMessageHandler.test.ts` | Unit test định tuyến RPC (action → mutator, query → `getWorkspaceStatus`).                                                             |
 
 ---
 
@@ -62,13 +62,13 @@ Phạm vi gồm:
 
 ## 4. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/backend/queries/workspaceStatus.test.ts` | ✅ 20/20 pass |
-| `tests/extension/services/stagingMessageHandler.test.ts` | ✅ 5/5 pass |
-| Typecheck (`tsc -p . --noEmit`) | ✅ sạch |
-| Lint (`oxlint`) | ✅ 0 warning / 0 error |
-| Format (`oxfmt --check`) | ✅ sạch |
+| Hạng mục                                                 | Kết quả                |
+| :------------------------------------------------------- | :--------------------- |
+| `tests/backend/queries/workspaceStatus.test.ts`          | ✅ 20/20 pass          |
+| `tests/extension/services/stagingMessageHandler.test.ts` | ✅ 5/5 pass            |
+| Typecheck (`tsc -p . --noEmit`)                          | ✅ sạch                |
+| Lint (`oxlint`)                                          | ✅ 0 warning / 0 error |
+| Format (`oxfmt --check`)                                 | ✅ sạch                |
 
 > Ghi chú: Khi chạy toàn bộ suite backend song song, `tests/backend/queries/loadBranches/list.test.ts` có thể gặp lỗi `Hook timed out` do cold-start `git` trên Windows (vấn đề đã ghi nhận ở `ISSUE-001`). Chạy riêng với `--hookTimeout 60000 --testTimeout 60000` thì 7/7 test pass; không liên quan đến thay đổi của nhiệm vụ này.
 
@@ -76,10 +76,10 @@ Phạm vi gồm:
 
 ## 5. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Parser NUL-delimiter đúng bản thiết kế (Mục 3.4) | ✅ Đạt |
-| `conflictedFiles` & trạng thái kép `MM`/`AM`/`AD`/`RM`/`RD` | ✅ Đạt |
-| Types RPC & message handlers | ✅ Đạt |
-| Unit test backend | ✅ 25/25 |
-| Typecheck + lint + format | ✅ Đạt |
+| Tiêu chí                                                    | Trạng thái |
+| :---------------------------------------------------------- | :--------: |
+| Parser NUL-delimiter đúng bản thiết kế (Mục 3.4)            |   ✅ Đạt   |
+| `conflictedFiles` & trạng thái kép `MM`/`AM`/`AD`/`RM`/`RD` |   ✅ Đạt   |
+| Types RPC & message handlers                                |   ✅ Đạt   |
+| Unit test backend                                           |  ✅ 25/25  |
+| Typecheck + lint + format                                   |   ✅ Đạt   |

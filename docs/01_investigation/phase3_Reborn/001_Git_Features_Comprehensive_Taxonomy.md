@@ -391,4 +391,4 @@ Dựa trên khảo sát toàn diện, một ứng dụng được công nhận l
 
 ---
 
-*Tài liệu tiếp theo: [002. Kiểm Toán Chi Tiết Năng Lực Hiện Có Của FpGitGraph](002_Fpgitgraph_Current_Capabilities_Audit.md)*
+_Tài liệu tiếp theo: [002. Kiểm Toán Chi Tiết Năng Lực Hiện Có Của FpGitGraph](002_Fpgitgraph_Current_Capabilities_Audit.md)_

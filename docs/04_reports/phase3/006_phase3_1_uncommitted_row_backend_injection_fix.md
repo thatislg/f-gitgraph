@@ -30,53 +30,53 @@ Tái hiện cơ chế chèn dòng `*` ở tầng cầu nối Extension Host (`Gr
 
 ### Tệp tác động
 
-| File | Thay đổi |
-| :--- | :--- |
-| `src/extension/sidecar/graph-merge.ts` | Thêm hằng `UNCOMMITTED_CHANGES_HASH`, `ROW_HEIGHT`; hàm `buildUncommittedRow()`; hàm `shiftPathD()` dịch tọa độ Y trong chuỗi SVG. |
-| `src/extension/sidecar/graph-data-bridge.ts` | Nhận `StatusProvider`; theo dõi `hasUncommitted`; chèn `*`; dịch chỉ số cửa sổ + dời hình học trong `loadWindow`. |
-| `src/extension/sidecar/graph-bridge-service.ts` | Tạo `statusProvider` từ `getWorkspaceStatus` và truyền vào cầu nối. |
-| `tests/backend/sidecar/graph-merge.test.ts` | Bổ sung test `buildUncommittedRow` và `shiftPathD`. |
-| `tests/backend/sidecar/graph-data-bridge.test.ts` | Bộ test mới cho cơ chế chèn dòng `*` + dời hình học + dịch chỉ số. |
-| `docs/02_design/phase3/03_WorkingTree_Sync_And_Watcher_Integration.md` | Bổ sung Mục 2.1.1 (cơ chế chèn backend), mở rộng Ma Trận Kiểm Thử, thêm Lịch Sử Sửa Đổi. |
+| File                                                                   | Thay đổi                                                                                                                           |
+| :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| `src/extension/sidecar/graph-merge.ts`                                 | Thêm hằng `UNCOMMITTED_CHANGES_HASH`, `ROW_HEIGHT`; hàm `buildUncommittedRow()`; hàm `shiftPathD()` dịch tọa độ Y trong chuỗi SVG. |
+| `src/extension/sidecar/graph-data-bridge.ts`                           | Nhận `StatusProvider`; theo dõi `hasUncommitted`; chèn `*`; dịch chỉ số cửa sổ + dời hình học trong `loadWindow`.                  |
+| `src/extension/sidecar/graph-bridge-service.ts`                        | Tạo `statusProvider` từ `getWorkspaceStatus` và truyền vào cầu nối.                                                                |
+| `tests/backend/sidecar/graph-merge.test.ts`                            | Bổ sung test `buildUncommittedRow` và `shiftPathD`.                                                                                |
+| `tests/backend/sidecar/graph-data-bridge.test.ts`                      | Bộ test mới cho cơ chế chèn dòng `*` + dời hình học + dịch chỉ số.                                                                 |
+| `docs/02_design/phase3/03_WorkingTree_Sync_And_Watcher_Integration.md` | Bổ sung Mục 2.1.1 (cơ chế chèn backend), mở rộng Ma Trận Kiểm Thử, thêm Lịch Sử Sửa Đổi.                                           |
 
 ---
 
 ## 4. Nhật Ký Lỗi Biên Dịch & Chẩn Đoán (Compilation & Diagnostic Error Log)
 
-| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa | Kết Quả Sau Sửa |
-| :-: | :---: | :--- | :---: | :--- | :---: | :--- | :--- | :---: |
-| 1 | Vòng 1 | `docs/02_design/phase3/03_...md` | E2E (runtime) | Dòng `*` không bao giờ xuất hiện trên đồ thị → UI không có Staging Area | `[DESIGN_DEFECT]` | Di trú F# đánh rơi logic `unshift({hash:"*"})`; design không đặc tả cơ chế chèn | Tái hiện cơ chế chèn ở `GraphDataBridge` + cập nhật design doc | ✅ Đã khắc phục |
-| 2 | Vòng 1 | `src/extension/sidecar/graph-data-bridge.ts` | Lint | `import(no-duplicates)`: import `./protocol` hai lần | `[DEV_BUG]` | Gộp nhầm hai dòng import type `protocol` | Gộp thành một import type duy nhất | ✅ Đã khắc phục |
-| 3 | Vòng 1 | `src/extension/sidecar/graph-data-bridge.ts` | Lint | `oxc(no-map-spread)`: spread object trong `map` | `[DEV_BUG]` | Dùng `{ ...row, y }` khi dời tọa độ | Thay bằng vòng lặp gán trực tiếp `row.y += shiftY` | ✅ Đã khắc phục |
-| 4 | Vòng 1 | `src/extension/sidecar/graph-data-bridge.ts` | Lint | `import-js(order)`: `@/backend` phải đứng trước `@/types` | `[DEV_BUG]` | Đặt nhóm import sai thứ tự | Sắp xếp lại nhóm import | ✅ Đã khắc phục |
-| 5 | Vòng 1 | `src/extension/sidecar/graph-data-bridge.ts` | Lint | `import-js(order)`: type import `./protocol` phải đứng trước `./sidecar-manager` | `[DEV_BUG]` | Đặt nhóm import sai thứ tự | Sắp xếp lại nhóm import | ✅ Đã khắc phục |
-| 6 | Vòng 2 | `tests/backend/sidecar/graph-data-bridge.test.ts` | Lint | `import-js(order)`: `@/backend` phải đứng trước `@/extension` | `[DEV_BUG]` | Đặt nhóm import sai thứ tự trong tệp test mới | Sắp xếp lại nhóm import | ✅ Đã khắc phục |
-| 7 | Vòng 3 | `src/webview/lib/dispatcher.ts` | E2E (runtime) | Sau khi stage/unstage/discard, Staging Area không cập nhật realtime (phải tắt/bật lại dòng `*` mới thấy) | `[DEV_BUG]` | 6 action staging (`stageFile`/`unstageFile`/`stageAll`/`unstageAll`/`discardFileChanges`/`discardAllChanges`) chưa được đăng ký trong `dispatcher`, nên phản hồi thành công không kích hoạt `refresh()` | Đăng ký 6 action vào `handlers` map → `handleActionResult` | ✅ Đã khắc phục |
+| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động                                  | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt                                                                              |     Phân Loại     | Nguyên Nhân Gốc                                                                                                                                                                                         | Giải Pháp Đã Sửa                                               | Kết Quả Sau Sửa |
+| :-: | :------------: | :------------------------------------------------ | :------------: | :------------------------------------------------------------------------------------------------------- | :---------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------- | :-------------: |
+|  1  |     Vòng 1     | `docs/02_design/phase3/03_...md`                  | E2E (runtime)  | Dòng `*` không bao giờ xuất hiện trên đồ thị → UI không có Staging Area                                  | `[DESIGN_DEFECT]` | Di trú F# đánh rơi logic `unshift({hash:"*"})`; design không đặc tả cơ chế chèn                                                                                                                         | Tái hiện cơ chế chèn ở `GraphDataBridge` + cập nhật design doc | ✅ Đã khắc phục |
+|  2  |     Vòng 1     | `src/extension/sidecar/graph-data-bridge.ts`      |      Lint      | `import(no-duplicates)`: import `./protocol` hai lần                                                     |    `[DEV_BUG]`    | Gộp nhầm hai dòng import type `protocol`                                                                                                                                                                | Gộp thành một import type duy nhất                             | ✅ Đã khắc phục |
+|  3  |     Vòng 1     | `src/extension/sidecar/graph-data-bridge.ts`      |      Lint      | `oxc(no-map-spread)`: spread object trong `map`                                                          |    `[DEV_BUG]`    | Dùng `{ ...row, y }` khi dời tọa độ                                                                                                                                                                     | Thay bằng vòng lặp gán trực tiếp `row.y += shiftY`             | ✅ Đã khắc phục |
+|  4  |     Vòng 1     | `src/extension/sidecar/graph-data-bridge.ts`      |      Lint      | `import-js(order)`: `@/backend` phải đứng trước `@/types`                                                |    `[DEV_BUG]`    | Đặt nhóm import sai thứ tự                                                                                                                                                                              | Sắp xếp lại nhóm import                                        | ✅ Đã khắc phục |
+|  5  |     Vòng 1     | `src/extension/sidecar/graph-data-bridge.ts`      |      Lint      | `import-js(order)`: type import `./protocol` phải đứng trước `./sidecar-manager`                         |    `[DEV_BUG]`    | Đặt nhóm import sai thứ tự                                                                                                                                                                              | Sắp xếp lại nhóm import                                        | ✅ Đã khắc phục |
+|  6  |     Vòng 2     | `tests/backend/sidecar/graph-data-bridge.test.ts` |      Lint      | `import-js(order)`: `@/backend` phải đứng trước `@/extension`                                            |    `[DEV_BUG]`    | Đặt nhóm import sai thứ tự trong tệp test mới                                                                                                                                                           | Sắp xếp lại nhóm import                                        | ✅ Đã khắc phục |
+|  7  |     Vòng 3     | `src/webview/lib/dispatcher.ts`                   | E2E (runtime)  | Sau khi stage/unstage/discard, Staging Area không cập nhật realtime (phải tắt/bật lại dòng `*` mới thấy) |    `[DEV_BUG]`    | 6 action staging (`stageFile`/`unstageFile`/`stageAll`/`unstageAll`/`discardFileChanges`/`discardAllChanges`) chưa được đăng ký trong `dispatcher`, nên phản hồi thành công không kích hoạt `refresh()` | Đăng ký 6 action vào `handlers` map → `handleActionResult`     | ✅ Đã khắc phục |
 
 ### 4.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
-| Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
-| :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **3 vòng** | Vòng 1 (lint 5 lỗi) → Vòng 2 (lint tệp test mới) → Vòng 3 (realtime sync) |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **7 lỗi** | $E_{design} + E_{dev}$ |
-| **Số lỗi do Thiết Kế** | $E_{design}$ | **1 lỗi** | Thiếu đặc tả cơ chế chèn dòng `*` (gốc rễ của defect) |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **6 lỗi** | 5 lỗi lint import/spread + 1 lỗi thiếu đăng ký dispatcher |
-| **Số sự cố Môi Trường/Tool** | $E_{env}$ | **0 sự cố** (không tính `Hook timed out` có sẵn) | Loại trừ khỏi tỷ lệ |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **14.3%** | $\frac{1}{7} \times 100\%$ |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **85.7%** | $\frac{6}{7} \times 100\%$ |
-| **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend target): OK |
+| Chỉ Số Định Lượng                         |   Ký Hiệu    |                 Giá Trị Thực Tế                  | Ghi Chú / Đánh Giá                                                        |
+| :---------------------------------------- | :----------: | :----------------------------------------------: | :------------------------------------------------------------------------ |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)**   |     $C$      |                    **3 vòng**                    | Vòng 1 (lint 5 lỗi) → Vòng 2 (lint tệp test mới) → Vòng 3 (realtime sync) |
+| **Tổng số lỗi kỹ thuật**                  | $E_{total}$  |                    **7 lỗi**                     | $E_{design} + E_{dev}$                                                    |
+| **Số lỗi do Thiết Kế**                    | $E_{design}$ |                    **1 lỗi**                     | Thiếu đặc tả cơ chế chèn dòng `*` (gốc rễ của defect)                     |
+| **Số lỗi do Triển Khai (Bug Dev)**        |  $E_{dev}$   |                    **6 lỗi**                     | 5 lỗi lint import/spread + 1 lỗi thiếu đăng ký dispatcher                 |
+| **Số sự cố Môi Trường/Tool**              |  $E_{env}$   | **0 sự cố** (không tính `Hook timed out` có sẵn) | Loại trừ khỏi tỷ lệ                                                       |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** |  **$DDR$**   |                    **14.3%**                     | $\frac{1}{7} \times 100\%$                                                |
+| **TỶ LỆ BUG KHI DEV (IBR)**               |  **$IBR$**   |                    **85.7%**                     | $\frac{6}{7} \times 100\%$                                                |
+| **Trạng thái cổng chẩn đoán cuối cùng**   |      -       |                  **100% PASS**                   | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend target): OK     |
 
 ---
 
 ## 5. Kết Quả Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/backend/sidecar/graph-merge.test.ts` | ✅ 8/8 pass |
-| `tests/backend/sidecar/graph-data-bridge.test.ts` | ✅ 4/4 pass |
-| Typecheck (`pnpm run typecheck`) | ✅ sạch (toàn workspace) |
-| Lint (`pnpm run lint`) | ✅ 0 error / 0 warning |
-| Compile (`pnpm run compile`) | ✅ thành công |
+| Hạng mục                                          | Kết quả                  |
+| :------------------------------------------------ | :----------------------- |
+| `tests/backend/sidecar/graph-merge.test.ts`       | ✅ 8/8 pass              |
+| `tests/backend/sidecar/graph-data-bridge.test.ts` | ✅ 4/4 pass              |
+| Typecheck (`pnpm run typecheck`)                  | ✅ sạch (toàn workspace) |
+| Lint (`pnpm run lint`)                            | ✅ 0 error / 0 warning   |
+| Compile (`pnpm run compile`)                      | ✅ thành công            |
 
 > Ghi chú: `pnpm run test` toàn cục vẫn gặp `Hook timed out` ở 4 suite backend và 1 test `commitDetails` do cold-start `git` trên Windows — sự cố môi trường (`[ENV_TOOL_ISSUE]`) đã ghi nhận, không liên quan thay đổi này.
 

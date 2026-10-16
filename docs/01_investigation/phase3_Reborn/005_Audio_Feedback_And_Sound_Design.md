@@ -37,16 +37,16 @@ Trong trải nghiệm người dùng hiện đại (được tiên phong bởi c
 
 ## 3. Bản Đồ Các Sự Kiện Âm Thanh (Soundscape Events Mapping)
 
-| Sự Kiện Git / Tương Tác | Tên Sound Event | Cảm Giác Âm Thanh (Acoustic Persona) | Thời Lượng | Mô Tả Kỹ Thuật Tổng Hợp |
-| :--- | :--- | :--- | :---: | :--- |
-| **Commit Thành Công** | `commit.success` | Tiếng chốt cơ khí của máy ảnh Leica / Lẫy cơ khí | $\sim 80\text{ms}$ | Sóng Sine tần số $800\text{Hz} \rightarrow 200\text{Hz}$ kết hợp White Noise burst nhẹ ($10\text{ms}$) mô phỏng tiếng click vật lý. |
-| **Push Hoàn Tất** | `push.success` | Âm thăng hoa nhẹ nhàng (Ascending Shimmer) | $\sim 180\text{ms}$ | Hai nốt nhạc thăng hoa cách nhau quãng 5 ($523\text{Hz} \rightarrow 784\text{Hz}$ - C5 $\rightarrow$ G5), tạo cảm giác nhẹ nhõm khi code đã lên remote an toàn. |
-| **Pull / Fetch Dữ Liệu** | `pull.sync` | Tiếng xung sóng dữ liệu (Data Ripple) | $\sim 120\text{ms}$ | Sóng Triangle tần số trung tính trượt êm ái. |
-| **Chuyển Nhánh (Checkout)**| `branch.checkout`| Tiếng công tắc cơ học (Mechanical Toggle Switch) | $\sim 45\text{ms}$ | Tiếng click dứt khoát, thanh gọn. |
-| **Cất Stash (Stash Save)** | `stash.store` | Tiếng trượt đóng ngăn kéo kim loại êm ái | $\sim 150\text{ms}$ | Sweep âm tần thấp đi xuống ($400\text{Hz} \rightarrow 150\text{Hz}$) với low-pass filter. |
-| **Bung Stash (Stash Pop)** | `stash.pop` | Tiếng mở lẫy kim loại | $\sim 150\text{ms}$ | Sweep âm đi lên ($200\text{Hz} \rightarrow 500\text{Hz}$). |
-| **Xung Đột (Conflict Alert)**| `conflict.detected`| Xung trầm nhắc nhở (Warm Low-Frequency Pulse) | $\sim 250\text{ms}$ | Hợp âm trầm ấm ($130\text{Hz}$ và $196\text{Hz}$), cảnh báo vừa đủ nhưng không làm giật mình. |
-| **Stage / Unstage Tệp** | `file.stage` | Tiếng gắp vật lý vi mô (Micro Snap) | $\sim 30\text{ms}$ | Click siêu ngắn tần số cao tạo phản hồi xúc giác khi nhấp chuột. |
+| Sự Kiện Git / Tương Tác       | Tên Sound Event     | Cảm Giác Âm Thanh (Acoustic Persona)             |     Thời Lượng      | Mô Tả Kỹ Thuật Tổng Hợp                                                                                                                                         |
+| :---------------------------- | :------------------ | :----------------------------------------------- | :-----------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Commit Thành Công**         | `commit.success`    | Tiếng chốt cơ khí của máy ảnh Leica / Lẫy cơ khí | $\sim 80\text{ms}$  | Sóng Sine tần số $800\text{Hz} \rightarrow 200\text{Hz}$ kết hợp White Noise burst nhẹ ($10\text{ms}$) mô phỏng tiếng click vật lý.                             |
+| **Push Hoàn Tất**             | `push.success`      | Âm thăng hoa nhẹ nhàng (Ascending Shimmer)       | $\sim 180\text{ms}$ | Hai nốt nhạc thăng hoa cách nhau quãng 5 ($523\text{Hz} \rightarrow 784\text{Hz}$ - C5 $\rightarrow$ G5), tạo cảm giác nhẹ nhõm khi code đã lên remote an toàn. |
+| **Pull / Fetch Dữ Liệu**      | `pull.sync`         | Tiếng xung sóng dữ liệu (Data Ripple)            | $\sim 120\text{ms}$ | Sóng Triangle tần số trung tính trượt êm ái.                                                                                                                    |
+| **Chuyển Nhánh (Checkout)**   | `branch.checkout`   | Tiếng công tắc cơ học (Mechanical Toggle Switch) | $\sim 45\text{ms}$  | Tiếng click dứt khoát, thanh gọn.                                                                                                                               |
+| **Cất Stash (Stash Save)**    | `stash.store`       | Tiếng trượt đóng ngăn kéo kim loại êm ái         | $\sim 150\text{ms}$ | Sweep âm tần thấp đi xuống ($400\text{Hz} \rightarrow 150\text{Hz}$) với low-pass filter.                                                                       |
+| **Bung Stash (Stash Pop)**    | `stash.pop`         | Tiếng mở lẫy kim loại                            | $\sim 150\text{ms}$ | Sweep âm đi lên ($200\text{Hz} \rightarrow 500\text{Hz}$).                                                                                                      |
+| **Xung Đột (Conflict Alert)** | `conflict.detected` | Xung trầm nhắc nhở (Warm Low-Frequency Pulse)    | $\sim 250\text{ms}$ | Hợp âm trầm ấm ($130\text{Hz}$ và $196\text{Hz}$), cảnh báo vừa đủ nhưng không làm giật mình.                                                                   |
+| **Stage / Unstage Tệp**       | `file.stage`        | Tiếng gắp vật lý vi mô (Micro Snap)              | $\sim 30\text{ms}$  | Click siêu ngắn tần số cao tạo phản hồi xúc giác khi nhấp chuột.                                                                                                |
 
 ---
 
@@ -63,7 +63,6 @@ Trong trải nghiệm người dùng hiện đại (được tiên phong bởi c
    - Đường cong biên độ sử dụng hàm số mũ (`exponentialRampToValueAtTime`) đưa âm lượng về mức cận 0 ($0.001$) trong thời lượng từ $25\text{ms}$ đến $190\text{ms}$, triệt tiêu hoàn toàn tiếng nổ lách tách do ngắt sóng đột ngột.
 3. **Đặc Tả Chi Tiết Từng Âm Thanh**:
    - Vui lòng xem bản thiết kế kỹ thuật chuẩn hóa đầy đủ tại: [04. Thiết Kế Phản Hồi Âm Thanh & Âm Học Vi Mô Cyber-Lab](../../02_design/phase3/04_Audio_Feedback_And_Sound_Design.md).
-
 
 ---
 

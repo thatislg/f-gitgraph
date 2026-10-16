@@ -4,6 +4,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
 
 > [!NOTE]
 > **Hồ sơ thiết kế tham chiếu**:
+>
 > - [003_Gap_Analysis_And_Evolution_Blueprint.md (Mục 4.2: Kiến trúc 3-Pane Workspace)](../../01_investigation/phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md).
 > - [004_Design_System_And_Visual_Identity.md (Quy chuẩn bố cục Cyber-Lab & Đinh tán góc)](../../01_investigation/phase3_Reborn/004_Design_System_And_Visual_Identity.md).
 > - [docs/02_design/phase3/ (Mục lục hồ sơ thiết kế kỹ thuật Phase 3)](../../02_design/phase3/README.md).
@@ -13,6 +14,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
 ## 1. Tổng Quan Giai Đoạn (Overview)
 
 ### 1.1. Tầm Nhìn & Mục Tiêu Cốt Lõi
+
 - **Mục tiêu**: Nâng cấp giao diện hiển thị đơn lẻ thành một **Không gian làm việc 3 phân vùng (3-Pane Workspace)** chuẩn mực của các ứng dụng Git Client chuyên nghiệp (như Fork, GitKraken, Tower), mang lại cái nhìn toàn cảnh về tài nguyên kho và khả năng đồng bộ từ xa với số đếm trực quan.
 - **Trọng tâm kỹ thuật**:
   - **Left Sidebar Navigator**: Cây điều hướng bao quát Working Tree, Nhánh cục bộ (Local Branches), Nhánh từ xa (Remote Branches), Nhãn phiên bản (Tags) và Ngăn xếp tạm (Stashes).
@@ -21,6 +23,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
   - **Khả năng co giãn linh hoạt (Responsive & Collapsible)**: Sidebar có thể thu gọn vào lề; Inspector có thể neo dạng cột bên phải hoặc ngăn kéo bên dưới.
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
+
 - **Trạng thái**: Đang chờ kết quả từ Chặng 3.1 (Pending on Phase 3.1).
 - **Tiến độ tổng thể**: 0% hoàn thành.
 

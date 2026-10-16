@@ -19,7 +19,10 @@ function makeStatus(overrides: Partial<WorkspaceStatusResult> = {}): WorkspaceSt
   };
 }
 
-function makeNode(y: number, lane = 0): { x: number; y: number; lane: number; color: number; isMerge: boolean; isRoot: boolean } {
+function makeNode(
+  y: number,
+  lane = 0
+): { x: number; y: number; lane: number; color: number; isMerge: boolean; isRoot: boolean } {
   return { x: 16 + lane * 20, y, lane, color: lane, isMerge: false, isRoot: false };
 }
 

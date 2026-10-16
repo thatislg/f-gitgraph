@@ -22,12 +22,12 @@ Khép kín nhóm nghiệm thu tổng hợp cho Chặng 3.1 bằng ba mũi kiểm
 
 ## 2. Cấu Trúc Mã Nguồn Tác Động
 
-| File | Nội dung |
-| :--- | :--- |
-| `src/extension/mutator/gitCliMutator.ts` | Bọc `normalizeError()` cho toàn bộ mutator ghi (stage/unstage/discard), không riêng `commit()` — chuẩn hóa lỗi `.git/index.lock` và lỗi danh tính. |
-| `tests/backend/gitCliMutator.test.ts` | Bổ sung test chuẩn hóa lỗi `.git/index.lock` (giả lập tệp khóa thật trong `.git/`). |
-| `tests/webview/components/commit/CommitTable.staging.test.ts` | Bổ sung test snapshot hình học F# (đường nhánh Bézier + tọa độ nút lục giác) trước/trong/sau khi mở Staging Area. |
-| `docs/03_progess/phase3/001_phase3_1_staging_and_composer.md` | Đánh dấu hoàn thành 5.2, 5.3.3; đánh dấu 5.4.2 là nợ kỹ thuật deferred; bổ sung nhật ký Nhóm Việc 5. |
+| File                                                          | Nội dung                                                                                                                                           |
+| :------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/extension/mutator/gitCliMutator.ts`                      | Bọc `normalizeError()` cho toàn bộ mutator ghi (stage/unstage/discard), không riêng `commit()` — chuẩn hóa lỗi `.git/index.lock` và lỗi danh tính. |
+| `tests/backend/gitCliMutator.test.ts`                         | Bổ sung test chuẩn hóa lỗi `.git/index.lock` (giả lập tệp khóa thật trong `.git/`).                                                                |
+| `tests/webview/components/commit/CommitTable.staging.test.ts` | Bổ sung test snapshot hình học F# (đường nhánh Bézier + tọa độ nút lục giác) trước/trong/sau khi mở Staging Area.                                  |
+| `docs/03_progess/phase3/001_phase3_1_staging_and_composer.md` | Đánh dấu hoàn thành 5.2, 5.3.3; đánh dấu 5.4.2 là nợ kỹ thuật deferred; bổ sung nhật ký Nhóm Việc 5.                                               |
 
 ---
 
@@ -44,7 +44,7 @@ Khép kín nhóm nghiệm thu tổng hợp cho Chặng 3.1 bằng ba mũi kiểm
 ### 3.2. Nhiệm vụ 5.3.3 — Xử lý xung đột `.git/index.lock`
 
 - Trước đây `normalizeError()` chỉ áp dụng cho `commit()`, còn `stageFile`/`unstageFile`/`stageAll`/`unstageAll`/`discardFileChanges`/`discardAllChanges` gọi thẳng `this.run(...)` nên hiện raw `stderr` tiếng Anh.
-- Giờ toàn bộ mutator ghi đều đi qua `normalizeError()`, trả về thông báo tiếng Việt: *"Kho mã nguồn đang bị khóa bởi một tiến trình Git khác. Vui lòng thử lại sau vài giây hoặc kiểm tra terminal"*.
+- Giờ toàn bộ mutator ghi đều đi qua `normalizeError()`, trả về thông báo tiếng Việt: _"Kho mã nguồn đang bị khóa bởi một tiến trình Git khác. Vui lòng thử lại sau vài giây hoặc kiểm tra terminal"_.
 - Webview không crash: `handleActionResult` đã mở `openErrorDialog` khi có lỗi.
 
 ### 3.3. Nhiệm vụ 5.4.2 — Light Theme (nợ kỹ thuật)
@@ -56,15 +56,15 @@ Khép kín nhóm nghiệm thu tổng hợp cho Chặng 3.1 bằng ba mũi kiểm
 
 ## 4. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/backend/gitCliMutator.test.ts` | ✅ 13/13 pass (bổ sung 1 test `.git/index.lock`) |
-| `tests/webview/components/commit/CommitTable.staging.test.ts` | ✅ 5/5 pass (bổ sung 1 test hình học) |
-| Toàn bộ project `extension` | ✅ 22/22 pass |
-| Toàn bộ project `webview` | ✅ 121/121 pass |
-| Typecheck (`pnpm run typecheck`) | ✅ sạch (toàn workspace) |
-| Lint (`pnpm run lint`) | ✅ 0 error / 0 warning |
-| Compile (`pnpm run compile`) | ✅ thành công |
+| Hạng mục                                                      | Kết quả                                          |
+| :------------------------------------------------------------ | :----------------------------------------------- |
+| `tests/backend/gitCliMutator.test.ts`                         | ✅ 13/13 pass (bổ sung 1 test `.git/index.lock`) |
+| `tests/webview/components/commit/CommitTable.staging.test.ts` | ✅ 5/5 pass (bổ sung 1 test hình học)            |
+| Toàn bộ project `extension`                                   | ✅ 22/22 pass                                    |
+| Toàn bộ project `webview`                                     | ✅ 121/121 pass                                  |
+| Typecheck (`pnpm run typecheck`)                              | ✅ sạch (toàn workspace)                         |
+| Lint (`pnpm run lint`)                                        | ✅ 0 error / 0 warning                           |
+| Compile (`pnpm run compile`)                                  | ✅ thành công                                    |
 
 > Ghi chú: `pnpm run test` toàn cục vẫn gặp `Hook timed out` ở một số suite backend (`loadBranches/list`…) do cold-start `git` trên Windows — sự cố môi trường đã ghi nhận tại `docs/05_issues/001_vitest_hook_timeout_windows.md`, không liên quan thay đổi này.
 
@@ -74,22 +74,22 @@ Khép kín nhóm nghiệm thu tổng hợp cho Chặng 3.1 bằng ba mũi kiểm
 
 Không ghi nhận lỗi kỹ thuật nào ở Vòng 1: các thay đổi đều vượt qua typecheck, lint, compile và test ngay lần chạy đầu tiên.
 
-| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa | Kết Quả Sau Sửa |
-| :-: | :---: | :--- | :---: | :--- | :---: | :--- | :--- | :---: |
-| — | Vòng 1 | — | — | Không có lỗi | — | — | — | ✅ Sạch ngay vòng 1 |
+| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa |   Kết Quả Sau Sửa   |
+| :-: | :------------: | :--------------- | :------------: | :-------------------------- | :-------: | :-------------- | :--------------- | :-----------------: |
+|  —  |     Vòng 1     | —                |       —        | Không có lỗi                |     —     | —               | —                | ✅ Sạch ngay vòng 1 |
 
 ### 5.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
-| Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
-| :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **1 vòng** | Sạch ngay vòng 1, không cần vòng sửa thêm |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **0 lỗi** | $E_{design} + E_{dev}$ |
-| **Số lỗi do Thiết Kế** | $E_{design}$ | **0 lỗi** | — |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **0 lỗi** | — |
-| **Số sự cố Môi Trường/Tool** | $E_{env}$ | **0 sự cố** (không tính `Hook timed out` có sẵn) | Loại trừ khỏi tỷ lệ |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **0%** | $\frac{0}{0}$ → không xác định, xem như 0% (không có lỗi) |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **0%** | $\frac{0}{0}$ → không xác định, xem như 0% (không có lỗi) |
-| **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (extension+webview): OK |
+| Chỉ Số Định Lượng                         |   Ký Hiệu    |                 Giá Trị Thực Tế                  | Ghi Chú / Đánh Giá                                                       |
+| :---------------------------------------- | :----------: | :----------------------------------------------: | :----------------------------------------------------------------------- |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)**   |     $C$      |                    **1 vòng**                    | Sạch ngay vòng 1, không cần vòng sửa thêm                                |
+| **Tổng số lỗi kỹ thuật**                  | $E_{total}$  |                    **0 lỗi**                     | $E_{design} + E_{dev}$                                                   |
+| **Số lỗi do Thiết Kế**                    | $E_{design}$ |                    **0 lỗi**                     | —                                                                        |
+| **Số lỗi do Triển Khai (Bug Dev)**        |  $E_{dev}$   |                    **0 lỗi**                     | —                                                                        |
+| **Số sự cố Môi Trường/Tool**              |  $E_{env}$   | **0 sự cố** (không tính `Hook timed out` có sẵn) | Loại trừ khỏi tỷ lệ                                                      |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** |  **$DDR$**   |                      **0%**                      | $\frac{0}{0}$ → không xác định, xem như 0% (không có lỗi)                |
+| **TỶ LỆ BUG KHI DEV (IBR)**               |  **$IBR$**   |                      **0%**                      | $\frac{0}{0}$ → không xác định, xem như 0% (không có lỗi)                |
+| **Trạng thái cổng chẩn đoán cuối cùng**   |      -       |                  **100% PASS**                   | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (extension+webview): OK |
 
 ---
 
@@ -101,11 +101,11 @@ Không ghi nhận lỗi kỹ thuật nào ở Vòng 1: các thay đổi đều v
 
 ## 7. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Bất biến hình học Zero Layout Shift (5.2.1 + 5.2.2) | ✅ Đạt |
-| Xử lý `.git/index.lock` rõ ràng, không crash (5.3.3) | ✅ Đạt |
-| Light Theme thanh lịch (5.4.2) | ⏸️ Nợ kỹ thuật (deferred) |
-| Typecheck + lint + compile + test | ✅ Đạt |
+| Tiêu chí                                             |        Trạng thái         |
+| :--------------------------------------------------- | :-----------------------: |
+| Bất biến hình học Zero Layout Shift (5.2.1 + 5.2.2)  |          ✅ Đạt           |
+| Xử lý `.git/index.lock` rõ ràng, không crash (5.3.3) |          ✅ Đạt           |
+| Light Theme thanh lịch (5.4.2)                       | ⏸️ Nợ kỹ thuật (deferred) |
+| Typecheck + lint + compile + test                    |          ✅ Đạt           |
 
 Chặng 3.1 đã đủ điều kiện đóng gói và phát hành phiên bản **1.1.0**.

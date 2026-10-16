@@ -4,6 +4,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
 
 > [!NOTE]
 > **Hồ sơ thiết kế tham chiếu**:
+>
 > - [003_Gap_Analysis_And_Evolution_Blueprint.md (Mục 4.3: Quản lý Stash & Multi-Commit Diff)](../../01_investigation/phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md).
 > - [004_Design_System_And_Visual_Identity.md (Quy chuẩn bố cục Cyber-Lab & Đinh tán góc)](../../01_investigation/phase3_Reborn/004_Design_System_And_Visual_Identity.md).
 > - [docs/02_design/phase3/ (Mục lục hồ sơ thiết kế kỹ thuật Phase 3)](../../02_design/phase3/README.md).
@@ -13,6 +14,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
 ## 1. Tổng Quan Giai Đoạn (Overview)
 
 ### 1.1. Tầm Nhìn & Mục Tiêu Cốt Lõi
+
 - **Mục tiêu**: Cung cấp công cụ quản lý các thay đổi mã nguồn tạm thời (Stash) toàn diện và trao quyền cho lập trình viên so sánh vi sai giữa bất kỳ 2 mốc lịch sử nào trên đồ thị, nâng cao khả năng phân tích và kiểm soát mã nguồn.
 - **Trọng tâm kỹ thuật**:
   - **Quản lý Stash chuyên nghiệp**: Xem danh sách các bản lưu trữ tạm, xem trước danh sách tệp và diff bên trong bản stash mà không cần pop ra working tree; thực thi an toàn các lệnh Apply, Pop, Drop, hoặc trích xuất Stash thành nhánh mới.
@@ -20,6 +22,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
   - **Stage từng khối mã (Partial Hunk Staging)**: Bổ sung khả năng chọn lọc từng đoạn code (hunk) trong tệp để stage hoặc discard, phục vụ việc phân tách commit sạch sẽ.
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
+
 - **Trạng thái**: Đang chờ kết quả từ Chặng 3.2 (Pending on Phase 3.2).
 - **Tiến độ tổng thể**: 0% hoàn thành.
 
@@ -71,7 +74,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
 
 - [ ] **Nhiệm vụ 3.2: Bảng hiển thị vi sai đa commit `CompareCommitsInspector.tsx`**
   - Tự động gọi query `git diff --name-status hashA..hashB`.
-  - Hiển thị thanh tóm lược đầu trang: *"Comparing {shortHashA} ↔ {shortHashB} ({count} files changed)"*.
+  - Hiển thị thanh tóm lược đầu trang: _"Comparing {shortHashA} ↔ {shortHashB} ({count} files changed)"_.
   - Hiển thị cây tệp thay đổi (FileTree) giữa 2 mốc lịch sử.
   - Click vào tệp để mở màn hình Diff của VS Code hiển thị chính xác sự thay đổi giữa 2 commit đó.
 

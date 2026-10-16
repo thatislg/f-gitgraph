@@ -80,10 +80,13 @@ export class GraphDataBridge {
 
     const rows = star && from === 0 ? [buildUncommittedRow(), ...realRows] : realRows;
 
-    const shiftedPaths = shiftY === 0 ? paths : paths.map((p) => ({
-      d: shiftPathD(p.d, shiftY),
-      color: p.color
-    }));
+    const shiftedPaths =
+      shiftY === 0
+        ? paths
+        : paths.map((p) => ({
+            d: shiftPathD(p.d, shiftY),
+            color: p.color
+          }));
 
     return { from, rows, paths: shiftedPaths };
   }

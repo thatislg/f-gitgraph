@@ -164,59 +164,59 @@ Mã nguồn nằm trong [src/webview/](file:///d:/Kojin/neo-git-graph/src/webvie
 
 Dưới đây là bảng rà soát 45 tiêu chí chức năng để xác định chính xác những gì F-GitGraph **đã hoàn thiện**, **mới có một phần**, và **hoàn toàn chưa có**:
 
-|      STT      | Nhóm Tính Năng                              | Tính Năng Chi Tiết                                   | Trạng Thái Trong F-GitGraph | Vị Trí Triển Khai / Ghi Chú                                    |
-| :-----------: | :--------------------------------------------- | :------------------------------------------------------ | :---------------------------: | :----------------------------------------------------------------- |
-|  **I**  | **ĐỒ THỊ & LỊCH SỬ**                |                                                         |                              |                                                                    |
-|       1       |                                                | Vẽ đồ thị commit DAG đa nhánh                     |   ✅ **Hoàn thiện**   | Nhân F# Native AOT (`Graph.fs`), cực nhanh                     |
-|       2       |                                                | Cuộn vô tận trên repo lớn (50k+ commits)           |   ✅ **Hoàn thiện**   | `CommitTable.tsx` ảo hóa cửa sổ trượt                      |
-|       3       |                                                | Lọc đồ thị theo nhánh cụ thể                     |   ✅ **Hoàn thiện**   | `MainHeader.tsx` (Branch Dropdown)                               |
-|       4       |                                                | Sắp xếp đồ thị (Topological / Date Order)          |   ✅ **Hoàn thiện**   | F# Core + Dropdown điều khiển trên header                      |
-|       5       |                                                | Ẩn / Hiện các nhánh Remote                          |   ✅ **Hoàn thiện**   | `MainHeader.tsx` (Checkbox)                                      |
-|       6       |                                                | Thiết kế Node lục giác & Avatar tác giả           |   ✅ **Hoàn thiện**   | `HexagonNode.tsx` (ClipPath, Neon Gradient)                      |
-|       7       |                                                | Tương tác Hover zoom (1.15x) & Click zoom (5x)       |   ✅ **Hoàn thiện**   | `AvatarZoomPreview.tsx`, `CommitRow.tsx`                       |
-|       8       |                                                | Xem trước nội dung commit khi hover (550ms)          |   ✅ **Hoàn thiện**   | `CommitHoverPanel.tsx`                                           |
-|       9       |                                                | Bảng chi tiết commit (Inspector Overlay)              |   ✅ **Hoàn thiện**   | `CommitDetails.tsx` (không làm vỡ đồ thị)                  |
-|      10      |                                                | Cây tệp tin thay đổi trong commit (FileTree)        |   ✅ **Hoàn thiện**   | `FileTree.tsx` (nhãn A, M, D, R)                                |
-|      11      |                                                | Tích hợp xem Diff với VS Code                        |   ✅ **Hoàn thiện**   | `diffDocProvider.ts` gọi `vscode.diff`                        |
-|      12      |                                                | So sánh vi sai giữa 2 commit bất kỳ                 |    ❌ **Chưa có**    | Chưa hỗ trợ multi-select 2 commit                               |
-|      13      |                                                | Tìm kiếm commit (Message, Author, Hash)               |    ❌ **Chưa có**    | Chưa có thanh search bar trên giao diện                        |
-| **II** | **QUẢN LÝ NHÁNH & TAG**               |                                                         |                              |                                                                    |
-|      14      |                                                | Tạo nhánh mới tại commit bất kỳ                   |   ✅ **Hoàn thiện**   | Context menu commit $\rightarrow$ Dialog $\rightarrow$ Git CLI |
-|      15      |                                                | Đổi tên nhánh (Rename branch)                       |   ✅ **Hoàn thiện**   | Context menu branch $\rightarrow$ Dialog $\rightarrow$ Git CLI |
-|      16      |                                                | Xóa nhánh (Delete branch: Safe & Force)               |   ✅ **Hoàn thiện**   | Context menu branch $\rightarrow$ Dialog (`-d` / `-D`)       |
-|      17      |                                                | Checkout nhánh cục bộ & remote                       |   ✅ **Hoàn thiện**   | Context menu branch $\rightarrow$ Git CLI checkout               |
-|      18      |                                                | Tạo Tag (Lightweight & Annotated)                      |   ✅ **Hoàn thiện**   | Context menu commit $\rightarrow$ Dialog $\rightarrow$ Git CLI |
-|      19      |                                                | Xóa Tag cục bộ                                       |   ✅ **Hoàn thiện**   | Context menu tag $\rightarrow$ Dialog $\rightarrow$ Git CLI    |
-|      20      |                                                | Đẩy Tag lên remote (Push Tag)                        |   ✅ **Hoàn thiện**   | Context menu tag $\rightarrow$ `git push origin <tag>`         |
-|      21      |                                                | Cây điều hướng Branches & Tags (Sidebar)           |    ❌ **Chưa có**    | Hiện chỉ có Dropdown chọn nhánh trên Header                  |
-| **III** | **THAO TÁC GHI & VIẾT LẠI LỊCH SỬ** |                                                         |                              |                                                                    |
-|      22      |                                                | Checkout commit đơn lẻ (Detached HEAD)               |   ✅ **Hoàn thiện**   | Context menu commit $\rightarrow$ `git checkout <hash>`        |
-|      23      |                                                | Cherry-pick commit                                      |   ✅ **Hoàn thiện**   | Hỗ trợ chọn parent index cho merge commit                       |
-|      24      |                                                | Revert commit                                           |   ✅ **Hoàn thiện**   | Hỗ trợ chọn parent index cho merge commit                       |
-|      25      |                                                | Merge commit / Merge branch                             |   ✅ **Hoàn thiện**   | Hỗ trợ tùy chọn `--no-ff` qua checkbox                       |
-|      26      |                                                | Reset nhánh (Soft, Mixed, Hard)                        |   ✅ **Hoàn thiện**   | Context menu commit $\rightarrow$ Dialog chọn chế độ reset   |
-|      27      |                                                | Kéo & thả trực quan (Drag & Drop to merge/rebase)    |    ❌ **Chưa có**    | Chưa hỗ trợ tương tác kéo thả trên Webview                |
-|      28      |                                                | Trình tái cấu trúc lịch sử (Visual Rebase -i)     |    ❌ **Chưa có**    | Chưa có UI reorder, squash, fixup, drop                          |
-| **IV** | **WORKING TREE, STAGING & COMMIT**       |                                                         |                              |                                                                    |
-|      29      |                                                | Hiển thị tệp thay đổi trong Working Tree           |    ⚠️ **Sơ khai**    | Chỉ hiển thị dòng "Uncommitted changes" trên table            |
-|      30      |                                                | Phân vùng danh sách Unstaged vs Staged Files         |    ❌ **Chưa có**    | Hoàn toàn chưa có khu vực staging                             |
-|      31      |                                                | Stage tệp / Unstage tệp (File Staging)                |    ❌ **Chưa có**    | Chưa có nút bấm hoặc hành động stage                       |
-|      32      |                                                | Stage từng đoạn code (Hunk / Line Staging)           |    ❌ **Chưa có**    | Chưa có giao diện patch diff tương tác                       |
-|      33      |                                                | Hủy thay đổi tệp (Discard Changes)                  |    ❌ **Chưa có**    | Chưa có nút revert file về HEAD                                |
-|      34      |                                                | Khung soạn thảo Commit Message (Composer)             |    ❌ **Chưa có**    | Chưa có form viết title, description commit                     |
-|      35      |                                                | Tùy chọn Amend commit & Ký số (GPG Sign)            |  ⚠️ **Backend có**  | `GitCliMutator.ts` có cờ, nhưng UI chưa có form             |
-|  **V**  | **ĐỒNG BỘ TỪ XA & MẠNG**            |                                                         |                              |                                                                    |
-|      36      |                                                | Nút Fetch toàn cục                                   |  ⚠️ **Backend có**  | `GitCliMutator.ts` có hàm `fetch`, chưa có nút UI         |
-|      37      |                                                | Nút Pull (kèm tùy chọn rebase)                      |  ⚠️ **Backend có**  | `GitCliMutator.ts` có hàm `pull`, chưa có nút UI          |
-|      38      |                                                | Nút Push (kèm cờ force-with-lease)                   |  ⚠️ **Backend có**  | `GitCliMutator.ts` có hàm `push`, chưa có nút UI          |
-|      39      |                                                | Huy hiệu số lượng commit `↑ahead` / `↓behind` |    ❌ **Chưa có**    | Chưa tính toán và hiển thị counter trên header              |
-|      40      |                                                | Quản lý Remotes (Add, Edit, Remove, Prune)            |    ❌ **Chưa có**    | Chưa có UI quản lý danh sách remote                           |
-| **VI** | **LƯU TRỮ TẠM, XUNG ĐỘT & KHÁC**   |                                                         |                              |                                                                    |
-|      41      |                                                | Quản lý Stash (Save, Pop, Apply, Drop, List)          |    ❌ **Chưa có**    | Chưa có giao diện tương tác với Stash                       |
-|      42      |                                                | Nhận diện trạng thái dở dang (In-Flight)           |  ⚠️ **Core F# có**  | `InFlightState.fs` nhận diện được, chưa hiển thị UI      |
-|      43      |                                                | Trình giải quyết xung đột (Conflict Resolver)      |    ❌ **Chưa có**    | Chưa có giao diện 3-Way Merge khi gặp conflict                 |
-|      44      |                                                | Quản lý Submodules & Worktrees                        |    ❌ **Chưa có**    | Chưa có trong phạm vi hiện tại                                |
-|      45      |                                                | Xem nhật ký tham chiếu (Reflog Viewer)               |    ❌ **Chưa có**    | Chưa hỗ trợ truy vấn reflog                                    |
+|   STT   | Nhóm Tính Năng                      | Tính Năng Chi Tiết                                | Trạng Thái Trong F-GitGraph | Vị Trí Triển Khai / Ghi Chú                                    |
+| :-----: | :---------------------------------- | :------------------------------------------------ | :-------------------------: | :------------------------------------------------------------- |
+|  **I**  | **ĐỒ THỊ & LỊCH SỬ**                |                                                   |                             |                                                                |
+|    1    |                                     | Vẽ đồ thị commit DAG đa nhánh                     |      ✅ **Hoàn thiện**      | Nhân F# Native AOT (`Graph.fs`), cực nhanh                     |
+|    2    |                                     | Cuộn vô tận trên repo lớn (50k+ commits)          |      ✅ **Hoàn thiện**      | `CommitTable.tsx` ảo hóa cửa sổ trượt                          |
+|    3    |                                     | Lọc đồ thị theo nhánh cụ thể                      |      ✅ **Hoàn thiện**      | `MainHeader.tsx` (Branch Dropdown)                             |
+|    4    |                                     | Sắp xếp đồ thị (Topological / Date Order)         |      ✅ **Hoàn thiện**      | F# Core + Dropdown điều khiển trên header                      |
+|    5    |                                     | Ẩn / Hiện các nhánh Remote                        |      ✅ **Hoàn thiện**      | `MainHeader.tsx` (Checkbox)                                    |
+|    6    |                                     | Thiết kế Node lục giác & Avatar tác giả           |      ✅ **Hoàn thiện**      | `HexagonNode.tsx` (ClipPath, Neon Gradient)                    |
+|    7    |                                     | Tương tác Hover zoom (1.15x) & Click zoom (5x)    |      ✅ **Hoàn thiện**      | `AvatarZoomPreview.tsx`, `CommitRow.tsx`                       |
+|    8    |                                     | Xem trước nội dung commit khi hover (550ms)       |      ✅ **Hoàn thiện**      | `CommitHoverPanel.tsx`                                         |
+|    9    |                                     | Bảng chi tiết commit (Inspector Overlay)          |      ✅ **Hoàn thiện**      | `CommitDetails.tsx` (không làm vỡ đồ thị)                      |
+|   10    |                                     | Cây tệp tin thay đổi trong commit (FileTree)      |      ✅ **Hoàn thiện**      | `FileTree.tsx` (nhãn A, M, D, R)                               |
+|   11    |                                     | Tích hợp xem Diff với VS Code                     |      ✅ **Hoàn thiện**      | `diffDocProvider.ts` gọi `vscode.diff`                         |
+|   12    |                                     | So sánh vi sai giữa 2 commit bất kỳ               |       ❌ **Chưa có**        | Chưa hỗ trợ multi-select 2 commit                              |
+|   13    |                                     | Tìm kiếm commit (Message, Author, Hash)           |       ❌ **Chưa có**        | Chưa có thanh search bar trên giao diện                        |
+| **II**  | **QUẢN LÝ NHÁNH & TAG**             |                                                   |                             |                                                                |
+|   14    |                                     | Tạo nhánh mới tại commit bất kỳ                   |      ✅ **Hoàn thiện**      | Context menu commit $\rightarrow$ Dialog $\rightarrow$ Git CLI |
+|   15    |                                     | Đổi tên nhánh (Rename branch)                     |      ✅ **Hoàn thiện**      | Context menu branch $\rightarrow$ Dialog $\rightarrow$ Git CLI |
+|   16    |                                     | Xóa nhánh (Delete branch: Safe & Force)           |      ✅ **Hoàn thiện**      | Context menu branch $\rightarrow$ Dialog (`-d` / `-D`)         |
+|   17    |                                     | Checkout nhánh cục bộ & remote                    |      ✅ **Hoàn thiện**      | Context menu branch $\rightarrow$ Git CLI checkout             |
+|   18    |                                     | Tạo Tag (Lightweight & Annotated)                 |      ✅ **Hoàn thiện**      | Context menu commit $\rightarrow$ Dialog $\rightarrow$ Git CLI |
+|   19    |                                     | Xóa Tag cục bộ                                    |      ✅ **Hoàn thiện**      | Context menu tag $\rightarrow$ Dialog $\rightarrow$ Git CLI    |
+|   20    |                                     | Đẩy Tag lên remote (Push Tag)                     |      ✅ **Hoàn thiện**      | Context menu tag $\rightarrow$ `git push origin <tag>`         |
+|   21    |                                     | Cây điều hướng Branches & Tags (Sidebar)          |       ❌ **Chưa có**        | Hiện chỉ có Dropdown chọn nhánh trên Header                    |
+| **III** | **THAO TÁC GHI & VIẾT LẠI LỊCH SỬ** |                                                   |                             |                                                                |
+|   22    |                                     | Checkout commit đơn lẻ (Detached HEAD)            |      ✅ **Hoàn thiện**      | Context menu commit $\rightarrow$ `git checkout <hash>`        |
+|   23    |                                     | Cherry-pick commit                                |      ✅ **Hoàn thiện**      | Hỗ trợ chọn parent index cho merge commit                      |
+|   24    |                                     | Revert commit                                     |      ✅ **Hoàn thiện**      | Hỗ trợ chọn parent index cho merge commit                      |
+|   25    |                                     | Merge commit / Merge branch                       |      ✅ **Hoàn thiện**      | Hỗ trợ tùy chọn `--no-ff` qua checkbox                         |
+|   26    |                                     | Reset nhánh (Soft, Mixed, Hard)                   |      ✅ **Hoàn thiện**      | Context menu commit $\rightarrow$ Dialog chọn chế độ reset     |
+|   27    |                                     | Kéo & thả trực quan (Drag & Drop to merge/rebase) |       ❌ **Chưa có**        | Chưa hỗ trợ tương tác kéo thả trên Webview                     |
+|   28    |                                     | Trình tái cấu trúc lịch sử (Visual Rebase -i)     |       ❌ **Chưa có**        | Chưa có UI reorder, squash, fixup, drop                        |
+| **IV**  | **WORKING TREE, STAGING & COMMIT**  |                                                   |                             |                                                                |
+|   29    |                                     | Hiển thị tệp thay đổi trong Working Tree          |       ⚠️ **Sơ khai**        | Chỉ hiển thị dòng "Uncommitted changes" trên table             |
+|   30    |                                     | Phân vùng danh sách Unstaged vs Staged Files      |       ❌ **Chưa có**        | Hoàn toàn chưa có khu vực staging                              |
+|   31    |                                     | Stage tệp / Unstage tệp (File Staging)            |       ❌ **Chưa có**        | Chưa có nút bấm hoặc hành động stage                           |
+|   32    |                                     | Stage từng đoạn code (Hunk / Line Staging)        |       ❌ **Chưa có**        | Chưa có giao diện patch diff tương tác                         |
+|   33    |                                     | Hủy thay đổi tệp (Discard Changes)                |       ❌ **Chưa có**        | Chưa có nút revert file về HEAD                                |
+|   34    |                                     | Khung soạn thảo Commit Message (Composer)         |       ❌ **Chưa có**        | Chưa có form viết title, description commit                    |
+|   35    |                                     | Tùy chọn Amend commit & Ký số (GPG Sign)          |      ⚠️ **Backend có**      | `GitCliMutator.ts` có cờ, nhưng UI chưa có form                |
+|  **V**  | **ĐỒNG BỘ TỪ XA & MẠNG**            |                                                   |                             |                                                                |
+|   36    |                                     | Nút Fetch toàn cục                                |      ⚠️ **Backend có**      | `GitCliMutator.ts` có hàm `fetch`, chưa có nút UI              |
+|   37    |                                     | Nút Pull (kèm tùy chọn rebase)                    |      ⚠️ **Backend có**      | `GitCliMutator.ts` có hàm `pull`, chưa có nút UI               |
+|   38    |                                     | Nút Push (kèm cờ force-with-lease)                |      ⚠️ **Backend có**      | `GitCliMutator.ts` có hàm `push`, chưa có nút UI               |
+|   39    |                                     | Huy hiệu số lượng commit `↑ahead` / `↓behind`     |       ❌ **Chưa có**        | Chưa tính toán và hiển thị counter trên header                 |
+|   40    |                                     | Quản lý Remotes (Add, Edit, Remove, Prune)        |       ❌ **Chưa có**        | Chưa có UI quản lý danh sách remote                            |
+| **VI**  | **LƯU TRỮ TẠM, XUNG ĐỘT & KHÁC**    |                                                   |                             |                                                                |
+|   41    |                                     | Quản lý Stash (Save, Pop, Apply, Drop, List)      |       ❌ **Chưa có**        | Chưa có giao diện tương tác với Stash                          |
+|   42    |                                     | Nhận diện trạng thái dở dang (In-Flight)          |      ⚠️ **Core F# có**      | `InFlightState.fs` nhận diện được, chưa hiển thị UI            |
+|   43    |                                     | Trình giải quyết xung đột (Conflict Resolver)     |       ❌ **Chưa có**        | Chưa có giao diện 3-Way Merge khi gặp conflict                 |
+|   44    |                                     | Quản lý Submodules & Worktrees                    |       ❌ **Chưa có**        | Chưa có trong phạm vi hiện tại                                 |
+|   45    |                                     | Xem nhật ký tham chiếu (Reflog Viewer)            |       ❌ **Chưa có**        | Chưa hỗ trợ truy vấn reflog                                    |
 
 ---
 
@@ -236,4 +236,4 @@ Dưới đây là bảng rà soát 45 tiêu chí chức năng để xác định
 
 ---
 
-*Tài liệu tiếp theo: [003. Phân Tích Độ Lệch &amp; Bản Thiết Kế Tiến Hóa Lên Full Git App](003_Gap_Analysis_And_Evolution_Blueprint.md)*
+_Tài liệu tiếp theo: [003. Phân Tích Độ Lệch &amp; Bản Thiết Kế Tiến Hóa Lên Full Git App](003_Gap_Analysis_And_Evolution_Blueprint.md)_

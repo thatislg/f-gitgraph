@@ -4,6 +4,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
 
 > [!NOTE]
 > **Hồ sơ thiết kế tham chiếu**:
+>
 > - [003_Gap_Analysis_And_Evolution_Blueprint.md (Mục 4.4: Rebase & Conflict Resolver)](../../01_investigation/phase3_Reborn/003_Gap_Analysis_And_Evolution_Blueprint.md).
 > - [004_Design_System_And_Visual_Identity.md (Quy chuẩn bố cục Cyber-Lab & Đinh tán góc)](../../01_investigation/phase3_Reborn/004_Design_System_And_Visual_Identity.md).
 > - [docs/02_design/phase3/ (Mục lục hồ sơ thiết kế kỹ thuật Phase 3)](../../02_design/phase3/README.md).
@@ -13,6 +14,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
 ## 1. Tổng Quan Giai Đoạn (Overview)
 
 ### 1.1. Tầm Nhìn & Mục Tiêu Cốt Lõi
+
 - **Mục tiêu**: Đưa F-GitGraph bước vào nhóm các ứng dụng Git cao cấp nhất thế giới bằng việc trang bị 2 tính năng "vũ khí tối thượng" (Killer Features): **Trình tái cấu trúc lịch sử trực quan (Visual Interactive Rebase)** và **Trình giải quyết xung đột 3 chiều (3-Way Merge Conflict Resolver)**.
 - **Trọng tâm kỹ thuật**:
   - **Visual Interactive Rebase**: Thay thế hoàn toàn quy trình chỉnh sửa file text khô khan của `git rebase -i` bằng bảng điều khiển trực quan: Kéo thả chuột đổi thứ tự commit, bấm nút chọn tác vụ `Pick`, `Squash`, `Fixup`, `Reword`, `Drop`, chỉnh sửa commit message trực tiếp trên form và thực thi an toàn qua Git CLI.
@@ -20,6 +22,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
   - **Tương tác Kéo & Thả (Drag & Drop)**: Cho phép kéo một nhánh thả vào một nhánh khác để kích hoạt Merge/Rebase, hoặc kéo một commit thả vào nhánh để Cherry-pick.
 
 ### 1.2. Trạng Thái Hiện Tại (Status)
+
 - **Trạng thái**: Đang chờ kết quả từ Chặng 3.3 (Pending on Phase 3.3).
 - **Tiến độ tổng thể**: 0% hoàn thành.
 
@@ -30,7 +33,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
 ### 📋 Nhóm Việc 1: Thiết Kế & Triển Khai Trình Visual Interactive Rebase Editor
 
 - [ ] **Nhiệm vụ 1.1: Khởi tạo Component `InteractiveRebaseModal.tsx`**
-  - Mở bảng hộp thoại toàn màn hình (Modal/Fullscreen Overlay) khi người dùng chọn tác vụ *"Rebase children of {hash} interactively..."*.
+  - Mở bảng hộp thoại toàn màn hình (Modal/Fullscreen Overlay) khi người dùng chọn tác vụ _"Rebase children of {hash} interactively..."_.
   - Nạp danh sách toàn bộ các commit nằm giữa điểm rebase (base) và `HEAD`.
   - Bảng danh sách commit hỗ trợ kéo thả đổi thứ tự dòng (Drag & Drop Reordering).
 
@@ -53,8 +56,8 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
 
 - [ ] **Nhiệm vụ 2.1: Hiển thị Banner cảnh báo trạng thái biến động dở dang**
   - Nhận diện trạng thái từ nhân F# Core (`InFlightState.fs`):
-    - Khi có `.git/rebase-merge/` hoặc `.git/rebase-apply/`: Banner vàng neon *"Rebase in progress - Conflicts detected"*.
-    - Khi có `.git/MERGE_HEAD`: Banner tím neon *"Merge in progress - Conflicts detected"*.
+    - Khi có `.git/rebase-merge/` hoặc `.git/rebase-apply/`: Banner vàng neon _"Rebase in progress - Conflicts detected"_.
+    - Khi có `.git/MERGE_HEAD`: Banner tím neon _"Merge in progress - Conflicts detected"_.
   - Các nút điều khiển luồng toàn cục ngay trên banner:
     - Nút `Continue`: Tiếp tục rebase/merge sau khi đã resolve hết xung đột.
     - Nút `Skip`: Bỏ qua commit hiện tại (khi rebase).
@@ -81,9 +84,9 @@ Tài liệu này ghi nhận tổng quan mục tiêu, phân rã đầu việc chi
 
 - [ ] **Nhiệm vụ 3.2: Xử lý các kịch bản thả chuột (Drop Handlers)**
   - Kéo **Nhánh A** thả vào **Nhánh B**:
-    - Hiển thị Action Popup: *"Merge {Branch A} into {Branch B}"* hoặc *"Rebase {Branch A} onto {Branch B}"*.
+    - Hiển thị Action Popup: _"Merge {Branch A} into {Branch B}"_ hoặc _"Rebase {Branch A} onto {Branch B}"_.
   - Kéo **Commit X** thả vào **Nhánh hiện tại**:
-    - Hiển thị Action Popup: *"Cherry-pick commit {shortHash} onto {currentBranch}"*.
+    - Hiển thị Action Popup: _"Cherry-pick commit {shortHash} onto {currentBranch}"_.
 
 ---
 

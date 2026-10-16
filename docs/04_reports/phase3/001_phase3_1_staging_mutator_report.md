@@ -22,10 +22,10 @@ Phạm vi nhiệm vụ này gồm:
 
 ## 2. Cấu Trúc Mã Nguồn Tác Động
 
-| File | Nội dung |
-| :--- | :--- |
+| File                                     | Nội dung                                                                                        |
+| :--------------------------------------- | :---------------------------------------------------------------------------------------------- |
 | `src/extension/mutator/gitCliMutator.ts` | Bổ sung 6 phương thức staging + `supportsRestore`/`canUseRestore()` cho cơ chế probe phiên bản. |
-| `tests/backend/gitCliMutator.test.ts` | Bổ sung các test xác nhận hành vi stage/unstage/discard và probe phiên bản. |
+| `tests/backend/gitCliMutator.test.ts`    | Bổ sung các test xác nhận hành vi stage/unstage/discard và probe phiên bản.                     |
 
 ---
 
@@ -33,14 +33,14 @@ Phạm vi nhiệm vụ này gồm:
 
 ### 3.1. Sáu Lệnh Staging (Nhiệm vụ 1.1.1 → 1.1.6)
 
-| Phương thức | Lệnh Git gốc | Ghi chú an toàn |
-| :--- | :--- | :--- |
-| `stageFile(filePath)` | `git add -- <filePath>` | Ký tự `--` bắt buộc để ngăn nhầm đường dẫn với nhánh/cờ. |
-| `unstageFile(filePath)` | `git restore --staged -- <filePath>` | Fallback `git reset -- <filePath>` trên Git < 2.23. |
-| `stageAll()` | `git add -A` | Bao phủ toàn bộ cây thư mục, không cần fallback. |
-| `unstageAll()` | `git restore --staged .` | Fallback `git reset` trên Git < 2.23. |
-| `discardFileChanges(filePath, isUntracked)` | untracked → `git clean -f -- <filePath>`; tracked → `git restore -- <filePath>` | Fallback tracked → `git checkout -- <filePath>`. |
-| `discardAllChanges()` | Bước 1 `git restore .` → Bước 2 `git clean -fd` | Fallback bước 1 → `git checkout -- .`; dừng ngay nếu bước 1 thất bại. |
+| Phương thức                                 | Lệnh Git gốc                                                                    | Ghi chú an toàn                                                       |
+| :------------------------------------------ | :------------------------------------------------------------------------------ | :-------------------------------------------------------------------- |
+| `stageFile(filePath)`                       | `git add -- <filePath>`                                                         | Ký tự `--` bắt buộc để ngăn nhầm đường dẫn với nhánh/cờ.              |
+| `unstageFile(filePath)`                     | `git restore --staged -- <filePath>`                                            | Fallback `git reset -- <filePath>` trên Git < 2.23.                   |
+| `stageAll()`                                | `git add -A`                                                                    | Bao phủ toàn bộ cây thư mục, không cần fallback.                      |
+| `unstageAll()`                              | `git restore --staged .`                                                        | Fallback `git reset` trên Git < 2.23.                                 |
+| `discardFileChanges(filePath, isUntracked)` | untracked → `git clean -f -- <filePath>`; tracked → `git restore -- <filePath>` | Fallback tracked → `git checkout -- <filePath>`.                      |
+| `discardAllChanges()`                       | Bước 1 `git restore .` → Bước 2 `git clean -fd`                                 | Fallback bước 1 → `git checkout -- .`; dừng ngay nếu bước 1 thất bại. |
 
 ### 3.2. Chiến Lược Tương Thích Đa Phiên Bản Git (Mục 2.2)
 
@@ -56,14 +56,14 @@ Phạm vi nhiệm vụ này gồm:
 
 Chạy lệnh: `pnpm exec vitest run --project backend tests/backend/gitCliMutator.test.ts --hookTimeout 60000 --testTimeout 60000`.
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `probes Git version and caches canUseRestore` | ✅ pass |
-| `stages and unstages a specific file` | ✅ pass |
-| `stages all and unstages all files` | ✅ pass |
-| `discards changes in a tracked file and cleans untracked file` | ✅ pass |
-| Các test nền tảng còn lại (branch/tag/checkout/commit) | ✅ pass |
-| **Tổng cộng** | **11/11 pass** |
+| Hạng mục                                                       | Kết quả        |
+| :------------------------------------------------------------- | :------------- |
+| `probes Git version and caches canUseRestore`                  | ✅ pass        |
+| `stages and unstages a specific file`                          | ✅ pass        |
+| `stages all and unstages all files`                            | ✅ pass        |
+| `discards changes in a tracked file and cleans untracked file` | ✅ pass        |
+| Các test nền tảng còn lại (branch/tag/checkout/commit)         | ✅ pass        |
+| **Tổng cộng**                                                  | **11/11 pass** |
 
 > Ghi chú: lần chạy đầu gặp lỗi `Hook timed out in 10000ms` do `beforeAll` (`makeRepo`) vượt ngưỡng hook timeout mặc định 10s ở trạng thái cold-start trên Windows (độ trễ `CreateProcess` khi spawn `git.exe`). Khi nâng `--hookTimeout 60000`, toàn bộ 11 test pass trong ~1.6s. Không thay đổi cấu hình `vitest.config.ts`.
 
@@ -71,11 +71,11 @@ Chạy lệnh: `pnpm exec vitest run --project backend tests/backend/gitCliMutat
 
 ## 5. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Hiện thực 6 lệnh staging | ✅ Đạt |
-| Ký tự `--` an toàn chống nhầm đường dẫn/nhánh | ✅ Đạt |
-| Chiến lược probe + fallback đa phiên bản Git | ✅ Đạt |
-| Tương thích đa nền tảng (Windows/macOS/Linux) | ✅ Đạt |
-| Kiểm thử backend | ✅ 11/11 |
-| Typecheck (không lỗi/warning) | ✅ Đạt |
+| Tiêu chí                                      | Trạng thái |
+| :-------------------------------------------- | :--------: |
+| Hiện thực 6 lệnh staging                      |   ✅ Đạt   |
+| Ký tự `--` an toàn chống nhầm đường dẫn/nhánh |   ✅ Đạt   |
+| Chiến lược probe + fallback đa phiên bản Git  |   ✅ Đạt   |
+| Tương thích đa nền tảng (Windows/macOS/Linux) |   ✅ Đạt   |
+| Kiểm thử backend                              |  ✅ 11/11  |
+| Typecheck (không lỗi/warning)                 |   ✅ Đạt   |

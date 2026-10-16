@@ -25,24 +25,24 @@ Phạm vi gồm:
 
 ## 2. Cấu Trúc Mã Nguồn Tác Động
 
-| File | Nội dung |
-| :--- | :--- |
-| `src/webview/components/staging/StagingPanel.tsx` | Bảng 2 phân khu Staged/Changes, bộ đếm, nút bulk (Stage All / Unstage All / Discard All), empty state. |
-| `src/webview/components/staging/CommitComposer.tsx` | Ô tiêu đề 34px + bộ đếm 50 ký tự 3 màu, mô tả auto-grow 60–160px, checkbox Amend/Sign, nút Commit & Commit & Push, phím tắt toàn cục. |
-| `src/webview/components/staging/StagingArea.tsx` | Container bọc `CornerCrossFrame`, nối `StagingPanel` + `CommitComposer`, quản lý modal Discard. |
-| `src/webview/lib/stores/staging.store.ts` | Signals (`stagedFiles`, `unstagedFiles`, `commitSubject`, ...), computed (`canCommit`, `subjectCounterColor`, `commitButtonLabel`, ...), dispatchers. |
-| `src/webview/lib/audio.ts` | Tổng hợp âm thanh chốt cơ khí (dual sine 1200Hz + 850Hz, 15ms) qua Web Audio API. |
-| `src/webview/lib/handler/commit-result.ts` | Xử lý phản hồi `commitChanges`/`commitAndPush`: hạ `isCommitting`, làm sạch tiêu đề/mô tả, phát âm thanh. |
-| `src/webview/styles.css` | Bổ sung token màu bộ đếm (`--color-counter-*`). |
-| `src/types/actions.ts` | Bổ sung action `commitAndPush`. |
-| `src/extension/mutator/gitCliMutator.ts` | Bổ sung phương thức `commitAndPush` (commit → push). |
-| `src/extension/services/messageHandler.ts` | Đăng ký routing `commitAndPush`; di dời `runMutation` ra module scope. |
-| `src/webview/lib/dispatcher.ts` | Đăng ký handler `commitChanges`/`commitAndPush` → `handleCommitResult`. |
-| `src/extension/l10n/webviewL10n.ts` | Bổ sung chuỗi lỗi `unableToCommitAndPush`. |
-| `tests/webview/lib/stores/staging.store.test.ts` | Test `canCommit`, `loadStatus`, `setAmend`. |
-| `tests/webview/components/staging/CommitComposer.test.ts` | Test bộ đếm, disabled, nhãn nút, `Ctrl+Enter`, amend-fill. |
-| `tests/webview/components/staging/StagingPanel.test.ts` | Test render tệp, bulk actions, empty state. |
-| `tests/extension/services/stagingMessageHandler.test.ts` | Bổ sung test routing `commitAndPush`. |
+| File                                                      | Nội dung                                                                                                                                              |
+| :-------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/webview/components/staging/StagingPanel.tsx`         | Bảng 2 phân khu Staged/Changes, bộ đếm, nút bulk (Stage All / Unstage All / Discard All), empty state.                                                |
+| `src/webview/components/staging/CommitComposer.tsx`       | Ô tiêu đề 34px + bộ đếm 50 ký tự 3 màu, mô tả auto-grow 60–160px, checkbox Amend/Sign, nút Commit & Commit & Push, phím tắt toàn cục.                 |
+| `src/webview/components/staging/StagingArea.tsx`          | Container bọc `CornerCrossFrame`, nối `StagingPanel` + `CommitComposer`, quản lý modal Discard.                                                       |
+| `src/webview/lib/stores/staging.store.ts`                 | Signals (`stagedFiles`, `unstagedFiles`, `commitSubject`, ...), computed (`canCommit`, `subjectCounterColor`, `commitButtonLabel`, ...), dispatchers. |
+| `src/webview/lib/audio.ts`                                | Tổng hợp âm thanh chốt cơ khí (dual sine 1200Hz + 850Hz, 15ms) qua Web Audio API.                                                                     |
+| `src/webview/lib/handler/commit-result.ts`                | Xử lý phản hồi `commitChanges`/`commitAndPush`: hạ `isCommitting`, làm sạch tiêu đề/mô tả, phát âm thanh.                                             |
+| `src/webview/styles.css`                                  | Bổ sung token màu bộ đếm (`--color-counter-*`).                                                                                                       |
+| `src/types/actions.ts`                                    | Bổ sung action `commitAndPush`.                                                                                                                       |
+| `src/extension/mutator/gitCliMutator.ts`                  | Bổ sung phương thức `commitAndPush` (commit → push).                                                                                                  |
+| `src/extension/services/messageHandler.ts`                | Đăng ký routing `commitAndPush`; di dời `runMutation` ra module scope.                                                                                |
+| `src/webview/lib/dispatcher.ts`                           | Đăng ký handler `commitChanges`/`commitAndPush` → `handleCommitResult`.                                                                               |
+| `src/extension/l10n/webviewL10n.ts`                       | Bổ sung chuỗi lỗi `unableToCommitAndPush`.                                                                                                            |
+| `tests/webview/lib/stores/staging.store.test.ts`          | Test `canCommit`, `loadStatus`, `setAmend`.                                                                                                           |
+| `tests/webview/components/staging/CommitComposer.test.ts` | Test bộ đếm, disabled, nhãn nút, `Ctrl+Enter`, amend-fill.                                                                                            |
+| `tests/webview/components/staging/StagingPanel.test.ts`   | Test render tệp, bulk actions, empty state.                                                                                                           |
+| `tests/extension/services/stagingMessageHandler.test.ts`  | Bổ sung test routing `commitAndPush`.                                                                                                                 |
 
 ---
 
@@ -80,17 +80,17 @@ Phạm vi gồm:
 
 ## 4. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/webview/lib/stores/staging.store.test.ts` | ✅ 7/7 pass |
-| `tests/webview/components/staging/CommitComposer.test.ts` | ✅ 5/5 pass |
-| `tests/webview/components/staging/StagingPanel.test.ts` | ✅ 5/5 pass |
-| Toàn bộ project `webview` | ✅ 111/111 pass |
-| `tests/extension/services/stagingMessageHandler.test.ts` | ✅ 6/6 pass |
-| Typecheck (`pnpm run typecheck`) | ✅ sạch (toàn workspace) |
-| Lint (`pnpm run lint`) | ✅ 0 error / 0 warning |
-| Compile (`pnpm run compile`) | ✅ thành công |
-| Format (`oxfmt --check`) trên các tệp Nhóm Việc 3 | ✅ sạch |
+| Hạng mục                                                  | Kết quả                  |
+| :-------------------------------------------------------- | :----------------------- |
+| `tests/webview/lib/stores/staging.store.test.ts`          | ✅ 7/7 pass              |
+| `tests/webview/components/staging/CommitComposer.test.ts` | ✅ 5/5 pass              |
+| `tests/webview/components/staging/StagingPanel.test.ts`   | ✅ 5/5 pass              |
+| Toàn bộ project `webview`                                 | ✅ 111/111 pass          |
+| `tests/extension/services/stagingMessageHandler.test.ts`  | ✅ 6/6 pass              |
+| Typecheck (`pnpm run typecheck`)                          | ✅ sạch (toàn workspace) |
+| Lint (`pnpm run lint`)                                    | ✅ 0 error / 0 warning   |
+| Compile (`pnpm run compile`)                              | ✅ thành công            |
+| Format (`oxfmt --check`) trên các tệp Nhóm Việc 3         | ✅ sạch                  |
 
 > Ghi chú: `pnpm run test` toàn cục vẫn gặp `Hook timed out` ở suite `tests/backend/queries/loadBranches/list.test.ts` (cold-start `git` trên Windows) — sự cố môi trường đã ghi nhận tại `docs/05_issues/001_vitest_hook_timeout_windows.md`, không liên quan thay đổi này.
 
@@ -98,25 +98,25 @@ Phạm vi gồm:
 
 ## 5. Nhật Ký Lỗi Biên Dịch & Chẩn Đoán (Compilation & Diagnostic Error Log)
 
-| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa | Kết Quả Sau Sửa |
-| :-: | :---: | :--- | :---: | :--- | :---: | :--- | :--- | :---: |
-| 1 | Vòng 1 | `tests/webview/components/staging/CommitComposer.test.ts`, `StagingPanel.test.ts`, `src/webview/components/staging/StagingArea.tsx` | Lint | `import-js/order`: sai thứ tự/nhóm import (`@/` phải đứng trước `@tests/`, `ui` sau `staging`) | `[DEV_BUG]` | Đặt import sai quy ước `import-js/order` của repo | Sắp xếp lại nhóm import đúng thứ tự `external` → `@/` → `@tests/` | ✅ Đã khắc phục |
-| 2 | Vòng 1 | `src/webview/components/staging/CommitComposer.tsx` | Lint | `unicorn/consistent-function-scoping`: `autoGrow` không dùng biến ngoài | `[DEV_BUG]` | Khai báo hàm trong thân component dù không phụ thuộc state | Di dời `autoGrow` ra module scope | ✅ Đã khắc phục |
-| 3 | Vòng 1 | `tests/webview/components/staging/CommitComposer.test.ts` | Unit Test | `AssertionError` (amend không nạp tiêu đề HEAD) | `[DEV_BUG]` | jsdom `.click()` trên checkbox không kích hoạt `change` (không toggle `checked`/fire event) | Đặt `checked = true` rồi `dispatchEvent(new Event("change"))`, assert trực tiếp `commitSubject.value` | ✅ Đã khắc phục |
-| 4 | Vòng 1 | `src/webview/lib/stores/staging.store.ts` + `src/types/actions.ts` + `src/extension/**` | Typecheck | Thiếu action RPC `commitAndPush` cho dispatcher `commitAndPush()` | `[DESIGN_DEFECT]` | UI design §4.3 đặc tả `commitAndPush()` nhưng hợp đồng RPC (backend design §4.1 + `actions.ts`) thiếu action tương ứng | Bổ sung action `commitAndPush` (types + `GitCliMutator.commitAndPush` + messageHandler + l10n) và cập nhật design doc 01 §4.1/§4.4 | ✅ Đã khắc phục |
+| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động                                                                                                                    | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt                                                                    |     Phân Loại     | Nguyên Nhân Gốc                                                                                                        | Giải Pháp Đã Sửa                                                                                                                   | Kết Quả Sau Sửa |
+| :-: | :------------: | :---------------------------------------------------------------------------------------------------------------------------------- | :------------: | :--------------------------------------------------------------------------------------------- | :---------------: | :--------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- | :-------------: |
+|  1  |     Vòng 1     | `tests/webview/components/staging/CommitComposer.test.ts`, `StagingPanel.test.ts`, `src/webview/components/staging/StagingArea.tsx` |      Lint      | `import-js/order`: sai thứ tự/nhóm import (`@/` phải đứng trước `@tests/`, `ui` sau `staging`) |    `[DEV_BUG]`    | Đặt import sai quy ước `import-js/order` của repo                                                                      | Sắp xếp lại nhóm import đúng thứ tự `external` → `@/` → `@tests/`                                                                  | ✅ Đã khắc phục |
+|  2  |     Vòng 1     | `src/webview/components/staging/CommitComposer.tsx`                                                                                 |      Lint      | `unicorn/consistent-function-scoping`: `autoGrow` không dùng biến ngoài                        |    `[DEV_BUG]`    | Khai báo hàm trong thân component dù không phụ thuộc state                                                             | Di dời `autoGrow` ra module scope                                                                                                  | ✅ Đã khắc phục |
+|  3  |     Vòng 1     | `tests/webview/components/staging/CommitComposer.test.ts`                                                                           |   Unit Test    | `AssertionError` (amend không nạp tiêu đề HEAD)                                                |    `[DEV_BUG]`    | jsdom `.click()` trên checkbox không kích hoạt `change` (không toggle `checked`/fire event)                            | Đặt `checked = true` rồi `dispatchEvent(new Event("change"))`, assert trực tiếp `commitSubject.value`                              | ✅ Đã khắc phục |
+|  4  |     Vòng 1     | `src/webview/lib/stores/staging.store.ts` + `src/types/actions.ts` + `src/extension/**`                                             |   Typecheck    | Thiếu action RPC `commitAndPush` cho dispatcher `commitAndPush()`                              | `[DESIGN_DEFECT]` | UI design §4.3 đặc tả `commitAndPush()` nhưng hợp đồng RPC (backend design §4.1 + `actions.ts`) thiếu action tương ứng | Bổ sung action `commitAndPush` (types + `GitCliMutator.commitAndPush` + messageHandler + l10n) và cập nhật design doc 01 §4.1/§4.4 | ✅ Đã khắc phục |
 
 ### 5.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
-| Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
-| :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **3 vòng** | Vòng 1 (lint + test) → Vòng 2 (sửa import/scoping + di dời `runMutation`) → Vòng 3 (sửa shadow) |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **4 lỗi** | $E_{design} + E_{dev}$ |
-| **Số lỗi do Thiết Kế** | $E_{design}$ | **1 lỗi** | Thiếu action `commitAndPush` trong hợp đồng RPC |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **3 lỗi** | Import order, `autoGrow` scoping, test checkbox |
-| **Số sự cố Môi Trường/Tool** | $E_{env}$ | **0 sự cố** | Loại trừ khỏi tỷ lệ |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **25.0%** | $\frac{1}{4} \times 100\%$ |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **75.0%** | $\frac{3}{4} \times 100\%$ |
-| **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (webview+extension): OK |
+| Chỉ Số Định Lượng                         |   Ký Hiệu    | Giá Trị Thực Tế | Ghi Chú / Đánh Giá                                                                              |
+| :---------------------------------------- | :----------: | :-------------: | :---------------------------------------------------------------------------------------------- |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)**   |     $C$      |   **3 vòng**    | Vòng 1 (lint + test) → Vòng 2 (sửa import/scoping + di dời `runMutation`) → Vòng 3 (sửa shadow) |
+| **Tổng số lỗi kỹ thuật**                  | $E_{total}$  |    **4 lỗi**    | $E_{design} + E_{dev}$                                                                          |
+| **Số lỗi do Thiết Kế**                    | $E_{design}$ |    **1 lỗi**    | Thiếu action `commitAndPush` trong hợp đồng RPC                                                 |
+| **Số lỗi do Triển Khai (Bug Dev)**        |  $E_{dev}$   |    **3 lỗi**    | Import order, `autoGrow` scoping, test checkbox                                                 |
+| **Số sự cố Môi Trường/Tool**              |  $E_{env}$   |   **0 sự cố**   | Loại trừ khỏi tỷ lệ                                                                             |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** |  **$DDR$**   |    **25.0%**    | $\frac{1}{4} \times 100\%$                                                                      |
+| **TỶ LỆ BUG KHI DEV (IBR)**               |  **$IBR$**   |    **75.0%**    | $\frac{3}{4} \times 100\%$                                                                      |
+| **Trạng thái cổng chẩn đoán cuối cùng**   |      -       |  **100% PASS**  | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (webview+extension): OK                        |
 
 ---
 
@@ -132,11 +132,11 @@ Phạm vi gồm:
 
 ## 7. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Bảng Staging 2 phân khu + bulk actions + empty state | ✅ Đạt |
-| Composer: bộ đếm 3 màu, auto-grow, Amend/Sign, `Ctrl+Enter`, âm thanh | ✅ Đạt |
-| Preact Signals store (base + computed + dispatchers) | ✅ Đạt |
-| Container `StagingArea` + quản lý modal tập trung | ✅ Đạt |
-| Unit test store/composer/panel + routing `commitAndPush` | ✅ 18/18 mới |
-| Typecheck + lint + compile + format | ✅ Đạt |
+| Tiêu chí                                                              |  Trạng thái  |
+| :-------------------------------------------------------------------- | :----------: |
+| Bảng Staging 2 phân khu + bulk actions + empty state                  |    ✅ Đạt    |
+| Composer: bộ đếm 3 màu, auto-grow, Amend/Sign, `Ctrl+Enter`, âm thanh |    ✅ Đạt    |
+| Preact Signals store (base + computed + dispatchers)                  |    ✅ Đạt    |
+| Container `StagingArea` + quản lý modal tập trung                     |    ✅ Đạt    |
+| Unit test store/composer/panel + routing `commitAndPush`              | ✅ 18/18 mới |
+| Typecheck + lint + compile + format                                   |    ✅ Đạt    |

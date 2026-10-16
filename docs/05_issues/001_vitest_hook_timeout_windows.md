@@ -48,18 +48,19 @@ Lỗi này làm dừng toàn bộ suite kiểm thử trước khi bất kỳ bà
 
 Cần phân định rạch ròi giữa môi trường Kiểm Thử (Test Environment) và môi trường Vận Hành Thực Tế (Production Runtime):
 
-| Phạm Vi Đánh Giá | Tác Động Thực Tế | Diễn Giải Chi Tiết |
-| :--- | :---: | :--- |
-| **Sản phẩm xuất bản (VSIX Package)** | ❌ **0% Ảnh hưởng** | Vitest, tệp `vitest.config.ts` và toàn bộ thư mục `tests/` hoàn toàn bị loại trừ khi đóng gói extension bằng esbuild. |
-| **Mã nguồn Runtime Extension** | ❌ **0% Ảnh hưởng** | Tiến trình `git.exe` trong `GitCliMutator.ts` chạy độc lập qua Node.js stream, không phụ thuộc vào bất kỳ cơ chế timeout nào của Vitest. |
-| **Tốc độ thực thi bài test** | ❌ **Không làm chậm** | Test chạy xong trong bao nhiêu mili-giây thì trả kết quả bấy nhiêu; timeout chỉ là "mức trần bảo hiểm" để tránh bị ngắt sớm. |
-| **Độ tin cậy của test suite** | ⚠️ **Gây báo lỗi giả (False Negative)** | Khiến lập trình viên tưởng rằng code backend bị lỗi trong khi thực tế chỉ là do hook khởi tạo bị ngắt bởi Vitest. |
+| Phạm Vi Đánh Giá                     |            Tác Động Thực Tế             | Diễn Giải Chi Tiết                                                                                                                       |
+| :----------------------------------- | :-------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sản phẩm xuất bản (VSIX Package)** |           ❌ **0% Ảnh hưởng**           | Vitest, tệp `vitest.config.ts` và toàn bộ thư mục `tests/` hoàn toàn bị loại trừ khi đóng gói extension bằng esbuild.                    |
+| **Mã nguồn Runtime Extension**       |           ❌ **0% Ảnh hưởng**           | Tiến trình `git.exe` trong `GitCliMutator.ts` chạy độc lập qua Node.js stream, không phụ thuộc vào bất kỳ cơ chế timeout nào của Vitest. |
+| **Tốc độ thực thi bài test**         |          ❌ **Không làm chậm**          | Test chạy xong trong bao nhiêu mili-giây thì trả kết quả bấy nhiêu; timeout chỉ là "mức trần bảo hiểm" để tránh bị ngắt sớm.             |
+| **Độ tin cậy của test suite**        | ⚠️ **Gây báo lỗi giả (False Negative)** | Khiến lập trình viên tưởng rằng code backend bị lỗi trong khi thực tế chỉ là do hook khởi tạo bị ngắt bởi Vitest.                        |
 
 ---
 
 ## 4. Các Phương Án Xử Lý Đề Xuất (Proposed Solutions)
 
 ### Phương Án 1: Cấu hình `hookTimeout: 30000` trong `vitest.config.ts` (Khuyến nghị cao nhất)
+
 - **Cách thực hiện**: Bổ sung `hookTimeout: 30000` (30 giây) và `testTimeout: 15000` (15 giây) vào cấu hình `test` của `vitest.config.ts`.
 - **Ưu điểm**:
   - Giải quyết triệt để vấn đề báo lỗi giả trên Windows và CI/CD runner.
@@ -67,6 +68,7 @@ Cần phân định rạch ròi giữa môi trường Kiểm Thử (Test Environ
 - **Nhược điểm**: Nếu có bug làm treo hook thực sự thì phải chờ 30 giây mới nhận được thông báo fail.
 
 ### Phương Án 2: Tối ưu hóa số lần gọi Git trong `makeRepo()`
+
 - **Cách thực hiện**: Thay vì gọi 4 lệnh `git config` độc lập, cấu hình trực tiếp thông qua biến môi trường hoặc cờ `-c`:
   - `git -c user.name=T -c user.email=t@t.com -c commit.gpgsign=false commit -m init`
   - Giảm số lần spawn tiến trình từ 7 lần xuống còn 3 lần (`init`, `add`, `commit`).
@@ -74,6 +76,7 @@ Cần phân định rạch ròi giữa môi trường Kiểm Thử (Test Environ
 - **Nhược điểm**: Chỉ áp dụng cho repo do test helper tạo ra, không bảo hiểm cho các test case nặng khác.
 
 ### Phương Án 3: Sử dụng cờ dòng lệnh thủ công
+
 - **Cách thực hiện**: Chạy lệnh test kèm cờ: `npx vitest run --hookTimeout 30000`.
 - **Ưu điểm**: Không cần sửa file cấu hình.
 - **Nhược điểm**: Bất tiện vì phải nhớ gõ cờ mỗi khi chạy test ngoài terminal.

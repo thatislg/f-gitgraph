@@ -5,6 +5,7 @@ Thư mục này ghi nhận toàn bộ tiến trình triển khai thực tế c�
 ---
 
 ## 📌 Quy Trình & Hướng Dẫn Vận Hành
+
 - **[000. Hướng Dẫn Quản Lý Công Việc & Đồng Bộ Tiến Độ Bằng GitHub Issues & Projects](000_huong_dan_quan_ly_task_github.md)**:
   - Hướng dẫn cấu trúc phân cấp: Milestone $\rightarrow$ Epics $\rightarrow$ Atomic Sub-tasks.
   - Hướng dẫn Sắp xếp (Sort) theo thứ tự lộ trình logic trên GitHub Projects và Issues.
@@ -15,16 +16,20 @@ Thư mục này ghi nhận toàn bộ tiến trình triển khai thực tế c�
 ## 1. Danh Mục Các Giai Đoạn Phát Triển
 
 ### 📦 [Phase 1: Xây Dựng Nền Móng Nhân F# Core Engine (ĐÃ HOÀN THÀNH & ĐÓNG GÓI)](phase1/README.md)
+
 Thư mục [`phase1/`](phase1/README.md) đóng gói toàn bộ hồ sơ tiến độ nền tảng ban đầu:
-- **[001. Windows First Milestone](phase1/001_windows_progress.md)**: Xây dựng nền móng F# Native AOT, Domain Model, Fast Reader, Parallel DAG Solver, Stdio IPC, Webview Integration, Commit Ordering và tinh chỉnh UI (*Đã hoàn thành 100%*).
-- **[002. Linux Milestone](phase1/002_linux_progress.md)**: Mở rộng sang Ubuntu/Fedora, tương thích `glibc` và tự cấp quyền `chmod +x` (*Đã đóng gói kế thừa*).
-- **[003. macOS Milestone](phase1/003_macos_progress.md)**: Hoàn thiện trên Apple Silicon & Intel, xử lý Gatekeeper (*Đã đóng gói kế thừa*).
-- **[004. Unified Packaging & Release Milestone](phase1/004_release_progress.md)**: Đóng gói Universal VSIX và CI/CD (*Đã đóng gói kế thừa*).
+
+- **[001. Windows First Milestone](phase1/001_windows_progress.md)**: Xây dựng nền móng F# Native AOT, Domain Model, Fast Reader, Parallel DAG Solver, Stdio IPC, Webview Integration, Commit Ordering và tinh chỉnh UI (_Đã hoàn thành 100%_).
+- **[002. Linux Milestone](phase1/002_linux_progress.md)**: Mở rộng sang Ubuntu/Fedora, tương thích `glibc` và tự cấp quyền `chmod +x` (_Đã đóng gói kế thừa_).
+- **[003. macOS Milestone](phase1/003_macos_progress.md)**: Hoàn thiện trên Apple Silicon & Intel, xử lý Gatekeeper (_Đã đóng gói kế thừa_).
+- **[004. Unified Packaging & Release Milestone](phase1/004_release_progress.md)**: Đóng gói Universal VSIX và CI/CD (_Đã đóng gói kế thừa_).
 
 ---
 
 ### 🚀 [Phase 3: Reborn — Tiến Hóa Thành Ứng Dụng Git UI Hoàn Chỉnh (ĐANG THỰC HIỆN)](phase3/README.md)
+
 Thư mục [`phase3/`](phase3/README.md) theo dõi tiến độ chi tiết từng chặng nâng cấp F-GitGraph thành một **Full-Featured Git Client App UI**:
+
 - **[Chặng 3.1: Khu Vực Staging & Bộ Soạn Thảo Commit (Core Dev Loop)](phase3/001_phase3_1_staging_and_composer.md)**:
   - Danh sách Unstaged / Staged Files.
   - Stage, Unstage, Discard thay đổi tệp an toàn.

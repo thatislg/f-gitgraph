@@ -8,20 +8,20 @@ Tài liệu này tổng hợp ma trận phân tích độ lệch (Gap Analysis) 
 
 Bảng phân tích độ lệch dưới đây đánh giá mức độ cấp thiết và độ phức tạp kỹ thuật của các tính năng còn thiếu, từ đó xác lập thứ tự ưu tiên cho lộ trình Phase 3:
 
-| STT | Trụ Cột Năng Lực | Tính Năng Còn Thiếu Trong F-GitGraph | Tác Động Trải Nghiệm (Impact) | Độ Phức Tạp (Complexity) | Mức Độ Ưu Tiên |
-| :---: | :--- | :--- | :---: | :---: | :---: |
-| **1** | **Workspace & Staging** | **Khu vực Staging (Danh sách Unstaged / Staged)** | 🔴 **Cực kỳ cao** (Chặn vòng lặp dev) | 🟡 Vừa phải | 🔥 **P0 (Bắt buộc số 1)** |
-| **2** | **Workspace & Staging** | **Khung soạn thảo Commit (Composer: Title, Body, Amend, Sign)** | 🔴 **Cực kỳ cao** (Không thể commit trên UI) | 🟢 Thấp - Vừa | 🔥 **P0 (Bắt buộc số 1)** |
-| **3** | **Workspace & Staging** | **Stage / Unstage / Discard tệp** | 🔴 **Cực kỳ cao** | 🟢 Thấp - Vừa | 🔥 **P0 (Bắt buộc số 1)** |
-| **4** | **Mutate & Sync** | **Thanh công cụ đỉnh: Fetch, Pull, Push kèm số đếm `↑` / `↓`** | 🔴 **Rất cao** (Thao tác lặp đi lặp lại) | 🟢 Thấp - Vừa | 🚀 **P1 (Ưu tiên cao)** |
-| **5** | **Navigation** | **Cây điều hướng Left Sidebar (Working Tree, Branches, Tags, Stashes)** | 🔴 **Rất cao** (Bao quát toàn bộ kho) | 🟡 Vừa phải | 🚀 **P1 (Ưu tiên cao)** |
-| **6** | **Search & Filter** | **Thanh tìm kiếm & lọc commit (Message, Author, Hash)** | 🟡 Cao (Duyệt lịch sử chuyên nghiệp) | 🟡 Vừa phải | 🚀 **P1 (Ưu tiên cao)** |
-| **7** | **Workspace & Staging** | **Stage / Discard từng đoạn code (Partial Hunk Staging)** | 🟡 Cao (Dành cho dev chuyên nghiệp) | 🔴 Cao | ⚡ **P2 (Nâng cao)** |
-| **8** | **Inspect** | **So sánh vi sai giữa 2 commit bất kỳ (Diff A ↔ B)** | 🟡 Cao | 🟢 Thấp - Vừa | ⚡ **P2 (Nâng cao)** |
-| **9** | **Shelving** | **Quản lý Stash (Stash Save, Pop, Apply, Drop, List Diff)** | 🟡 Cao | 🟢 Thấp - Vừa | ⚡ **P2 (Nâng cao)** |
-| **10** | **Rewrite** | **Trình tái cấu trúc lịch sử trực quan (Visual Interactive Rebase)** | 🟣 Điểm sáng cạnh tranh (Killer Feature) | 🔴 Cao | 💎 **P3 (Đột phá)** |
-| **11** | **Resolve** | **Trình giải quyết xung đột trực quan (In-Flight Conflict Resolver)** | 🟣 Điểm sáng cạnh tranh | 🔴 Cao | 💎 **P3 (Đột phá)** |
-| **12** | **Interactions** | **Kéo & thả trực quan (Drag & Drop to merge/rebase/cherry-pick)** | 🟣 Tăng cường UX | 🟡 Vừa phải | 💎 **P3 (Đột phá)** |
+|  STT   | Trụ Cột Năng Lực        | Tính Năng Còn Thiếu Trong F-GitGraph                                    |        Tác Động Trải Nghiệm (Impact)         | Độ Phức Tạp (Complexity) |      Mức Độ Ưu Tiên       |
+| :----: | :---------------------- | :---------------------------------------------------------------------- | :------------------------------------------: | :----------------------: | :-----------------------: |
+| **1**  | **Workspace & Staging** | **Khu vực Staging (Danh sách Unstaged / Staged)**                       |    🔴 **Cực kỳ cao** (Chặn vòng lặp dev)     |       🟡 Vừa phải        | 🔥 **P0 (Bắt buộc số 1)** |
+| **2**  | **Workspace & Staging** | **Khung soạn thảo Commit (Composer: Title, Body, Amend, Sign)**         | 🔴 **Cực kỳ cao** (Không thể commit trên UI) |      🟢 Thấp - Vừa       | 🔥 **P0 (Bắt buộc số 1)** |
+| **3**  | **Workspace & Staging** | **Stage / Unstage / Discard tệp**                                       |              🔴 **Cực kỳ cao**               |      🟢 Thấp - Vừa       | 🔥 **P0 (Bắt buộc số 1)** |
+| **4**  | **Mutate & Sync**       | **Thanh công cụ đỉnh: Fetch, Pull, Push kèm số đếm `↑` / `↓`**          |   🔴 **Rất cao** (Thao tác lặp đi lặp lại)   |      🟢 Thấp - Vừa       |  🚀 **P1 (Ưu tiên cao)**  |
+| **5**  | **Navigation**          | **Cây điều hướng Left Sidebar (Working Tree, Branches, Tags, Stashes)** |    🔴 **Rất cao** (Bao quát toàn bộ kho)     |       🟡 Vừa phải        |  🚀 **P1 (Ưu tiên cao)**  |
+| **6**  | **Search & Filter**     | **Thanh tìm kiếm & lọc commit (Message, Author, Hash)**                 |     🟡 Cao (Duyệt lịch sử chuyên nghiệp)     |       🟡 Vừa phải        |  🚀 **P1 (Ưu tiên cao)**  |
+| **7**  | **Workspace & Staging** | **Stage / Discard từng đoạn code (Partial Hunk Staging)**               |     🟡 Cao (Dành cho dev chuyên nghiệp)      |          🔴 Cao          |   ⚡ **P2 (Nâng cao)**    |
+| **8**  | **Inspect**             | **So sánh vi sai giữa 2 commit bất kỳ (Diff A ↔ B)**                    |                    🟡 Cao                    |      🟢 Thấp - Vừa       |   ⚡ **P2 (Nâng cao)**    |
+| **9**  | **Shelving**            | **Quản lý Stash (Stash Save, Pop, Apply, Drop, List Diff)**             |                    🟡 Cao                    |      🟢 Thấp - Vừa       |   ⚡ **P2 (Nâng cao)**    |
+| **10** | **Rewrite**             | **Trình tái cấu trúc lịch sử trực quan (Visual Interactive Rebase)**    |   🟣 Điểm sáng cạnh tranh (Killer Feature)   |          🔴 Cao          |    💎 **P3 (Đột phá)**    |
+| **11** | **Resolve**             | **Trình giải quyết xung đột trực quan (In-Flight Conflict Resolver)**   |           🟣 Điểm sáng cạnh tranh            |          🔴 Cao          |    💎 **P3 (Đột phá)**    |
+| **12** | **Interactions**        | **Kéo & thả trực quan (Drag & Drop to merge/rebase/cherry-pick)**       |               🟣 Tăng cường UX               |       🟡 Vừa phải        |    💎 **P3 (Đột phá)**    |
 
 ---
 
@@ -56,6 +56,7 @@ Bảng phân tích độ lệch dưới đây đánh giá mức độ cấp thi�
 ```
 
 ### Các Đặc Điểm Bố Cục Đáng Chú Ý:
+
 1. **Khả năng co giãn và thu gọn (Responsive & Collapsible)**:
    - Sidebar bên trái có thể thu gọn lại thành thanh icon mini (như VS Code Activity Bar) để nhường toàn bộ không gian cho Đồ thị khi cần xem DAG diện rộng.
    - Inspector bên phải có thể chuyển đổi linh hoạt giữa dạng **Right Pane (cột bên phải)** cho màn hình ngang rộng hoặc **Bottom Dock (ngăn kéo bên dưới)** cho màn hình nhỏ.
@@ -118,7 +119,8 @@ gantt
 ---
 
 ### 🚀 Giai Đoạn 3.1: Khu Vực Staging & Bộ Soạn Thảo Commit (Vòng Lặp Dev Cốt Lõi)
-*Mục tiêu: Đảm bảo lập trình viên có thể thực hiện trọn vẹn chu trình làm việc hàng ngày (Xem file đổi $\rightarrow$ Stage $\rightarrow$ Viết commit $\rightarrow$ Commit) ngay trên F-GitGraph mà không cần mở tab SCM mặc định của VS Code.*
+
+_Mục tiêu: Đảm bảo lập trình viên có thể thực hiện trọn vẹn chu trình làm việc hàng ngày (Xem file đổi $\rightarrow$ Stage $\rightarrow$ Viết commit $\rightarrow$ Commit) ngay trên F-GitGraph mà không cần mở tab SCM mặc định của VS Code._
 
 - **Đầu việc 3.1.1: Bảng điều khiển Staging Area (Unstaged vs Staged Files)**:
   - Hiển thị danh sách các tệp thay đổi phân thành 2 nhóm: "Staged Changes" và "Changes (Unstaged)".
@@ -138,7 +140,8 @@ gantt
 ---
 
 ### 🚀 Giai Đoạn 3.2: Kiến Trúc 3-Pane Workspace & Thanh Công Cụ Đồng Bộ
-*Mục tiêu: Xây dựng không gian làm việc chuyên nghiệp, bao quát toàn bộ tài nguyên của kho và cung cấp các nút đồng bộ từ xa có bộ đếm trực quan.*
+
+_Mục tiêu: Xây dựng không gian làm việc chuyên nghiệp, bao quát toàn bộ tài nguyên của kho và cung cấp các nút đồng bộ từ xa có bộ đếm trực quan._
 
 - **Đầu việc 3.2.1: Cây điều hướng Left Sidebar Navigator**:
   - Nhóm `Working Tree`: Hiển thị số lượng tệp đang thay đổi.
@@ -159,7 +162,8 @@ gantt
 ---
 
 ### 🚀 Giai Đoạn 3.3: Quản Lý Stash & So Sánh Vi Sai Đa Commit
-*Mục tiêu: Mở rộng các công cụ khảo sát nâng cao và quản lý mã nguồn tạm thời.*
+
+_Mục tiêu: Mở rộng các công cụ khảo sát nâng cao và quản lý mã nguồn tạm thời._
 
 - **Đầu việc 3.3.1: Bảng quản lý Stash chuyên sâu (Stash Inspector)**:
   - Xem danh sách các bản stash kèm thông điệp, ngày tạo và nhánh nguồn.
@@ -174,7 +178,8 @@ gantt
 ---
 
 ### 🚀 Giai Đoạn 3.4: Tái Cấu Trúc Lịch Sử & Xử Lý Xung Đột Trực Quan
-*Mục tiêu: Đưa F-GitGraph vươn lên nhóm các công cụ Git cao cấp nhất thế giới với các tính năng "Killer Features".*
+
+_Mục tiêu: Đưa F-GitGraph vươn lên nhóm các công cụ Git cao cấp nhất thế giới với các tính năng "Killer Features"._
 
 - **Đầu việc 3.4.1: Trình tái cấu trúc lịch sử trực quan (Visual Interactive Rebase Editor)**:
   - Khi kích hoạt rebase từ một commit cha: Hiển thị bảng danh sách các commit cần thao tác.
@@ -196,6 +201,7 @@ gantt
 ## 5. Kết Luận & Định Hướng Bắt Đầu
 
 Hồ sơ điều tra Phase 3 đã xác lập một bức tranh toàn cảnh rõ ràng:
+
 1. **F-GitGraph đã có một nền tảng nhân F# Core Engine cực mạnh** về tốc độ tính toán đồ thị, đọc nhị phân và thẩm mỹ hiển thị.
 2. **Khoảng cách lớn nhất** ngăn cản ứng dụng trở thành một Git App hoàn chỉnh chính là sự thiếu vắng của **Khu vực Staging & Bộ soạn thảo Commit (Phase 3.1)** và **Kiến trúc Không gian Làm việc 3-Pane (Phase 3.2)**.
 3. Việc tập trung triển khai **Phase 3.1 ngay lập tức** sẽ mang lại bước nhảy vọt lớn nhất về giá trị sử dụng cho người dùng, hoàn thiện vòng lặp làm việc cốt lõi của lập trình viên ngay trên F-GitGraph.
