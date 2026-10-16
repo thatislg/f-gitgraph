@@ -184,4 +184,18 @@ describe("GitCliMutator", () => {
     const after = gitOut(["log", "-1", "--pretty=%B"]).trim();
     expect(after).toBe(before);
   });
+
+  it("normalizes index.lock conflicts into a friendly, actionable message", async () => {
+    // Giả lập một tiến trình Git khác đang giữ khóa chỉ mục.
+    const lockPath = path.join(repo, ".git", "index.lock");
+    fs.writeFileSync(lockPath, "");
+
+    try {
+      const result = await mutator.stageFile("f");
+      expect(result.ok).toBe(false);
+      expect(result.stderr).toContain("đang bị khóa bởi một tiến trình Git khác");
+    } finally {
+      fs.rmSync(lockPath, { force: true });
+    }
+  });
 });

@@ -166,39 +166,39 @@ export class GitCliMutator {
 
   /** Đưa một tệp vào Staging Index; `--` ngăn nhầm lẫn đường dẫn với nhánh/cờ (tương thích mọi bản Git). */
   async stageFile(filePath: string): Promise<MutatorResult> {
-    return this.run(["add", "--", filePath]);
+    return this.normalizeError(await this.run(["add", "--", filePath]));
   }
 
   /** Rút một tệp khỏi Staging Index; tự động fallback `git reset --` trên Git < 2.23. */
   async unstageFile(filePath: string): Promise<MutatorResult> {
     if (await this.canUseRestore()) {
-      return this.run(["restore", "--staged", "--", filePath]);
+      return this.normalizeError(await this.run(["restore", "--staged", "--", filePath]));
     }
-    return this.run(["reset", "--", filePath]);
+    return this.normalizeError(await this.run(["reset", "--", filePath]));
   }
 
   /** Đưa toàn bộ tệp mới, sửa đổi và bị xóa vào Staging Index (tương thích mọi bản Git). */
   async stageAll(): Promise<MutatorResult> {
-    return this.run(["add", "-A"]);
+    return this.normalizeError(await this.run(["add", "-A"]));
   }
 
   /** Rút toàn bộ tệp khỏi Staging Index về lại working tree; fallback `git reset` trên Git < 2.23. */
   async unstageAll(): Promise<MutatorResult> {
     if (await this.canUseRestore()) {
-      return this.run(["restore", "--staged", "."]);
+      return this.normalizeError(await this.run(["restore", "--staged", "."]));
     }
-    return this.run(["reset"]);
+    return this.normalizeError(await this.run(["reset"]));
   }
 
   /** Hoàn tác thay đổi một tệp: untracked -> clean -f, tracked -> restore (hoặc fallback checkout). */
   async discardFileChanges(filePath: string, isUntracked: boolean): Promise<MutatorResult> {
     if (isUntracked) {
-      return this.run(["clean", "-f", "--", filePath]);
+      return this.normalizeError(await this.run(["clean", "-f", "--", filePath]));
     }
     if (await this.canUseRestore()) {
-      return this.run(["restore", "--", filePath]);
+      return this.normalizeError(await this.run(["restore", "--", filePath]));
     }
-    return this.run(["checkout", "--", filePath]);
+    return this.normalizeError(await this.run(["checkout", "--", filePath]));
   }
 
   /** Làm sạch toàn bộ working tree; fallback `git checkout -- .` trên Git < 2.23, sau đó clean -fd. */
@@ -207,9 +207,9 @@ export class GitCliMutator {
       ? await this.run(["restore", "."])
       : await this.run(["checkout", "--", "."]);
     if (!restore.ok) {
-      return restore;
+      return this.normalizeError(restore);
     }
-    return this.run(["clean", "-fd"]);
+    return this.normalizeError(await this.run(["clean", "-fd"]));
   }
 
   async createBranch(name: string, commitHash: string): Promise<MutatorResult> {

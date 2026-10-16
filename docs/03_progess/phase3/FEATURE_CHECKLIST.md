@@ -14,8 +14,8 @@ Tài liệu này là **Bảng Điều Khiển Trung Tâm (Single Source of Truth
 ## 📊 Tổng Hợp Tỉ Lệ Hoàn Thành Tính Năng
 
 - **Tổng số tính năng quy hoạch**: 60 tính năng
-- **Đã hoàn thành**: 0 / 60 (0%)
-- **Đang triển khai**: Chặng 3.1 (Staging & Commit Composer)
+- **Đã hoàn thành**: 19 / 60 (31.7%)
+- **Đang triển khai**: Chặng 3.1 đã hoàn tất; chặng kế tiếp 3.2 (3-Pane Workspace)
 
 ---
 
@@ -23,18 +23,18 @@ Tài liệu này là **Bảng Điều Khiển Trung Tâm (Single Source of Truth
 
 | STT | Trạng Thái | Tính Năng Người Dùng (Feature) | Mô Tả & Tiêu Chí Nghiệm Thu | Ngày Hoàn Thành |
 | :---: | :---: | :--- | :--- | :---: |
-| 1.1 | [ ] | **Danh mục Staged Changes** | Hiển thị danh sách các tệp đã đưa vào index kèm số lượng đếm `Staged Changes (N)`. | |
-| 1.2 | [ ] | **Danh mục Changes (Unstaged)** | Hiển thị danh sách các tệp sửa đổi trên working tree chưa đưa vào index. | |
-| 1.3 | [ ] | **Danh mục Untracked Files** | Nhận diện và liệt kê các tệp mới tạo chưa được Git theo dõi. | |
-| 1.4 | [ ] | **Badge trạng thái màu Neon** | Hiển thị badge vuông sắc nét: `A` (Xanh lục), `M` (Vàng), `D` (Đỏ), `R` (Tím). | |
-| 1.5 | [ ] | **Nút Stage Tệp (`+`)** | Icon `+` xuất hiện khi hover lên tệp unstaged; click để chuyển tệp lên Staged. | |
-| 1.6 | [ ] | **Nút Unstage Tệp (`-`)** | Icon `-` xuất hiện khi hover lên tệp staged; click để rút tệp về Changes. | |
-| 1.7 | [ ] | **Nút Stage All (`+`)** | Đưa toàn bộ các tệp thay đổi vào index với một cú nhấp chuột (`git add -A`). | |
-| 1.8 | [ ] | **Nút Unstage All (`-`)** | Rút toàn bộ tệp staged về working tree (`git restore --staged .`). | |
-| 1.9 | [ ] | **Nút Discard Changes (Hoàn tác)** | Hoàn tác tệp về trạng thái commit gần nhất; luôn bật hộp thoại xác nhận bảo vệ mã nguồn. | |
-| 1.10| [ ] | **Nút Discard All Changes** | Hoàn tác toàn bộ tệp unstaged kèm cảnh báo nguy hiểm cấp cao. | |
-| 1.11| [ ] | **Click Tệp Xem Diff Vi Sai** | Nhấp chuột vào bất kỳ tệp nào trong Staging để mở trực tiếp màn hình `vscode.diff`. | |
-| 1.12| [ ] | **Tự động làm mới theo File Watcher**| Danh sách Staged/Unstaged tự động cập nhật khi người dùng sửa hoặc lưu file trong IDE. | |
+| 1.1 | [x] | **Danh mục Staged Changes** | Hiển thị danh sách các tệp đã đưa vào index kèm số lượng đếm `Staged Changes (N)`. | 2026-10-16 |
+| 1.2 | [x] | **Danh mục Changes (Unstaged)** | Hiển thị danh sách các tệp sửa đổi trên working tree chưa đưa vào index. | 2026-10-16 |
+| 1.3 | [x] | **Danh mục Untracked Files** | Nhận diện và liệt kê các tệp mới tạo chưa được Git theo dõi. | 2026-10-16 |
+| 1.4 | [x] | **Badge trạng thái màu Neon** | Hiển thị badge vuông sắc nét: `A` (Xanh lục), `M` (Vàng), `D` (Đỏ), `R` (Tím). | 2026-10-16 |
+| 1.5 | [x] | **Nút Stage Tệp (`+`)** | Icon `+` xuất hiện khi hover lên tệp unstaged; click để chuyển tệp lên Staged. | 2026-10-16 |
+| 1.6 | [x] | **Nút Unstage Tệp (`-`)** | Icon `-` xuất hiện khi hover lên tệp staged; click để rút tệp về Changes. | 2026-10-16 |
+| 1.7 | [x] | **Nút Stage All (`+`)** | Đưa toàn bộ các tệp thay đổi vào index với một cú nhấp chuột (`git add -A`). | 2026-10-16 |
+| 1.8 | [x] | **Nút Unstage All (`-`)** | Rút toàn bộ tệp staged về working tree (`git restore --staged .`). | 2026-10-16 |
+| 1.9 | [x] | **Nút Discard Changes (Hoàn tác)** | Hoàn tác tệp về trạng thái commit gần nhất; luôn bật hộp thoại xác nhận bảo vệ mã nguồn. | 2026-10-16 |
+| 1.10| [x] | **Nút Discard All Changes** | Hoàn tác toàn bộ tệp unstaged kèm cảnh báo nguy hiểm cấp cao. | 2026-10-16 |
+| 1.11| [ ] | **Click Tệp Xem Diff Vi Sai** | Nhấp chuột vào bất kỳ tệp nào trong Staging để mở trực tiếp màn hình `vscode.diff`. | *(nợ kỹ thuật — đang mở file trong editor, chưa mở diff)* |
+| 1.12| [x] | **Tự động làm mới theo File Watcher**| Danh sách Staged/Unstaged tự động cập nhật khi người dùng sửa hoặc lưu file trong IDE. | 2026-10-16 |
 
 ---
 
@@ -42,14 +42,14 @@ Tài liệu này là **Bảng Điều Khiển Trung Tâm (Single Source of Truth
 
 | STT | Trạng Thái | Tính Năng Người Dùng (Feature) | Mô Tả & Tiêu Chí Nghiệm Thu | Ngày Hoàn Thành |
 | :---: | :---: | :--- | :--- | :---: |
-| 2.1 | [ ] | **Khung nhập Tiêu đề (Subject)** | Ô input nhập dòng tiêu đề commit với placeholder trực quan. | |
-| 2.2 | [ ] | **Bộ đếm ký tự 50 chars thông minh**| Hiển thị góc phải: Trắng ($\le 50$), Vàng ($51 - 72$), Đỏ ($> 72$ chars). | |
-| 2.3 | [ ] | **Khung nhập Mô tả mở rộng (Body)**| Textarea nhập nội dung chi tiết nhiều dòng, tự động co dãn chiều cao. | |
-| 2.4 | [ ] | **Checkbox "Amend previous commit"**| Tích chọn để tự nạp commit message cũ lên và sửa đổi commit `HEAD`. | |
-| 2.5 | [ ] | **Checkbox "Sign commit (GPG)"** | Bật/tắt cờ ký số mật mã `-S` cho commit. | |
-| 2.6 | [ ] | **Nút bấm chính "Commit"** | Hiển thị số lượng tệp sẽ commit (vd: `Commit 3 files`); tự vô hiệu khi chưa có staged. | |
-| 2.7 | [ ] | **Nút phụ "Commit & Push"** | Tự động commit và đẩy thẳng lên remote tracking branch sau khi commit thành công. | |
-| 2.8 | [ ] | **Phím tắt `Ctrl + Enter`** | Nhấn `Ctrl + Enter` (hoặc `Cmd + Enter`) từ bất kỳ ô nhập liệu nào để commit tức thì. | |
+| 2.1 | [x] | **Khung nhập Tiêu đề (Subject)** | Ô input nhập dòng tiêu đề commit với placeholder trực quan. | 2026-10-16 |
+| 2.2 | [x] | **Bộ đếm ký tự 50 chars thông minh**| Hiển thị góc phải: Trắng ($\le 50$), Vàng ($51 - 72$), Đỏ ($> 72$ chars). | 2026-10-16 |
+| 2.3 | [x] | **Khung nhập Mô tả mở rộng (Body)**| Textarea nhập nội dung chi tiết nhiều dòng, tự động co dãn chiều cao. | 2026-10-16 |
+| 2.4 | [x] | **Checkbox "Amend previous commit"**| Tích chọn để tự nạp commit message cũ lên và sửa đổi commit `HEAD`. | 2026-10-16 |
+| 2.5 | [x] | **Checkbox "Sign commit (GPG)"** | Bật/tắt cờ ký số mật mã `-S` cho commit. | 2026-10-16 |
+| 2.6 | [x] | **Nút bấm chính "Commit"** | Hiển thị số lượng tệp sẽ commit (vd: `Commit 3 files`); tự vô hiệu khi chưa có staged. | 2026-10-16 |
+| 2.7 | [x] | **Nút phụ "Commit & Push"** | Tự động commit và đẩy thẳng lên remote tracking branch sau khi commit thành công. | 2026-10-16 |
+| 2.8 | [x] | **Phím tắt `Ctrl + Enter`** | Nhấn `Ctrl + Enter` (hoặc `Cmd + Enter`) từ bất kỳ ô nhập liệu nào để commit tức thì. | 2026-10-16 |
 
 ---
 

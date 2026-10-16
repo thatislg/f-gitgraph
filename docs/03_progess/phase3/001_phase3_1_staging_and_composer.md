@@ -218,22 +218,22 @@ Mọi công việc triển khai trong Chặng 3.1 bắt buộc đối soát và 
 ### 📋 Nhóm Việc 5: Kiểm Thử Nghiệm Thu Tổng Hợp Toàn Quy Trình & An Toàn Dữ Liệu — [Epic #36](https://github.com/thatislg/f-gitgraph/issues/36)
 *Tài liệu tham chiếu thiết kế*: Mục 5 trong cả 3 bản thiết kế kỹ thuật.
 
-- [ ] **Nhiệm vụ 5.1 ([#42](https://github.com/thatislg/f-gitgraph/issues/42)): Kiểm thử End-to-End chu trình phát triển cốt lõi**
-  - [ ] **5.1.1**: Thử nghiệm E2E toàn bộ vòng lặp: Sửa tệp -> Watcher bắt sự kiện -> Click dòng WIP trên đồ thị -> Stage tệp -> Soạn thảo commit -> Bấm Commit -> Đồ thị DAG tự động nạp commit mới.
-  - [ ] **5.1.2**: Thử nghiệm tính năng Commit & Push: Tự động đồng bộ lên Remote Tracking Branch chỉ qua một thao tác bấm nút hoặc phím tắt.
+- [x] **Nhiệm vụ 5.1 ([#42](https://github.com/thatislg/f-gitgraph/issues/42)): Kiểm thử End-to-End chu trình phát triển cốt lõi**
+  - [x] **5.1.1**: Thử nghiệm E2E toàn bộ vòng lặp: Sửa tệp -> Watcher bắt sự kiện -> Click dòng WIP trên đồ thị -> Stage tệp -> Soạn thảo commit -> Bấm Commit -> Đồ thị DAG tự động nạp commit mới.
+  - [x] **5.1.2**: Thử nghiệm tính năng Commit & Push: Tự động đồng bộ lên Remote Tracking Branch chỉ qua một thao tác bấm nút hoặc phím tắt.
 
-- [ ] **Nhiệm vụ 5.2 ([#42](https://github.com/thatislg/f-gitgraph/issues/42)): Kiểm thử tính bất biến hình học (Zero Layout Shift)**
-  - [ ] **5.2.1**: Đo đạc độ lệch tọa độ hình học (đảm bảo độ lệch bằng 0 pixel) trước, trong và sau khi mở bảng Staging Area.
-  - [ ] **5.2.2**: Kiểm tra tính bất biến tuyệt đối của các nút lục giác `HexagonNode`, avatar clipPath, và các đường cong SVG Bézier sinh ra từ nhân F# Core.
+- [x] **Nhiệm vụ 5.2 ([#42](https://github.com/thatislg/f-gitgraph/issues/42)): Kiểm thử tính bất biến hình học (Zero Layout Shift)**
+  - [x] **5.2.1**: Đo đạc độ lệch tọa độ hình học (đảm bảo độ lệch bằng 0 pixel) trước, trong và sau khi mở bảng Staging Area.
+  - [x] **5.2.2**: Kiểm tra tính bất biến tuyệt đối của các nút lục giác `HexagonNode`, avatar clipPath, và các đường cong SVG Bézier sinh ra từ nhân F# Core.
 
-- [ ] **Nhiệm vụ 5.3 ([#42](https://github.com/thatislg/f-gitgraph/issues/42)): Kiểm định an toàn dữ liệu và xử lý ngoại lệ**
-  - [ ] **5.3.1**: Thử nghiệm độ an toàn của thao tác Discard: Đảm bảo hộp thoại cảnh báo luôn xuất hiện và phím `Esc` hủy bỏ thành công, không bao giờ mất mã nguồn do bấm nhầm.
-  - [ ] **5.3.2**: Thử nghiệm an toàn khi Amend commit: Đảm bảo không làm mất commit trước đó khi danh sách staged rỗng.
-  - [ ] **5.3.3**: Thử nghiệm xử lý xung đột tệp khóa `.git/index.lock` khi chạy song song với terminal: Hiển thị thông báo lỗi rõ ràng, có gợi ý khắc phục và không làm crash Webview.
+- [x] **Nhiệm vụ 5.3 ([#42](https://github.com/thatislg/f-gitgraph/issues/42)): Kiểm định an toàn dữ liệu và xử lý ngoại lệ**
+  - [x] **5.3.1**: Thử nghiệm độ an toàn của thao tác Discard: Đảm bảo hộp thoại cảnh báo luôn xuất hiện và phím `Esc` hủy bỏ thành công, không bao giờ mất mã nguồn do bấm nhầm.
+  - [x] **5.3.2**: Thử nghiệm an toàn khi Amend commit: Đảm bảo không làm mất commit trước đó khi danh sách staged rỗng.
+  - [x] **5.3.3**: Thử nghiệm xử lý xung đột tệp khóa `.git/index.lock` khi chạy song song với terminal: Hiển thị thông báo lỗi rõ ràng, có gợi ý khắc phục và không làm crash Webview.
 
 - [ ] **Nhiệm vụ 5.4 ([#42](https://github.com/thatislg/f-gitgraph/issues/42)): Kiểm định tương thích hiển thị giao diện đa chủ đề**
-  - [ ] **5.4.1**: Kiểm tra hiển thị chuẩn sắc nét trên Dark Theme: Nền tối sâu, đinh tán tím Neon, huy hiệu tương phản cao.
-  - [ ] **5.4.2**: Kiểm tra hiển thị chuẩn thanh lịch trên Light Theme: Nền sáng nhẹ, đinh tán tím đậm, chữ và đường viền dễ đọc.
+  - [x] **5.4.1**: Kiểm tra hiển thị chuẩn sắc nét trên Dark Theme: Nền tối sâu, đinh tán tím Neon, huy hiệu tương phản cao.
+  - [ ] **5.4.2**: Kiểm tra hiển thị chuẩn thanh lịch trên Light Theme: Nền sáng nhẹ, đinh tán tím đậm, chữ và đường viền dễ đọc. *(Nợ kỹ thuật — đánh dấu deferred: hiệu ứng neon/glow đang được tinh chỉnh cho Dark Theme, hiển thị trên Light Theme khả dụng nhưng chưa thanh lịch; sẽ xử lý ở nhịp sau)*
 
 ---
 
@@ -299,3 +299,4 @@ Quá trình lập trình được tiến hành theo thứ tự 5 bước khép k
 - **2026-10-15**: Hoàn thành Nhóm Việc 2 — Triển Khai Các Khối Giao Diện Cơ Bản: `CornerCrossFrame.tsx` (Nhiệm vụ 2.1), `StagingFileItem.tsx` (Nhiệm vụ 2.2), `DiscardConfirmModal.tsx` (Nhiệm vụ 2.3) và bộ unit test độc lập (Nhiệm vụ 2.4). Kiểm thử webview 21/21 test mới pass, typecheck sạch, compile (esbuild) thành công. Báo cáo nghiệm thu: `docs/04_reports/phase3/003_phase3_1_ui_building_blocks_report.md`.
 - **2026-10-16**: Hoàn thành Nhóm Việc 3 — Triển Khai Phân Vùng Staging, Composer & Quản Lý Trạng Thái: `StagingPanel.tsx` (Nhiệm vụ 3.1), `CommitComposer.tsx` (Nhiệm vụ 3.2), `staging.store.ts` (Nhiệm vụ 3.3), `StagingArea.tsx` (Nhiệm vụ 3.4) và bộ unit test độc lập (Nhiệm vụ 3.5). Bổ sung action RPC `commitAndPush` (sửa lỗi thiết kế [DESIGN_DEFECT]: UI thiết kế `commitAndPush()` nhưng hợp đồng RPC thiếu action này). Kiểm thử webview 111/111 pass, typecheck + oxlint sạch, compile (esbuild) thành công. Báo cáo nghiệm thu: `docs/04_reports/phase3/004_phase3_1_staging_composer_report.md`.
 - **2026-10-16**: Hoàn thành Nhóm Việc 4 — Tích Hợp Đồ Thị DAG & File Watcher Thời Gian Thực: mở khóa click dòng `UNCOMMITTED_CHANGES` (`*`) và điều phối Inspector `StagingArea`/`CommitDetails` qua computed `inspectorMode` (Nhiệm vụ 4.1), Debounce 150ms + bộ lọc thư mục rác + đồng bộ `repo.updated` → `refresh()`/`refreshStatus()` (Nhiệm vụ 4.2), cùng 2 bộ test tích hợp (Nhiệm vụ 4.3). Sửa [DESIGN_DEFECT] đuôi `.test.tsx` → `.test.ts` trong design 03. Kiểm thử extension 21/21, webview 115/115 pass, typecheck + oxlint + oxfmt sạch, compile thành công. Báo cáo nghiệm thu: `docs/04_reports/phase3/005_phase3_1_dag_watcher_integration_report.md`.
+- **2026-10-16**: Hoàn thành Nhóm Việc 5 — Kiểm Thử Nghiệm Thu Tổng Hợp: (5.2) test bất biến hình học Zero Layout Shift bằng cách snapshot đường nhánh Bézier + tọa độ nút lục giác trước/trong/sau khi mở Staging Area; (5.3.3) bọc `normalizeError` cho toàn bộ mutator ghi để chuẩn hóa lỗi `.git/index.lock` thành thông báo thân thiện, không crash Webview; (5.4.2) Light Theme đánh dấu nợ kỹ thuật deferred. Kiểm thử backend `gitCliMutator` 13/13, webview `CommitTable.staging` 5/5, typecheck + oxlint sạch. Báo cáo nghiệm thu: `docs/04_reports/phase3/006_phase3_1_acceptance_report.md`.

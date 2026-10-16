@@ -135,4 +135,35 @@ describe("CommitTable staging integration", () => {
     const overlay = container.querySelector("[data-action='stage-all']")?.closest("div.absolute");
     expect(overlay).not.toBeNull();
   });
+
+  it("preserves F# graph geometry (branch paths & node centers) across staging toggle", async () => {
+    // Đưa một đường nhánh Bézier cố định từ nhân F# vào cửa sổ đồ thị.
+    windowPaths.value = [{ d: "M20 0 C 20 12, 12 12, 12 24", color: 0 }];
+
+    renderTable();
+
+    const snapshot = () => {
+      const graphSvg = container.querySelector("svg.block.overflow-visible");
+      // Đường nhánh Bézier do F# cung cấp (loại trừ icon nằm trong nút lục giác).
+      const branchD = Array.from(graphSvg?.querySelectorAll("path") ?? [])
+        .filter((p) => !p.closest(".graph-node-hexagon"))
+        .map((p) => p.getAttribute("d"));
+      // Tọa độ các đỉnh lục giác (suy từ cx/cy của F#), bất biến với trạng thái chọn/hover.
+      const nodePoints = Array.from(container.querySelectorAll(".graph-node-hexagon polygon")).map(
+        (p) => p.getAttribute("points")
+      );
+      return { branchD, nodePoints };
+    };
+
+    const before = snapshot();
+    await clickRow(0); // mở Staging Area
+    const during = snapshot();
+    await clickRow(0); // đóng Staging Area
+    const after = snapshot();
+
+    // Hình học F# (đường nhánh + tọa độ nút) phải bất biến ở cả ba trạng thái.
+    expect(during).toEqual(before);
+    expect(after).toEqual(before);
+    expect(before.branchD).toContain("M20 0 C 20 12, 12 12, 12 24");
+  });
 });
