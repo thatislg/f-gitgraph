@@ -7,6 +7,7 @@ import {
   confirmDiscard,
   discardModalTarget,
   openDiscardModal,
+  openFile,
   stage,
   stageAll,
   stagedFiles,
@@ -46,6 +47,7 @@ export function StagingArea() {
               openDiscardModal({ filePath, isUntracked, isAll: false })
             }
             onDiff={noopDiff}
+            onOpenFile={openFile}
             onStageAll={stageAll}
             onUnstageAll={unstageAll}
             onDiscardAll={() => openDiscardModal({ isAll: true })}

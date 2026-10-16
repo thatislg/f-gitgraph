@@ -150,6 +150,11 @@ export function registerMessageHandlers(
       })
     )
   );
+  registerAction("openFile", async (msg) => {
+    const fileUri = vscode.Uri.joinPath(vscode.Uri.file(msg.repo), ...msg.filePath.split("/"));
+    const document = await vscode.workspace.openTextDocument(fileUri);
+    await vscode.window.showTextDocument(document, { preview: true });
+  });
 
   // --- Query handlers ---
 

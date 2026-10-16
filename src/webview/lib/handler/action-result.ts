@@ -23,7 +23,8 @@ const ERROR_KEY: Record<ActionResponse["command"], keyof LocalizedStrings> = {
   discardFileChanges: "unableToDiscardFileChanges",
   discardAllChanges: "unableToDiscardAllChanges",
   commitChanges: "unableToCommitChanges",
-  commitAndPush: "unableToCommitAndPush"
+  commitAndPush: "unableToCommitAndPush",
+  openFile: "unableToOpenFile"
 };
 
 /** Every git command answers the same way, so one handler serves them all. */

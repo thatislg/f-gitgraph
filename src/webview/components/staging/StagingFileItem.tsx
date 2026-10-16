@@ -21,6 +21,7 @@ export type StagingFileItemProps = {
   onUnstage: (filePath: string) => void;
   onDiscard: (filePath: string, isUntracked: boolean) => void;
   onDiff: (filePath: string) => void;
+  onOpenFile: (filePath: string) => void;
 };
 
 const BADGE_CLASS: Record<StagingFileStatus, string> = {
@@ -51,7 +52,8 @@ export function StagingFileItem({
   onStage,
   onUnstage,
   onDiscard,
-  onDiff
+  onDiff,
+  onOpenFile
 }: StagingFileItemProps) {
   const { fileName, folderPath } = splitPath(file.path);
   const discardIcon = file.isUntracked ? "🗑" : "↺";
@@ -82,6 +84,18 @@ export function StagingFileItem({
         class="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
         data-actions
       >
+        <button
+          type="button"
+          class={ACTION_BUTTON_CLASS}
+          title="Open file"
+          data-action="open-file"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenFile(file.path);
+          }}
+        >
+          📄
+        </button>
         {isStaged ? (
           <>
             <button

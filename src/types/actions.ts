@@ -24,6 +24,7 @@ type ActionPayloads = {
   discardAllChanges: object;
   commitChanges: { summary: string; description: string; amend: boolean; sign: boolean };
   commitAndPush: { summary: string; description: string; amend: boolean; sign: boolean };
+  openFile: { filePath: string };
 };
 
 export type ActionRequest = {
