@@ -21,6 +21,10 @@ type QueryPayloads = {
     request: { repo: string };
     response: WorkspaceStatusResult;
   };
+  headCommit: {
+    request: { repo: string };
+    response: { headCommit: { subject: string; description: string } | null };
+  };
 };
 
 export type QueryRequest = {

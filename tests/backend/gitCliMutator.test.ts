@@ -172,4 +172,16 @@ describe("GitCliMutator", () => {
     expect(amendedLog).toContain("amended body");
     expect(amendedLog).not.toContain("initial title");
   });
+
+  it("amends with --no-edit to keep the previous message when adding files", async () => {
+    fs.writeFileSync(path.join(repo, "f"), "no-edit content");
+    await mutator.stageFile("f");
+    const before = gitOut(["log", "-1", "--pretty=%B"]).trim();
+
+    const amendRes = await mutator.commit("", { amend: true });
+    expect(amendRes.ok).toBe(true);
+
+    const after = gitOut(["log", "-1", "--pretty=%B"]).trim();
+    expect(after).toBe(before);
+  });
 });

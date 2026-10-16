@@ -167,4 +167,19 @@ describe("registerMessageHandlers (staging & commit routing)", () => {
     );
     expect(gitClient.setRepo).toHaveBeenCalledWith("/repo");
   });
+
+  it("routes headCommit query to getHeadCommitMessage and posts the result", async () => {
+    const { post, gitClient, receive } = setup();
+    (gitClient.getInstance as ReturnType<typeof vi.fn>).mockReturnValue({
+      raw: vi.fn().mockResolvedValue("feat: HEAD subject\nHEAD body line")
+    });
+
+    await receive({ command: "headCommit", repo: "/repo" });
+
+    expect(post).toHaveBeenCalledWith({
+      command: "headCommit",
+      headCommit: { subject: "feat: HEAD subject", description: "HEAD body line" }
+    });
+    expect(gitClient.setRepo).toHaveBeenCalledWith("/repo");
+  });
 });

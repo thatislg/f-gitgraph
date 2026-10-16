@@ -11,6 +11,7 @@ import {
   headCommitSubject,
   isAmend,
   isCommitting,
+  loadHeadCommit,
   loadStatus,
   setAmend,
   stagedFiles,
@@ -52,6 +53,19 @@ describe("stagingStore", () => {
     stagedFiles.value = [{ path: "a.ts", status: "M", isUntracked: false }];
     commitSubject.value = "feat";
     expect(canCommit.value).toBe(true);
+  });
+
+  it("returns canCommit=true when amending with staged files and no message (--no-edit)", () => {
+    stagedFiles.value = [{ path: "a.ts", status: "M", isUntracked: false }];
+    commitSubject.value = "";
+    isAmend.value = true;
+    expect(canCommit.value).toBe(true);
+  });
+
+  it("returns canCommit=false when amending with no staged files and no message", () => {
+    commitSubject.value = "";
+    isAmend.value = true;
+    expect(canCommit.value).toBe(false);
   });
 
   it("returns canCommit=false while a commit is in progress", () => {
@@ -99,5 +113,17 @@ describe("stagingStore", () => {
     expect(commitSubject.value).toBe("draft subject");
     expect(commitDescription.value).toBe("draft body");
     expect(isAmend.value).toBe(false);
+  });
+
+  it("loadHeadCommit populates HEAD fields and fills the composer while amend is on", () => {
+    loadHeadCommit("HEAD subject", "HEAD body");
+    expect(headCommitSubject.value).toBe("HEAD subject");
+    expect(headCommitDescription.value).toBe("HEAD body");
+    expect(commitSubject.value).toBe("");
+
+    isAmend.value = true;
+    loadHeadCommit("HEAD subject 2", "HEAD body 2");
+    expect(commitSubject.value).toBe("HEAD subject 2");
+    expect(commitDescription.value).toBe("HEAD body 2");
   });
 });

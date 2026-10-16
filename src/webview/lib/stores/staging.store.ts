@@ -6,7 +6,7 @@ import type {
   WorkspaceStatusResult
 } from "@/backend/queries/workspaceStatus";
 import type { StagingFile } from "@/webview/components/staging/StagingFileItem";
-import { runAction } from "@/webview/lib/actions";
+import { runAction, requestHeadCommit } from "@/webview/lib/actions";
 
 /**
  * Kho trạng thái tập trung của phân vùng Staging & Commit Composer, được mô hình hóa
@@ -65,17 +65,19 @@ export const stagedCount = computed(() => stagedFiles.value.length);
 export const unstagedCount = computed(() => unstagedFiles.value.length);
 
 /**
- * Điều kiện sẵn sàng commit theo bảng chân trị: tiêu đề khác rỗng và
- * (có tệp staged hoặc đang amend), đồng thời không đang bận thực thi.
+ * Điều kiện sẵn sàng commit theo bảng chân trị, không phụ thuộc tiến trình đang chạy.
+ * - Commit thường: cần tiêu đề khác rỗng và có tệp đã stage.
+ * - Amend: cho phép khi có tệp staged (gộp thêm file, giữ message cũ qua `--no-edit`)
+ *   hoặc khi tiêu đề khác rỗng (sửa message).
  */
 export const canCommit = computed(() => {
   if (isCommitting.value) {
     return false;
   }
-  if (commitSubject.value.trim().length === 0) {
-    return false;
+  if (isAmend.value) {
+    return stagedCount.value > 0 || commitSubject.value.trim().length > 0;
   }
-  return stagedCount.value > 0 || isAmend.value;
+  return stagedCount.value > 0 && commitSubject.value.trim().length > 0;
 });
 
 /** Mức cảnh báo màu của bộ đếm ký tự tiêu đề (≤50 xám, 51–72 hổ phách, >72 đỏ). */
@@ -186,12 +188,29 @@ export function setAmend(value: boolean): void {
     draftDescription.value = commitDescription.value;
     commitSubject.value = headCommitSubject.value;
     commitDescription.value = headCommitDescription.value;
+    // Nạp message HEAD từ Backend nếu chưa có, để ô soạn thảo tự điền khi phản hồi về.
+    if (headCommitSubject.value === "" && headCommitDescription.value === "") {
+      requestHeadCommit();
+    }
   } else {
     commitSubject.value = draftSubject.value;
     commitDescription.value = draftDescription.value;
   }
 
   isAmend.value = value;
+}
+
+/**
+ * Lưu tiêu đề/mô tả commit HEAD do Backend trả về. Nếu chế độ Amend đang bật, sao chép
+ * ngay vào ô soạn thảo để người dùng có thể chỉnh sửa message cũ.
+ */
+export function loadHeadCommit(subject: string, description: string): void {
+  headCommitSubject.value = subject;
+  headCommitDescription.value = description;
+  if (isAmend.value) {
+    commitSubject.value = subject;
+    commitDescription.value = description;
+  }
 }
 
 /** Gửi commit xuống Backend khi đủ điều kiện `canCommit`. */

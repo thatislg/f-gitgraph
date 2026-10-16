@@ -11,6 +11,7 @@ import { mergeBranch, mergeCommit } from "@/backend/actions/merge";
 import { addTag, deleteTag, pushTag } from "@/backend/actions/tag";
 import type { GitClient } from "@/backend/gitClient";
 import { commitDetails } from "@/backend/queries/commitDetails";
+import { getHeadCommitMessage } from "@/backend/queries/headCommit";
 import { loadBranches } from "@/backend/queries/loadBranches";
 import { getWorkspaceStatus } from "@/backend/queries/workspaceStatus";
 import { abbrevCommit } from "@/backend/utils/string";
@@ -186,6 +187,14 @@ export function registerMessageHandlers(
     bridge.post({
       command: "workspaceStatus",
       ...(await getWorkspaceStatus(gitClient.getInstance()))
+    });
+  });
+
+  bridge.onMessage("headCommit", async (msg) => {
+    setCurrentRepo(msg.repo);
+    bridge.post({
+      command: "headCommit",
+      ...(await getHeadCommitMessage(gitClient.getInstance()))
     });
   });
 

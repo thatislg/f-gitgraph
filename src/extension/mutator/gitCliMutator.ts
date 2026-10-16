@@ -120,12 +120,20 @@ export class GitCliMutator {
       description?: string;
     } = {}
   ): Promise<MutatorResult> {
-    const args = ["commit", "-m", message];
-    if (options.description && options.description.trim().length > 0) {
-      args.push("-m", options.description.trim());
+    const args = ["commit"];
+    const hasMessage = message.trim().length > 0;
+    if (hasMessage) {
+      args.push("-m", message);
+      if (options.description && options.description.trim().length > 0) {
+        args.push("-m", options.description.trim());
+      }
     }
     if (options.amend) {
       args.push("--amend");
+      // Giữ nguyên message cũ khi amend mà không nhập tiêu đề mới (gộp thêm file).
+      if (!hasMessage) {
+        args.push("--no-edit");
+      }
     }
     if (options.sign) {
       args.push("-S");

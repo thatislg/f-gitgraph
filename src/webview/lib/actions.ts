@@ -180,6 +180,16 @@ export function refreshStatus() {
   vscode.postMessage({ command: "workspaceStatus", repo });
 }
 
+/** Yêu cầu Backend trả về tiêu đề/mô tả của commit HEAD để nạp sẵn khi bật Amend. */
+export function requestHeadCommit() {
+  const repo = selectedRepo.value;
+  if (repo === undefined) {
+    return;
+  }
+
+  vscode.postMessage({ command: "headCommit", repo });
+}
+
 /** Open the details view of a commit, or close it when it is already open. */
 export function toggleCommitDetails(hash: string) {
   if (hash === expandedCommit.value) {
