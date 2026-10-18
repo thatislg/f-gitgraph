@@ -111,6 +111,7 @@ _Mục tiêu_: Hoàn thiện toàn bộ các phương thức thực thi Git CLI 
   - [ ] **1.4.1**: Tạo `tests/backend/mutator/syncMutator.test.ts`: Test các lệnh `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` trên kho git thật giả lập.
   - [ ] **1.4.2**: Tạo `tests/backend/queries/syncStatus.test.ts`: Test bóc tách ahead/behind khi có upstream, khi lệch commit, và khi không có remote.
   - [ ] **1.4.3**: Tạo `tests/backend/queries/stashList.test.ts`: Test bóc tách danh sách stash với tiếng Việt unicode và ký tự đặc biệt.
+  - [ ] **1.4.4**: Tạo `tests/extension/services/syncMessageHandler.test.ts`: Test định tuyến RPC từ Webview xuống Mutator mạng/stash và các Query sync/stash.
 
 ---
 
