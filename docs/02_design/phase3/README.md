@@ -36,3 +36,32 @@ Thư mục này lưu trữ toàn bộ hệ thống tài liệu thiết kế kỹ
    - Kiến trúc bộ tổng hợp sóng âm vi mô không tệp tin ngoại vi (Zero-Asset Overhead Web Audio Engine) cư trú thuần túy trong Webview UI.
    - Bản đồ sự kiện âm thanh "xúc giác kỹ thuật số": Chốt cơ khí Leica (`commit.success`), hợp âm thăng hoa quãng 5 (`push.success`), gắp vật lý (`file.stage`), và xung trầm ấm (`conflict.detected`).
    - Cài đặt VS Code (`f-gitgraph.soundEffects.enabled`, `f-gitgraph.soundEffects.volume`), nút ngắt âm nhanh trên UI và cơ chế chống ô nhiễm âm thanh (Cooldown 120ms, Polyphony limit = 2).
+
+---
+
+### 📦 Giai Đoạn 3.2: Kiến Trúc 3-Pane Workspace & Thanh Công Cụ Đồng Bộ Toàn Cục
+
+5. **[05. Thiết Kế Backend Mutator Đồng Bộ, Quản Lý Stash & RPC Protocol (05_Sync_And_Stash_Backend_Mutator_Design.md)](05_Sync_And_Stash_Backend_Mutator_Design.md)**:
+   - Mở rộng `GitCliMutator.ts` hỗ trợ: `fetchAll(prune)`, `pull(mode)`, `push(forceWithLease, remote, branch)`, `stashSave`, `stashPop`, `stashDrop`.
+   - Bộ truy vấn số đếm đồng bộ `syncStatus.ts` (`git rev-list --left-right --count HEAD...@{u}`) và ngăn xếp lưu trữ `stashList.ts`.
+   - Khai báo kiểu Action/Query RPC đầy đủ trong `src/types/actions.ts` và `src/types/queries.ts` (Contract-First).
+
+6. **[06. Thiết Kế Thanh Công Cụ Đỉnh Toàn Cục & Huy Hiệu Đồng Bộ (06_Global_Toolbar_And_Sync_Badge_Design.md)](06_Global_Toolbar_And_Sync_Badge_Design.md)**:
+   - Thiết kế `GlobalToolbar.tsx` thay thế `MainHeader.tsx`, tích hợp các nút tác vụ nhanh mạng và stash.
+   - Huy hiệu số đếm phát sáng Neon `SyncBadge.tsx` (`↑ahead` / `↓behind`), dropdown menu tùy chọn.
+   - Kho trạng thái phản ứng `sync.store.ts` và cam kết phản xạ đồng bộ Realtime State Guarantee qua `dispatcher.ts`.
+
+7. **[07. Thiết Kế Cây Điều Hướng Left Sidebar Navigator (07_Sidebar_Navigator_Tree_Design.md)](07_Sidebar_Navigator_Tree_Design.md)**:
+   - Thiết kế cây điều hướng bên trái `SidebarNavigator.tsx` gồm 5 nhóm: Working Tree, Local Branches, Remotes, Tags, Stashes.
+   - Nhánh `HEAD` active với viền tím Neon, huy hiệu số commit chưa push cạnh từng nhánh, double-click checkout nhánh.
+   - Thanh Resizer kéo thả mượt mà (160px – 450px), nút thu gọn nhanh, lưu cấu hình vào `localStorage`.
+
+8. **[08. Thiết Kế Thanh Tìm Kiếm, Lọc Commit & Điều Hướng Đồ Thị DAG (08_Search_Filter_And_DAG_Navigation_Design.md)](08_Search_Filter_And_DAG_Navigation_Design.md)**:
+   - Thanh tìm kiếm commit `SearchFilterBar.tsx` kích hoạt bằng phím tắt toàn cục `Ctrl + F`.
+   - Thuật toán bóc tách cú pháp lọc: Tìm kiếm tự do trong thông điệp, lọc theo tác giả `author:`, lọc theo mã băm `hash:`.
+   - Highlight phát quang Neon trên đồ thị và cuộn mượt mà trên bảng ảo hóa Virtualized Table.
+
+9. **[09. Thiết Kế Bố Cục Co Giãn Responsive 3-Pane & Nghiệm Thu Bất Biến Hình Học (09_Workspace_Layout_And_Responsive_3Pane_Design.md)](09_Workspace_Layout_And_Responsive_3Pane_Design.md)**:
+   - Khung bố cục tổng thể `WorkspaceLayout.tsx` ghép nối 3 phân vùng độc lập (Sidebar - DAG Table - Inspector).
+   - Tích hợp `ResizeObserver` theo dõi kích thước động kết hợp `requestAnimationFrame`.
+   - Kiểm định bất biến hình học tuyệt đối (Zero Layout Shift): Độ lệch tọa độ các nút `HexagonNode` và đường cong Bézier bằng 0 pixel khi co giãn hoặc đóng mở Sidebar.
