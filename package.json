@@ -1,7 +1,7 @@
 {
   "name": "f-gitgraph",
   "displayName": "F-GitGraph",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "%description%",
   "categories": [
     "SCM Providers",
