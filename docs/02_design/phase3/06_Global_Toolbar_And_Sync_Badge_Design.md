@@ -211,7 +211,7 @@ Mọi hàm điều phối trong `sync.store.ts` đều phải tuân thủ nghiê
 - **Quy Trình Các Bước Xử Lý Cụ Thể**:
   1. *Bước 1 (Gửi Query RPC)*: Gọi phương thức `WebviewBridge.postMessage({ type: 'query', query: 'syncStatus', params: { repo } })`.
   2. *Bước 2 (Xử lý phản hồi)*:
-     - Nhận đối tượng phản hồi có cấu trúc `SyncStatusResult`.
+     - Nhận đối tượng phản hồi có cấu trúc `SyncStatusResult` (nhập khẩu trực tiếp từ hợp đồng trung tâm `src/types/queries.ts` theo chuẩn Contract-First, bảo đảm Webview hoàn toàn độc lập với mã nguồn Backend).
      - Gán `aheadCount.value = response.ahead`.
      - Gán `behindCount.value = response.behind`.
      - Gán `upstreamBranch.value = response.upstream`.
@@ -327,3 +327,12 @@ Mọi tệp kiểm thử cho Nhóm Việc 2 bắt buộc đặt tên với đuô
 | :--- | :--- | :--- |
 | `tests/webview/lib/stores/sync.store.test.ts` | `sync.store.ts` | 1. **Khởi tạo store**: Các giá trị mặc định bằng 0, cờ mạng bằng `false`.<br>2. **Tính toán `hasPendingSync`**: Đúng khi `ahead > 0` hoặc `behind > 0`; sai khi cả hai bằng 0.<br>3. **Tính toán `isNetworkBusy`**: Đúng khi ít nhất một cờ mạng bật; sai khi toàn bộ tắt.<br>4. **Cập nhật dữ liệu từ RPC**: Nạp kết quả query gán chính xác `aheadCount`, `behindCount`, `upstreamBranch`, `isDetached`.<br>5. **Xử lý lỗi RPC**: Khi truy vấn query thất bại, store reset an toàn về 0 mà không vỡ ứng dụng.<br>6. **Dispatcher kích hoạt cờ loading**: Kiểm tra cờ `isFetching`, `isPulling`, `isPushing`, `isStashing` bật khi gọi action và tự động tắt khi có phản hồi.<br>7. **Chống gọi trùng lặp (Double Invocations)**: Gọi liên tiếp hai lần `push()`, xác nhận chỉ có đúng 1 lệnh RPC được gửi đi. |
 | `tests/webview/components/toolbar/GlobalToolbar.test.ts` | `GlobalToolbar.tsx` & `SyncBadge.tsx` | 1. **Render đầy đủ**: Kết xuất chính xác 6 nút tác vụ mạng/stash và cụm thông tin kho.<br>2. **Hiển thị huy hiệu `SyncBadge`**: Hiển thị nhãn `"↓ 2"` màu xanh lơ khi `behind = 2`; hiển thị `"↑ 1"` màu hổ phách khi `ahead = 1`.<br>3. **Ẩn huy hiệu**: Khi `ahead = 0 && behind = 0`, huy hiệu tự động ẩn hoàn toàn khỏi DOM.<br>4. **Click kích hoạt Action RPC**: Nhấp nút Fetch All gọi đúng action `fetchAll`; nhấp Pull gọi `pull`.<br>5. **Dropdown Menu tương tác**: Nhấp mũi tên mở menu tùy chọn; nhấp tùy chọn Rebase gọi đúng `pull('rebase')`; nhấp ra ngoài tự động đóng menu; bấm phím `Esc` đóng menu.<br>6. **Vô hiệu hóa khi bận (Busy State)**: Khi `isNetworkBusy = true`, các nút bấm tự động có thuộc tính `disabled` chống click lặp. |
+
+---
+
+## 6. Lịch Sử Sửa Đổi Thiết Kế (Revision History)
+
+| Phiên Bản | Ngày | Phân Loại | Người Sửa | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật |
+| :---: | :---: | :---: | :---: | :--- |
+| **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả Top Toolbar & Sync Badge. |
+| **v1.1.0** | 2026-10-19 | Đồng bộ hóa | AI Architect | **Đồng bộ hóa hợp đồng Contract-First với Design 05**: Xác nhận kiểu dữ liệu phản hồi `SyncStatusResult` được nhập khẩu từ `src/types/queries.ts`, duy trì tính cách ly tuyệt đối của Webview UI khỏi môi trường Node.js. Bổ sung yêu cầu đăng ký định danh lỗi cho 6 Action mạng/stash trong bộ điều phối lỗi Webview `action-result.ts`. |

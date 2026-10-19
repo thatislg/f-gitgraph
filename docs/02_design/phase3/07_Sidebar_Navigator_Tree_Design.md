@@ -73,7 +73,7 @@ flowchart TD
 | `currentHead` | string \| null | Có | - | Tên nhánh đang checkout tại HEAD (hoặc null nếu detached) |
 | `remotes` | Array<RemoteGroup> | Có | - | Cấu trúc danh sách remote và các nhánh con tương ứng |
 | `tags` | Array<string> | Có | - | Danh sách tên toàn bộ các release tag |
-| `stashes` | Array<StashItem> | Có | - | Danh sách bản ghi stash lấy từ query backend |
+| `stashes` | Array<StashRecord> | Có | - | Danh sách bản ghi stash nhập khẩu từ `src/types/queries.ts` |
 | `unstagedCount` | number | Có | - | Số lượng tệp biến động chưa đưa vào Staging |
 | `stagedCount` | number | Có | - | Số lượng tệp đã đưa vào Staging Index |
 
@@ -83,10 +83,11 @@ flowchart TD
 - `aheadCount`: Số commit chưa push của riêng nhánh này (number).
 - `upstream`: Tên nhánh remote theo dõi tương ứng (string hoặc null).
 
-#### Cấu Trúc Đối Tượng `StashItem`:
+#### Cấu Trúc Đối Tượng `StashRecord` (Chuẩn Hóa Hợp Đồng RPC):
 - `index`: Chỉ số của bản stash trong ngăn xếp (number $\ge 0$).
-- `message`: Tiêu đề nội dung stash (string).
-- `date`: Chuỗi thời gian lưu trữ (string).
+- `hash`: Mã băm commit đại diện rút gọn (string).
+- `message`: Tiêu đề nội dung bản stash (string).
+- `date`: Chuỗi thời gian lưu trữ tương đối (string).
 
 ---
 
@@ -266,7 +267,10 @@ Thanh phân cách dọc chịu trách nhiệm điều khiển kéo dãn chiều 
 3. **Nhấp Chuột Phải Mở Menu Ngữ Cảnh (Context Menu)**:
    - Chuột phải vào nhánh cục bộ: Tận dụng trực tiếp hệ thống Menu Phase 1: Checkout, Merge into Current, Rebase onto Current, Rename Branch, Delete Branch.
    - Chuột phải vào remote branch: Hiển thị menu: Checkout as New Local Branch, Pull, Delete Remote Branch.
-   - Chuột phải vào bản ghi stash: Hiển thị menu tiếng Anh: Apply Stash, Pop Stash, Drop Stash.
+   - Chuột phải vào bản ghi stash: Hiển thị menu tiếng Anh: Apply Stash, Pop Stash, Drop Stash. Trong đó:
+     - Tùy chọn `Pop Stash`: Kích hoạt Action RPC `stashPop` với payload `{ index }`.
+     - Tùy chọn `Drop Stash`: Kích hoạt Action RPC `stashDrop` với payload `{ index }`.
+     - Sau khi thực thi thành công, tự động gọi `refreshStatus()` và nạp lại danh sách stash mới.
 
 ---
 
@@ -297,3 +301,12 @@ Mọi tệp kiểm thử cho Nhóm Việc 3 bắt buộc đặt tên với đuô
 | :--- | :--- | :--- |
 | `tests/webview/lib/stores/sidebar.store.test.ts` | `sidebar.store.ts` | 1. **Khởi tạo & Ranh giới**: Độ rộng mặc định 220px; thử nghiệm truyền giá trị ngoài khoảng (ví dụ 100px hoặc 600px) xác nhận kẹp đúng ranh giới $[160, 450]$.<br>2. **Toggle Collapse**: Đảo trạng thái thu gọn và xác nhận lưu giá trị boolean vào `localStorage`.<br>3. **Đóng mở Section**: Thêm/xóa đúng mã `sectionId` khỏi tập hợp `expandedSectionIds`.<br>4. **Phục hồi từ LocalStorage**: Khởi tạo store với mock `localStorage` chứa giá trị cũ (ví dụ 300px), xác nhận store nạp đúng giá trị 300px.<br>5. **Bảo vệ dữ liệu rác**: Nếu `localStorage` chứa giá trị không hợp lệ (chuỗi rác), store tự động dùng giá trị mặc định 220px mà không ném lỗi. |
 | `tests/webview/components/sidebar/SidebarNavigator.test.ts` | `SidebarNavigator.tsx` | 1. **Render 5 phân nhóm**: Kết xuất đầy đủ 5 tiêu đề nhóm tiếng Anh chuẩn mực.<br>2. **Đánh dấu nhánh HEAD**: Nhánh active có class highlight viền tím Neon và render icon checkmark; các nhánh thường không có.<br>3. **Hiển thị số commit chưa push**: Nhánh có `aheadCount = 2` render đúng nhãn nhỏ `"↑2"` màu hổ phách.<br>4. **Tương tác Double-Click**: Bấm đúp vào nhánh phát chính xác Action RPC `checkoutBranch` kèm tên nhánh.<br>5. **Bấm nút `+` tạo nhánh**: Kích hoạt đúng callback mở modal tạo nhánh mới.<br>6. **Resizer kéo dãn chuột**: Giả lập sự kiện `mousedown` $\rightarrow$ `mousemove` dịch chuyển 50px $\rightarrow$ `mouseup`, xác nhận chiều rộng Sidebar tăng tương ứng và kích hoạt ghi `localStorage`. |
+
+---
+
+## 7. Lịch Sử Sửa Đổi Thiết Kế (Revision History)
+
+| Phiên Bản | Ngày | Phân Loại | Người Sửa | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật |
+| :---: | :---: | :---: | :---: | :--- |
+| **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả Left Sidebar Navigator Tree. |
+| **v1.1.0** | 2026-10-19 | Đồng bộ hóa | AI Architect | **Chuẩn hóa đối tượng StashRecord & Liên kết Action RPC**: Thay thế kiểu dữ liệu tự phát `StashItem` bằng `StashRecord` đồng nhất với `src/types/queries.ts` (Contract-First). Bổ sung định tuyến Action RPC `stashPop` và `stashDrop` trong menu ngữ cảnh của bản ghi Stash. |

@@ -241,3 +241,13 @@ Mọi tệp kiểm thử cho Nhóm Việc 4 bắt buộc đặt tên với đuô
 | Tệp Kiểm Thử Độc Lập | Module Mục Tiêu | Kịch Bản Kiểm Thử Chi Tiết Bắt Buộc |
 | :--- | :--- | :--- |
 | `tests/webview/components/search/SearchFilterBar.test.ts` | `SearchFilterBar.tsx` & `search.store.ts` | 1. **Phím tắt toàn cục `Ctrl + F`**: Nhấn tổ hợp phím kích hoạt mở thanh tìm kiếm và chuyển tiêu điểm vào ô input.<br>2. **Lọc thông điệp tự do**: Nhập từ khóa `"login"`, xác nhận lọc chính xác các commit có tiêu đề hoặc mô tả chứa `"login"` (không phân biệt hoa thường).<br>3. **Lọc theo tác giả `author:`**: Nhập `"author:Nam"`, xác nhận chỉ lọc các commit có trường author chứa chuỗi `"Nam"`.<br>4. **Lọc theo mã hash `hash:`**: Nhập `"hash:a1b2"`, xác nhận chỉ lọc các commit có mã hash bắt đầu bằng `"a1b2"`.<br>5. **Lọc kết hợp nhiều điều kiện**: Nhập `"author:Nam fix"`, xác nhận chỉ các commit vừa có tác giả Nam vừa chứa từ "fix" mới được trả về.<br>6. **Xoay vòng Next / Prev**: Danh sách có 3 kết quả; bấm `Enter` (Next) tăng từ 1 lên 2, lên 3, rồi xoay vòng về 1; bấm `Shift + Enter` (Prev) xoay vòng ngược lại.<br>7. **Phím `Esc` đóng tìm kiếm**: Bấm `Esc` làm sạch chuỗi `searchQuery`, đóng thanh tìm kiếm và trả tiêu điểm.<br>8. **Tính toán vị trí cuộn**: Kiểm tra hàm cuộn bảng ảo hóa được gọi với đúng tọa độ pixel mục tiêu khi chuyển kết quả. |
+
+---
+
+## 8. Lịch Sử Sửa Đổi Thiết Kế (Revision History)
+
+| Phiên Bản | Ngày | Phân Loại | Người Sửa | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật |
+| :---: | :---: | :---: | :---: | :--- |
+| **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả Search, Filter & DAG Navigation. |
+| **v1.1.0** | 2026-10-19 | Rà soát | AI Architect | **Rà soát tính toàn vẹn và độc lập giao diện**: Xác nhận thuật toán tìm kiếm Commit vận hành hoàn toàn trên dữ liệu commit của Webview UI, không phát sinh RPC query bổ sung và bảo đảm tương thích 100% với cấu trúc 3-Pane Workspace sau cập nhật Design 05–07. |
+

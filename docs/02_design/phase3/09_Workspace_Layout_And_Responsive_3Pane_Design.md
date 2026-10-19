@@ -164,3 +164,13 @@ Mọi tệp kiểm thử cho Nhóm Việc 5 bắt buộc đặt tên với đuô
 | :--- | :--- | :--- |
 | `tests/webview/layout/WorkspaceLayout.geometry.test.ts` | `WorkspaceLayout.tsx` & `CommitTable.tsx` | 1. **Snapshot ban đầu (Sidebar 220px)**: Ghi lại trọn vẹn mảng thuộc tính `d` của đường nhánh Bézier và tọa độ nút lục giác `HexagonNode`.<br>2. **Mở rộng Sidebar lên 380px**: Cập nhật độ rộng, kích hoạt resize, snapshot lại dữ liệu hình học, assert `toEqual` xác nhận độ lệch bằng 0 pixel.<br>3. **Thu gọn Sidebar về 0px**: Đặt `isCollapsed = true`, snapshot lại dữ liệu hình học, assert `toEqual` xác nhận độ lệch bằng 0 pixel.<br>4. **Bảo toàn chiều cao hàng**: Xác nhận mọi dòng bảng `CommitRow` giữ nguyên chiều cao đúng 24px trong suốt quá trình co giãn. |
 | `tests/webview/layout/WorkspaceLayout.test.ts` | `WorkspaceLayout.tsx` | 1. **Kết xuất đầy đủ**: Render trọn vẹn 3 phân vùng (Toolbar đỉnh, Sidebar trái, Bảng DAG giữa).<br>2. **Tương tác thu gọn Sidebar**: Đảo cờ `isSidebarCollapsed`, xác nhận class co về 0px được kích hoạt trên container Sidebar.<br>3. **ResizeObserver kích hoạt mượt mà**: Mô phỏng thay đổi kích thước container, xác nhận hàm callback cập nhật biến CSS chiều rộng không gian khả dụng.<br>4. **Hiển thị Inspector Overlay**: Khi có prop `inspector`, render đúng vùng phủ overlay nổi không làm lệch cấu trúc DOM của bảng table. |
+
+---
+
+## 7. Lịch Sử Sửa Đổi Thiết Kế (Revision History)
+
+| Phiên Bản | Ngày | Phân Loại | Người Sửa | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật |
+| :---: | :---: | :---: | :---: | :--- |
+| **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả 3-Pane Workspace Layout & Zero Layout Shift. |
+| **v1.1.0** | 2026-10-19 | Rà soát | AI Architect | **Rà soát tính bất biến hình học & tương thích bố cục 3 phân vùng**: Xác nhận tính tương thích hợp đồng giữa các phân vùng sau khi chuẩn hóa `SyncStatusResult` và `StashRecord` ở Design 05–07. Bảo đảm cam kết Zero Layout Shift (sai số 0 pixel trên đồ thị DAG F# Core) được duy trì nguyên vẹn. |
+

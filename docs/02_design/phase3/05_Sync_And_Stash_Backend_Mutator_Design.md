@@ -39,11 +39,11 @@ flowchart TD
         Mutator -->|Spawn tiến trình mảng tham số an toàn| GitCLI["Tiến trình Git gốc (git.exe)"]
     end
 
-    subgraph Tier4["Tầng 4: Bộ Truy Vấn Nhanh Lock-Free (Queries)"]
+    subgraph Tier4["Tầng 4: Bộ Truy Vấn Nhanh (Backend Queries)"]
         Router -->|Query 'syncStatus'| QSync["src/backend/queries/syncStatus.ts"]
         Router -->|Query 'stashList'| QStash["src/backend/queries/stashList.ts"]
-        QSync -->|Đọc rev-parse & rev-list| GitCLI
-        QStash -->|Đọc stash list NUL| GitCLI
+        QSync -->|Thực thi raw qua SimpleGit| GitCLI["Tiến trình Git gốc (git.exe)"]
+        QStash -->|Thực thi raw qua SimpleGit| GitCLI
     end
 
     GitCLI --> GitRepo[("Kho Git (.git/)")]
@@ -54,8 +54,10 @@ flowchart TD
   - Trình quản lý chứng thực cá nhân (Git Credential Manager trên Windows / Keychain trên macOS / Secret Service trên Linux).
   - Trình quản lý khóa SSH (SSH Agent, khóa SSH mặc định).
   - Chữ ký số GPG/SSH và các bộ móc nối mạng tự động (pre-push hooks).
-- **Ngăn chặn triệt để Command Injection**: Mọi lệnh Git thực thi bắt buộc truyền dưới dạng danh sách mảng chuỗi (String Array Arguments) trong phương thức `child_process.spawn`. Tuyệt đối không dùng `child_process.exec` hoặc nối chuỗi thô vào shell.
+- **Kế thừa đường dẫn Git tùy chỉnh (`gitPath`)**: Toàn bộ các lệnh đọc và ghi bắt buộc phải kế thừa `gitPath` được cấu hình từ cài đặt người dùng (thông qua `GitCliMutator` và thực thể `SimpleGit` từ `gitClientFactory`). Tuyệt đối không gọi lệnh `"git"` mặc định tự phát để bảo đảm hoạt động chính xác trên môi trường Git Portable hoặc thư mục cài đặt tùy biến.
+- **Ngăn chặn triệt để Command Injection**: Mọi lệnh Git thực thi bắt buộc truyền dưới dạng danh sách mảng chuỗi (String Array Arguments) trong phương thức `run` của Mutator hoặc `git.raw` của SimpleGit. Tuyệt đối không dùng `child_process.exec` hoặc nối chuỗi thô vào shell.
 - **Bảo vệ nhánh remote bằng cờ `--force-with-lease`**: Trong tùy chọn ép đẩy (Force Push), bắt buộc sử dụng `--force-with-lease` thay cho cờ `--force` trần tục để ngăn chặn ghi đè commit của đồng nghiệp trong trường hợp remote branch đã có commit mới mà máy cục bộ chưa cập nhật.
+- **Cách ly môi trường Webview (Zero Node.js Runtime in Webview)**: Tầng hợp đồng dữ liệu RPC (`src/types/`) phải định nghĩa kiểu trả về của các truy vấn một cách độc lập; tầng Webview tuyệt đối không được nhập khẩu (import) bất kỳ kiểu dữ liệu hay module nào kéo theo thư viện Node.js (`child_process`, `Buffer`).
 
 ---
 
@@ -208,9 +210,11 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 
 ### 3.1. Truy Vấn `getSyncStatus`
 
-- **Chữ Ký Hàm**: `getSyncStatus(repoPath: string): Promise<SyncStatusResult>`
+- **Chữ Ký Hàm**: `getSyncStatus(git: SimpleGit): Promise<SyncStatusResult>`
 - **Đặc Tả Đầu Vào (Input)**:
-  - Tham số `repoPath`: Kiểu chuỗi ký tự bắt buộc. Đường dẫn tuyệt đối đến thư mục gốc của repository trên đĩa cứng.
+  - Tham số `git`: Thực thể `SimpleGit` (thu được từ `gitClient.getInstance()`), đã được đóng gói sẵn đường dẫn kho hiện tại `baseDir` và đường dẫn nhị phân `binary: gitPath`.
+- **Đặc Tả Đầu Ra (Output)**:
+  - Trả về đối tượng `SyncStatusResult` (được định nghĩa trực tiếp tại `src/types/queries.ts` theo nguyên tắc Contract-First).
 
 #### Bảng Từ Điển Dữ Liệu Đối Tượng Trả Về (`SyncStatusResult`):
 
@@ -224,20 +228,20 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 #### Quy Trình Xử Lý Thuật Toán 3 Bước Chi Tiết:
 
 1. **Bước 1 (Kiểm tra trạng thái Detached HEAD)**:
-   - Spawn tiến trình: `git rev-parse --abbrev-ref HEAD` trong thư mục `repoPath`.
-   - Nếu tiến trình trả về mã lỗi hoặc chuỗi kết quả cắt khoảng trắng bằng đúng `"HEAD"`:
+   - Thực thi lệnh raw qua `git.raw(["rev-parse", "--abbrev-ref", "HEAD"])`.
+   - Nếu lệnh bị lỗi (Promise reject) hoặc chuỗi kết quả cắt khoảng trắng bằng đúng `"HEAD"`:
      - Kết luận: Kho đang ở trạng thái Detached HEAD.
      - Trả về đối tượng: `{ isDetached: true, upstream: null, ahead: 0, behind: 0 }`.
 2. **Bước 2 (Xác định Upstream Tracking Branch)**:
-   - Spawn tiến trình: `git rev-parse --abbrev-ref --symbolic-full-name @{u}` trong thư mục `repoPath`.
-   - Nếu tiến trình trả về mã thoát khác 0 (nghĩa là nhánh chưa thiết lập upstream hoặc chưa chạy `git push -u`):
-     - Không ném exception, kết luận nhánh chưa liên kết remote.
+   - Thực thi lệnh raw qua `git.raw(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"])`.
+   - Nếu lệnh trả về lỗi ngoại lệ (thường gặp khi mã thoát 128 do nhánh chưa thiết lập upstream hoặc chưa chạy `git push -u`):
+     - Bắt lỗi an toàn, không ném exception ra ngoài. Kết luận: Nhánh chưa liên kết remote.
      - Trả về đối tượng: `{ isDetached: false, upstream: null, ahead: 0, behind: 0 }`.
    - Nếu thành công:
      - Lấy chuỗi kết quả cắt khoảng trắng: `upstreamName = stdout.trim()` (ví dụ `"origin/main"`).
 3. **Bước 3 (Đếm số lượng commit chênh lệch hai chiều)**:
-   - Spawn tiến trình: `git rev-list --left-right --count HEAD...@{u}` trong thư mục `repoPath`.
-   - Nếu tiến trình thành công:
+   - Thực thi lệnh raw qua `git.raw(["rev-list", "--left-right", "--count", "HEAD...@{u}"])`.
+   - Nếu lệnh thành công:
      - Đọc chuỗi `stdout` có định dạng `<left>\t<right>\n`.
      - Cắt khoảng trắng chuỗi đầu ra.
      - Tách chuỗi thành mảng các token bằng ký tự tab `\t` (hoặc khoảng trắng `\s+` nếu không có tab).
@@ -251,9 +255,11 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 
 ### 3.2. Truy Vấn `getStashList`
 
-- **Chữ Ký Hàm**: `getStashList(repoPath: string): Promise<StashListResult>`
+- **Chữ Ký Hàm**: `getStashList(git: SimpleGit): Promise<StashListResult>`
 - **Đặc Tả Đầu Vào (Input)**:
-  - Tham số `repoPath`: Kiểu chuỗi ký tự bắt buộc. Đường dẫn tuyệt đối đến thư mục gốc của repository.
+  - Tham số `git`: Thực thể `SimpleGit` (thu được từ `gitClient.getInstance()`).
+- **Đặc Tả Đầu Ra (Output)**:
+  - Trả về đối tượng `StashListResult` (được định nghĩa trực tiếp tại `src/types/queries.ts`).
 
 #### Bảng Từ Điển Dữ Liệu Đối Tượng Bản Ghi Stash (`StashRecord`):
 
@@ -273,9 +279,9 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 #### Quy Trình Xử Lý Thuật Toán Bóc Tách Byte NUL Chi Tiết:
 
 1. **Bước 1 (Thực thi lệnh Git)**:
-   - Spawn tiến trình: `git stash list --pretty=format:%gd%x00%h%x00%gs%x00%cr` trong thư mục `repoPath`.
+   - Thực thi lệnh raw qua `git.raw(["stash", "list", "--pretty=format:%gd%x00%h%x00%gs%x00%cr"])`.
 2. **Bước 2 (Kiểm tra dữ liệu rỗng)**:
-   - Nếu tiến trình thoát với mã lỗi hoặc chuỗi `stdout` cắt khoảng trắng là rỗng:
+   - Nếu lệnh ném ngoại lệ hoặc chuỗi `stdout` cắt khoảng trắng là rỗng:
      - Trả về ngay đối tượng rỗng: `{ stashes: [] }`.
 3. **Bước 3 (Bóc tách từng dòng qua byte NUL)**:
    - Khởi tạo mảng kết quả: `stashes = []`.
@@ -348,8 +354,8 @@ Trong bộ điều phối tin nhắn trung tâm `src/extension/services/messageH
      - Hành động `stashPop`: Ủy thác cho `gitMutator.stashPop(payload.index)`.
      - Hành động `stashDrop`: Ủy thác cho `gitMutator.stashDrop(payload.index)`.
 2. **Đăng ký Query Handlers**:
-   - Truy vấn `syncStatus`: Ủy thác cho hàm `getSyncStatus(payload.repo)` và trả về trực tiếp kết quả `SyncStatusResult`.
-   - Truy vấn `stashList`: Ủy thác cho hàm `getStashList(payload.repo)` và trả về đối tượng `{ stashes }`.
+   - Truy vấn `syncStatus`: Ủy thác cho hàm `getSyncStatus(gitClient.getInstance())` và trả về trực tiếp kết quả `SyncStatusResult`.
+   - Truy vấn `stashList`: Ủy thác cho hàm `getStashList(gitClient.getInstance())` và trả về đối tượng `{ stashes }`.
 
 ---
 
@@ -362,4 +368,13 @@ Mọi tệp kiểm thử cho Nhóm Việc 1 bắt buộc đặt tên với đuô
 | `tests/backend/mutator/syncMutator.test.ts` | `src/extension/mutator/gitCliMutator.ts` | 1. **`fetchAll`**: Tạo remote giả lập cục bộ, thực thi `fetchAll(true)`, xác nhận cờ `--prune` hoạt động và trả về `ok: true`.<br>2. **`pull` Merge**: Khởi tạo commit trên upstream, gọi `pull('merge')`, xác nhận commit mới được tích hợp vào HEAD.<br>3. **`pull` Rebase**: Tạo lịch sử phân nhánh, gọi `pull('rebase')`, xác nhận lịch sử commit được xếp thẳng hàng.<br>4. **`pull` Xung đột**: Giả lập sửa cùng 1 dòng trên cả local và remote, gọi `pull('merge')`, xác nhận trả về `ok: false` kèm thông điệp chuẩn hóa tiếng Anh về merge conflict.<br>5. **`push` Thường & Force-with-lease**: Thực thi push thành công commit mới; giả lập commit remote bị lệch, xác nhận `--force-with-lease` bảo vệ và báo lỗi `non-fast-forward` chuẩn hóa tiếng Anh.<br>6. **`stashSave` / `stashPop` / `stashDrop`**: Sửa tệp tracked và tạo tệp untracked, gọi `stashSave("test stash", true)`, xác nhận working tree sạch sẽ 100%; sau đó gọi `stashPop(0)` xác nhận toàn bộ tệp và nội dung khôi phục nguyên vẹn; gọi `stashDrop(0)` xác nhận xóa bản stash. |
 | `tests/backend/queries/syncStatus.test.ts` | `src/backend/queries/syncStatus.ts` | 1. **Kho đồng bộ sạch sẽ**: Nhánh local trùng khớp commit với upstream $\rightarrow$ `ahead = 0, behind = 0, upstream = 'origin/main', isDetached = false`.<br>2. **Nhánh có commit chờ đẩy**: Tạo 3 commit cục bộ $\rightarrow$ `ahead = 3, behind = 0`.<br>3. **Nhánh chậm hơn remote**: Tạo 2 commit trên remote chưa pull $\rightarrow$ `ahead = 0, behind = 2`.<br>4. **Nhánh vừa ahead vừa behind**: Tạo 2 commit local và 3 commit remote $\rightarrow$ `ahead = 2, behind = 3`.<br>5. **Nhánh chưa có upstream**: Tạo nhánh mới không đặt cờ `-u` $\rightarrow$ `upstream = null, ahead = 0, behind = 0`.<br>6. **Trạng thái Detached HEAD**: `git checkout <commitHash>` $\rightarrow$ `isDetached = true`. |
 | `tests/backend/queries/stashList.test.ts` | `src/backend/queries/stashList.ts` | 1. **Danh sách rỗng**: Kho chưa có stash nào $\rightarrow$ Trả về mảng rỗng `[]`.<br>2. **Danh sách nhiều stash**: Cất lần lượt 3 stash với các thông điệp có dấu $\rightarrow$ Bóc tách chính xác 3 phần tử với đúng thứ tự index 0, 1, 2, đúng chuỗi thông điệp và thời gian tương đối.<br>3. **Ký tự đặc biệt**: Thông điệp chứa dấu nháy kép, dấu hai chấm, dấu tab $\rightarrow$ Bóc tách NUL-delimiter không bị gãy chuỗi. |
-| `tests/extension/services/syncMessageHandler.test.ts` | `src/extension/services/messageHandler.ts` | 1. Định tuyến chính xác action `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` sang `gitMutator`.<br>2. Định tuyến chính xác query `syncStatus` và `stashList` sang hàm query tương ứng.<br>3. Xử lý lỗi ném ra từ mutator thành phản hồi lỗi RPC hợp lệ cho Webview. |
+| `tests/extension/services/syncMessageHandler.test.ts` | `src/extension/services/messageHandler.ts` | 1. Định tuyến chính xác action `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` sang `gitMutator`.<br>2. Định tuyến chính xác query `syncStatus` và `stashList` sang hàm query tương ứng với tham số thực thể `SimpleGit`.<br>3. Xử lý lỗi ném ra từ mutator thành phản hồi lỗi RPC hợp lệ cho Webview. |
+
+---
+
+## 8. Lịch Sử Sửa Đổi Thiết Kế (Revision History)
+
+| Phiên Bản | Ngày | Phân Loại | Người Sửa | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật |
+| :---: | :---: | :---: | :---: | :--- |
+| **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả Backend Mutator, Stash & RPC Protocol. |
+| **v1.1.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Tái cấu trúc bộ truy vấn trạng thái sang SimpleGit**: Thay thế giải pháp `child_process.spawn` tự phát bằng `SimpleGit.raw(...)`. Khắc phục lỗ hổng ranh giới bỏ quên cấu hình `gitPath` (lỗi khi người dùng dùng Git Portable) và ngăn chặn triệt để nguy cơ rò rỉ kiểu dữ liệu Node.js (`node:child_process`, `Buffer`) vào môi trường Webview DOM. Định vị kiểu kết quả hợp đồng trực tiếp tại `src/types/queries.ts` chuẩn Contract-First. |

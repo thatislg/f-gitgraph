@@ -291,4 +291,5 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 5 bư�
   - Bổ sung bảng kiểm kê 24 tệp tin tác động trên toàn bộ hệ thống.
   - Tích hợp kiểm thử song hành cho từng nhóm nhiệm vụ riêng biệt với 8 tệp test `*.test.ts` chuẩn quy ước.
   - Bổ sung yêu cầu bảo toàn hình học F# Core với `ResizeObserver` và test snapshot Zero Layout Shift khi co giãn Sidebar.
+  - **Cập nhật kiến trúc truy vấn Backend (`[DESIGN_DEFECT]`)**: Đồng bộ hóa toàn bộ hệ thống thiết kế từ Design 05 đến Design 09; chuyển đổi giải pháp truy vấn `getSyncStatus` và `getStashList` từ `child_process.spawn` tự phát sang `SimpleGit.raw(...)`, kế thừa `gitPath` tùy chỉnh và bảo vệ Webview khỏi ô nhiễm kiểu dữ liệu Node.js.
   - Cập nhật trạng thái Chặng 3.2: **Sẵn sàng triển khai mã nguồn**.
