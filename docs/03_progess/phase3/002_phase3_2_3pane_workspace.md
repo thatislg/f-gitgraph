@@ -42,7 +42,7 @@ Mọi công việc triển khai trong Chặng 3.2 bắt buộc đối soát và 
 
 - **Mục tiêu**: Nâng cấp giao diện hiển thị đơn lẻ của F-GitGraph thành một **Không gian làm việc 3 phân vùng (3-Pane Workspace)** chuẩn mực của các ứng dụng Git Client chuyên nghiệp (như Fork, GitKraken, Tower). Cung cấp cây điều hướng toàn diện (Branches, Remotes, Tags, Stashes, Working Tree) và thanh tác vụ đồng bộ toàn cục (`Fetch`, `Pull`, `Push`, `Stash`) với số đếm trực quan (`↑ahead` / `↓behind`).
 - **Trạng thái hiện tại**: **Sẵn sàng triển khai mã nguồn** (Phase 3.1 đã nghiệm thu đạt chuẩn v1.1.0).
-- **Tiến độ tổng thể**: 20% hoàn thành (Nhóm Việc 1 hoàn tất).
+- **Tiến độ tổng thể**: 40% hoàn thành (Nhóm Việc 1 & 2 hoàn tất).
 
 ### 1.2. Bảng Kiểm Kê Tệp Tin Tác Động (Impacted Files Inventory)
 
@@ -121,34 +121,37 @@ _Tài liệu tham chiếu thiết kế_: [06_Global_Toolbar_And_Sync_Badge_Desig
 
 _Mục tiêu_: Thay thế `MainHeader.tsx` bằng `GlobalToolbar.tsx` mang phong cách Cyber-Lab, tích hợp các nút tác vụ nhanh và huy hiệu đồng bộ tự động cập nhật (tuân thủ **Nguyên Tắc 2: Realtime State Guarantee**).
 
-- [ ] **Nhiệm vụ 2.1: Xây dựng Store quản lý đồng bộ `src/webview/lib/stores/sync.store.ts`**
-  - [ ] **2.1.1**: Khởi tạo các tín hiệu Preact Signals: `aheadCount`, `behindCount`, `upstreamBranch`, `isFetching`, `isPulling`, `isPushing`.
-  - [ ] **2.1.2**: Khởi tạo computed signals: `hasPendingSync`, `syncStatusText`, `pullButtonLabel`, `pushButtonLabel`.
-  - [ ] **2.1.3**: Hiện thực các hàm điều phối hành động: `fetch()`, `pull()`, `push()`, `stash()`, `pop()`.
+- [x] **Nhiệm vụ 2.1: Xây dựng Store quản lý đồng bộ `src/webview/lib/stores/sync.store.ts`**
+  - [x] **2.1.1**: Khởi tạo các tín hiệu Preact Signals: `aheadCount`, `behindCount`, `upstreamBranch`, `isDetached`, `isFetching`, `isPulling`, `isPushing`, `isStashing`, `stashList`.
+  - [x] **2.1.2**: Khởi tạo computed signals: `hasPendingSync`, `isNetworkBusy`, `syncStatusText`.
+  - [x] **2.1.3**: Hiện thực các hàm điều phối hành động: `fetch()`, `pull()`, `push()`, `stash()`, `pop()` (đều có guard `isNetworkBusy`).
+  - [x] **2.1.4**: Bổ sung kho tiện ích công thái học `audio.store.ts` (câm âm thanh qua `localStorage`) và `sidebar.store.ts` (thu gọn thanh điều hướng).
 
-- [ ] **Nhiệm vụ 2.2: Xây dựng Component huy hiệu `src/webview/components/toolbar/SyncBadge.tsx`**
-  - [ ] **2.2.1**: Thiết kế huy hiệu số đếm phát sáng Neon:
+- [x] **Nhiệm vụ 2.2: Xây dựng Component huy hiệu `src/webview/components/toolbar/SyncBadge.tsx`**
+  - [x] **2.2.1**: Thiết kế huy hiệu số đếm phát sáng Neon:
     - Trạng thái `behind > 0`: Huy hiệu màu xanh lơ Neon `#06b6d4` (`Pull ↓ N`).
     - Trạng thái `ahead > 0`: Huy hiệu màu hổ phách Neon `#f59e0b` (`Push ↑ N`).
-    - Trạng thái đồng bộ sạch (`ahead == 0 && behind == 0`): Ẩn badge hoặc hiển thị icon checkmark xám nhẹ.
+    - Trạng thái đồng bộ sạch (`ahead == 0 && behind == 0`): Ẩn hoàn toàn badge khỏi DOM (`return null`).
 
-- [ ] **Nhiệm vụ 2.3: Xây dựng Component `src/webview/components/toolbar/GlobalToolbar.tsx`**
-  - [ ] **2.3.1**: Đóng khung Toolbar trong phong cách Cyber-Lab chiều cao chuẩn 40px, viền dưới kỹ thuật, bọc trong `CornerCrossFrame` hoặc đường kẻ đinh tán tối giản.
-  - [ ] **2.3.2**: Nhóm nút tác vụ mạng bên trái:
+- [x] **Nhiệm vụ 2.3: Xây dựng Component `src/webview/components/toolbar/GlobalToolbar.tsx` & `ToolbarDropdownButton.tsx`**
+  - [x] **2.3.1**: Đóng khung Toolbar trong phong cách Cyber-Lab chiều cao chuẩn 40px, viền dưới kỹ thuật, bọc trong `CornerCrossFrame` hoặc đường kẻ đinh tán tối giản.
+  - [x] **2.3.2**: Nhóm nút tác vụ mạng bên trái:
     - **Nút `Fetch All`**: Icon xoay đồng bộ, hiển thị spinner khi `isFetching`.
     - **Nút `Pull`**: Tích hợp `SyncBadge`, dropdown tùy chọn (`Pull (Merge)` / `Pull --rebase`).
     - **Nút `Push`**: Tích hợp `SyncBadge`, dropdown tùy chọn (`Push` / `Push with Lease`).
     - **Nút `Stash` & `Pop`**: Lưu nhanh hoặc khôi phục nhanh thay đổi tạm thời.
     - **Nút `Refresh`**: Kích hoạt làm mới toàn diện cả đồ thị, working tree và số đếm sync.
-  - [ ] **2.3.3**: Nhóm thông tin kho bên phải: Tên repo hiện tại, tên branch hiện tại đang checkout (`HEAD`), nút ngắt/bật âm thanh vi mô (Audio toggle).
+  - [x] **2.3.3**: Nhóm thông tin kho bên phải: Tên repo hiện tại, tên branch hiện tại đang checkout (`HEAD`), nút ngắt/bật âm thanh vi mô (Audio toggle), nút thu gọn Sidebar.
+  - [x] **2.3.4**: Xây dựng `ToolbarDropdownButton.tsx` (Split Button WAI-ARIA Menu Button Pattern): primary 75% / arrow 25%, click-outside, anti-flapping 16ms, keyboard xoay vòng modulo, dọn dẹp listener.
 
-- [ ] **Nhiệm vụ 2.4: Đăng ký Router Realtime trong `src/webview/lib/dispatcher.ts`**
-  - [ ] **2.4.1**: Đăng ký 100% action mạng (`fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`) vào map `handlers` trong `dispatcher.ts`.
-  - [ ] **2.4.2**: Sau khi action hoàn tất thành công, tự động gọi `refresh()` (nạp lại đồ thị DAG), `refreshStatus()` (nạp lại Staging) và `refreshSyncStatus()` (cập nhật lại số đếm ahead/behind).
+- [x] **Nhiệm vụ 2.4: Đăng ký Router Realtime trong `src/webview/lib/dispatcher.ts`**
+  - [x] **2.4.1**: Đăng ký 100% action mạng (`fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`) vào map `handlers` trong `dispatcher.ts`.
+  - [x] **2.4.2**: Sau khi action hoàn tất thành công, tự động gọi `refresh()` (nạp lại đồ thị DAG), `refreshStatus()` (nạp lại Staging), `refreshSyncStatus()` (số đếm ahead/behind) và `refreshStashList()` (danh sách stash); phát âm thành công push/pull.
 
-- [ ] **Nhiệm vụ 2.5 (TEST NHÓM 2): Bộ Unit Tests Cho Top Toolbar & Sync Store**
-  - [ ] **2.5.1**: Tạo `tests/webview/lib/stores/sync.store.test.ts`: Test logic tính toán badge, chuyển đổi trạng thái loading khi gọi API.
-  - [ ] **2.5.2**: Tạo `tests/webview/components/toolbar/GlobalToolbar.test.ts`: Test render thanh công cụ, hiển thị đúng huy hiệu `↑ahead` / `↓behind`, click nút phát đúng action RPC.
+- [x] **Nhiệm vụ 2.5 (TEST NHÓM 2): Bộ Unit Tests Cho Top Toolbar & Sync Store**
+  - [x] **2.5.1**: Tạo `tests/webview/lib/stores/sync.store.test.ts`: Test logic tính toán badge, chuyển đổi trạng thái loading khi gọi API.
+  - [x] **2.5.2**: Tạo `tests/webview/components/toolbar/GlobalToolbar.test.ts`: Test render thanh công cụ, hiển thị đúng huy hiệu `↑ahead` / `↓behind`, click nút phát đúng action RPC.
+  - [x] **2.5.3**: Tạo `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts`, `tests/webview/lib/stores/audio.store.test.ts`, `tests/webview/lib/stores/sidebar.store.test.ts`.
 
 ---
 
@@ -299,3 +302,9 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 5 bư�
   - Khai hợp đồng RPC (`src/types/actions.ts`, `src/types/queries.ts`) và đăng ký `messageHandler.ts`.
   - 26 unit test mới trên 4 tệp; 4 cổng chẩn đoán (typecheck/lint/compile/test) đạt 100% PASS.
   - Ghi nhận 2 `[DESIGN_DEFECT]` (spawn→SimpleGit, chuỗi lỗi stash), 2 `[DEV_BUG]`, 1 `[ENV_TOOL_ISSUE]`.
+- **2026-10-19**: Hoàn tất **Nhóm Việc 2** (Top Toolbar & Sync Store Realtime). Xem báo cáo chi tiết [010_phase3_2_toolbar_report.md](../../04_reports/phase3/010_phase3_2_toolbar_report.md):
+  - Xây dựng `sync.store.ts` (signals + computed + dispatcher), `audio.store.ts`, `sidebar.store.ts`.
+  - Xây dựng `SyncBadge.tsx`, `ToolbarDropdownButton.tsx` (Split Button WAI-ARIA) và `GlobalToolbar.tsx` (3 cụm, kế thừa 100% 4 điều khiển `MainHeader` — Zero Regression).
+  - Mở rộng âm thanh (`playPushSuccessSound`/`playPullSuccessSound`), `actions.ts`, handler/dispatcher mạng-stash và l10n (~20 key); thay thế & xóa `MainHeader.tsx`.
+  - 31 unit test mới trên 5 tệp; 4 cổng chẩn đoán (typecheck/lint/compile/test) đạt 100% PASS (backend 148, extension 27, webview 152).
+  - Ghi nhận 4 `[DEV_BUG]` (timing/assertion test + `no-shadow`), 0 `[DESIGN_DEFECT]` — DDR = 0%, IBR = 100%.

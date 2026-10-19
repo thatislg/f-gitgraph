@@ -190,87 +190,269 @@ Thanh phân cách dọc chịu trách nhiệm điều khiển kéo dãn chiều 
 
 ## 3. Quản Lý Trạng Thái Bằng Preact Signals (`sidebar.store.ts`)
 
-### 3.1. Bảng Danh Mục Tín Hiệu Cơ Sở (Base Signals)
+Kho trạng thái `sidebar.store.ts` chịu trách nhiệm quản lý toàn bộ dữ liệu phản ứng của thanh điều hướng cột trái, điều phối hành vi kéo dãn độ rộng, lưu trữ bền vững trạng thái người dùng và giao tiếp với Backend qua giao thức bất đồng bộ `vscode.postMessage`.
 
-| Tên Tín Hiệu | Kiểu Dữ Liệu | Giá Trị Khởi Tạo | Mô Tả Ý Nghĩa |
+---
+
+### 3.1. Bảng Danh Mục Tín Hiệu Cơ Sở & Tín Hiệu Dẫn Xuất
+
+#### 1. Tín Hiệu Cơ Sở (Base Signals):
+
+| Tên Tín Hiệu | Kiểu Dữ Liệu | Giá Trị Khởi Tạo | Mô Tả Ý Nghĩa Nghiệp Vụ & Ràng Buộc |
 | :--- | :--- | :---: | :--- |
-| `sidebarWidth` | number | `220` | Chiều rộng hiện tại của Sidebar tính theo pixel (kẹp trong khoảng $[160, 450]$) |
-| `isCollapsed` | boolean | `false` | Cờ trạng thái thu gọn Sidebar hoàn toàn về 0px |
-| `expandedSectionIds` | Set<string> | `Set(['working-tree', 'branches', 'remotes', 'tags', 'stashes'])` | Tập hợp các mã định danh nhóm Section đang ở trạng thái mở rộng |
-| `selectedItemId` | string \| null | `null` | Mã định danh của item đang được người dùng chọn/focus |
+| `sidebarWidth` | number | `220` | Chiều rộng thực tế của Sidebar tính theo pixel, kẹp nghiêm ngặt trong khoảng $[160, 450]$ |
+| `isSidebarCollapsed` | boolean | `false` | Cờ trạng thái thu gọn Sidebar hoàn toàn về 0px (đồng bộ tên gọi với Design 06) |
+| `expandedSectionIds` | Set<string> | `Set(['working-tree', 'branches', 'remotes', 'tags', 'stashes'])` | Tập hợp các mã định danh của phân nhóm đang mở rộng hiển thị |
+| `selectedItemId` | string \| null | `null` | Mã định danh duy nhất của phần tử đang được người dùng chọn hoặc giữ tiêu điểm |
+| `isResizing` | boolean | `false` | Cờ đánh dấu đang trong quá trình kéo chuột điều chỉnh kích thước thanh Sidebar |
+| `isCheckingOut` | boolean | `false` | Cờ khóa tương tác (Mutex Lock) khi đang gửi lệnh checkout nhánh xuống Backend |
+
+#### 2. Tín Hiệu Dẫn Xuất (Computed Signals):
+
+| Tên Tín Hiệu | Kiểu Dữ Liệu | Công Thức / Logic Tính Toán | Mô Tả Ý Nghĩa |
+| :--- | :--- | :--- | :--- |
+| `effectiveSidebarWidth` | number | `isSidebarCollapsed.value ? 0 : sidebarWidth.value` | Chiều rộng hiển thị thực tế áp dụng trực tiếp lên CSS của container Sidebar |
+| `sidebarToggleTooltip` | string | `isSidebarCollapsed.value ? "Expand sidebar navigator" : "Collapse sidebar navigator"` | Tooltip hiển thị khi rê chuột qua nút chuyển đổi đóng/mở Sidebar |
+| `isAnySectionExpanded` | boolean | `expandedSectionIds.value.size > 0` | Trạng thái có ít nhất một phân nhóm đang mở, phục vụ nút gập toàn bộ |
 
 ---
 
-### 3.2. Đặc Tả Chi Tiết Input / Output & Các Bước Xử Lý Của Bộ Hàm Điều Phối
+### 3.2. Đặc Tả Chi Tiết Input / Output & Quy Trình Xử Lý Cụ Thể Từng Bước Của Bộ Hàm Điều Phối
 
-#### 1. Hàm `setSidebarWidth(width: number): void`
+Mọi hàm điều phối trong `sidebar.store.ts` tuân thủ nghiêm ngặt nguyên tắc **Thiết Kế Hộp Đen (Black-Box Contract)** và **Lập Trình Phòng Vệ (Defensive Programming)**:
+
+```mermaid
+flowchart TD
+    subgraph DragWorkflow["Quy Trình Kéo Dãn Độ Rộng Mượt Mà (Zero-Jank Resizing)"]
+        MouseDown["Nhấn chuột mousedown trên Resizer"] --> SetFlag["Gán isResizing = true & startX, startWidth"]
+        SetFlag --> MouseMove["Di chuyển mousemove liên tục (60-144fps)"]
+        MouseMove --> StepClamped["setSidebarWidth(width, commitToStorage = false)"]
+        StepClamped --> DirectUI["Cập nhật sidebarWidth.value mượt mà (Không ghi Disk)"]
+        DirectUI --> MouseUp["Nhả chuột mouseup hoàn tất kéo"]
+        MouseUp --> FinalCommit["setSidebarWidth(finalWidth, commitToStorage = true)"]
+        FinalCommit --> SafeDisk["Ghi an toàn vào localStorage (try-catch)"]
+    end
+```
+
+---
+
+#### 1. Hàm `setSidebarWidth(width: number, commitToStorage = false): void`
+- **Mục Tiêu**: Cập nhật chiều rộng pixel của Sidebar với cơ chế tách biệt tối ưu giữa cập nhật giao diện thời gian thực (60fps) và ghi đĩa bền vững, triệt tiêu hoàn toàn hiện tượng giật khung hình (Zero-Jank Resizing).
 - **Đặc Tả Đầu Vào (Input)**:
-  - Tham số `width`: Số thực hoặc số nguyên đại diện cho chiều rộng pixel.
+  - `width`: Kiểu số thực hoặc số nguyên biểu thị chiều rộng pixel cần đặt.
+  - `commitToStorage`: Kiểu boolean, tùy chọn, mặc định `false`. Khi bằng `true`, dữ liệu mới được ghi vào bộ nhớ bền vững `localStorage`.
 - **Đặc Tả Đầu Ra (Output)**:
-  - Không trả về giá trị (`void`).
+  - `void`: Không trả về giá trị trực tiếp; cập nhật tín hiệu và lưu trữ.
 - **Quy Trình Các Bước Xử Lý Cụ Thể**:
-  1. *Bước 1 (Kẹp giá trị an toàn)*: Tính toán giá trị hợp lệ: `clamped = Math.min(450, Math.max(160, Math.round(width)))`.
-  2. *Bước 2 (Cập nhật tín hiệu)*: Gán `sidebarWidth.value = clamped`.
-  3. *Bước 3 (Lưu trữ bền vững)*: Gọi `localStorage.setItem('f-gitgraph.sidebar.width', String(clamped))`.
+  1. *Bước 1 (Làm sạch và kiểm tra dữ liệu phòng vệ)*:
+     - Kiểm tra nếu `typeof width !== "number"` hoặc `Number.isFinite(width) === false` hoặc `Number.isNaN(width)`:
+       - Tự động thay thế giá trị bằng độ rộng mặc định $220\text{px}$.
+  2. *Bước 2 (Kẹp giá trị trong ranh giới an toàn tối thiểu và tối đa)*:
+     - Làm tròn số nguyên: `const roundedWidth = Math.round(width)`.
+     - Áp dụng công thức kẹp số học:
+       $$ClampedWidth = \min(450, \max(160, roundedWidth))$$
+     - Bảo đảm độ rộng luôn nằm vững chắc trong khoảng $[160\text{px}, 450\text{px}]$.
+  3. *Bước 3 (Cập nhật tín hiệu phản ứng)*:
+     - So sánh: Nếu `sidebarWidth.value !== ClampedWidth`:
+       - Gán giá trị: `sidebarWidth.value = ClampedWidth`.
+       - Tự động kích hoạt Preact render lại chiều rộng thanh Sidebar mà không gây gián đoạn luồng người dùng.
+  4. *Bước 4 (Ghi lưu trữ bền vững có điều kiện & Bẫy ngoại lệ)*:
+     - Nếu `commitToStorage === true`:
+       - Khởi tạo khối phòng vệ `try-catch`:
+         - Thực thi `localStorage.setItem('f-gitgraph.sidebar.width', String(ClampedWidth))`.
+       - *Bẫy lỗi ngoại lệ*: Nếu trình duyệt chặn lưu trữ do chế độ ẩn danh (Private Browsing) hoặc ném lỗi vượt định mức dung lượng (`QuotaExceededError` / `SecurityError`):
+         - Không ném lỗi ra ngoài làm sập giao diện; ghi log cảnh báo mức nhẹ và duy trì giá trị trong bộ nhớ RAM tạm thời.
 
 ---
 
-#### 2. Hàm `toggleCollapse(): void`
-- **Đặc Tả Đầu Vào (Input)**: Không có.
-- **Đặc Tả Đầu Ra (Output)**: Không trả về giá trị (`void`).
+#### 2. Hàm `toggleSidebar(): void` (hoặc `toggleCollapse`)
+- **Mục Tiêu**: Chuyển đổi trạng thái đóng/mở thanh Sidebar bên trái và phát tín hiệu cho toàn bộ không gian làm việc tự động tái bố cục (Layout Reflow).
+- **Đặc Tả Đầu Vào (Input)**: Không có tham số.
+- **Đặc Tả Đầu Ra (Output)**: `void`.
 - **Quy Trình Các Bước Xử Lý Cụ Thể**:
-  1. *Bước 1 (Đảo cờ)*: Tính toán giá trị mới: `nextState = !isCollapsed.value`.
-  2. *Bước 2 (Cập nhật tín hiệu)*: Gán `isCollapsed.value = nextState`.
-  3. *Bước 3 (Lưu trữ bền vững)*: Gọi `localStorage.setItem('f-gitgraph.sidebar.collapsed', String(nextState))`.
+  1. *Bước 1 (Đảo trạng thái logic)*:
+     - Tính toán trạng thái mới: `const nextState = !isSidebarCollapsed.value`.
+  2. *Bước 2 (Cập nhật tín hiệu cơ sở)*:
+     - Gán `isSidebarCollapsed.value = nextState`.
+  3. *Bước 3 (Đồng bộ lưu trữ bền vững)*:
+     - Bọc trong `try-catch`, gọi `localStorage.setItem('f-gitgraph.sidebar.collapsed', String(nextState))`.
+  4. *Bước 4 (Kích hoạt sự kiện tái bố cục không gian làm việc - Layout Reflow Trigger)*:
+     - Thiết lập bộ đếm thời gian trễ $160\text{ms}$ (khớp với thời gian hiệu ứng chuyển động CSS `transition: width 150ms ease-in-out` cộng thêm $10\text{ms}$ bù trễ khung hình).
+     - Khi hết thời gian trễ: Kích hoạt phát sự kiện toàn cục `window.dispatchEvent(new Event('resize'))`.
+     - *Mục đích kỹ thuật*: Bắt buộc bảng đồ thị F# commit DAG và bảng commit table tự động tính toán lại chiều rộng cột nhìn thấy, ngăn chặn tình trạng đồ thị SVG bị co rúm hoặc tràn lề sau khi mở rộng/thu gọn Sidebar.
 
 ---
 
 #### 3. Hàm `toggleSection(sectionId: string): void`
+- **Mục Tiêu**: Đóng hoặc mở một phân nhóm accordion cụ thể trong 5 nhóm tài nguyên Git của Sidebar.
 - **Đặc Tả Đầu Vào (Input)**:
-  - Tham số `sectionId`: Chuỗi ký tự định danh nhóm (ví dụ `"branches"`, `"stashes"`).
-- **Đặc Tả Đầu Ra (Output)**: Không trả về giá trị (`void`).
+  - `sectionId`: Chuỗi ký tự định danh nhóm (chỉ chấp nhận một trong 5 giá trị: `"working-tree"`, `"branches"`, `"remotes"`, `"tags"`, `"stashes"`).
+- **Đặc Tả Đầu Ra (Output)**: `void`.
 - **Quy Trình Các Bước Xử Lý Cụ Thể**:
-  1. *Bước 1 (Bản sao tập hợp)*: Tạo một bản sao mới `nextSet = new Set(expandedSectionIds.value)`.
-  2. *Bước 2 (Thêm hoặc xóa)*:
-     - Nếu `nextSet.has(sectionId)`: Gọi `nextSet.delete(sectionId)`.
-     - Ngược lại: Gọi `nextSet.add(sectionId)`.
-  3. *Bước 3 (Cập nhật tín hiệu)*: Gán `expandedSectionIds.value = nextSet`.
-  4. *Bước 4 (Lưu trữ)*: Chuyển danh sách thành mảng JSON và lưu vào `localStorage.setItem('f-gitgraph.sidebar.sections', JSON.stringify([...nextSet]))`.
+  1. *Bước 1 (Kiểm tra tính hợp lệ)*:
+     - Nếu `sectionId` rỗng hoặc không thuộc danh sách 5 nhóm hợp lệ, lập tức thoát hàm để bảo toàn tính toàn vẹn dữ liệu.
+  2. *Bước 2 (Tạo bản sao bất biến của tập hợp)*:
+     - Khởi tạo tập hợp mới: `const nextSet = new Set(expandedSectionIds.value)`.
+  3. *Bước 3 (Thao tác đảo trạng thái phân nhóm)*:
+     - Nếu `nextSet.has(sectionId)` bằng `true`:
+       - Gọi phương thức `nextSet.delete(sectionId)` (chuyển sang trạng thái gập).
+     - Ngược lại:
+       - Gọi phương thức `nextSet.add(sectionId)` (chuyển sang trạng thái mở rộng).
+  4. *Bước 4 (Cập nhật tín hiệu phản ứng)*:
+     - Gán `expandedSectionIds.value = nextSet`.
+  5. *Bước 5 (Tuần tự hóa và lưu trữ bền vững)*:
+     - Chuyển đổi tập hợp thành mảng chuỗi: `const serializedArray = Array.from(nextSet)`.
+     - Bọc trong `try-catch`, gọi `localStorage.setItem('f-gitgraph.sidebar.sections', JSON.stringify(serializedArray))`.
 
 ---
 
-#### 4. Hàm `initSidebarStore(): void`
-- **Đặc Tả Đầu Vào (Input)**: Không có.
-- **Đặc Tả Đầu Ra (Output)**: Không trả về giá trị (`void`).
-- **Quy Trình Khôi Phục Từ LocalStorage**:
-  1. *Bước 1 (Khôi phục chiều rộng)*:
-     - Đọc giá trị từ `localStorage.getItem('f-gitgraph.sidebar.width')`.
-     - Nếu tồn tại và phân tích được số nguyên hợp lệ: Kẹp trong khoảng $[160, 450]$ và gán cho `sidebarWidth.value`.
-     - Nếu không tồn tại: Giữ nguyên mặc định 220px.
+#### 4. Hàm `expandAllSections(): void` & `collapseAllSections(): void`
+- **Mục Tiêu**: Tiện ích một chạm cho phép người dùng mở toàn bộ hoặc gập toàn bộ 5 phân nhóm trên cây điều hướng.
+- **Quy Trình Xử Lý Cụ Thể**:
+  - Với `expandAllSections()`:
+    1. Gán `expandedSectionIds.value = new Set(['working-tree', 'branches', 'remotes', 'tags', 'stashes'])`.
+    2. Ghi mảng 5 phần tử vào `localStorage`.
+  - Với `collapseAllSections()`:
+    1. Gán `expandedSectionIds.value = new Set<string>()`.
+    2. Ghi mảng rỗng `[]` vào `localStorage`.
+
+---
+
+#### 5. Hàm `selectItem(itemId: string | null): void`
+- **Mục Tiêu**: Quản lý phần tử đang được người dùng bấm chọn hoặc đang nhận tiêu điểm điều hướng trên cây Sidebar.
+- **Đặc Tả Đầu Vào (Input)**:
+  - `itemId`: Chuỗi định danh duy nhất của phần tử (ví dụ `"branch:main"`, `"tag:v1.0.0"`, `"stash:0"`, `"working-tree:changes"`) hoặc `null` nếu bỏ chọn.
+- **Đặc Tả Đầu Ra (Output)**: `void`.
+- **Quy Trình Các Bước Xử Lý Cụ Thể**:
+  1. *Bước 1*: Gán `selectedItemId.value = itemId`.
+  2. *Bước 2*: Kích hoạt cập nhật DOM: Component hiển thị vạch sáng viền tím Neon Cyber-Lab (`#a855f7`) tại phần tử được chọn, đồng thời gỡ bỏ vạch sáng khỏi phần tử được chọn trước đó.
+
+---
+
+#### 6. Hàm `initSidebarStore(): void`
+- **Mục Tiêu**: Khôi phục toàn diện trạng thái cây điều hướng từ bộ nhớ cục bộ `localStorage` khi Webview khởi động, kèm cơ chế phòng vệ chống dữ liệu rác (Defensive Hydration Pipeline).
+- **Đặc Tả Đầu Vào (Input)**: Không có tham số.
+- **Đặc Tả Đầu Ra (Output)**: `void`.
+- **Quy Trình Khôi Phục Phòng Vệ 4 Tầng Từng Bước**:
+  1. *Bước 1 (Khôi phục chiều rộng an toàn)*:
+     - Đọc giá trị chuỗi từ `localStorage.getItem('f-gitgraph.sidebar.width')`.
+     - Nếu tồn tại giá trị:
+       - Sử dụng hàm `parseInt(storedWidth, 10)` để giải mã số nguyên.
+       - Kiểm tra nếu kết quả là số hữu hạn hợp lệ:
+         - Kẹp giá trị: `sidebarWidth.value = Math.min(450, Math.max(160, parsedWidth))`.
+       - Nếu không hợp lệ hoặc bằng `NaN`: Thiết lập mặc định $220\text{px}$.
+     - Nếu không tồn tại: Thiết lập mặc định $220\text{px}$.
   2. *Bước 2 (Khôi phục trạng thái thu gọn)*:
-     - Đọc `localStorage.getItem('f-gitgraph.sidebar.collapsed')`.
-     - Nếu bằng `"true"`: Gán `isCollapsed.value = true`.
-  3. *Bước 3 (Khôi phục trạng thái Section)*:
-     - Đọc `localStorage.getItem('f-gitgraph.sidebar.sections')`.
-     - Nếu phân tích thành mảng hợp lệ: Gán `expandedSectionIds.value = new Set(parsedArray)`.
+     - Đọc giá trị từ `localStorage.getItem('f-gitgraph.sidebar.collapsed')`.
+     - So khớp nghiêm ngặt: Nếu bằng đúng chuỗi `"true"`, gán `isSidebarCollapsed.value = true`. Ngược lại gán `false`.
+  3. *Bước 3 (Khôi phục danh sách phân nhóm mở rộng)*:
+     - Đọc giá trị từ `localStorage.getItem('f-gitgraph.sidebar.sections')`.
+     - Nếu tồn tại chuỗi JSON:
+       - Bọc trong `try-catch`, phân tích bằng `JSON.parse(storedSections)`.
+       - Kiểm tra nếu kết quả là một Mảng (`Array.isArray(parsed)`):
+         - Lọc danh sách chỉ giữ lại các mã ID thuộc 5 nhóm hợp lệ.
+         - Gán `expandedSectionIds.value = new Set(filteredArray)`.
+       - Nếu xảy ra lỗi phân tích cú pháp JSON: Gán mặc định mở toàn bộ cả 5 nhóm.
+     - Nếu không tồn tại: Gán mặc định mở toàn bộ cả 5 nhóm.
+  4. *Bước 4 (Cô lập môi trường cấm Storage)*:
+     - Toàn bộ 3 bước trên được đặt trong một khối bao bọc an toàn cấp cao; nếu đối tượng `window.localStorage` không khả dụng hoặc bị hệ điều hành chặn quyền:
+       - Toàn bộ các tín hiệu tự động sử dụng giá trị mặc định chuẩn xác mà không ném ra bất kỳ biệt lệ nào làm sập ứng dụng.
 
 ---
 
-## 4. Đặc Tả Tương Tác Người Dùng & Điều Phối Hành Động
+#### 7. Hàm `checkoutBranchAction(branchName: string): Promise<void>`
+- **Mục Tiêu**: Xử lý logic nghiệp vụ khi người dùng nhấp đúp vào một nhánh cục bộ để thực hiện checkout an toàn qua Safe Mutator Tier.
+- **Đặc Tả Đầu Vào (Input)**:
+  - `branchName`: Tên chuỗi của nhánh cần chuyển tới (ví dụ `"feature/login"`).
+- **Đặc Tả Đầu Ra (Output)**: `Promise<void>`.
+- **Quy Trình Các Bước Xử Lý Cụ Thể**:
+  1. *Bước 1 (Khóa Mutex chống nhấp đúp liên hoàn)*:
+     - Kiểm tra nếu `isCheckingOut.value === true`: Thoát ngay lập tức để ngăn ngừa gửi liên tiếp nhiều lệnh checkout gây xung đột tiến trình Git CLI.
+     - Kiểm tra nếu `branchName === currentHead.value`: Bỏ qua vì kho đang ở chính nhánh này rồi.
+     - Bật cờ khóa: `isCheckingOut.value = true`.
+  2. *Bước 2 (Gửi Action RPC xuống Backend)*:
+     - Gọi hàm phát lệnh an toàn:
+       `vscode.postMessage({ command: "checkoutBranch", repo: selectedRepo.value, branch: branchName })`.
+  3. *Bước 3 (Tiếp nhận phản hồi qua Dispatcher Router)*:
+     - Khi Backend thực thi lệnh `git checkout -- <branch>` hoàn tất và gửi thông điệp `ActionResponse` về Webview:
+       - Giải phóng cờ khóa: `isCheckingOut.value = false`.
+       - *Nếu thất bại (`msg.status !== null`)*:
+         - Hiển thị hộp thoại cảnh báo lỗi tiếng Anh từ `result.stderr` (ví dụ: cảnh báo tệp đang biến động trong Working Tree bị ghi đè, yêu cầu người dùng Stash hoặc Commit trước).
+       - *Nếu thành công (`msg.status === null`)*:
+         - Kích hoạt âm thanh vi mô chuyển công tắc cơ học `branch.checkout` (nếu âm thanh đang bật).
+         - Kích hoạt chuỗi làm mới 4 chiều đồng bộ qua Dispatcher (`refresh()`, `refreshStatus()`, `refreshSyncStatus()`, `refreshStashList()`).
+         - Cập nhật hiển thị viền tím Neon sang nhánh mới được checkout.
 
-1. **Nhấp Chọn Mục Working Tree**:
-   - Khi nhấp chuột trái vào dòng `Changes`: Tương đương với hành vi nhấp chọn dòng mầm `*` trên đồ thị DAG. Hệ thống kích hoạt tín hiệu mở phân vùng Staging Area & Commit Composer ở bảng phải.
-2. **Nhấp Đúp (Double-Click) Vào Nhánh Cục Bộ**:
-   - Khi nhấp đúp vào một nhánh trong nhóm `LOCAL BRANCHES`: Gửi ngay Action RPC `checkoutBranch` kèm tên nhánh về Backend.
-   - Nếu nhánh checkout thành công: Backend phát sự kiện cập nhật $\rightarrow$ Webview tự động chuyển viền tím Neon sang nhánh mới.
-   - Nếu có lỗi xung đột tệp chưa commit: Backend trả về lỗi tiếng Anh $\rightarrow$ Webview hiển thị thông báo yêu cầu Stash hoặc Commit trước khi chuyển nhánh.
-3. **Nhấp Chuột Phải Mở Menu Ngữ Cảnh (Context Menu)**:
-   - Chuột phải vào nhánh cục bộ: Tận dụng trực tiếp hệ thống Menu Phase 1: Checkout, Merge into Current, Rebase onto Current, Rename Branch, Delete Branch.
-   - Chuột phải vào remote branch: Hiển thị menu: Checkout as New Local Branch, Pull, Delete Remote Branch.
-   - Chuột phải vào bản ghi stash: Hiển thị menu tiếng Anh: Apply Stash, Pop Stash, Drop Stash. Trong đó:
-     - Tùy chọn `Pop Stash`: Kích hoạt Action RPC `stashPop` với payload `{ index }`.
-     - Tùy chọn `Drop Stash`: Kích hoạt Action RPC `stashDrop` với payload `{ index }`.
-     - Sau khi thực thi thành công, tự động gọi `refreshStatus()` và nạp lại danh sách stash mới.
+---
+
+#### 8. Hàm `openWorkingTreeAction(): void`
+- **Mục Tiêu**: Xử lý logic khi người dùng nhấp chọn mục `WORKING TREE -> Changes` trên Sidebar.
+- **Đặc Tả Đầu Vào / Đầu Ra**: Không tham số, trả về `void`.
+- **Quy Trình Các Bước Xử Lý Cụ Thể**:
+  1. *Bước 1*: Đánh dấu lựa chọn: `selectItem("working-tree:changes")`.
+  2. *Bước 2*: Kiểm tra trạng thái khung Staging Area ở bảng phải. Nếu chưa mở (`inspectorMode.value !== "staging"`):
+     - Đặt `expandedCommit.value = UNCOMMITTED_CHANGES` (tương đương với việc nhấp vào dòng mầm `*` trên đồ thị).
+  3. *Bước 3*: Gửi query cập nhật trạng thái tệp: `refreshStatus()`.
+
+---
+
+#### 9. Hàm `handleStashAction(index: number, mode: 'pop' | 'drop' | 'apply'): void`
+- **Mục Tiêu**: Điều phối các hành động quản lý stash từ menu ngữ cảnh của dòng Stash Item trên Sidebar.
+- **Đặc Tả Đầu Vào (Input)**:
+  - `index`: Chỉ số số nguyên không âm của bản stash trong ngăn xếp ($\ge 0$).
+  - `mode`: Một trong ba hành động: `"pop"`, `"drop"`, hoặc `"apply"`.
+- **Quy Trình Các Bước Xử Lý Cụ Thể**:
+  1. *Bước 1 (Kiểm tra an toàn)*:
+     - Nếu `mode === "drop"`: Mở hộp thoại xác nhận cảnh báo nguy hiểm bằng tiếng Anh (*"Are you sure you want to drop stash@{index}? This action cannot be undone."*). Chỉ gửi lệnh khi người dùng xác nhận.
+  2. *Bước 2 (Gửi Action RPC)*:
+     - Nếu `mode === "pop"`: Gọi `runAction({ command: "stashPop", index })`.
+     - Nếu `mode === "drop"`: Gọi `runAction({ command: "stashDrop", index })`.
+  3. *Bước 3 (Xử lý kết quả & Làm mới dữ liệu)*:
+     - Khi nhận kết quả từ Backend: Nếu thành công, tự động gọi `refreshStatus()` và `refreshStashList()` để cập nhật danh sách bản ghi mới nhất.
+
+---
+
+## 4. Đặc Tả Tương Tác Người Dùng & Điều Phối Hành Động Cây Phân Cấp
+
+### 4.1. Tương Tác Chuột & Menu Ngữ Cảnh Từng Nhóm
+
+1. **Nhấp Đơn (Single Click) Vào Item**:
+   - Nhấp vào `Changes`: Kích hoạt `openWorkingTreeAction()`.
+   - Nhấp vào nhánh hoặc tag: Đặt `selectedItemId` tương ứng và tự động cuộn bảng đồ thị DAG đến commit đỉnh của nhánh hoặc tag đó.
+2. **Nhấp Đúp (Double Click) Vào Nhánh Cục Bộ**:
+   - Kích hoạt ngay hàm `checkoutBranchAction(branchName)`.
+3. **Menu Ngữ Cảnh Chuột Phải (Context Menu Workflow)**:
+   - *Chuột phải vào Nhánh Cục Bộ*: Mở menu gồm các hành động tiếng Anh chuẩn mực:
+     - `"Checkout"`: Chuyển nhánh.
+     - `"Merge into current branch"`: Mở dialog xác nhận merge.
+     - `"Rebase current branch onto this"`: Mở dialog xác nhận rebase.
+     - `"Rename branch..."`: Mở dialog nhập tên mới.
+     - `"Delete branch..."`: Mở dialog xác nhận xóa (chặn xóa nhánh HEAD hiện tại).
+   - *Chuột phải vào Nhánh Remote*: Mở menu gồm:
+     - `"Checkout as New Local Branch..."`.
+     - `"Pull into Current Branch"`.
+     - `"Delete Remote Branch..."` (cảnh báo xác nhận đỏ).
+   - *Chuột phải vào Bản Ghi Stash*: Mở menu gồm:
+     - `"Apply Stash"`: Áp dụng và giữ stash.
+     - `"Pop Stash"`: Kích hoạt `handleStashAction(index, 'pop')`.
+     - `"Drop Stash..."`: Kích hoạt `handleStashAction(index, 'drop')`.
+
+---
+
+### 4.2. Quy Chuẩn Điều Hướng Bằng Bàn Phím (WAI-ARIA Tree View Keyboard Navigation)
+
+Nhằm bảo đảm tính tiếp cận toàn diện cho người dùng thao tác thuần bàn phím trên Sidebar:
+
+| Phím Nhấn (Key) | Ngữ Cảnh Kích Hoạt | Hành Động Xử Lý Chi Tiết Từng Bước |
+| :--- | :--- | :--- |
+| **`ArrowDown`** | Bất kỳ vị trí nào trên cây Sidebar | Di chuyển tiêu điểm xuống phần tử hiển thị kế tiếp (duyệt tuần tự qua các Section Header và các Item con đang mở). |
+| **`ArrowUp`** | Bất kỳ vị trí nào trên cây Sidebar | Di chuyển tiêu điểm lên phần tử hiển thị phía trước. |
+| **`ArrowRight`** | Đang ở dòng Tiêu Đề Nhóm (Section Header) | - Nếu Section đang đóng: Mở rộng Section (`toggleSection(id)`).<br>- Nếu Section đã mở: Di chuyển tiêu điểm vào Item con đầu tiên của Section đó. |
+| **`ArrowLeft`** | Đang ở dòng Tiêu Đề Nhóm hoặc Item con | - Nếu đang ở Item con: Di chuyển tiêu điểm ngược về Section Header cha.<br>- Nếu đang ở Section Header mở: Gập Section lại (`toggleSection(id)`). |
+| **`Enter`** / **`Space`** | Tiêu điểm tại Section Header | Kích hoạt đóng/mở phân nhóm (`toggleSection(id)`). |
+| **`Enter`** | Tiêu điểm tại Nhánh Cục Bộ | Kích hoạt chuyển nhánh (`checkoutBranchAction(branchName)`). |
+| **`Enter`** | Tiêu điểm tại dòng `Changes` | Mở phân vùng Staging Area (`openWorkingTreeAction()`). |
+| **`Home`** / **`End`** | Đang focus trên Sidebar | Nhảy tiêu điểm tức thì về dòng đầu tiên (`WORKSPACE`) hoặc dòng cuối cùng hiển thị của cây. |
 
 ---
 
@@ -299,8 +481,8 @@ Mọi tệp kiểm thử cho Nhóm Việc 3 bắt buộc đặt tên với đuô
 
 | Tệp Kiểm Thử Độc Lập | Module Mục Tiêu | Kịch Bản Kiểm Thử Chi Tiết Bắt Buộc |
 | :--- | :--- | :--- |
-| `tests/webview/lib/stores/sidebar.store.test.ts` | `sidebar.store.ts` | 1. **Khởi tạo & Ranh giới**: Độ rộng mặc định 220px; thử nghiệm truyền giá trị ngoài khoảng (ví dụ 100px hoặc 600px) xác nhận kẹp đúng ranh giới $[160, 450]$.<br>2. **Toggle Collapse**: Đảo trạng thái thu gọn và xác nhận lưu giá trị boolean vào `localStorage`.<br>3. **Đóng mở Section**: Thêm/xóa đúng mã `sectionId` khỏi tập hợp `expandedSectionIds`.<br>4. **Phục hồi từ LocalStorage**: Khởi tạo store với mock `localStorage` chứa giá trị cũ (ví dụ 300px), xác nhận store nạp đúng giá trị 300px.<br>5. **Bảo vệ dữ liệu rác**: Nếu `localStorage` chứa giá trị không hợp lệ (chuỗi rác), store tự động dùng giá trị mặc định 220px mà không ném lỗi. |
-| `tests/webview/components/sidebar/SidebarNavigator.test.ts` | `SidebarNavigator.tsx` | 1. **Render 5 phân nhóm**: Kết xuất đầy đủ 5 tiêu đề nhóm tiếng Anh chuẩn mực.<br>2. **Đánh dấu nhánh HEAD**: Nhánh active có class highlight viền tím Neon và render icon checkmark; các nhánh thường không có.<br>3. **Hiển thị số commit chưa push**: Nhánh có `aheadCount = 2` render đúng nhãn nhỏ `"↑2"` màu hổ phách.<br>4. **Tương tác Double-Click**: Bấm đúp vào nhánh phát chính xác Action RPC `checkoutBranch` kèm tên nhánh.<br>5. **Bấm nút `+` tạo nhánh**: Kích hoạt đúng callback mở modal tạo nhánh mới.<br>6. **Resizer kéo dãn chuột**: Giả lập sự kiện `mousedown` $\rightarrow$ `mousemove` dịch chuyển 50px $\rightarrow$ `mouseup`, xác nhận chiều rộng Sidebar tăng tương ứng và kích hoạt ghi `localStorage`. |
+| `tests/webview/lib/stores/sidebar.store.test.ts` | `sidebar.store.ts` | 1. **Khởi tạo & Ranh giới an toàn**: Độ rộng mặc định 220px; thử nghiệm truyền giá trị ngoài khoảng (100px hoặc 600px, số âm, `NaN`) xác nhận kẹp đúng ranh giới $[160, 450]$.<br>2. **Tách biệt cập nhật UI vs Lưu trữ Disk**: Khi `commitToStorage = false`, tín hiệu cập nhật nhưng không gọi `localStorage.setItem`; khi `true`, ghi chính xác vào disk.<br>3. **Toggle Sidebar & Bẫy Reflow**: Đảo cờ `isSidebarCollapsed`, xác nhận lưu giá trị boolean và kiểm tra sự kiện resize được phát sau 160ms.<br>4. **Đóng mở Section & Mở/Gập toàn bộ**: Thêm/xóa đúng mã `sectionId`; kiểm tra `expandAllSections` và `collapseAllSections` cập nhật chính xác.<br>5. **Khôi phục phòng vệ (Defensive Hydration)**: Khôi phục store khi `localStorage` chứa giá trị hợp lệ, chuỗi rác `NaN`, hoặc JSON bị hỏng; xác nhận store luôn fallback an toàn về giá trị mặc định.<br>6. **Bẫy lỗi Storage Sandbox**: Giả lập `localStorage.setItem` ném ngoại lệ `QuotaExceededError`, xác nhận hàm không ném lỗi ra ngoài.<br>7. **Khóa Mutex Checkout**: Gọi `checkoutBranchAction` bật cờ `isCheckingOut = true`, gọi lần 2 liên tiếp bị chặn thoát sớm; giải phóng cờ khi có kết quả. |
+| `tests/webview/components/sidebar/SidebarNavigator.test.ts` | `SidebarNavigator.tsx` | 1. **Render 5 phân nhóm**: Kết xuất đầy đủ 5 tiêu đề nhóm tiếng Anh chuẩn mực.<br>2. **Đánh dấu nhánh HEAD**: Nhánh active có class highlight viền tím Neon và render icon checkmark; các nhánh thường không có.<br>3. **Hiển thị số commit chưa push**: Nhánh có `aheadCount = 2` render đúng nhãn nhỏ `"↑2"` màu hổ phách.<br>4. **Tương tác Double-Click**: Bấm đúp vào nhánh phát chính xác Action RPC `checkoutBranch` kèm tên nhánh.<br>5. **Bấm nút `+` tạo nhánh**: Kích hoạt đúng callback mở modal tạo nhánh mới.<br>6. **Resizer kéo dãn chuột**: Giả lập sự kiện `mousedown` $\rightarrow$ `mousemove` dịch chuyển 50px $\rightarrow$ `mouseup`, xác nhận chiều rộng Sidebar tăng tương ứng và chỉ kích hoạt ghi `localStorage` tại nhịp `mouseup`.<br>7. **Điều hướng bàn phím WAI-ARIA**: Kiểm tra các phím `ArrowDown`, `ArrowUp`, `ArrowRight` (mở section), `ArrowLeft` (gập section), và `Enter` kích hoạt đúng phần tử. |
 
 ---
 
@@ -310,3 +492,4 @@ Mọi tệp kiểm thử cho Nhóm Việc 3 bắt buộc đặt tên với đuô
 | :---: | :---: | :---: | :---: | :--- |
 | **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả Left Sidebar Navigator Tree. |
 | **v1.1.0** | 2026-10-19 | Đồng bộ hóa | AI Architect | **Chuẩn hóa đối tượng StashRecord & Liên kết Action RPC**: Thay thế kiểu dữ liệu tự phát `StashItem` bằng `StashRecord` đồng nhất với `src/types/queries.ts` (Contract-First). Bổ sung định tuyến Action RPC `stashPop` và `stashDrop` trong menu ngữ cảnh của bản ghi Stash. |
+| **v1.2.0** | 2026-10-19 | Nâng cấp thiết kế | AI Architect | **Chi tiết hóa toàn diện Mục 3.2 (Quy Trình Xử Lý Cụ Thể Từng Bước) & Bổ sung WAI-ARIA Tree Navigation**: <br>1. **Tách biệt cập nhật UI và lưu đĩa bền vững**: Bổ sung cờ `commitToStorage` trong `setSidebarWidth` triệt tiêu tình trạng nghẽn I/O (Zero-Jank Resizing) khi kéo chuột 60-144fps.<br>2. **Đồng bộ hóa tên gọi với Design 06**: Thống nhất dùng `isSidebarCollapsed` và `toggleSidebar()`; bổ sung cơ chế phát sự kiện `window.resize` sau 160ms transition.<br>3. **Bổ sung các hàm điều phối hành động Git**: Đặc tả chi tiết 9 hàm điều phối (`checkoutBranchAction` với khóa Mutex chống spam, `openWorkingTreeAction`, `handleStashAction`, `expandAllSections`, `collapseAllSections`, `selectItem`).<br>4. **Quy trình khôi phục phòng vệ 4 tầng**: Đặc tả `initSidebarStore` xử lý an toàn dữ liệu rác, `NaN`, JSON lỗi và môi trường cấm `localStorage`.<br>5. **Đặc tả điều hướng bàn phím WAI-ARIA Tree View**: Bổ sung bảng ánh xạ phím mũi tên 4 chiều, `Enter`, `Space`, `Home`, `End`. Mở rộng ma trận kiểm thử đơn vị. |

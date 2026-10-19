@@ -180,6 +180,26 @@ export function refreshStatus() {
   vscode.postMessage({ command: "workspaceStatus", repo });
 }
 
+/** Yêu cầu Backend trả về số đếm đồng bộ ahead/behind để cập nhật huy hiệu nút bấm. */
+export function refreshSyncStatus(repo?: string) {
+  const target = repo ?? selectedRepo.value;
+  if (target === undefined) {
+    return;
+  }
+
+  vscode.postMessage({ command: "syncStatus", repo: target });
+}
+
+/** Yêu cầu Backend trả về danh sách ngăn xếp stash để cập nhật cây điều hướng. */
+export function refreshStashList(repo?: string) {
+  const target = repo ?? selectedRepo.value;
+  if (target === undefined) {
+    return;
+  }
+
+  vscode.postMessage({ command: "stashList", repo: target });
+}
+
 /** Yêu cầu Backend trả về tiêu đề/mô tả của commit HEAD để nạp sẵn khi bật Amend. */
 export function requestHeadCommit() {
   const repo = selectedRepo.value;

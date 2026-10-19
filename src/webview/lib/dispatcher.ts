@@ -6,6 +6,8 @@ import { handleCommitResult } from "./handler/commit-result";
 import { handleHeadCommit } from "./handler/head-commit";
 import { handleLoadBranches } from "./handler/load-branches";
 import { handleRefresh } from "./handler/refresh";
+import { handleSyncAction } from "./handler/sync-action";
+import { handleStashList, handleSyncStatus } from "./handler/sync-query";
 import { handleViewDiff } from "./handler/view-diff";
 import { handleWorkspaceStatus } from "./handler/workspace-status";
 
@@ -35,12 +37,20 @@ const handlers: Handlers = {
   unstageAll: handleActionResult,
   discardFileChanges: handleActionResult,
   discardAllChanges: handleActionResult,
+  fetchAll: handleSyncAction,
+  pull: handleSyncAction,
+  push: handleSyncAction,
+  stashSave: handleSyncAction,
+  stashPop: handleSyncAction,
+  stashDrop: handleSyncAction,
   commitDetails: handleCommitDetails,
   commitChanges: handleCommitResult,
   commitAndPush: handleCommitResult,
   headCommit: handleHeadCommit,
   loadBranches: handleLoadBranches,
   refresh: handleRefresh,
+  syncStatus: handleSyncStatus,
+  stashList: handleStashList,
   viewDiff: handleViewDiff,
   workspaceStatus: handleWorkspaceStatus
 };
