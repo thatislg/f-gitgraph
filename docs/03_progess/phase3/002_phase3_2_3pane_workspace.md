@@ -42,7 +42,7 @@ Mọi công việc triển khai trong Chặng 3.2 bắt buộc đối soát và 
 
 - **Mục tiêu**: Nâng cấp giao diện hiển thị đơn lẻ của F-GitGraph thành một **Không gian làm việc 3 phân vùng (3-Pane Workspace)** chuẩn mực của các ứng dụng Git Client chuyên nghiệp (như Fork, GitKraken, Tower). Cung cấp cây điều hướng toàn diện (Branches, Remotes, Tags, Stashes, Working Tree) và thanh tác vụ đồng bộ toàn cục (`Fetch`, `Pull`, `Push`, `Stash`) với số đếm trực quan (`↑ahead` / `↓behind`).
 - **Trạng thái hiện tại**: **Sẵn sàng triển khai mã nguồn** (Phase 3.1 đã nghiệm thu đạt chuẩn v1.1.0).
-- **Tiến độ tổng thể**: 0% hoàn thành.
+- **Tiến độ tổng thể**: 20% hoàn thành (Nhóm Việc 1 hoàn tất).
 
 ### 1.2. Bảng Kiểm Kê Tệp Tin Tác Động (Impacted Files Inventory)
 
@@ -85,33 +85,33 @@ _Tài liệu tham chiếu thiết kế_: [05_Sync_And_Stash_Backend_Mutator_Desi
 
 _Mục tiêu_: Hoàn thiện toàn bộ các phương thức thực thi Git CLI gốc, bộ truy vấn số đếm đồng bộ và danh sách stash, đồng thời khai báo hợp đồng RPC trước khi dựng giao diện UI (tuân thủ **Nguyên Tắc 1**).
 
-- [ ] **Nhiệm vụ 1.1: Mở rộng các lệnh mạng & Stash trong `src/extension/mutator/gitCliMutator.ts`**
-  - [ ] **1.1.1**: Hiện thực hàm `fetchAll(prune = true)`: Thực thi `git fetch --all ${prune ? '--prune' : ''}`. Bọc qua `normalizeError()` để chuẩn hóa thông báo lỗi kết nối mạng.
-  - [ ] **1.1.2**: Nâng cấp hàm `pull(mode: 'merge' | 'rebase')`: Thực thi `git pull` hoặc `git pull --rebase`. Bắt và xử lý xung đột tự động (conflict detection).
-  - [ ] **1.1.3**: Nâng cấp hàm `push(options: { forceWithLease?: boolean; remote?: string; branch?: string })`: Hỗ trợ đẩy lên upstream mặc định hoặc chỉ định rõ remote/branch, hỗ trợ cờ an toàn `--force-with-lease`.
-  - [ ] **1.1.4**: Hiện thực hàm `stashSave(message?: string, includeUntracked = false)`: Thực thi `git stash push` kèm tham số `-u` (nếu có untracked) và `-m <message>`.
-  - [ ] **1.1.5**: Hiện thực hàm `stashPop(index = 0)`: Thực thi `git stash pop stash@{index}`.
-  - [ ] **1.1.6**: Hiện thực hàm `stashDrop(index = 0)`: Thực thi `git stash drop stash@{index}`.
+- [x] **Nhiệm vụ 1.1: Mở rộng các lệnh mạng & Stash trong `src/extension/mutator/gitCliMutator.ts`**
+  - [x] **1.1.1**: Hiện thực hàm `fetchAll(prune = true)`: Thực thi `git fetch --all ${prune ? '--prune' : ''}`. Bọc qua `normalizeError()` để chuẩn hóa thông báo lỗi kết nối mạng.
+  - [x] **1.1.2**: Nâng cấp hàm `pull(mode: 'merge' | 'rebase')`: Thực thi `git pull` hoặc `git pull --rebase`. Bắt và xử lý xung đột tự động (conflict detection).
+  - [x] **1.1.3**: Nâng cấp hàm `push(options: { forceWithLease?: boolean; remote?: string; branch?: string })`: Hỗ trợ đẩy lên upstream mặc định hoặc chỉ định rõ remote/branch, hỗ trợ cờ an toàn `--force-with-lease`.
+  - [x] **1.1.4**: Hiện thực hàm `stashSave(message?: string, includeUntracked = false)`: Thực thi `git stash push` kèm tham số `-u` (nếu có untracked) và `-m <message>`.
+  - [x] **1.1.5**: Hiện thực hàm `stashPop(index = 0)`: Thực thi `git stash pop stash@{index}`.
+  - [x] **1.1.6**: Hiện thực hàm `stashDrop(index = 0)`: Thực thi `git stash drop stash@{index}`.
 
-- [ ] **Nhiệm vụ 1.2: Xây dựng các bộ truy vấn Backend mới**
-  - [ ] **1.2.1**: Xây dựng `src/backend/queries/syncStatus.ts`:
+- [x] **Nhiệm vụ 1.2: Xây dựng các bộ truy vấn Backend mới**
+  - [x] **1.2.1**: Xây dựng `src/backend/queries/syncStatus.ts`:
     - Xác định tên upstream tracking branch của nhánh hiện tại qua `git rev-parse --abbrev-ref --symbolic-full-name @{u}`.
     - Thực thi `git rev-list --left-right --count HEAD...@{u}` để trích xuất chính xác 2 chỉ số: `ahead` (commit cục bộ chưa push) và `behind` (commit remote chưa pull).
     - Trả về `SyncStatusResult: { ahead: number; behind: number; upstream: string | null; isDetached: boolean }`.
-  - [ ] **1.2.2**: Xây dựng `src/backend/queries/stashList.ts`:
+  - [x] **1.2.2**: Xây dựng `src/backend/queries/stashList.ts`:
     - Thực thi `git stash list --pretty=format:%gd%x00%h%x00%gs%x00%cr` bóc tách bằng NUL-delimiter.
     - Trả về mảng `StashRecord: { index: number; hash: string; message: string; date: string }[]`.
 
-- [ ] **Nhiệm vụ 1.3: Khai báo Hợp đồng RPC & Đăng ký Message Handlers**
-  - [ ] **1.3.1**: Cập nhật `src/types/actions.ts`: Khai báo payload cho `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`.
-  - [ ] **1.3.2**: Cập nhật `src/types/queries.ts`: Khai báo query payload cho `syncStatus` và `stashList`.
-  - [ ] **1.3.3**: Cập nhật `src/extension/services/messageHandler.ts`: Đăng ký tiếp nhận và định tuyến các action/query mới tới `GitCliMutator` và các hàm query tương ứng qua helper `runMutation`.
+- [x] **Nhiệm vụ 1.3: Khai báo Hợp đồng RPC & Đăng ký Message Handlers**
+  - [x] **1.3.1**: Cập nhật `src/types/actions.ts`: Khai báo payload cho `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`.
+  - [x] **1.3.2**: Cập nhật `src/types/queries.ts`: Khai báo query payload cho `syncStatus` và `stashList`.
+  - [x] **1.3.3**: Cập nhật `src/extension/services/messageHandler.ts`: Đăng ký tiếp nhận và định tuyến các action/query mới tới `GitCliMutator` và các hàm query tương ứng qua helper `runMutation`.
 
-- [ ] **Nhiệm vụ 1.4 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend**
-  - [ ] **1.4.1**: Tạo `tests/backend/mutator/syncMutator.test.ts`: Test các lệnh `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` trên kho git thật giả lập.
-  - [ ] **1.4.2**: Tạo `tests/backend/queries/syncStatus.test.ts`: Test bóc tách ahead/behind khi có upstream, khi lệch commit, và khi không có remote.
-  - [ ] **1.4.3**: Tạo `tests/backend/queries/stashList.test.ts`: Test bóc tách danh sách stash với tiếng Việt unicode và ký tự đặc biệt.
-  - [ ] **1.4.4**: Tạo `tests/extension/services/syncMessageHandler.test.ts`: Test định tuyến RPC từ Webview xuống Mutator mạng/stash và các Query sync/stash.
+- [x] **Nhiệm vụ 1.4 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend**
+  - [x] **1.4.1**: Tạo `tests/backend/mutator/syncMutator.test.ts`: Test các lệnh `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` trên kho git thật giả lập.
+  - [x] **1.4.2**: Tạo `tests/backend/queries/syncStatus.test.ts`: Test bóc tách ahead/behind khi có upstream, khi lệch commit, và khi không có remote.
+  - [x] **1.4.3**: Tạo `tests/backend/queries/stashList.test.ts`: Test bóc tách danh sách stash với tiếng Việt unicode và ký tự đặc biệt.
+  - [x] **1.4.4**: Tạo `tests/extension/services/syncMessageHandler.test.ts`: Test định tuyến RPC từ Webview xuống Mutator mạng/stash và các Query sync/stash.
 
 ---
 
@@ -293,3 +293,9 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 5 bư�
   - Bổ sung yêu cầu bảo toàn hình học F# Core với `ResizeObserver` và test snapshot Zero Layout Shift khi co giãn Sidebar.
   - **Cập nhật kiến trúc truy vấn Backend (`[DESIGN_DEFECT]`)**: Đồng bộ hóa toàn bộ hệ thống thiết kế từ Design 05 đến Design 09; chuyển đổi giải pháp truy vấn `getSyncStatus` và `getStashList` từ `child_process.spawn` tự phát sang `SimpleGit.raw(...)`, kế thừa `gitPath` tùy chỉnh và bảo vệ Webview khỏi ô nhiễm kiểu dữ liệu Node.js.
   - Cập nhật trạng thái Chặng 3.2: **Sẵn sàng triển khai mã nguồn**.
+- **2026-10-19**: Hoàn tất **Nhóm Việc 1** (Contract-First Backend Sync & Stash). Xem báo cáo chi tiết [009_phase3_2_sync_stash_backend_report.md](../../04_reports/phase3/009_phase3_2_sync_stash_backend_report.md):
+  - Mở rộng `GitCliMutator` (`fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`) + chuẩn hóa lỗi mạng/SSH.
+  - Xây dựng 2 bộ truy vấn backend `syncStatus.ts` & `stashList.ts` (qua `SimpleGit.raw`).
+  - Khai hợp đồng RPC (`src/types/actions.ts`, `src/types/queries.ts`) và đăng ký `messageHandler.ts`.
+  - 26 unit test mới trên 4 tệp; 4 cổng chẩn đoán (typecheck/lint/compile/test) đạt 100% PASS.
+  - Ghi nhận 2 `[DESIGN_DEFECT]` (spawn→SimpleGit, chuỗi lỗi stash), 2 `[DEV_BUG]`, 1 `[ENV_TOOL_ISSUE]`.

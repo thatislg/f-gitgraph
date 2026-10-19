@@ -185,7 +185,7 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
   1. *Bước 1 (Chuẩn hóa selector)*: Tạo chuỗi định danh bản stash mục tiêu: `"stash@{" + validIndex + "}"`.
   2. *Bước 2 (Thực thi)*: Gọi `this.run(["stash", "pop", targetStash])`.
   3. *Bước 3 (Bắt lỗi chuyên biệt)*:
-     - Nếu lỗi chứa chuỗi `is not a stash-like commit`: Gán thông báo tiếng Anh: *"Stash entry 'stash@{" + validIndex + "}' does not exist or has already been dropped."*
+     - Nếu lỗi chứa một trong các chuỗi `is not a valid reference`, `is not a stash-like commit` hoặc `No stash entries found`: Gán thông báo tiếng Anh: *"Stash entry 'stash@{" + validIndex + "}' does not exist or has already been dropped."*
      - Nếu phát hiện `CONFLICT`: Gán thông báo: *"Conflict encountered while applying stash. Stash entry was preserved."*
   4. *Bước 4 (Chuẩn hóa & Trả kết quả)*: Gọi `this.normalizeError(result)` và trả về.
 
@@ -310,7 +310,7 @@ Toàn bộ thông báo lỗi trả về cho tầng Giao diện Webview **bắt b
 | 4 | `CONFLICT (content): Merge conflict in` / `Automatic merge failed; fix conflicts` | *"Merge conflict detected. Please resolve conflicts in your working tree."* | Xung đột nội dung tệp khi chạy lệnh Pull ở chế độ Merge. |
 | 5 | `error: could not apply` / `Resolve all conflicts manually` | *"Rebase conflict detected. Please resolve conflicts or abort the rebase."* | Xung đột nội dung tệp khi chạy lệnh Pull ở chế độ Rebase. |
 | 6 | `error: Your local changes to the following files would be overwritten by merge` | *"Your local changes would be overwritten by pull. Please commit or stash your changes before pulling."* | Có tệp chưa commit bị trùng với tệp pull về. |
-| 7 | `fatal: 'stash@{` ... `}' is not a stash-like commit` | *"The specified stash entry does not exist or has already been dropped."* | Chỉ số stash yêu cầu pop hoặc drop không tồn tại trong ngăn xếp. |
+| 7 | `error: stash@{N} is not a valid reference` / `fatal: 'stash@{` ... `}' is not a stash-like commit` / `No stash entries found` | *"The specified stash entry does not exist or has already been dropped."* | Chỉ số stash yêu cầu pop hoặc drop không tồn tại trong ngăn xếp. |
 | 8 | `Another git process seems to be running` / `index.lock': File exists` | *"The repository is locked by another Git process. Please wait a few seconds or check your terminal."* | Xung đột tệp khóa `.git/index.lock` do tiến trình Git khác đang chạy. |
 
 ---
@@ -378,3 +378,4 @@ Mọi tệp kiểm thử cho Nhóm Việc 1 bắt buộc đặt tên với đuô
 | :---: | :---: | :---: | :---: | :--- |
 | **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả Backend Mutator, Stash & RPC Protocol. |
 | **v1.1.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Tái cấu trúc bộ truy vấn trạng thái sang SimpleGit**: Thay thế giải pháp `child_process.spawn` tự phát bằng `SimpleGit.raw(...)`. Khắc phục lỗ hổng ranh giới bỏ quên cấu hình `gitPath` (lỗi khi người dùng dùng Git Portable) và ngăn chặn triệt để nguy cơ rò rỉ kiểu dữ liệu Node.js (`node:child_process`, `Buffer`) vào môi trường Webview DOM. Định vị kiểu kết quả hợp đồng trực tiếp tại `src/types/queries.ts` chuẩn Contract-First. |
+| **v1.2.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Hiệu chỉnh chuỗi nhận diện lỗi stash không tồn tại**: Git CLI thực tế (2.56.0) trả về `error: stash@{N} is not a valid reference` cho chỉ số stash vượt ngoài ngăn xếp, trong khi `is not a stash-like commit` chỉ xuất hiện khi truyền một tham chiếu không phải stash (ví dụ `HEAD`). Cập nhật chuỗi nhận diện ở Mục 2.5 và Mục 4 (hàng 7) để bắt đúng cả hai trường hợp và `No stash entries found`. |

@@ -61,6 +61,12 @@ export function getWebviewLocalizedStrings() {
     unableToCommitChanges: vscode.l10n.t("Unable to Commit Changes"),
     unableToCommitAndPush: vscode.l10n.t("Unable to Commit and Push Changes"),
     unableToOpenFile: vscode.l10n.t("Unable to Open File"),
+    unableToFetchAll: vscode.l10n.t("Unable to Fetch All"),
+    unableToPull: vscode.l10n.t("Unable to Pull"),
+    unableToPush: vscode.l10n.t("Unable to Push"),
+    unableToStashSave: vscode.l10n.t("Unable to Stash Changes"),
+    unableToStashPop: vscode.l10n.t("Unable to Apply Stash"),
+    unableToStashDrop: vscode.l10n.t("Unable to Drop Stash"),
     invalidCharacters: vscode.l10n.t("Unable to {0}, one or more invalid characters entered."),
 
     // Actions

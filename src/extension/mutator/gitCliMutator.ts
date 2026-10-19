@@ -19,6 +19,13 @@ export type MutatorResult = {
   stderr: string;
 };
 
+export type PushOptions = {
+  forceWithLease?: boolean;
+  remote?: string;
+  branch?: string;
+  setUpstream?: boolean;
+};
+
 const INVALID_REF: MutatorResult = {
   ok: false,
   exitCode: null,
@@ -90,12 +97,43 @@ export class GitCliMutator {
     if (result.ok) {
       return result;
     }
-    const { stderr } = result;
-    if (stderr.includes("index.lock")) {
+    const { stdout, stderr } = result;
+    const output = stdout + "\n" + stderr;
+
+    // Lỗi kết nối mạng tới remote (fetch/pull/push).
+    if (
+      output.includes("Could not resolve host") ||
+      output.includes("Failed to connect") ||
+      output.includes("Network is unreachable") ||
+      output.includes("Could not read from remote repository")
+    ) {
       return {
         ...result,
         stderr:
-          "Kho mã nguồn đang bị khóa bởi một tiến trình Git khác. Vui lòng thử lại sau vài giây hoặc kiểm tra terminal"
+          "Unable to connect to the remote Git server. Please check your internet connection or remote URL."
+      };
+    }
+
+    // Lỗi xác thực SSH/HTTPS bị remote từ chối.
+    if (
+      output.includes("Permission denied (publickey)") ||
+      output.includes("Authentication failed") ||
+      output.includes("Invalid username or password")
+    ) {
+      return {
+        ...result,
+        stderr: "Git authentication failed. Please verify your SSH key or Personal Access Token."
+      };
+    }
+
+    if (
+      stderr.includes("index.lock") ||
+      stderr.includes("Another git process seems to be running")
+    ) {
+      return {
+        ...result,
+        stderr:
+          "The repository is locked by another Git process. Please wait a few seconds or check your terminal."
       };
     }
     if (
@@ -270,15 +308,113 @@ export class GitCliMutator {
     return this.run(["tag", "-a", name, "-m", message]);
   }
 
-  async push(remote = "origin", branch: string): Promise<MutatorResult> {
-    return this.run(["push", remote, branch]);
+  /** Tải toàn bộ commit/branch/tag từ mọi remote; `--prune` dọn tracking branch đã bị xóa. */
+  async fetchAll(prune = true): Promise<MutatorResult> {
+    const args = ["fetch", "--all"];
+    if (prune) {
+      args.push("--prune");
+    }
+    return this.normalizeError(await this.run(args));
   }
 
-  async pull(rebase = false): Promise<MutatorResult> {
-    return this.run(rebase ? ["pull", "--rebase"] : ["pull"]);
+  /** Kéo thay đổi từ upstream theo chiến lược merge hoặc rebase, tự phát hiện xung đột. */
+  async pull(mode: "merge" | "rebase"): Promise<MutatorResult> {
+    const args = mode === "rebase" ? ["pull", "--rebase"] : ["pull", "--no-rebase"];
+    const result = await this.run(args);
+    if (!result.ok) {
+      const output = result.stdout + "\n" + result.stderr;
+      if (output.includes("CONFLICT")) {
+        return this.normalizeError({
+          ...result,
+          stderr:
+            mode === "rebase"
+              ? "Rebase conflict detected. Please resolve conflicts or abort the rebase."
+              : "Merge conflict detected. Please resolve conflicts in your working tree."
+        });
+      }
+      if (output.includes("Your local changes to the following files would be overwritten")) {
+        return this.normalizeError({
+          ...result,
+          stderr:
+            "Your local changes would be overwritten by pull. Please commit or stash your changes before pulling."
+        });
+      }
+    }
+    return this.normalizeError(result);
   }
 
-  async fetch(remote = "origin"): Promise<MutatorResult> {
-    return this.run(["fetch", remote]);
+  /** Đẩy commit lên remote; hỗ trợ `--force-with-lease`, `-u` và chỉ định remote/branch đích. */
+  async push(options: PushOptions = {}): Promise<MutatorResult> {
+    const args = ["push"];
+    if (options.forceWithLease) {
+      args.push("--force-with-lease");
+    }
+    if (options.setUpstream) {
+      args.push("-u");
+    }
+    if (options.remote !== undefined && options.branch !== undefined) {
+      if (!(await this.isValidRefName(options.branch, "branch"))) {
+        return { ...INVALID_REF, stderr: `Invalid branch name: ${options.branch}` };
+      }
+      args.push(options.remote, options.branch);
+    }
+    const result = await this.run(args);
+    if (!result.ok) {
+      const output = result.stdout + "\n" + result.stderr;
+      if (output.includes("[rejected]") || output.includes("non-fast-forward")) {
+        return this.normalizeError({
+          ...result,
+          stderr:
+            "Push rejected: the remote branch contains work that you do not have locally. Please pull before pushing."
+        });
+      }
+    }
+    return this.normalizeError(result);
+  }
+
+  /** Lưu nhanh thay đổi vào ngăn xếp stash; `-u` kèm cả tệp untracked, `-m` gán thông điệp. */
+  async stashSave(message?: string, includeUntracked = false): Promise<MutatorResult> {
+    const args = ["stash", "push"];
+    if (includeUntracked) {
+      args.push("-u");
+    }
+    if (message !== undefined && message.trim().length > 0) {
+      args.push("-m", message.trim());
+    }
+    args.push("--");
+    return this.normalizeError(await this.run(args));
+  }
+
+  /** Khôi phục bản stash tại `stash@{index}` và xóa nó khỏi ngăn xếp. */
+  async stashPop(index = 0): Promise<MutatorResult> {
+    const validIndex = Math.max(0, Math.floor(index));
+    const target = `stash@{${validIndex}}`;
+    const result = await this.run(["stash", "pop", target]);
+    if (!result.ok) {
+      const output = result.stdout + "\n" + result.stderr;
+      if (
+        output.includes("is not a stash-like commit") ||
+        output.includes("is not a valid reference") ||
+        output.includes("No stash entries found")
+      ) {
+        return this.normalizeError({
+          ...result,
+          stderr: `Stash entry '${target}' does not exist or has already been dropped.`
+        });
+      }
+      if (output.includes("CONFLICT")) {
+        return this.normalizeError({
+          ...result,
+          stderr: "Conflict encountered while applying stash. Stash entry was preserved."
+        });
+      }
+    }
+    return this.normalizeError(result);
+  }
+
+  /** Xóa bỏ vĩnh viễn bản stash tại `stash@{index}`. */
+  async stashDrop(index = 0): Promise<MutatorResult> {
+    const validIndex = Math.max(0, Math.floor(index));
+    return this.normalizeError(await this.run(["stash", "drop", `stash@{${validIndex}}`]));
   }
 }

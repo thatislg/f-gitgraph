@@ -193,7 +193,7 @@ describe("GitCliMutator", () => {
     try {
       const result = await mutator.stageFile("f");
       expect(result.ok).toBe(false);
-      expect(result.stderr).toContain("đang bị khóa bởi một tiến trình Git khác");
+      expect(result.stderr).toContain("repository is locked by another Git process");
     } finally {
       fs.rmSync(lockPath, { force: true });
     }

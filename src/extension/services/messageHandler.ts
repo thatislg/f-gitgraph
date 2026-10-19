@@ -13,6 +13,8 @@ import type { GitClient } from "@/backend/gitClient";
 import { commitDetails } from "@/backend/queries/commitDetails";
 import { getHeadCommitMessage } from "@/backend/queries/headCommit";
 import { loadBranches } from "@/backend/queries/loadBranches";
+import { getStashList } from "@/backend/queries/stashList";
+import { getSyncStatus } from "@/backend/queries/syncStatus";
 import { getWorkspaceStatus } from "@/backend/queries/workspaceStatus";
 import { abbrevCommit } from "@/backend/utils/string";
 import type { Config } from "@/extension/config";
@@ -157,6 +159,17 @@ export function registerMessageHandlers(
     await vscode.window.showTextDocument(document, { preview: true });
   });
 
+  // --- Sync & Stash actions (ủy thác cho GitCliMutator) ---
+
+  registerAction("fetchAll", (msg) => runMutation(gitMutator.fetchAll(msg.prune)));
+  registerAction("pull", (msg) => runMutation(gitMutator.pull(msg.mode)));
+  registerAction("push", (msg) => runMutation(gitMutator.push(msg)));
+  registerAction("stashSave", (msg) =>
+    runMutation(gitMutator.stashSave(msg.message, msg.includeUntracked))
+  );
+  registerAction("stashPop", (msg) => runMutation(gitMutator.stashPop(msg.index)));
+  registerAction("stashDrop", (msg) => runMutation(gitMutator.stashDrop(msg.index)));
+
   // --- Query handlers ---
 
   bridge.onMessage("loadBranches", async (msg) => {
@@ -195,6 +208,22 @@ export function registerMessageHandlers(
     bridge.post({
       command: "headCommit",
       ...(await getHeadCommitMessage(gitClient.getInstance()))
+    });
+  });
+
+  bridge.onMessage("syncStatus", async (msg) => {
+    setCurrentRepo(msg.repo);
+    bridge.post({
+      command: "syncStatus",
+      ...(await getSyncStatus(gitClient.getInstance()))
+    });
+  });
+
+  bridge.onMessage("stashList", async (msg) => {
+    setCurrentRepo(msg.repo);
+    bridge.post({
+      command: "stashList",
+      ...(await getStashList(gitClient.getInstance()))
     });
   });
 

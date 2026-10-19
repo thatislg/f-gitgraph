@@ -14,7 +14,11 @@ export default defineConfig({
         resolve: { alias },
         test: {
           name: "backend",
-          include: ["tests/backend/**/*.test.ts"]
+          include: ["tests/backend/**/*.test.ts"],
+          // Test mạng/stash spawn nhiều tiến trình git (clone/push/pull); trên
+          // Windows độ trễ `CreateProcess` khiến mỗi test/hook có thể vượt mặc định.
+          testTimeout: 30000,
+          hookTimeout: 30000
         }
       },
       {

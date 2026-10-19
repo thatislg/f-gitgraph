@@ -25,6 +25,12 @@ type ActionPayloads = {
   commitChanges: { summary: string; description: string; amend: boolean; sign: boolean };
   commitAndPush: { summary: string; description: string; amend: boolean; sign: boolean };
   openFile: { filePath: string };
+  fetchAll: { prune: boolean };
+  pull: { mode: "merge" | "rebase" };
+  push: { forceWithLease?: boolean; remote?: string; branch?: string; setUpstream?: boolean };
+  stashSave: { message?: string; includeUntracked: boolean };
+  stashPop: { index: number };
+  stashDrop: { index: number };
 };
 
 export type ActionRequest = {

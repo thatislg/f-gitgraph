@@ -2,6 +2,28 @@ import type { WorkspaceStatusResult } from "@/backend/queries/workspaceStatus";
 
 import type { GitCommitDetails } from "./git";
 
+// Các kiểu trả về của truy vấn đồng bộ & stash được định nghĩa trực tiếp tại
+// `src/types/queries.ts` theo chuẩn Contract-First (Nguyên Tắc 1). Tầng Webview phải
+// import được các kiểu này mà không kéo theo thư viện Node.js (Zero Node.js Runtime).
+
+export type SyncStatusResult = {
+  ahead: number;
+  behind: number;
+  upstream: string | null;
+  isDetached: boolean;
+};
+
+export type StashRecord = {
+  index: number;
+  hash: string;
+  message: string;
+  date: string;
+};
+
+export type StashListResult = {
+  stashes: StashRecord[];
+};
+
 type QueryPayloads = {
   commitDetails: {
     request: { repo: string; commitHash: string };
@@ -24,6 +46,14 @@ type QueryPayloads = {
   headCommit: {
     request: { repo: string };
     response: { headCommit: { subject: string; description: string } | null };
+  };
+  syncStatus: {
+    request: { repo: string };
+    response: SyncStatusResult;
+  };
+  stashList: {
+    request: { repo: string };
+    response: StashListResult;
   };
 };
 
