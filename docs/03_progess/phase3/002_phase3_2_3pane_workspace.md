@@ -51,12 +51,14 @@ Mọi công việc triển khai trong Chặng 3.2 bắt buộc đối soát và 
 | **Backend Core** | `src/extension/mutator/gitCliMutator.ts` | Bổ sung: `fetchAll`, nâng cấp `pull(mode)`, `push(forceWithLease, remote, branch)`, `stashSave`, `stashPop`, `stashDrop`. |
 | **Backend Query** | `src/backend/queries/syncStatus.ts` | Truy vấn số đếm chênh lệch `git rev-list --left-right --count HEAD...@{u}` (`ahead`, `behind`, `upstream`). |
 | **Backend Query** | `src/backend/queries/stashList.ts` | Bóc tách danh sách ngăn xếp `git stash list --pretty=format:...` thành `StashRecord[]`. |
+| **Backend Query** | `src/backend/queries/listTags.ts` | Bóc tách danh sách release tags `git tag --list --sort=-creatordate` thành `TagListResult`. |
 | **Backend Types** | `src/types/actions.ts` | Khai báo payload cho `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`. |
-| **Backend Types** | `src/types/queries.ts` | Khai báo query payload cho `syncStatus` và `stashList`. |
-| **Backend IPC** | `src/extension/services/messageHandler.ts` | Đăng ký các action mutate mạng/stash và query sync/stash mới từ Webview. |
+| **Backend Types** | `src/types/queries.ts` | Khai báo query payload cho `syncStatus`, `stashList`, và `listTags`. |
+| **Backend IPC** | `src/extension/services/messageHandler.ts` | Đăng ký các action mutate mạng/stash và query sync/stash/tags mới từ Webview. |
 | **Backend Test** | `tests/backend/mutator/syncMutator.test.ts` | Unit test cho các phương thức mutator: `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`. |
 | **Backend Test** | `tests/backend/queries/syncStatus.test.ts` | Unit test bóc tách số đếm ahead/behind khi có upstream, không có upstream, hoặc detached HEAD. |
 | **Backend Test** | `tests/backend/queries/stashList.test.ts` | Unit test bóc tách chuỗi stash list thành mảng đối tượng định kiểu. |
+| **Backend Test** | `tests/backend/queries/listTags.test.ts` | Unit test bóc tách danh sách tag (creatordate, tên từ điển, ký tự đặc biệt, tag rỗng, fallback). |
 | **UI State** | `src/webview/lib/stores/sync.store.ts` | Quản lý trạng thái đồng bộ (`aheadCount`, `behindCount`, `upstreamBranch`, `isFetching`, `isPulling`, `isPushing`). |
 | **UI State** | `src/webview/lib/stores/sidebar.store.ts` | Quản lý trạng thái cây điều hướng: đóng/mở sidebar, độ rộng (width), các node mở rộng (expanded sections). |
 | **UI Component** | `src/webview/components/toolbar/GlobalToolbar.tsx` | Thanh công cụ đỉnh thay thế `MainHeader.tsx`: cụm nút Fetch/Pull/Push kèm badge đếm, nút Stash/Pop, nút Refresh. |
@@ -83,7 +85,7 @@ Mọi công việc triển khai trong Chặng 3.2 bắt buộc đối soát và 
 
 _Tài liệu tham chiếu thiết kế_: [05_Sync_And_Stash_Backend_Mutator_Design.md](../../02_design/phase3/05_Sync_And_Stash_Backend_Mutator_Design.md).
 
-_Mục tiêu_: Hoàn thiện toàn bộ các phương thức thực thi Git CLI gốc, bộ truy vấn số đếm đồng bộ và danh sách stash, đồng thời khai báo hợp đồng RPC trước khi dựng giao diện UI (tuân thủ **Nguyên Tắc 1**).
+_Mục tiêu_: Hoàn thiện toàn bộ các phương thức thực thi Git CLI gốc, bộ truy vấn số đếm đồng bộ, danh sách stash và danh sách release tags, đồng thời khai báo hợp đồng RPC trước khi dựng giao diện UI (tuân thủ **Nguyên Tắc 1**).
 
 - [x] **Nhiệm vụ 1.1: Mở rộng các lệnh mạng & Stash trong `src/extension/mutator/gitCliMutator.ts`**
   - [x] **1.1.1**: Hiện thực hàm `fetchAll(prune = true)`: Thực thi `git fetch --all ${prune ? '--prune' : ''}`. Bọc qua `normalizeError()` để chuẩn hóa thông báo lỗi kết nối mạng.
@@ -93,7 +95,7 @@ _Mục tiêu_: Hoàn thiện toàn bộ các phương thức thực thi Git CLI 
   - [x] **1.1.5**: Hiện thực hàm `stashPop(index = 0)`: Thực thi `git stash pop stash@{index}`.
   - [x] **1.1.6**: Hiện thực hàm `stashDrop(index = 0)`: Thực thi `git stash drop stash@{index}`.
 
-- [x] **Nhiệm vụ 1.2: Xây dựng các bộ truy vấn Backend mới**
+- [ ] **Nhiệm vụ 1.2: Xây dựng các bộ truy vấn Backend mới**
   - [x] **1.2.1**: Xây dựng `src/backend/queries/syncStatus.ts`:
     - Xác định tên upstream tracking branch của nhánh hiện tại qua `git rev-parse --abbrev-ref --symbolic-full-name @{u}`.
     - Thực thi `git rev-list --left-right --count HEAD...@{u}` để trích xuất chính xác 2 chỉ số: `ahead` (commit cục bộ chưa push) và `behind` (commit remote chưa pull).
@@ -101,17 +103,21 @@ _Mục tiêu_: Hoàn thiện toàn bộ các phương thức thực thi Git CLI 
   - [x] **1.2.2**: Xây dựng `src/backend/queries/stashList.ts`:
     - Thực thi `git stash list --pretty=format:%gd%x00%h%x00%gs%x00%cr` bóc tách bằng NUL-delimiter.
     - Trả về mảng `StashRecord: { index: number; hash: string; message: string; date: string }[]`.
+  - [ ] **1.2.3**: Xây dựng `src/backend/queries/listTags.ts`:
+    - Thực thi `git tag --list --sort=-creatordate` (hoặc `--sort=name`) qua `SimpleGit.raw`.
+    - Trả về `TagListResult: { tags: string[] }`.
 
-- [x] **Nhiệm vụ 1.3: Khai báo Hợp đồng RPC & Đăng ký Message Handlers**
+- [ ] **Nhiệm vụ 1.3: Khai báo Hợp đồng RPC & Đăng ký Message Handlers**
   - [x] **1.3.1**: Cập nhật `src/types/actions.ts`: Khai báo payload cho `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`.
-  - [x] **1.3.2**: Cập nhật `src/types/queries.ts`: Khai báo query payload cho `syncStatus` và `stashList`.
-  - [x] **1.3.3**: Cập nhật `src/extension/services/messageHandler.ts`: Đăng ký tiếp nhận và định tuyến các action/query mới tới `GitCliMutator` và các hàm query tương ứng qua helper `runMutation`.
+  - [ ] **1.3.2**: Cập nhật `src/types/queries.ts`: Khai báo query payload cho `syncStatus`, `stashList`, và `listTags`.
+  - [ ] **1.3.3**: Cập nhật `src/extension/services/messageHandler.ts`: Đăng ký tiếp nhận và định tuyến các action/query mới tới `GitCliMutator` và các hàm query tương ứng (`syncStatus`, `stashList`, `listTags`) qua helper `runMutation`.
 
-- [x] **Nhiệm vụ 1.4 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend**
+- [ ] **Nhiệm vụ 1.4 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend**
   - [x] **1.4.1**: Tạo `tests/backend/mutator/syncMutator.test.ts`: Test các lệnh `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` trên kho git thật giả lập.
   - [x] **1.4.2**: Tạo `tests/backend/queries/syncStatus.test.ts`: Test bóc tách ahead/behind khi có upstream, khi lệch commit, và khi không có remote.
   - [x] **1.4.3**: Tạo `tests/backend/queries/stashList.test.ts`: Test bóc tách danh sách stash với tiếng Việt unicode và ký tự đặc biệt.
-  - [x] **1.4.4**: Tạo `tests/extension/services/syncMessageHandler.test.ts`: Test định tuyến RPC từ Webview xuống Mutator mạng/stash và các Query sync/stash.
+  - [x] **1.4.4**: Cập nhật `tests/extension/services/syncMessageHandler.test.ts`: Test định tuyến RPC từ Webview xuống Mutator mạng/stash và các Query sync/stash/tags.
+  - [ ] **1.4.5**: Tạo `tests/backend/queries/listTags.test.ts`: Test bóc tách danh sách tag với thứ tự creatordate, tên từ điển, ký tự đặc biệt, tag rỗng, và lỗi fallback an toàn.
 
 ---
 

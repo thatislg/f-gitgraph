@@ -42,8 +42,10 @@ flowchart TD
     subgraph Tier4["Tầng 4: Bộ Truy Vấn Nhanh (Backend Queries)"]
         Router -->|Query 'syncStatus'| QSync["src/backend/queries/syncStatus.ts"]
         Router -->|Query 'stashList'| QStash["src/backend/queries/stashList.ts"]
+        Router -->|Query 'listTags'| QTags["src/backend/queries/listTags.ts"]
         QSync -->|Thực thi raw qua SimpleGit| GitCLI["Tiến trình Git gốc (git.exe)"]
         QStash -->|Thực thi raw qua SimpleGit| GitCLI
+        QTags -->|Thực thi raw qua SimpleGit| GitCLI
     end
 
     GitCLI --> GitRepo[("Kho Git (.git/)")]
@@ -298,6 +300,60 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 
 ---
 
+### 3.3. Truy Vấn `listTags` (Lấy Danh Sách Release Tags)
+
+- **Chữ Ký Hàm**: `listTags(git: SimpleGit, input?: ListTagsInput): Promise<TagListResult>`
+- **Hàm Phân Tích Cú Pháp Thuần (Pure Parser)**: `parseTagList(stdout: string): string[]`
+- **Đặc Tả Đầu Vào (Input)**:
+  - Tham số `git`: Thực thể `SimpleGit` (thu được từ `gitClient.getInstance()`).
+  - Tham số `input`: Đối tượng tùy chọn `ListTagsInput` gồm thuộc tính:
+    - `sort`: Kiểu chuỗi tùy chọn (`"creatordate"` hoặc `"name"`), mặc định là `"creatordate"`.
+
+#### Bảng Từ Điển Dữ Liệu Tham Số Đầu Vào (`ListTagsInput`):
+
+| Tên Thuộc Tính | Kiểu Dữ Liệu | Bắt Buộc? | Mặc Định | Ràng Buộc & Mô Tả Ý Nghĩa |
+| :--- | :--- | :---: | :---: | :--- |
+| `sort` | string | Không | `"creatordate"` | Tiêu chí sắp xếp: `"creatordate"` (mốc mới nhất lên đầu qua cờ `--sort=-creatordate`) hoặc `"name"` (theo thứ tự từ điển A-Z). |
+
+- **Đặc Tả Đầu Ra (Output)**:
+  - Trả về đối tượng `TagListResult` (được định nghĩa trực tiếp tại `src/types/queries.ts` chuẩn Contract-First).
+
+#### Bảng Đối Tượng Kết Quả (`TagListResult`):
+
+| Tên Thuộc Tính | Kiểu Dữ Liệu | Ràng Buộc | Mô Tả Ý Nghĩa |
+| :--- | :--- | :---: | :--- |
+| `tags` | Mảng các chuỗi (`Array<string>`) | Phần tử không rỗng, không chứa khoảng trắng thừa | Danh sách tên toàn bộ các release tag trong kho (ví dụ `["v1.1.0", "v1.0.0", "v0.9.0"]`), tương thích trực tiếp 100% với prop `tags` của `SidebarNavigator.tsx`. |
+
+#### Quy Trình Xử Lý Thuật Toán Bóc Tách Chi Tiết:
+
+1. **Bước 1 (Chuẩn bị tham số lệnh Git)**:
+   - Nếu `input?.sort === "name"`: Khởi tạo mảng tham số gồm hai phần tử `["tag", "--list"]`.
+   - Ngược lại (mặc định): Khởi tạo mảng tham số gồm ba phần tử `["tag", "--list", "--sort=-creatordate"]`.
+2. **Bước 2 (Thực thi lệnh Git an toàn qua SimpleGit)**:
+   - Gọi phương thức `git.raw(args)` bọc trong khối kiểm soát lỗi `catch`.
+   - Tiến trình thực thi kế thừa toàn vẹn cấu hình `gitPath` và ranh giới an toàn mảng chuỗi chống command injection.
+3. **Bước 3 (Kiểm tra dữ liệu rỗng & Bẫy lỗi ngoại lệ)**:
+   - Nếu lệnh ném ngoại lệ (thư mục không phải Git repo, lỗi quyền truy cập file) hoặc chuỗi `stdout` cắt khoảng trắng là rỗng:
+     - Trả về ngay đối tượng rỗng: `{ tags: [] }`.
+4. **Bước 4 (Bóc tách luồng văn bản `parseTagList`)**:
+   - Khởi tạo mảng kết quả: `tags = []`.
+   - Tách chuỗi `stdout` thành mảng các dòng bằng biểu thức chính quy ngắt dòng tương thích đa nền tảng (hỗ trợ cả Windows `\r\n` và Unix `\n`).
+   - Lặp qua từng dòng văn bản:
+     - Cắt tỉa khoảng trắng đầu cuối (`trim()`).
+     - Bỏ qua các dòng rỗng.
+     - Bảo toàn nguyên vẹn Unicode tiếng Việt và các ký tự hợp lệ theo quy chuẩn `git check-ref-format` (dấu gạch chéo `/`, dấu gạch ngang `-`, dấu chấm `.`).
+     - Đẩy chuỗi tên tag hợp lệ vào mảng `tags`.
+5. **Bước 5 (Trả kết quả chuẩn hóa)**:
+   - Trả về đối tượng `{ tags }`.
+
+#### Trường Hợp Biên & Ranh Giới An Toàn:
+- **Kho chưa có tag nào**: `git tag --list` trả về chuỗi rỗng $\rightarrow$ Kết quả là `{ tags: [] }`, giao diện Sidebar tự động hiển thị nhãn `No tags` (Design 07 Mục 2.1).
+- **Tag phân cấp thư mục (Hierarchical Tags)**: Các tag có cấu trúc thư mục như `release/v1.0.0` hoặc `build/2026-10-19` được giữ nguyên vẹn chuỗi, không bị hiểu nhầm thành nhánh remote.
+- **Tag chứa ký tự đặc biệt**: Tag có tiền tố `v`, ký tự gạch dưới, dấu gạch ngang, dấu cộng (ví dụ `v1.0.0+build123`) được bảo toàn tuyệt đối.
+- **Kho có số lượng tag cực lớn (hàng nghìn tags)**: Thuật toán tách chuỗi một lần với độ phức tạp $O(N)$ tuyến tính theo số dòng, không gây gián đoạn luồng xử lý hoặc nghẽn hàng đợi IPC.
+
+---
+
 ## 4. Bảng Chuẩn Hóa Lỗi & Ngoại Lệ (Error Normalization Matrix)
 
 Toàn bộ thông báo lỗi trả về cho tầng Giao diện Webview **bắt buộc sử dụng tiếng Anh chuẩn mực làm ngôn ngữ chính thức**. Bảng đối chiếu quy tắc nhận diện chuỗi và câu thông báo chuẩn hóa:
@@ -338,6 +394,7 @@ Hợp đồng dữ liệu giao tiếp giữa Webview và Extension Host được
 | :--- | :--- | :--- | :--- |
 | **`syncStatus`** | `repo`: string (đường dẫn kho) | `ahead`: number ($\ge 0$)<br>`behind`: number ($\ge 0$)<br>`upstream`: string \| null<br>`isDetached`: boolean | Truy vấn số đếm chênh lệch commit giữa HEAD và nhánh upstream theo dõi. |
 | **`stashList`** | `repo`: string (đường dẫn kho) | `stashes`: Mảng các đối tượng gồm:<br>- `index`: number<br>- `hash`: string<br>- `message`: string<br>- `date`: string | Truy vấn toàn bộ danh sách các bản lưu trữ tạm trong kho mã nguồn. |
+| **`listTags`** | `repo`: string (đường dẫn kho)<br>`sort`?: `"creatordate"` \| `"name"` | `tags`: Mảng các chuỗi (`Array<string>`) | Truy vấn toàn bộ danh sách tên các release tag trong kho mã nguồn, cung cấp dữ liệu trực tiếp cho Sidebar Navigator (Design 07). |
 
 ---
 
@@ -356,6 +413,7 @@ Trong bộ điều phối tin nhắn trung tâm `src/extension/services/messageH
 2. **Đăng ký Query Handlers**:
    - Truy vấn `syncStatus`: Ủy thác cho hàm `getSyncStatus(gitClient.getInstance())` và trả về trực tiếp kết quả `SyncStatusResult`.
    - Truy vấn `stashList`: Ủy thác cho hàm `getStashList(gitClient.getInstance())` và trả về đối tượng `{ stashes }`.
+   - Truy vấn `listTags`: Ủy thác cho hàm `listTags(gitClient.getInstance(), { sort: msg.sort })` và trả về đối tượng `{ tags }`.
 
 ---
 
@@ -368,7 +426,8 @@ Mọi tệp kiểm thử cho Nhóm Việc 1 bắt buộc đặt tên với đuô
 | `tests/backend/mutator/syncMutator.test.ts` | `src/extension/mutator/gitCliMutator.ts` | 1. **`fetchAll`**: Tạo remote giả lập cục bộ, thực thi `fetchAll(true)`, xác nhận cờ `--prune` hoạt động và trả về `ok: true`.<br>2. **`pull` Merge**: Khởi tạo commit trên upstream, gọi `pull('merge')`, xác nhận commit mới được tích hợp vào HEAD.<br>3. **`pull` Rebase**: Tạo lịch sử phân nhánh, gọi `pull('rebase')`, xác nhận lịch sử commit được xếp thẳng hàng.<br>4. **`pull` Xung đột**: Giả lập sửa cùng 1 dòng trên cả local và remote, gọi `pull('merge')`, xác nhận trả về `ok: false` kèm thông điệp chuẩn hóa tiếng Anh về merge conflict.<br>5. **`push` Thường & Force-with-lease**: Thực thi push thành công commit mới; giả lập commit remote bị lệch, xác nhận `--force-with-lease` bảo vệ và báo lỗi `non-fast-forward` chuẩn hóa tiếng Anh.<br>6. **`stashSave` / `stashPop` / `stashDrop`**: Sửa tệp tracked và tạo tệp untracked, gọi `stashSave("test stash", true)`, xác nhận working tree sạch sẽ 100%; sau đó gọi `stashPop(0)` xác nhận toàn bộ tệp và nội dung khôi phục nguyên vẹn; gọi `stashDrop(0)` xác nhận xóa bản stash. |
 | `tests/backend/queries/syncStatus.test.ts` | `src/backend/queries/syncStatus.ts` | 1. **Kho đồng bộ sạch sẽ**: Nhánh local trùng khớp commit với upstream $\rightarrow$ `ahead = 0, behind = 0, upstream = 'origin/main', isDetached = false`.<br>2. **Nhánh có commit chờ đẩy**: Tạo 3 commit cục bộ $\rightarrow$ `ahead = 3, behind = 0`.<br>3. **Nhánh chậm hơn remote**: Tạo 2 commit trên remote chưa pull $\rightarrow$ `ahead = 0, behind = 2`.<br>4. **Nhánh vừa ahead vừa behind**: Tạo 2 commit local và 3 commit remote $\rightarrow$ `ahead = 2, behind = 3`.<br>5. **Nhánh chưa có upstream**: Tạo nhánh mới không đặt cờ `-u` $\rightarrow$ `upstream = null, ahead = 0, behind = 0`.<br>6. **Trạng thái Detached HEAD**: `git checkout <commitHash>` $\rightarrow$ `isDetached = true`. |
 | `tests/backend/queries/stashList.test.ts` | `src/backend/queries/stashList.ts` | 1. **Danh sách rỗng**: Kho chưa có stash nào $\rightarrow$ Trả về mảng rỗng `[]`.<br>2. **Danh sách nhiều stash**: Cất lần lượt 3 stash với các thông điệp có dấu $\rightarrow$ Bóc tách chính xác 3 phần tử với đúng thứ tự index 0, 1, 2, đúng chuỗi thông điệp và thời gian tương đối.<br>3. **Ký tự đặc biệt**: Thông điệp chứa dấu nháy kép, dấu hai chấm, dấu tab $\rightarrow$ Bóc tách NUL-delimiter không bị gãy chuỗi. |
-| `tests/extension/services/syncMessageHandler.test.ts` | `src/extension/services/messageHandler.ts` | 1. Định tuyến chính xác action `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` sang `gitMutator`.<br>2. Định tuyến chính xác query `syncStatus` và `stashList` sang hàm query tương ứng với tham số thực thể `SimpleGit`.<br>3. Xử lý lỗi ném ra từ mutator thành phản hồi lỗi RPC hợp lệ cho Webview. |
+| `tests/backend/queries/listTags.test.ts` | `src/backend/queries/listTags.ts` | 1. **Kho chưa có tag nào**: Kho mới tạo $\rightarrow$ Trả về mảng rỗng `{ tags: [] }`.<br>2. **Kho có nhiều tag (sắp xếp creatordate)**: Tạo lần lượt các tag `v0.1.0`, `v0.2.0`, `v1.0.0` qua nhiều commit $\rightarrow$ Tag tạo sau cùng `v1.0.0` xuất hiện ở đầu danh sách.<br>3. **Sắp xếp theo tên từ điển (sort = 'name')**: Truyền tùy chọn `sort: 'name'`, xác nhận kết quả xếp theo thứ tự bảng chữ cái A-Z.<br>4. **Tag phân cấp & ký tự đặc biệt**: Tag chứa dấu gạch chéo (`release/v1.0`), gạch ngang, dấu chấm, tiền tố `v` $\rightarrow$ Bóc tách chính xác 100% tên đầy đủ.<br>5. **Tag lightweight và tag annotated**: Kho chứa cả hai loại tag $\rightarrow$ Liệt kê đầy đủ không bỏ sót.<br>6. **Bẫy ngoại lệ phòng vệ**: Khi lệnh Git CLI thất bại hoặc thư mục không phải kho Git $\rightarrow$ Fallback an toàn về `{ tags: [] }`, không làm sập giao diện. |
+| `tests/extension/services/syncMessageHandler.test.ts` | `src/extension/services/messageHandler.ts` | 1. Định tuyến chính xác action `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` sang `gitMutator`.<br>2. Định tuyến chính xác query `syncStatus`, `stashList`, và `listTags` sang hàm query tương ứng với tham số thực thể `SimpleGit`.<br>3. Xử lý lỗi ném ra từ mutator thành phản hồi lỗi RPC hợp lệ cho Webview. |
 
 ---
 
@@ -379,3 +438,4 @@ Mọi tệp kiểm thử cho Nhóm Việc 1 bắt buộc đặt tên với đuô
 | **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả Backend Mutator, Stash & RPC Protocol. |
 | **v1.1.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Tái cấu trúc bộ truy vấn trạng thái sang SimpleGit**: Thay thế giải pháp `child_process.spawn` tự phát bằng `SimpleGit.raw(...)`. Khắc phục lỗ hổng ranh giới bỏ quên cấu hình `gitPath` (lỗi khi người dùng dùng Git Portable) và ngăn chặn triệt để nguy cơ rò rỉ kiểu dữ liệu Node.js (`node:child_process`, `Buffer`) vào môi trường Webview DOM. Định vị kiểu kết quả hợp đồng trực tiếp tại `src/types/queries.ts` chuẩn Contract-First. |
 | **v1.2.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Hiệu chỉnh chuỗi nhận diện lỗi stash không tồn tại**: Git CLI thực tế (2.56.0) trả về `error: stash@{N} is not a valid reference` cho chỉ số stash vượt ngoài ngăn xếp, trong khi `is not a stash-like commit` chỉ xuất hiện khi truyền một tham chiếu không phải stash (ví dụ `HEAD`). Cập nhật chuỗi nhận diện ở Mục 2.5 và Mục 4 (hàng 7) để bắt đúng cả hai trường hợp và `No stash entries found`. |
+| **v1.3.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Bổ sung đặc tả truy vấn danh sách nhãn phát hành (`listTags`)**: Khắc phục lỗ hổng thiết kế thiếu nguồn dữ liệu backend cho phân nhóm TAGS trên cây điều hướng Sidebar Navigator (Design 07 Mục 2.1 & 2.2). Bổ sung Mục 3.3 đặc tả chi tiết chữ ký hàm `listTags`, hàm phân tích cú pháp thuần `parseTagList`, bảng từ điển dữ liệu I/O Contract-First `TagListResult`, thuật toán bóc tách `git tag --list --sort=-creatordate` an toàn qua `SimpleGit.raw`, ranh giới phòng vệ và ma trận kiểm thử đơn vị song hành. |

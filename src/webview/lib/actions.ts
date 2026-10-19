@@ -53,6 +53,11 @@ export function selectRepo(repo: string) {
 
   vscode.postMessage({ command: "selectRepo", repo });
   requestBranches(repo);
+  // Nạp ngay 3 trạng thái tài nguyên phục vụ Sidebar (Working Tree, Stashes) và huy hiệu
+  // ahead/behind ngay khi chọn repo, thay vì chờ một action mạng/stash kích hoạt.
+  refreshStatus();
+  refreshSyncStatus(repo);
+  refreshStashList(repo);
   void graphWindowStore.loadGraph(repo, undefined, commitOrdering.value);
 }
 
