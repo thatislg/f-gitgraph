@@ -12,18 +12,21 @@ export function createWevbviewHtml(ctx: vscode.ExtensionContext, webview: vscode
 
   const nonce = crypto.randomBytes(32).toString("base64url");
 
+  const wheelturnUri = toOutputUri("wheelturn.mp3").toString();
+
   const html = `<!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="UTF-8">
       <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline';
-      script-src ${webview.cspSource} 'nonce-${nonce}'; img-src ${webview.cspSource} https: data:; connect-src ${webview.cspSource};">
+      script-src ${webview.cspSource} 'nonce-${nonce}'; img-src ${webview.cspSource} https: data:; media-src ${webview.cspSource}; connect-src ${webview.cspSource};">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="stylesheet" href="${toOutputUri("web.min.css")}">
       <title>${EXTENSION_NAME}</title>
     </head>
     <body>
       <div id="app"></div>
+      <script nonce="${nonce}">window.__WHEELTURN_AUDIO_URL__ = ${JSON.stringify(wheelturnUri)};</script>
       <script nonce="${nonce}" src="${toOutputUri("web.min.js")}"></script>
       </body>
   </html>`;

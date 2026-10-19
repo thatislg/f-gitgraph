@@ -47,10 +47,44 @@ const MICRO_HAPTIC_FREQUENCY = 1400;
 const MICRO_HAPTIC_DURATION_SECONDS = 0.006;
 const MICRO_HAPTIC_PEAK_GAIN = 0.08;
 
-const PETAL_HOVER_START_FREQUENCY = 2000;
-const PETAL_HOVER_END_FREQUENCY = 600;
-const PETAL_HOVER_DURATION_SECONDS = 0.014;
-const PETAL_HOVER_PEAK_GAIN = 0.3;
+// --- Bản tổng hợp cũ (comment để dễ revert) ---
+// const PETAL_HOVER_START_FREQUENCY = 2000;
+// const PETAL_HOVER_END_FREQUENCY = 600;
+// const PETAL_HOVER_DURATION_SECONDS = 0.014;
+// const PETAL_HOVER_PEAK_GAIN = 0.3;
+
+let wheelTurnAudio: HTMLAudioElement | null = null;
+
+/**
+ * Phát tiếng xoay bánh xe khi rê chuột qua một cánh hoa ở State 3.
+ *
+ * Bản cũ (tổng hợp sóng vuông) được comment lại để dễ revert:
+ * ```ts
+ * playFrequencySweep(
+ *   PETAL_HOVER_START_FREQUENCY,
+ *   PETAL_HOVER_END_FREQUENCY,
+ *   PETAL_HOVER_DURATION_SECONDS,
+ *   PETAL_HOVER_PEAK_GAIN,
+ *   "square"
+ * );
+ * ```
+ */
+export function playPetalHoverTick(): void {
+  if (isAudioMuted.value) {
+    return;
+  }
+
+  const url = window.__WHEELTURN_AUDIO_URL__;
+  if (url === undefined) {
+    return;
+  }
+  if (wheelTurnAudio === null) {
+    wheelTurnAudio = new Audio(url);
+    wheelTurnAudio.preload = "auto";
+  }
+  wheelTurnAudio.currentTime = 0;
+  void wheelTurnAudio.play().catch(() => {});
+}
 
 const IRIS_OPEN_START_FREQUENCY = 380;
 const IRIS_OPEN_END_FREQUENCY = 760;
@@ -180,16 +214,16 @@ export function playMicroHapticTick(): void {
   playFrequencySweep(MICRO_HAPTIC_FREQUENCY, MICRO_HAPTIC_FREQUENCY, MICRO_HAPTIC_DURATION_SECONDS, MICRO_HAPTIC_PEAK_GAIN);
 }
 
-/** Phát xung kim loại sắc nhưng đầy đặn (14ms, 2000Hz → 600Hz, sóng vuông) khi rê chuột qua một cánh hoa ở State 3. */
-export function playPetalHoverTick(): void {
-  playFrequencySweep(
-    PETAL_HOVER_START_FREQUENCY,
-    PETAL_HOVER_END_FREQUENCY,
-    PETAL_HOVER_DURATION_SECONDS,
-    PETAL_HOVER_PEAK_GAIN,
-    "square"
-  );
-}
+// --- Bản tổng hợp cũ (comment để dễ revert) ---
+// export function playPetalHoverTick(): void {
+//   playFrequencySweep(
+//     PETAL_HOVER_START_FREQUENCY,
+//     PETAL_HOVER_END_FREQUENCY,
+//     PETAL_HOVER_DURATION_SECONDS,
+//     PETAL_HOVER_PEAK_GAIN,
+//     "square"
+//   );
+// }
 
 /** Phát âm thanh quét tần số tăng (380Hz → 760Hz) khi bánh xe bung mở State 1 → 2. */
 export function playIrisShutterOpen(): void {

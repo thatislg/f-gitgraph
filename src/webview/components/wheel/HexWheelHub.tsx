@@ -1,3 +1,4 @@
+import type { CSSProperties } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 
 import { openContextMenu } from "@/webview/lib/actions";
@@ -24,7 +25,7 @@ import {
   PETAL_RADIUS,
   petalCenters
 } from "@/webview/utils/hexGeometry";
-import type { PetalActionId } from "@/webview/utils/hexGeometry";
+import type { PetalActionId, Point } from "@/webview/utils/hexGeometry";
 
 import { ContextualPill } from "./ContextualPill";
 import { FGitGraphLogo } from "./FGitGraphLogo";
@@ -39,6 +40,50 @@ const SIZE = HALF * 2;
 const EMBLEM_SIZE = EMBLEM_RADIUS * 2;
 /** Bán kính hoạt động tối đa bao gồm cả ContextualPill, dùng để chống tràn màn hình. */
 const R_MAX = 160;
+/** Khoảng cách từ mép cánh hoa đến viên nang ngữ cảnh. */
+const PILL_GAP = 12;
+
+type PillPlacement = "top" | "bottom" | "left" | "right";
+
+/** Hướng bung viên nang ngữ cảnh theo từng cánh hoa (hướng tâm ra ngoài, tránh che biểu tượng khác). */
+const PILL_PLACEMENT: Record<PetalActionId, PillPlacement> = {
+  push: "top",
+  pull: "right",
+  fetch: "right",
+  pop: "bottom",
+  stash: "left",
+  refresh: "left"
+};
+
+/** Tính vị trí tuyệt đối của viên nang ngữ cảnh theo hướng bung, căn giữa trên trục vuông góc. */
+function pillStyle(center: Point, placement: PillPlacement): CSSProperties {
+  switch (placement) {
+    case "top":
+      return {
+        left: HALF + center.x,
+        top: HALF + center.y - PETAL_RADIUS - PILL_GAP,
+        transform: "translate(-50%, -100%)"
+      };
+    case "bottom":
+      return {
+        left: HALF + center.x,
+        top: HALF + center.y + PETAL_RADIUS + PILL_GAP,
+        transform: "translate(-50%, 0)"
+      };
+    case "left":
+      return {
+        left: HALF + center.x - PETAL_RADIUS - PILL_GAP,
+        top: HALF + center.y,
+        transform: "translate(-100%, -50%)"
+      };
+    case "right":
+      return {
+        left: HALF + center.x + PETAL_RADIUS + PILL_GAP,
+        top: HALF + center.y,
+        transform: "translateY(-50%)"
+      };
+  }
+}
 
 function petalBadge(id: PetalActionId): { direction: "ahead" | "behind"; count: number } | null {
   if (id === "push" && aheadCount.value > 0) {
@@ -243,10 +288,7 @@ export function HexWheelHub() {
               <ContextualPill
                 text={activePetalTooltip.value}
                 color={isMono ? MONO_ACTIVE : PETAL_COLORS[activeId]}
-                style={{
-                  left: HALF + activeCenter.x + PETAL_RADIUS + 12,
-                  top: HALF + activeCenter.y - 8
-                }}
+                style={pillStyle(activeCenter, PILL_PLACEMENT[activeId])}
               />
             )}
           </div>
