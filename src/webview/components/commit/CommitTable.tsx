@@ -36,6 +36,12 @@ import {
   windowPaths,
   windowRows
 } from "@/webview/lib/stores/graph-window.store";
+import {
+  activeCommitHash,
+  hasActiveSearch,
+  matchingRowIndices,
+  scrollRequest
+} from "@/webview/lib/stores/search.store";
 import { branchColour, UNCOMMITTED_COLOUR } from "@/webview/utils/palette";
 
 type CommitTableProps = {
@@ -133,6 +139,24 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Điều phối cuộn phi ghép nối từ thanh tìm kiếm: khi có yêu cầu `scrollRequest` mới,
+  // cuộn mượt mà căn giữa dòng commit mục tiêu trong vùng nhìn.
+  const scrollReq = scrollRequest.value;
+  useEffect(() => {
+    if (scrollReq === null) {
+      return;
+    }
+    const viewportHeight = window.innerHeight;
+    const y = Math.max(0, scrollReq.rowIndex * ROW_HEIGHT - viewportHeight / 2 + ROW_HEIGHT / 2);
+    if (typeof window.scrollTo === "function") {
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }, [scrollReq]);
+
+  const searchActive = hasActiveSearch.value;
+  const matchingIndexSet = new Set(matchingRowIndices.value);
+  const activeHash = activeCommitHash.value;
 
   // If any commit is selected/expanded, immediately close and suppress hoverPopover
   useEffect(() => {
@@ -285,6 +309,8 @@ export function CommitTable({ head, headBranch }: CommitTableProps) {
                   colour={colour}
                   expanded={index === expandedRow}
                   isAnyExpanded={isAnyExpanded}
+                  dimmed={searchActive && !matchingIndexSet.has(index)}
+                  activeMatch={searchActive && row.hash === activeHash}
                   avatarRightX={avatarRightX}
                   onHover={(hovered) => {
                     hoveredRow.value = hovered ? index : null;

@@ -198,20 +198,20 @@ _Tài liệu tham chiếu thiết kế_: [08_Search_Filter_And_DAG_Navigation_De
 
 _Mục tiêu_: Tích hợp bộ tìm kiếm và lọc commit tức thì ngay trên đồ thị DAG, hỗ trợ phím tắt toàn cục và highlight trực quan.
 
-- [ ] **Nhiệm vụ 4.1: Xây dựng Store tìm kiếm `src/webview/lib/stores/search.store.ts`**
-  - [ ] **4.1.1**: Tín hiệu cơ sở: `searchQuery`, `searchMode` (`all` | `message` | `author` | `hash`), `matchingCommitIndices`, `currentMatchIndex`.
-  - [ ] **4.1.2**: Thuật toán tìm kiếm cục bộ siêu tốc trên danh sách commit hiện có:
+- [x] **Nhiệm vụ 4.1: Xây dựng Store tìm kiếm `src/webview/lib/stores/search.store.ts`**
+  - [x] **4.1.1**: Tín hiệu cơ sở: `searchQuery`, `searchMode` (`all` | `message` | `author` | `hash`), `matchingCommitIndices`, `currentMatchIndex`.
+  - [x] **4.1.2**: Thuật toán tìm kiếm cục bộ siêu tốc trên danh sách commit hiện có:
     - Lọc theo cú pháp tiền tố: `author:Nam`, `hash:a1b2`, hoặc tìm kiếm tự do trong thông điệp.
     - Tính toán danh sách chỉ số dòng khớp và tổng số lượng kết quả.
 
-- [ ] **Nhiệm vụ 4.2: Xây dựng Component `src/webview/components/search/SearchFilterBar.tsx`**
-  - [ ] **4.2.1**: Ô nhập văn bản tìm kiếm đặt trên đỉnh bảng commit hoặc thanh Toolbar.
-  - [ ] **4.2.2**: Bắt tổ hợp phím tắt toàn cục `Ctrl + F` (hoặc `Cmd + F` trên macOS) để tự động focus vào ô tìm kiếm; phím `Esc` để xóa tìm kiếm và đóng thanh lọc.
-  - [ ] **4.2.3**: Bộ điều hướng kết quả: Nút `Next (↓)` / `Previous (↑)` kèm bộ đếm `(3 of 12)`.
-  - [ ] **4.2.4**: Tự động cuộn mượt mà (Smooth scroll) đến dòng commit tương ứng trên bảng ảo hóa `CommitTable`.
+- [x] **Nhiệm vụ 4.2: Xây dựng Component `src/webview/components/search/SearchFilterBar.tsx`**
+  - [x] **4.2.1**: Ô nhập văn bản tìm kiếm đặt trên đỉnh bảng commit hoặc thanh Toolbar.
+  - [x] **4.2.2**: Bắt tổ hợp phím tắt toàn cục `Ctrl + F` (hoặc `Cmd + F` trên macOS) để tự động focus vào ô tìm kiếm; phím `Esc` để xóa tìm kiếm và đóng thanh lọc.
+  - [x] **4.2.3**: Bộ điều hướng kết quả: Nút `Next (↓)` / `Previous (↑)` kèm bộ đếm `(3 of 12)`.
+  - [x] **4.2.4**: Tự động cuộn mượt mà (Smooth scroll) đến dòng commit tương ứng trên bảng ảo hóa `CommitTable`.
 
-- [ ] **Nhiệm vụ 4.3 (TEST NHÓM 4): Bộ Unit Tests Cho Search & Filter Bar**
-  - [ ] **4.3.1**: Tạo `tests/webview/components/search/SearchFilterBar.test.ts`: Test phím tắt `Ctrl + F`, lọc commit theo author/hash/message, chuyển đổi kết quả Next/Prev.
+- [x] **Nhiệm vụ 4.3 (TEST NHÓM 4): Bộ Unit Tests Cho Search & Filter Bar**
+  - [x] **4.3.1**: Tạo `tests/webview/components/search/SearchFilterBar.test.ts`: Test phím tắt `Ctrl + F`, lọc commit theo author/hash/message, chuyển đổi kết quả Next/Prev.
 
 ---
 
@@ -221,15 +221,15 @@ _Tài liệu tham chiếu thiết kế_: [09_Workspace_Layout_And_Responsive_3Pa
 
 _Mục tiêu_: Ghép nối toàn bộ hệ thống vào bố cục `WorkspaceLayout.tsx`, kiểm chứng tính bất biến hình học tuyệt đối (Zero Layout Shift) khi Sidebar co giãn hoặc ẩn hiện (tuân thủ **Nguyên Tắc 3**).
 
-- [ ] **Nhiệm vụ 5.1: Xây dựng Container Bố Cục `src/webview/components/layout/WorkspaceLayout.tsx`**
-  - [ ] **5.1.1**: Tổ chức cấu trúc Flexbox/Grid 3 phân vùng:
+- [x] **Nhiệm vụ 5.1: Xây dựng Container Bố Cục `src/webview/components/layout/WorkspaceLayout.tsx`**
+  - [x] **5.1.1**: Tổ chức cấu trúc Flexbox/Grid 3 phân vùng:
     - **Vùng 1 (Trái)**: `<SidebarNavigator />` (có thể thu gọn hoặc kéo dãn).
     - **Vùng 2 (Giữa)**: `<CommitTable />` (bảng đồ thị DAG ảo hóa).
     - **Vùng 3 (Phải hoặc Ngăn kéo dưới)**: `<StagingArea />` hoặc `<CommitDetails />`.
-  - [ ] **5.1.2**: Tích hợp `ResizeObserver` bao bọc vùng đồ thị: Tự động cập nhật `viewportWidth` khi độ rộng Sidebar thay đổi mà không gây giật lag (sử dụng `requestAnimationFrame`).
+  - [x] **5.1.2**: Tích hợp `ResizeObserver` bao bọc vùng đồ thị: Tự động cập nhật `viewportWidth` khi độ rộng Sidebar thay đổi mà không gây giật lag (sử dụng `requestAnimationFrame`).
 
-- [ ] **Nhiệm vụ 5.2: Kiểm thử hồi quy giao diện & Nghiệm thu bất biến hình học (Zero Layout Shift)**
-  - [ ] **5.2.1**: Tạo `tests/webview/layout/WorkspaceLayout.geometry.test.ts`:
+- [x] **Nhiệm vụ 5.2: Kiểm thử hồi quy giao diện & Nghiệm thu bất biến hình học (Zero Layout Shift)**
+  - [x] **5.2.1**: Tạo `tests/webview/layout/WorkspaceLayout.geometry.test.ts`:
     - Đo đạc và snapshot tọa độ nút lục giác `HexagonNode` và các đường cong SVG Bézier của F# Core trước và sau khi:
       1. Sidebar đang mở (220px).
       2. Kéo dãn Sidebar lên 350px.
@@ -326,3 +326,9 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 5 bư�
   - Đồng bộ Webview: `refreshTags()` (actions), tín hiệu `tagList` + `loadTagList` (sync.store), `handleTagList` (sync-query), đăng ký dispatcher, nối `App.tsx` `tags={tagList.value}`.
   - 14 unit test mới (backend 11 + extension 2 + webview 1); 4 cổng chẩn đoán đạt 100% PASS (backend 159, extension 29, webview 198).
   - Ghi nhận 3 `[DEV_BUG]` (1 import-order + 2 `no-array-sort`), 0 `[DESIGN_DEFECT]` — DDR = 0%, IBR = 100%.
+- **2026-10-19**: Hoàn tất **Nhóm Việc 4** (Search & Filter Bar) + **Nhóm Việc 5** (Workspace Layout 3-Pane). Xem báo cáo chi tiết [013_phase3_2_search_layout_report.md](../../04_reports/phase3/013_phase3_2_search_layout_report.md):
+  - Xây dựng `search.store.ts` (`parseSearchQuery`/`matchesCommit` thuần + signals/computed + dispatcher + `effect` auto-clamp + `dispatchScrollToRow` phi ghép nối), vận hành trên `windowRows` (không RPC bổ sung).
+  - Xây dựng `SearchFilterBar.tsx` (Ctrl/Cmd+F toàn cục, Enter/Shift+Enter, Esc, Clear/Prev/Next/Close, bộ đếm), `layout.store.ts` (`viewportWidth`), `WorkspaceLayout.tsx` (3 phân vùng + `ResizeObserver` + `requestAnimationFrame`).
+  - Refactor `App.tsx` (bọc `WorkspaceLayout`), `CommitTable.tsx` (cuộn căn giữa `scrollRequest` + highlight), `CommitRow.tsx` (props `dimmed`/`activeMatch`); khắc phục lỗi khối giữa bị dồn trái (`flex-1 min-w-0`).
+  - 42 unit test mới trên 4 tệp (26 + 10 + 4 + 2); 4 cổng chẩn đoán đạt 100% PASS (backend 159, extension 29, webview 240).
+  - Ghi nhận 7 `[DEV_BUG]` (3 import-order + 1 TS narrowing + 3 test data/logic/timing), 0 `[DESIGN_DEFECT]` — DDR = 0%, IBR = 100%.

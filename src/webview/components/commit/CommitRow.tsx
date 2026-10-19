@@ -26,6 +26,10 @@ type CommitRowProps = {
   expanded: boolean;
   /** Whether any commit details view is currently open in the table. */
   isAnyExpanded?: boolean | undefined;
+  /** Row is dimmed because an active search filter excludes it. */
+  dimmed?: boolean | undefined;
+  /** Row is the currently focused search match (neon highlight). */
+  activeMatch?: boolean | undefined;
   /** Open or close the details view. Absent for the uncommitted changes row. */
   onSelect: (() => void) | undefined;
   /** Callback fired when the row is hovered or unhovered */
@@ -81,6 +85,8 @@ export function CommitRow({
   colour,
   expanded,
   isAnyExpanded = false,
+  dimmed = false,
+  activeMatch = false,
   onSelect,
   onHover,
   avatarRightX,
@@ -115,9 +121,12 @@ export function CommitRow({
   // Flameshot neon purple glowing border around the selected commit row
   const rowStyleString = [
     colour !== undefined ? `--color-graph: ${colour}` : "",
+    dimmed ? "opacity: 0.55" : "",
     expanded
       ? "outline: 1.5px solid #a855f7; outline-offset: -1.5px; box-shadow: 0 0 10px rgba(168, 85, 247, 0.45), inset 0 0 6px rgba(168, 85, 247, 0.2); position: relative; z-index: 5;"
-      : ""
+      : activeMatch
+        ? "outline: 1.5px solid #a855f7; outline-offset: -1.5px; box-shadow: 0 0 12px rgba(168, 85, 247, 0.6), inset 0 0 6px rgba(168, 85, 247, 0.25); position: relative; z-index: 4;"
+        : ""
   ]
     .filter(Boolean)
     .join("; ");

@@ -131,8 +131,9 @@ flowchart TD
 | Tên Tín Hiệu | Kiểu Dữ Liệu | Giá Trị Khởi Tạo | Mô Tả Ý Nghĩa |
 | :--- | :--- | :---: | :--- |
 | `searchQuery` | string | `""` | Chuỗi tìm kiếm hiện tại do người dùng nhập |
-| `isSearchOpen` | boolean | `false` | Cờ trạng thái đóng/mở thanh tìm kiếm |
+| `isSearchOpen` | boolean | `false` | Cờ trạng thái đóng/mở thanh tìm kiếm trên Webview UI |
 | `currentMatchIndex` | number | `0` | Chỉ số thứ tự của kết quả đang được focus trong danh sách kết quả khớp (0-indexed) |
+| `scrollRequest` | `{ rowIndex: number; timestamp: number } \| null` | `null` | Tín hiệu yêu cầu cuộn bảng ảo hóa đến dòng chỉ định (kèm timestamp để bảo đảm luôn kích hoạt phản ứng mỗi lần phát lệnh) |
 
 ---
 
@@ -149,46 +150,214 @@ flowchart TD
 
 ### 4.3. Đặc Tả Chi Tiết Input / Output & Các Bước Xử Lý Của Bộ Hàm Điều Phối
 
+Toàn bộ các hàm điều phối của kho trạng thái tìm kiếm tuân thủ chặt chẽ kiến trúc phản ứng vi mô (Fine-grained Reactive Store) của Preact Signals, áp dụng cơ chế cập nhật nguyên tử `batch` để loại trừ hiện tượng vẽ lại màn hình lãng phí, đồng thời xử lý triệt để các trường hợp biên dữ liệu.
+
+---
+
 #### 1. Hàm `setQuery(query: string): void`
-- **Đặc Tả Đầu Vào (Input)**: Tham số `query` kiểu chuỗi ký tự.
-- **Đặc Tả Đầu Ra (Output)**: Không trả về giá trị (`void`).
-- **Quy Trình Các Bước Xử Lý Cụ Thể**:
-  1. *Bước 1*: Gán `searchQuery.value = query`.
-  2. *Bước 2*: Đặt lại chỉ số focus: `currentMatchIndex.value = 0`.
-  3. *Bước 3*: Tín hiệu dẫn xuất `matchingRowIndices` tự động tính toán lại mảng kết quả.
-  4. *Bước 4*: Nếu có kết quả (`totalMatches.value > 0`), tự động phát lệnh cuộn bảng ảo hóa đến chỉ số dòng `matchingRowIndices.value[0]`.
+
+- **Mục Tiêu (Goal)**: Tiếp nhận chuỗi tìm kiếm từ người dùng, đồng bộ tín hiệu `searchQuery`, tái kích hoạt giải thuật lọc commit, xác lập lại chỉ số tiêu điểm về kết quả đầu tiên và tự động kích hoạt cuộn bảng ảo hóa đến dòng khớp đầu tiên.
+- **Đặc Tả Đầu Vào (Input)**:
+  - `query: string`: Chuỗi ký tự thô do người dùng nhập từ ô input của `SearchFilterBar`.
+- **Đặc Tả Đầu Ra (Output)**:
+  - `void`: Cập nhật trực tiếp vào các tín hiệu phản ứng cơ sở.
+- **Điều Kiện Tiên Quyết (Preconditions)**:
+  - Kho trạng thái `search.store.ts` đã được khởi tạo.
+  - Danh sách commit của bảng ảo hóa đã sẵn sàng trong bộ nhớ Webview.
+- **Trạng Thái Sau Thực Thi (Postconditions)**:
+  - Tín hiệu `searchQuery.value` nhận giá trị chuỗi mới.
+  - Tín hiệu `currentMatchIndex.value` được đặt lại về `0`.
+  - Tín hiệu dẫn xuất `matchingRowIndices` phản ứng tự động cập nhật mảng chỉ số dòng thỏa mãn.
+  - Nếu có kết quả (`totalMatches.value > 0`), tín hiệu `scrollRequest` được gán để yêu cầu cuộn đến dòng đầu tiên `matchingRowIndices.value[0]`.
+- **Xử Lý Trường Hợp Ngoại Lệ & Biên (Edge Cases)**:
+  - *Chuỗi nhập trùng giá trị hiện tại*: Nếu `query === searchQuery.value`, dừng thực thi ngay lập tức (Early Return) để tránh tính toán lại và kích hoạt cuộn dư thừa.
+  - *Chuỗi rỗng hoặc chỉ toàn khoảng trắng (`query.trim() === ""`)*: Cập nhật `searchQuery.value = query`, `currentMatchIndex.value = 0`. Tín hiệu dẫn xuất `matchingRowIndices` nhận mảng rỗng `[]`, `totalMatches` là 0, `activeCommitHash` là `null`, `counterText` là chuỗi rỗng `""`. Tuyệt đối không phát lệnh cuộn để giữ nguyên vị trí hiện tại của bảng commit.
+  - *Không có kết quả khớp (`totalMatches === 0`)*: Không phát lệnh cuộn; nhãn `counterText` tự động chuyển sang `"No matches"`.
+- **Quy Trình Các Bước Xử Lý Tuần Tự (Step-by-step Pipeline)**:
+  1. *Bước 1 (Kiểm tra tương đương)*: So sánh giá trị chuỗi tham số `query` với `searchQuery.value`. Nếu hai giá trị giống nhau hoàn toàn, kết thúc hàm ngay lập tức.
+  2. *Bước 2 (Cập nhật trạng thái nguyên tử)*: Bao bọc trong khối `batch` của `@preact/signals`:
+     - 2.1: Gán `searchQuery.value = query`.
+     - 2.2: Gán `currentMatchIndex.value = 0`.
+  3. *Bước 3 (Đánh giá điều kiện cuộn điều hướng)*:
+     - 3.1: Kiểm tra chuỗi đã cắt tỉa `query.trim()`. Nếu rỗng, kết thúc xử lý (không phát lệnh cuộn).
+     - 3.2: Kiểm tra số lượng kết quả dẫn xuất `totalMatches.value`. Nếu bằng 0, kết thúc xử lý.
+     - 3.3: Nếu `totalMatches.value > 0`, trích xuất chỉ số dòng của kết quả đầu tiên: `targetRowIndex = matchingRowIndices.value[0]`.
+  4. *Bước 4 (Phát lệnh cuộn điều phối)*:
+     - Gọi hàm điều phối nội bộ `dispatchScrollToRow(targetRowIndex)`, cập nhật tín hiệu `scrollRequest.value = { rowIndex: targetRowIndex, timestamp: Date.now() }` để bảng ảo hóa căn giữa dòng commit mục tiêu.
 
 ---
 
 #### 2. Hàm `nextMatch(): void`
-- **Đặc Tả Đầu Vào (Input)**: Không có.
-- **Đặc Tả Đầu Ra (Output)**: Không trả về giá trị (`void`).
-- **Quy Trình Xoay Vòng Chỉ Số (Cyclic Step-Forward)**:
-  1. *Bước 1*: Nếu `totalMatches.value <= 1`, dừng lại không cần chuyển.
-  2. *Bước 2 (Tính toán chỉ số xoay vòng)*:
-     - `nextIdx = (currentMatchIndex.value + 1) % totalMatches.value`.
-  3. *Bước 3*: Gán `currentMatchIndex.value = nextIdx`.
-  4. *Bước 4*: Kích hoạt cuộn bảng ảo hóa đến dòng `matchingRowIndices.value[nextIdx]`.
+
+- **Mục Tiêu (Goal)**: Chuyển tiêu điểm định vị sang kết quả tìm kiếm kế tiếp theo thứ tự thời gian/dòng bảng, hỗ trợ cơ chế xoay vòng tuần hoàn (Cyclic Step-Forward) từ kết quả cuối cùng quay trở lại kết quả đầu tiên, đồng thời kích hoạt cuộn căn giữa màn hình.
+- **Đặc Tả Đầu Vào (Input)**: Không có tham số.
+- **Đặc Tả Đầu Ra (Output)**: `void`.
+- **Điều Kiện Tiên Quyết (Preconditions)**:
+  - Thanh tìm kiếm đang mở hoặc từ khóa tìm kiếm đang có hiệu lực.
+- **Trạng Thái Sau Thực Thi (Postconditions)**:
+  - `currentMatchIndex.value` được tăng lên 1 (hoặc xoay vòng về 0).
+  - `activeCommitHash` phản ánh mã hash mới tương ứng.
+  - Nút lục giác `HexagonNode` của commit mới chuyển sang chế độ Neon Pulse hoạt họa.
+  - Bảng ảo hóa thực hiện cuộn mượt đưa dòng commit tương ứng vào tâm vùng nhìn.
+- **Xử Lý Trường Hợp Ngoại Lệ & Biên (Edge Cases)**:
+  - *Không có kết quả nào (`totalMatches.value === 0`)*: Không làm gì cả (No-op), kết thúc ngay.
+  - *Chỉ có đúng 1 kết quả duy nhất (`totalMatches.value === 1`)*: Chỉ số `currentMatchIndex.value` giữ nguyên là `0`. Tuy nhiên, vẫn phát lệnh cuộn `dispatchScrollToRow(matchingRowIndices.value[0])` để hỗ trợ trường hợp người dùng đã cuộn tay rời khỏi tầm nhìn và muốn tái căn giữa kết quả duy nhất này.
+  - *Chỉ số hiện tại vượt biên*: Nếu do dữ liệu commit thay đổi khiến `currentMatchIndex.value >= totalMatches.value`, tự động kẹp về `0`.
+- **Quy Trình Các Bước Xử Lý Tuần Tự (Step-by-step Pipeline)**:
+  1. *Bước 1 (Kiểm tra tính sẵn sàng)*: Đọc `count = totalMatches.value`. Nếu `count === 0`, kết thúc hàm.
+  2. *Bước 2 (Xử lý trường hợp một kết quả)*: Nếu `count === 1`:
+     - 2.1: Giữ nguyên `currentMatchIndex.value = 0`.
+     - 2.2: Gọi `dispatchScrollToRow(matchingRowIndices.value[0])`.
+     - 2.3: Kết thúc hàm.
+  3. *Bước 3 (Tính toán chỉ số xoay vòng tuần hoàn)*: Khi `count > 1`:
+     - Áp dụng công thức số học tuần hoàn: `nextIdx = (currentMatchIndex.value + 1) % count`.
+  4. *Bước 4 (Cập nhật chỉ số)*: Gán `currentMatchIndex.value = nextIdx`.
+  5. *Bước 5 (Trích xuất và phát lệnh cuộn)*:
+     - Trích xuất chỉ số dòng mục tiêu: `targetRow = matchingRowIndices.value[nextIdx]`.
+     - Gọi `dispatchScrollToRow(targetRow)`.
 
 ---
 
 #### 3. Hàm `prevMatch(): void`
-- **Đặc Tả Đầu Vào (Input)**: Không có.
-- **Đặc Tả Đầu Ra (Output)**: Không trả về giá trị (`void`).
-- **Quy Trình Xoay Vòng Ngược (Cyclic Step-Backward)**:
-  1. *Bước 1*: Nếu `totalMatches.value <= 1`, dừng lại.
-  2. *Bước 2 (Tính toán chỉ số xoay vòng lùi)*:
-     - `prevIdx = (currentMatchIndex.value - 1 + totalMatches.value) % totalMatches.value`.
-  3. *Bước 3*: Gán `currentMatchIndex.value = prevIdx`.
-  4. *Bước 4*: Kích hoạt cuộn bảng ảo hóa đến dòng `matchingRowIndices.value[prevIdx]`.
+
+- **Mục Tiêu (Goal)**: Chuyển tiêu điểm định vị lùi lại kết quả tìm kiếm trước đó, hỗ trợ xoay vòng tuần hoàn ngược (Cyclic Step-Backward) từ kết quả đầu tiên nhảy xuống kết quả cuối cùng, đồng thời kích hoạt cuộn căn giữa màn hình.
+- **Đặc Tả Đầu Vào (Input)**: Không có tham số.
+- **Đặc Tả Đầu Ra (Output)**: `void`.
+- **Điều Kiện Tiên Quyết (Preconditions)**:
+  - Tương tự hàm `nextMatch()`.
+- **Trạng Thái Sau Thực Thi (Postconditions)**:
+  - `currentMatchIndex.value` giảm đi 1 (hoặc nhảy xuống `totalMatches.value - 1`).
+  - Nút commit mới nhận trạng thái phát quang Neon Pulse.
+  - Bảng ảo hóa cuộn mượt đưa dòng commit tương ứng vào tâm vùng nhìn.
+- **Xử Lý Trường Hợp Ngoại Lệ & Biên (Edge Cases)**:
+  - *Không có kết quả (`totalMatches.value === 0`)*: Không làm gì cả (No-op).
+  - *Chỉ có 1 kết quả (`totalMatches.value === 1`)*: Giữ nguyên `0` và tái kích hoạt lệnh cuộn căn giữa dòng `matchingRowIndices.value[0]`.
+  - *Xoay vòng ngược an toàn tránh số âm*: Cần cộng thêm số lượng tổng `count` trước khi chia lấy dư để bảo đảm chỉ số luôn là số nguyên không âm.
+- **Quy Trình Các Bước Xử Lý Tuần Tự (Step-by-step Pipeline)**:
+  1. *Bước 1 (Kiểm tra tính sẵn sàng)*: Đọc `count = totalMatches.value`. Nếu `count === 0`, kết thúc hàm.
+  2. *Bước 2 (Xử lý trường hợp một kết quả)*: Nếu `count === 1`:
+     - 2.1: Giữ nguyên `currentMatchIndex.value = 0`.
+     - 2.2: Gọi `dispatchScrollToRow(matchingRowIndices.value[0])`.
+     - 2.3: Kết thúc hàm.
+  3. *Bước 3 (Tính toán chỉ số xoay vòng ngược an toàn)*: Khi `count > 1`:
+     - Áp dụng công thức số học tuần hoàn không âm: `prevIdx = (currentMatchIndex.value - 1 + count) % count`.
+  4. *Bước 4 (Cập nhật chỉ số)*: Gán `currentMatchIndex.value = prevIdx`.
+  5. *Bước 5 (Trích xuất và phát lệnh cuộn)*:
+     - Trích xuất `targetRow = matchingRowIndices.value[prevIdx]`.
+     - Gọi `dispatchScrollToRow(targetRow)`.
 
 ---
 
 #### 4. Hàm `openSearch(): void`
-- **Quy trình**: Gán `isSearchOpen.value = true`. Đặt hẹn giờ `setTimeout(0)` để focus và select toàn bộ chữ trong ô input.
+
+- **Mục Tiêu (Goal)**: Kích hoạt hiển thị thanh tìm kiếm nổi `SearchFilterBar`, lập lịch chuyển tiêu điểm bàn phím vào ô input, tự động bôi đen toàn bộ từ khóa hiện hữu để người dùng sẵn sàng gõ đè, đồng thời tái căn chỉnh cuộn nếu đang có kết quả lọc.
+- **Đặc Tả Đầu Vào (Input)**: Không có tham số.
+- **Đặc Tả Đầu Ra (Output)**: `void`.
+- **Điều Kiện Tiên Quyết (Preconditions)**:
+  - Được kích hoạt thông qua tổ hợp phím tắt toàn cục `Ctrl + F` (trên Windows/Linux), `Cmd + F` (trên macOS), hoặc nút bấm tìm kiếm trên thanh điều hướng.
+- **Trạng Thái Sau Thực Thi (Postconditions)**:
+  - Tín hiệu `isSearchOpen.value` mang giá trị `true`.
+  - Ô input của `SearchFilterBar` nhận được trạng thái `focus()`.
+  - Toàn bộ văn bản trong ô input được bôi đen thông qua phương thức `select()`.
+- **Xử Lý Trường Hợp Ngoại Lệ & Biên (Edge Cases)**:
+  - *Thanh tìm kiếm đã mở sẵn*: Nếu `isSearchOpen.value === true`, chỉ cần thực hiện lại thao tác `focus()` và `select()` mà không phát sinh hiệu ứng mở lại DOM.
+  - *DOM Input chưa được mount kịp thời*: Khi `isSearchOpen` vừa đổi từ `false` sang `true`, phần tử `<input>` có thể chưa sẵn sàng trong DOM ở cùng khung hình. Do đó, bắt buộc phải trì hoãn thao tác focus sang nhịp microtask kế tiếp bằng `requestAnimationFrame` hoặc `setTimeout(0)`.
+  - *Phần tử input tham chiếu bị null*: Cần kiểm tra an toàn sự tồn tại của DOM element trước khi gọi các hàm tương tác trình duyệt.
+- **Quy Trình Các Bước Xử Lý Tuần Tự (Step-by-step Pipeline)**:
+  1. *Bước 1 (Kích hoạt cờ hiển thị)*: Gán `isSearchOpen.value = true`.
+  2. *Bước 2 (Lập lịch tiêu điểm bất đồng bộ)*: Đăng ký một callback thông qua `requestAnimationFrame` (hoặc `setTimeout(0)`) nhằm bảo đảm trình duyệt đã hoàn tất chu trình Render Tree cho component `SearchFilterBar`.
+  3. *Bước 3 (Thao tác phần tử DOM an toàn)*:
+     - 3.1: Truy xuất phần tử DOM input thông qua biến tham chiếu `searchInputRef`.
+     - 3.2: Nếu tham chiếu tồn tại khác `null`:
+       - Gọi phương thức `searchInputRef.focus()` để chiếm quyền điều khiển bàn phím.
+       - Gọi phương thức `searchInputRef.select()` để bôi đen toàn bộ chuỗi văn bản đang có sẵn.
+  4. *Bước 4 (Tái kích hoạt căn giữa kết quả nếu đã có bộ lọc)*:
+     - Nếu `totalMatches.value > 0` và `matchingRowIndices.value.length > 0`:
+       - Lấy chỉ số dòng mục tiêu hiện hành: `targetRow = matchingRowIndices.value[currentMatchIndex.value]`.
+       - Gọi `dispatchScrollToRow(targetRow)` để tái xác lập tầm nhìn của người dùng.
+
+---
 
 #### 5. Hàm `closeSearch(): void`
-- **Quy trình**: Gán `searchQuery.value = ""`, `currentMatchIndex.value = 0`, `isSearchOpen.value = false`.
+
+- **Mục Tiêu (Goal)**: Đóng thanh tìm kiếm, làm sạch toàn bộ dữ liệu từ khóa tìm kiếm và các chỉ số kết quả, khôi phục độ mờ $100\%$ cho tất cả các nút commit, dọn dẹp viền Neon Pulse và hoàn trả tiêu điểm bàn phím về đồ thị DAG.
+- **Đặc Tả Đầu Vào (Input)**: Không có tham số.
+- **Đặc Tả Đầu Ra (Output)**: `void`.
+- **Điều Kiện Tiên Quyết (Preconditions)**:
+  - Được kích hoạt khi người dùng nhấn phím `Escape`, nhấp vào nút đóng (`Icon x`), hoặc hủy bỏ tìm kiếm từ giao diện.
+- **Trạng Thái Sau Thực Thi (Postconditions)**:
+  - `isSearchOpen.value` mang giá trị `false`.
+  - `searchQuery.value` được đặt lại thành chuỗi rỗng `""`.
+  - `currentMatchIndex.value` được đặt lại về `0`.
+  - `scrollRequest.value` được đặt lại về `null`.
+  - Toàn bộ các dòng commit trên bảng ảo hóa trở về trạng thái hiển thị bình thường (`opacity: 1`), loại bỏ hoàn toàn viền tím Neon và hoạt họa phát quang.
+  - Tiêu điểm bàn phím được chuyển về container của bảng đồ thị commit DAG.
+- **Xử Lý Trường Hợp Ngoại Lệ & Biên (Edge Cases)**:
+  - *Hiện tượng kẹt tiêu điểm (Focus Trap)*: Nếu chỉ ẩn component input mà không chuyển tiêu điểm bàn phím đi nơi khác, trình duyệt có thể mất tiêu điểm hoặc chuyển tiêu điểm ra ngoài khung nhìn Webview. Do đó, bắt buộc phải trả tiêu điểm về container bảng đồ thị DAG (`graphContainerRef.focus()`).
+- **Quy Trình Các Bước Xử Lý Tuần Tự (Step-by-step Pipeline)**:
+  1. *Bước 1 (Làm sạch trạng thái nguyên tử)*: Sử dụng hàm `batch` để đồng bộ cập nhật tất cả các tín hiệu cùng lúc:
+     - 1.1: Gán `isSearchOpen.value = false`.
+     - 1.2: Gán `searchQuery.value = ""`.
+     - 1.3: Gán `currentMatchIndex.value = 0`.
+     - 1.4: Gán `scrollRequest.value = null`.
+  2. *Bước 2 (Hoàn trả tiêu điểm an toàn)*:
+     - 2.1: Truy xuất phần tử DOM container của bảng đồ thị DAG thông qua biến tham chiếu `graphContainerRef`.
+     - 2.2: Nếu phần tử tồn tại khác `null`, gọi `graphContainerRef.focus()` để cho phép người dùng tiếp tục thao tác phím mũi tên (`ArrowUp`, `ArrowDown`) trên danh sách commit mà không cần nhấp chuột.
+
+---
+
+#### 6. Hàm `clearQuery(): void`
+
+- **Mục Tiêu (Goal)**: Xóa nhanh nội dung chuỗi tìm kiếm khi người dùng nhấn nút "Xóa nhanh" (`Icon x-circle`), đồng thời duy trì thanh tìm kiếm ở trạng thái mở và giữ nguyên tiêu điểm nhập liệu trong ô input.
+- **Đặc Tả Đầu Vào (Input)**: Không có tham số.
+- **Đặc Tả Đầu Ra (Output)**: `void`.
+- **Điều Kiện Tiên Quyết (Preconditions)**:
+  - Ô input đang chứa chuỗi ký tự khác rỗng (`searchQuery.value.length > 0`).
+- **Trạng Thái Sau Thực Thi (Postconditions)**:
+  - `searchQuery.value` mang giá trị chuỗi rỗng `""`.
+  - `currentMatchIndex.value` đặt lại về `0`.
+  - `isSearchOpen.value` vẫn duy trì là `true`.
+  - Tiêu điểm bàn phím tiếp tục nằm trong ô input.
+- **Quy Trình Các Bước Xử Lý Tuần Tự (Step-by-step Pipeline)**:
+  1. *Bước 1 (Xóa chuỗi nguyên tử)*: Bao bọc trong `batch`:
+     - 1.1: Gán `searchQuery.value = ""`.
+     - 1.2: Gán `currentMatchIndex.value = 0`.
+     - 1.3: Gán `scrollRequest.value = null`.
+  2. *Bước 2 (Duy trì tiêu điểm)*:
+     - Truy xuất `searchInputRef`. Nếu tồn tại khác `null`, gọi `searchInputRef.focus()` để người dùng có thể gõ ngay từ khóa tìm kiếm mới mà không bị gián đoạn thao tác.
+
+---
+
+#### 7. Cơ Chế Điều Phối Cuộn Bảng Ảo Hóa Phi Ghép Nối (`Scroll Coordination Pipeline`)
+
+Nhằm bảo đảm tính độc lập hoàn toàn giữa module logic `search.store.ts` và tầng hiển thị DOM của bảng ảo hóa, hệ thống thiết kế cơ chế điều phối cuộn phi ghép nối (Decoupled Scroll Coordination) thông qua tín hiệu phản ứng `scrollRequest`:
+
+1. **Hàm Điều Phối Nội Bộ `dispatchScrollToRow(rowIndex: number): void`**:
+   - Nhận tham số `rowIndex: number` đại diện cho chỉ số dòng cần cuộn tới.
+   - Gán `scrollRequest.value = { rowIndex, timestamp: Date.now() }`.
+   - *Ý nghĩa của trường `timestamp`*: Đảm bảo mỗi lần gọi hàm đều tạo ra một đối tượng tham chiếu mới. Nhờ đó, ngay cả khi người dùng bấm Next liên tục trên cùng một kết quả (trường hợp `totalMatches === 1`), hook phản ứng tại tầng UI vẫn luôn luôn bắt được sự thay đổi và kích hoạt lệnh cuộn tái căn giữa màn hình.
+2. **Quy Trình Tiêu Thụ Tín Hiệu Cuộn Phía Component Bảng Ảo Hóa (`VirtualizedTable`)**:
+   - Component bảng ảo hóa đăng ký một hiệu ứng phản ứng (`useSignalEffect` hoặc `effect`):
+     - Khi `scrollRequest.value !== null`:
+       - *Bước 1*: Đọc `targetRowIndex = scrollRequest.value.rowIndex`.
+       - *Bước 2*: Áp dụng công thức căn giữa chiều cao dòng $24\text{px}$ chuẩn mực (Mục 5.1):
+         $$Y_{\text{scroll}} = \max\left(0, \text{targetRowIndex} \times 24\text{px} - \frac{H_{\text{viewport}}}{2} + 12\text{px}\right)$$
+       - *Bước 3*: Gọi phương thức cuộn mượt mà của container bảng ảo hóa: `scrollElement.scrollTo({ top: Y_scroll, behavior: 'smooth' })`.
+
+---
+
+#### 8. Cơ Chế Kẹp Chỉ Số Tự Động Khi Dữ Liệu Commit Biến Động (`Index Clamping & Mutation Sync`)
+
+Khi kho lưu trữ Git phát sinh các biến động ngầm (như đổi nhánh, nạp thêm trang commit mới qua RPC `graph.window`, hoặc nhận commit mới từ Git watcher):
+
+- **Nguy Cơ Lỗi Vượt Biên (Out-of-Bounds Hazard)**: Giả sử người dùng đang chọn kết quả thứ 5 (`currentMatchIndex = 4` trên tổng số 5 kết quả). Khi dữ liệu commit thay đổi, số lượng commit thỏa mãn điều kiện tìm kiếm giảm xuống chỉ còn 2 kết quả (`totalMatches = 2`). Nếu không kẹp chỉ số, việc truy cập `matchingRowIndices.value[4]` sẽ trả về `undefined`, gây sập giao diện hiển thị.
+- **Quy Trình Kẹp Chỉ Số Tự Động (Auto-Clamping Pipeline)**:
+  1. *Bước 1*: Mỗi khi tín hiệu `matchingRowIndices` tự động tính toán lại mảng kết quả mới:
+  2. *Bước 2 (Kiểm tra và kẹp an toàn)*:
+     - Nếu `totalMatches.value === 0`: Tự động đặt lại `currentMatchIndex.value = 0`.
+     - Nếu `currentMatchIndex.value >= totalMatches.value`: Tự động kẹp giá trị về chỉ số hợp lệ cao nhất:
+       $$\text{currentMatchIndex.value} = \text{totalMatches.value} - 1$$
+  3. *Bước 3*: Giá trị `activeCommitHash` lập tức được đồng bộ hóa với mã hash tại chỉ số đã kẹp, duy trì tính toàn vẹn trạng thái tuyệt đối.
 
 ---
 
@@ -240,7 +409,7 @@ Mọi tệp kiểm thử cho Nhóm Việc 4 bắt buộc đặt tên với đuô
 
 | Tệp Kiểm Thử Độc Lập | Module Mục Tiêu | Kịch Bản Kiểm Thử Chi Tiết Bắt Buộc |
 | :--- | :--- | :--- |
-| `tests/webview/components/search/SearchFilterBar.test.ts` | `SearchFilterBar.tsx` & `search.store.ts` | 1. **Phím tắt toàn cục `Ctrl + F`**: Nhấn tổ hợp phím kích hoạt mở thanh tìm kiếm và chuyển tiêu điểm vào ô input.<br>2. **Lọc thông điệp tự do**: Nhập từ khóa `"login"`, xác nhận lọc chính xác các commit có tiêu đề hoặc mô tả chứa `"login"` (không phân biệt hoa thường).<br>3. **Lọc theo tác giả `author:`**: Nhập `"author:Nam"`, xác nhận chỉ lọc các commit có trường author chứa chuỗi `"Nam"`.<br>4. **Lọc theo mã hash `hash:`**: Nhập `"hash:a1b2"`, xác nhận chỉ lọc các commit có mã hash bắt đầu bằng `"a1b2"`.<br>5. **Lọc kết hợp nhiều điều kiện**: Nhập `"author:Nam fix"`, xác nhận chỉ các commit vừa có tác giả Nam vừa chứa từ "fix" mới được trả về.<br>6. **Xoay vòng Next / Prev**: Danh sách có 3 kết quả; bấm `Enter` (Next) tăng từ 1 lên 2, lên 3, rồi xoay vòng về 1; bấm `Shift + Enter` (Prev) xoay vòng ngược lại.<br>7. **Phím `Esc` đóng tìm kiếm**: Bấm `Esc` làm sạch chuỗi `searchQuery`, đóng thanh tìm kiếm và trả tiêu điểm.<br>8. **Tính toán vị trí cuộn**: Kiểm tra hàm cuộn bảng ảo hóa được gọi với đúng tọa độ pixel mục tiêu khi chuyển kết quả. |
+| `tests/webview/components/search/SearchFilterBar.test.ts` | `SearchFilterBar.tsx` & `search.store.ts` | 1. **Phím tắt toàn cục `Ctrl + F`**: Nhấn tổ hợp phím kích hoạt mở thanh tìm kiếm và chuyển tiêu điểm vào ô input.<br>2. **Lọc thông điệp tự do**: Nhập từ khóa `"login"`, xác nhận lọc chính xác các commit có tiêu đề hoặc mô tả chứa `"login"` (không phân biệt hoa thường).<br>3. **Lọc theo tác giả `author:`**: Nhập `"author:Nam"`, xác nhận chỉ lọc các commit có trường author chứa chuỗi `"Nam"`.<br>4. **Lọc theo mã hash `hash:`**: Nhập `"hash:a1b2"`, xác nhận chỉ lọc các commit có mã hash bắt đầu bằng `"a1b2"`.<br>5. **Lọc kết hợp nhiều điều kiện**: Nhập `"author:Nam fix"`, xác nhận chỉ các commit vừa có tác giả Nam vừa chứa từ "fix" mới được trả về.<br>6. **Xoay vòng Next / Prev**: Danh sách có 3 kết quả; bấm `Enter` (Next) tăng từ 1 lên 2, lên 3, rồi xoay vòng về 1; bấm `Shift + Enter` (Prev) xoay vòng ngược lại.<br>7. **Xử lý biên 1 kết quả duy nhất**: Khi chỉ có 1 kết quả, bấm Next hoặc Prev vẫn kích hoạt lệnh cuộn tái căn giữa.<br>8. **Xóa nhanh bằng nút Clear**: Nhấn nút Clear xóa chuỗi tìm kiếm, đặt lại chỉ số về 0 nhưng vẫn giữ tiêu điểm trong ô input.<br>9. **Phím `Esc` đóng tìm kiếm**: Bấm `Esc` làm sạch chuỗi `searchQuery`, đóng thanh tìm kiếm và trả tiêu điểm về container đồ thị DAG.<br>10. **Tính toán vị trí cuộn & Kẹp chỉ số an toàn**: Kiểm tra hàm cuộn bảng ảo hóa được gọi với đúng tọa độ pixel mục tiêu khi chuyển kết quả, và tự động kẹp chỉ số an toàn khi dữ liệu commit thay đổi. |
 
 ---
 
@@ -250,4 +419,5 @@ Mọi tệp kiểm thử cho Nhóm Việc 4 bắt buộc đặt tên với đuô
 | :---: | :---: | :---: | :---: | :--- |
 | **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả Search, Filter & DAG Navigation. |
 | **v1.1.0** | 2026-10-19 | Rà soát | AI Architect | **Rà soát tính toàn vẹn và độc lập giao diện**: Xác nhận thuật toán tìm kiếm Commit vận hành hoàn toàn trên dữ liệu commit của Webview UI, không phát sinh RPC query bổ sung và bảo đảm tương thích 100% với cấu trúc 3-Pane Workspace sau cập nhật Design 05–07. |
+| **v1.2.0** | 2026-10-19 | Cập nhật thiết kế | AI Architect | **Chi tiết hóa toàn diện Mục 4.3**: Bổ sung đặc tả Black-Box chuẩn mực cho từng hàm điều phối (`setQuery`, `nextMatch`, `prevMatch`, `openSearch`, `closeSearch`, `clearQuery`), xử lý toàn diện các trường hợp biên dữ liệu, quy trình tuần tự từng bước chi tiết (step-by-step pipeline), cơ chế điều phối cuộn bảng ảo hóa phi ghép nối (`scrollRequest`) và cơ chế kẹp chỉ số tự động chống lỗi vượt biên (`Index Clamping`). |
 

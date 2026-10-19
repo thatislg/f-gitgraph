@@ -1,5 +1,7 @@
 import type { GitRepo } from "@/types";
 
+import { WorkspaceLayout } from "./components/layout/WorkspaceLayout";
+import { SearchFilterBar } from "./components/search/SearchFilterBar";
 import {
   SidebarNavigator,
   type BranchItem,
@@ -66,23 +68,30 @@ export function App({ repos }: { repos: Array<GitRepo> }) {
   const { branches, remotes } = splitBranches(branchList.value ?? [], headBranch.value);
 
   return (
-    <div class="flex min-h-screen flex-col">
-      <GlobalToolbar repos={repos} />
-      <div class="flex min-h-0 flex-1">
-        <SidebarNavigator
-          branches={branches}
-          currentHead={headBranch.value}
-          remotes={remotes}
-          tags={tagList.value}
-          stashes={stashList.value}
-          unstagedCount={unstagedCount.value}
-          stagedCount={stagedCount.value}
-        />
-        <GraphView />
-      </div>
+    <>
+      <WorkspaceLayout
+        toolbar={<GlobalToolbar repos={repos} />}
+        sidebar={
+          <SidebarNavigator
+            branches={branches}
+            currentHead={headBranch.value}
+            remotes={remotes}
+            tags={tagList.value}
+            stashes={stashList.value}
+            unstagedCount={unstagedCount.value}
+            stagedCount={stagedCount.value}
+          />
+        }
+        graph={
+          <>
+            <GraphView />
+            <SearchFilterBar />
+          </>
+        }
+      />
       <ScrollShadow />
       <ContextMenu />
       <Dialog />
-    </div>
+    </>
   );
 }

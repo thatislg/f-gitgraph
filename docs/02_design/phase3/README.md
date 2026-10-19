@@ -65,3 +65,14 @@ Thư mục này lưu trữ toàn bộ hệ thống tài liệu thiết kế kỹ
    - Khung bố cục tổng thể `WorkspaceLayout.tsx` ghép nối 3 phân vùng độc lập (Sidebar - DAG Table - Inspector).
    - Tích hợp `ResizeObserver` theo dõi kích thước động kết hợp `requestAnimationFrame`.
    - Kiểm định bất biến hình học tuyệt đối (Zero Layout Shift): Độ lệch tọa độ các nút `HexagonNode` và đường cong Bézier bằng 0 pixel khi co giãn hoặc đóng mở Sidebar.
+
+---
+
+### 🚀 Giai Đoạn 3.2.UI: Đột Phá Giao Diện Bánh Xe Lục Giác & Nâng Tầm Thẩm Mỹ Cyber-Lab
+
+10. **[10. Thiết Kế Chi Tiết Cyber Hex-Wheel Command Hub & Trải Nghiệm Giao Diện Radial Đột Phá (10_WheelConcepts.md)](10_WheelConcepts.md)**:
+    - Hiện thực hóa Concept Menu Bánh xe Lục giác hướng tâm (`Git Radial Menu Concept`) lấy cảm hứng từ `Concept1_Color.jpg` và `Concept2_Color.jpg`.
+    - Kiến trúc 3 trạng thái tương tác hoàn chỉnh: State 1 (Collapsed Segmented Emblem), State 2 (Expanded 7-Hex Honeycomb Cluster), State 3 (Depth of Field Focus & Contextual Floating Pill).
+    - Hỗ trợ 2 phong cách thẩm mỹ: Neon Chromatic (Đa sắc bán dẫn) và Cyber Blue Monochromatic (Đơn sắc kỹ thuật cao) với bộ token phát quang Neon sắc nét.
+    - Kho trạng thái phản ứng `wheel.store.ts` bằng Preact Signals, liên kết 100% với `sync.store.ts`, bảo đảm nguyên tắc Zero Layout Shift đối với đồ thị DAG.
+
