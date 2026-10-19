@@ -95,7 +95,7 @@ _Mục tiêu_: Hoàn thiện toàn bộ các phương thức thực thi Git CLI 
   - [x] **1.1.5**: Hiện thực hàm `stashPop(index = 0)`: Thực thi `git stash pop stash@{index}`.
   - [x] **1.1.6**: Hiện thực hàm `stashDrop(index = 0)`: Thực thi `git stash drop stash@{index}`.
 
-- [ ] **Nhiệm vụ 1.2: Xây dựng các bộ truy vấn Backend mới**
+- [x] **Nhiệm vụ 1.2: Xây dựng các bộ truy vấn Backend mới**
   - [x] **1.2.1**: Xây dựng `src/backend/queries/syncStatus.ts`:
     - Xác định tên upstream tracking branch của nhánh hiện tại qua `git rev-parse --abbrev-ref --symbolic-full-name @{u}`.
     - Thực thi `git rev-list --left-right --count HEAD...@{u}` để trích xuất chính xác 2 chỉ số: `ahead` (commit cục bộ chưa push) và `behind` (commit remote chưa pull).
@@ -103,21 +103,21 @@ _Mục tiêu_: Hoàn thiện toàn bộ các phương thức thực thi Git CLI 
   - [x] **1.2.2**: Xây dựng `src/backend/queries/stashList.ts`:
     - Thực thi `git stash list --pretty=format:%gd%x00%h%x00%gs%x00%cr` bóc tách bằng NUL-delimiter.
     - Trả về mảng `StashRecord: { index: number; hash: string; message: string; date: string }[]`.
-  - [ ] **1.2.3**: Xây dựng `src/backend/queries/listTags.ts`:
+  - [x] **1.2.3**: Xây dựng `src/backend/queries/listTags.ts`:
     - Thực thi `git tag --list --sort=-creatordate` (hoặc `--sort=name`) qua `SimpleGit.raw`.
     - Trả về `TagListResult: { tags: string[] }`.
 
-- [ ] **Nhiệm vụ 1.3: Khai báo Hợp đồng RPC & Đăng ký Message Handlers**
+- [x] **Nhiệm vụ 1.3: Khai báo Hợp đồng RPC & Đăng ký Message Handlers**
   - [x] **1.3.1**: Cập nhật `src/types/actions.ts`: Khai báo payload cho `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`.
-  - [ ] **1.3.2**: Cập nhật `src/types/queries.ts`: Khai báo query payload cho `syncStatus`, `stashList`, và `listTags`.
-  - [ ] **1.3.3**: Cập nhật `src/extension/services/messageHandler.ts`: Đăng ký tiếp nhận và định tuyến các action/query mới tới `GitCliMutator` và các hàm query tương ứng (`syncStatus`, `stashList`, `listTags`) qua helper `runMutation`.
+  - [x] **1.3.2**: Cập nhật `src/types/queries.ts`: Khai báo query payload cho `syncStatus`, `stashList`, và `listTags`.
+  - [x] **1.3.3**: Cập nhật `src/extension/services/messageHandler.ts`: Đăng ký tiếp nhận và định tuyến các action/query mới tới `GitCliMutator` và các hàm query tương ứng (`syncStatus`, `stashList`, `listTags`) qua helper `runMutation`.
 
-- [ ] **Nhiệm vụ 1.4 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend**
+- [x] **Nhiệm vụ 1.4 (TEST NHÓM 1): Bộ Unit Tests Độc Lập Cho Tầng Backend**
   - [x] **1.4.1**: Tạo `tests/backend/mutator/syncMutator.test.ts`: Test các lệnh `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` trên kho git thật giả lập.
   - [x] **1.4.2**: Tạo `tests/backend/queries/syncStatus.test.ts`: Test bóc tách ahead/behind khi có upstream, khi lệch commit, và khi không có remote.
   - [x] **1.4.3**: Tạo `tests/backend/queries/stashList.test.ts`: Test bóc tách danh sách stash với tiếng Việt unicode và ký tự đặc biệt.
   - [x] **1.4.4**: Cập nhật `tests/extension/services/syncMessageHandler.test.ts`: Test định tuyến RPC từ Webview xuống Mutator mạng/stash và các Query sync/stash/tags.
-  - [ ] **1.4.5**: Tạo `tests/backend/queries/listTags.test.ts`: Test bóc tách danh sách tag với thứ tự creatordate, tên từ điển, ký tự đặc biệt, tag rỗng, và lỗi fallback an toàn.
+  - [x] **1.4.5**: Tạo `tests/backend/queries/listTags.test.ts`: Test bóc tách danh sách tag với thứ tự creatordate, tên từ điển, ký tự đặc biệt, tag rỗng, và lỗi fallback an toàn.
 
 ---
 
@@ -320,3 +320,9 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 5 bư�
   - 47 unit test mới trên 2 tệp (store 37 + component 10); 4 cổng chẩn đoán đạt 100% PASS (backend 148, extension 27, webview 197).
   - Ghi nhận 9 `[DEV_BUG]` (6 import-order + focus test + guard `scrollIntoView` + assertion), 0 `[DESIGN_DEFECT]` — DDR = 0%, IBR = 100%.
   - **Ghi chú**: 3.3.2 (Context Menu chuột phải) và 3.3.3 (Inspector stash) được hoãn sang Nhóm Việc 5; `stashApply` không tồn tại trong backend (chỉ `pop`/`drop`), `createBranchAction` chỉ mở modal (defer modal component).
+- **2026-10-19**: Bổ sung **Nhóm Việc 1** — Truy vấn `listTags` (nguồn dữ liệu phân nhóm TAGS). Xem báo cáo chi tiết [012_phase3_2_tags_report.md](../../04_reports/phase3/012_phase3_2_tags_report.md):
+  - Lấp lỗ hổng thiết kế thiếu nguồn dữ liệu backend cho TAGS: bổ sung query `listTags` (Design 05 Mục 3.3) + `TagListResult`/`ListTagsInput` (Contract-First tại `src/types/queries.ts`).
+  - Xây dựng `src/backend/queries/listTags.ts` (`parseTagList` thuần + `listTags` qua `SimpleGit.raw`), đăng ký query handler trong `messageHandler.ts`.
+  - Đồng bộ Webview: `refreshTags()` (actions), tín hiệu `tagList` + `loadTagList` (sync.store), `handleTagList` (sync-query), đăng ký dispatcher, nối `App.tsx` `tags={tagList.value}`.
+  - 14 unit test mới (backend 11 + extension 2 + webview 1); 4 cổng chẩn đoán đạt 100% PASS (backend 159, extension 29, webview 198).
+  - Ghi nhận 3 `[DEV_BUG]` (1 import-order + 2 `no-array-sort`), 0 `[DESIGN_DEFECT]` — DDR = 0%, IBR = 100%.

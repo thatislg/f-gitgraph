@@ -35,6 +35,9 @@ export const isStashing = signal(false);
 /** Danh sách bản ghi stash (tiêu thụ bởi cây điều hướng Sidebar ở Nhóm Việc 3). */
 export const stashList = signal<StashRecord[]>([]);
 
+/** Danh sách release tags (tiêu thụ bởi phân nhóm TAGS trong cây điều hướng Sidebar). */
+export const tagList = signal<string[]>([]);
+
 // --- Tín hiệu dẫn xuất (Computed Signals) ---
 
 /** `true` khi kho có commit lệch cần đồng bộ (ahead hoặc behind lớn hơn 0). */
@@ -75,6 +78,11 @@ export function loadSyncStatus(msg: SyncStatusResult): void {
 /** Nạp danh sách stash từ phản hồi truy vấn `stashList`. */
 export function loadStashList(stashes: StashRecord[]): void {
   stashList.value = stashes;
+}
+
+/** Nạp danh sách release tags từ phản hồi truy vấn `listTags`. */
+export function loadTagList(tags: string[]): void {
+  tagList.value = tags;
 }
 
 /** Phát lệnh `fetchAll`; chống gọi trùng lặp khi đang bận. */

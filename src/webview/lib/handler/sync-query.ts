@@ -1,8 +1,9 @@
 import type { ResponseMessage } from "@/types";
-import { loadSyncStatus, loadStashList } from "@/webview/lib/stores/sync.store";
+import { loadSyncStatus, loadStashList, loadTagList } from "@/webview/lib/stores/sync.store";
 
 type SyncStatusMessage = Extract<ResponseMessage, { command: "syncStatus" }>;
 type StashListMessage = Extract<ResponseMessage, { command: "stashList" }>;
+type TagListMessage = Extract<ResponseMessage, { command: "listTags" }>;
 
 /** Xử lý phản hồi truy vấn `syncStatus`: nạp số đếm ahead/behind vào `sync.store`. */
 export function handleSyncStatus(msg: SyncStatusMessage): void {
@@ -12,4 +13,9 @@ export function handleSyncStatus(msg: SyncStatusMessage): void {
 /** Xử lý phản hồi truy vấn `stashList`: nạp danh sách stash vào `sync.store`. */
 export function handleStashList(msg: StashListMessage): void {
   loadStashList(msg.stashes);
+}
+
+/** Xử lý phản hồi truy vấn `listTags`: nạp danh sách release tags vào `sync.store`. */
+export function handleTagList(msg: TagListMessage): void {
+  loadTagList(msg.tags);
 }

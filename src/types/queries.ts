@@ -24,6 +24,14 @@ export type StashListResult = {
   stashes: StashRecord[];
 };
 
+export type ListTagsInput = {
+  sort?: "creatordate" | "name";
+};
+
+export type TagListResult = {
+  tags: string[];
+};
+
 type QueryPayloads = {
   commitDetails: {
     request: { repo: string; commitHash: string };
@@ -54,6 +62,10 @@ type QueryPayloads = {
   stashList: {
     request: { repo: string };
     response: StashListResult;
+  };
+  listTags: {
+    request: { repo: string; sort?: "creatordate" | "name" };
+    response: TagListResult;
   };
 };
 

@@ -12,6 +12,7 @@ import { addTag, deleteTag, pushTag } from "@/backend/actions/tag";
 import type { GitClient } from "@/backend/gitClient";
 import { commitDetails } from "@/backend/queries/commitDetails";
 import { getHeadCommitMessage } from "@/backend/queries/headCommit";
+import { listTags } from "@/backend/queries/listTags";
 import { loadBranches } from "@/backend/queries/loadBranches";
 import { getStashList } from "@/backend/queries/stashList";
 import { getSyncStatus } from "@/backend/queries/syncStatus";
@@ -224,6 +225,17 @@ export function registerMessageHandlers(
     bridge.post({
       command: "stashList",
       ...(await getStashList(gitClient.getInstance()))
+    });
+  });
+
+  bridge.onMessage("listTags", async (msg) => {
+    setCurrentRepo(msg.repo);
+    bridge.post({
+      command: "listTags",
+      ...(await listTags(
+        gitClient.getInstance(),
+        msg.sort === undefined ? undefined : { sort: msg.sort }
+      ))
     });
   });
 

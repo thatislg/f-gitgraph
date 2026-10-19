@@ -8,7 +8,7 @@ import { handleLoadBranches } from "./handler/load-branches";
 import { handleRefresh } from "./handler/refresh";
 import { handleCheckoutBranch, handleSidebarStash } from "./handler/sidebar-action";
 import { handleSyncAction } from "./handler/sync-action";
-import { handleStashList, handleSyncStatus } from "./handler/sync-query";
+import { handleStashList, handleSyncStatus, handleTagList } from "./handler/sync-query";
 import { handleViewDiff } from "./handler/view-diff";
 import { handleWorkspaceStatus } from "./handler/workspace-status";
 
@@ -52,6 +52,7 @@ const handlers: Handlers = {
   refresh: handleRefresh,
   syncStatus: handleSyncStatus,
   stashList: handleStashList,
+  listTags: handleTagList,
   viewDiff: handleViewDiff,
   workspaceStatus: handleWorkspaceStatus
 };

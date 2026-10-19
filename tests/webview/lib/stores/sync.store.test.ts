@@ -20,12 +20,14 @@ import {
   isStashing,
   loadStashList,
   loadSyncStatus,
+  loadTagList,
   pop,
   pull,
   push,
   stash,
   stashList,
   syncStatusText,
+  tagList,
   upstreamBranch
 } from "@/webview/lib/stores/sync.store";
 
@@ -39,6 +41,7 @@ function resetStore() {
   isPushing.value = false;
   isStashing.value = false;
   stashList.value = [];
+  tagList.value = [];
 }
 
 describe("syncStore", () => {
@@ -144,6 +147,11 @@ describe("syncStore", () => {
   it("loadStashList assigns the stash list", () => {
     loadStashList([{ index: 0, hash: "abc", message: "wip", date: "now" }]);
     expect(stashList.value).toEqual([{ index: 0, hash: "abc", message: "wip", date: "now" }]);
+  });
+
+  it("loadTagList assigns the tag list", () => {
+    loadTagList(["v1.0.0", "v0.9.0"]);
+    expect(tagList.value).toEqual(["v1.0.0", "v0.9.0"]);
   });
 
   it("blocks double invocation while a network action is busy", () => {

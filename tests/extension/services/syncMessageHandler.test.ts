@@ -153,4 +153,27 @@ describe("registerMessageHandlers (sync & stash routing)", () => {
       stashes: [{ index: 0, hash: "abc1234", message: "test stash", date: "10 minutes ago" }]
     });
   });
+
+  it("routes listTags query through the SimpleGit instance", async () => {
+    const { post, gitClient, receive } = setup();
+    (gitClient.getInstance as ReturnType<typeof vi.fn>).mockReturnValue({
+      raw: vi.fn(() => Promise.resolve("v1.0.0\nv0.1.0\n"))
+    });
+
+    await receive({ command: "listTags", repo: "/repo" });
+
+    expect(post).toHaveBeenCalledWith({
+      command: "listTags",
+      tags: ["v1.0.0", "v0.1.0"]
+    });
+  });
+
+  it("passes the sort option through to the listTags query", async () => {
+    const { gitClient, receive } = setup();
+    const raw = vi.fn(() => Promise.resolve(""));
+    (gitClient.getInstance as ReturnType<typeof vi.fn>).mockReturnValue({ raw });
+
+    await receive({ command: "listTags", repo: "/repo", sort: "name" });
+    expect(raw).toHaveBeenCalledWith(["tag", "--list"]);
+  });
 });

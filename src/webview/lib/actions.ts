@@ -53,11 +53,12 @@ export function selectRepo(repo: string) {
 
   vscode.postMessage({ command: "selectRepo", repo });
   requestBranches(repo);
-  // Nạp ngay 3 trạng thái tài nguyên phục vụ Sidebar (Working Tree, Stashes) và huy hiệu
-  // ahead/behind ngay khi chọn repo, thay vì chờ một action mạng/stash kích hoạt.
+  // Nạp ngay 4 trạng thái tài nguyên phục vụ Sidebar (Working Tree, Stashes, Tags) và
+  // huy hiệu ahead/behind ngay khi chọn repo, thay vì chờ một action kích hoạt.
   refreshStatus();
   refreshSyncStatus(repo);
   refreshStashList(repo);
+  refreshTags(repo);
   void graphWindowStore.loadGraph(repo, undefined, commitOrdering.value);
 }
 
@@ -148,6 +149,7 @@ export function refresh() {
 
   requestBranches(repo);
   refreshStatus();
+  refreshTags(repo);
   void graphWindowStore.loadGraph(repo, selectedBranch.value, commitOrdering.value);
 }
 
@@ -203,6 +205,16 @@ export function refreshStashList(repo?: string) {
   }
 
   vscode.postMessage({ command: "stashList", repo: target });
+}
+
+/** Yêu cầu Backend trả về danh sách release tags để cập nhật phân nhóm TAGS. */
+export function refreshTags(repo?: string) {
+  const target = repo ?? selectedRepo.value;
+  if (target === undefined) {
+    return;
+  }
+
+  vscode.postMessage({ command: "listTags", repo: target });
 }
 
 /** Yêu cầu Backend trả về tiêu đề/mô tả của commit HEAD để nạp sẵn khi bật Amend. */

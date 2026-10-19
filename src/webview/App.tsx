@@ -12,7 +12,7 @@ import { ScrollShadow } from "./components/ui/ScrollShadow";
 import { GraphView } from "./layout/GraphView";
 import { branchList, headBranch } from "./lib/stores";
 import { stagedCount, unstagedCount } from "./lib/stores/staging.store";
-import { stashList } from "./lib/stores/sync.store";
+import { stashList, tagList } from "./lib/stores/sync.store";
 
 const REMOTE_PREFIX = "remotes/";
 
@@ -73,7 +73,7 @@ export function App({ repos }: { repos: Array<GitRepo> }) {
           branches={branches}
           currentHead={headBranch.value}
           remotes={remotes}
-          tags={[]}
+          tags={tagList.value}
           stashes={stashList.value}
           unstagedCount={unstagedCount.value}
           stagedCount={stagedCount.value}
