@@ -14,7 +14,8 @@ export async function webviewInitialize(): Promise<WebviewInitialize> {
     initialLoadCommits: config.initialLoadCommits(),
     loadMoreCommits: config.loadMoreCommits(),
     locale: vscode.env.language,
-    showCurrentBranchByDefault: config.showCurrentBranchByDefault()
+    showCurrentBranchByDefault: config.showCurrentBranchByDefault(),
+    wheelStyle: config.wheelStyle()
   };
 
   return {

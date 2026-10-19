@@ -95,6 +95,16 @@
   }
 }
 
+@keyframes f-gitgraph-pip-breath {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 @layer components {
   /* A scroll timeline drives the fade, so the range is a distance, not a duration. */
   .animate-scroll-shadow {

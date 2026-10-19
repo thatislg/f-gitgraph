@@ -17,7 +17,8 @@ async function loadStores() {
   return {
     stores: await import("@/webview/lib/stores"),
     sync: await import("@/webview/lib/stores/sync.store"),
-    graph: await import("@/webview/lib/stores/graph-window.store")
+    graph: await import("@/webview/lib/stores/graph-window.store"),
+    wheel: await import("@/webview/lib/stores/wheel.store")
   };
 }
 
@@ -27,7 +28,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  const { stores, sync, graph } = await loadStores();
+  const { stores, sync, graph, wheel } = await loadStores();
   stores.selectedRepo.value = "/repo-a";
   stores.headBranch.value = "main";
   stores.branchList.value = ["main", "feature/x"];
@@ -45,6 +46,9 @@ beforeEach(async () => {
   sync.isPulling.value = false;
   sync.isPushing.value = false;
   sync.isStashing.value = false;
+
+  wheel.wheelStage.value = 0;
+  wheel.activePetal.value = null;
 });
 
 afterEach(() => {
@@ -57,14 +61,12 @@ function renderToolbar() {
 }
 
 describe("GlobalToolbar", () => {
-  it("renders the sync/stash cluster and workspace controls", () => {
+  it("renders the wheel command hub trigger and the workspace controls", () => {
     renderToolbar();
 
-    expect(container.querySelector("button[aria-label='fetchAll']")).toBeTruthy();
-    expect(container.querySelectorAll("[data-dropdown-primary]")).toHaveLength(2);
-    expect(container.querySelector("button[aria-label='stash']")).toBeTruthy();
-    expect(container.querySelector("button[aria-label='pop']")).toBeTruthy();
-    expect(container.querySelector("button[aria-label='refresh']")).toBeTruthy();
+    expect(container.querySelector("[data-wheel-trigger]")).toBeTruthy();
+    expect(container.querySelector("[data-wheel-emblem]")).toBeTruthy();
+    expect(container.querySelector("[data-sync-status-text]")).toBeTruthy();
     expect(container.querySelector("[data-detached-badge]")).toBeNull();
   });
 
@@ -73,23 +75,20 @@ describe("GlobalToolbar", () => {
     expect(container.textContent).toContain("repo:");
   });
 
-  it("shows behind and ahead neon badges with the correct labels", async () => {
+  it("shows the live sync status text reflecting ahead/behind counts", async () => {
     const { sync } = await loadStores();
     sync.behindCount.value = 2;
     sync.aheadCount.value = 1;
     renderToolbar();
 
-    const behind = container.querySelector("[data-sync-badge='behind']");
-    const ahead = container.querySelector("[data-sync-badge='ahead']");
-    expect(behind?.textContent).toBe("↓ 2");
-    expect(ahead?.textContent).toBe("↑ 1");
-    expect(behind?.getAttribute("style")).toContain("rgb(6, 182, 212)");
-    expect(ahead?.getAttribute("style")).toContain("rgb(245, 158, 11)");
+    expect(container.querySelector("[data-sync-status-text]")?.textContent).toBe(
+      "1 ahead, 2 behind"
+    );
   });
 
-  it("hides the badges when both counts are zero", () => {
+  it("reports 'Up to date' when both counts are zero", () => {
     renderToolbar();
-    expect(container.querySelector("[data-sync-badge]")).toBeNull();
+    expect(container.querySelector("[data-sync-status-text]")?.textContent).toBe("Up to date");
   });
 
   it("renders the detached HEAD warning badge when detached", async () => {
@@ -100,12 +99,11 @@ describe("GlobalToolbar", () => {
     expect(container.querySelector("[data-detached-badge]")?.textContent).toBe("detachedHead");
   });
 
-  it("disables the action buttons while a network operation is busy", async () => {
-    const { sync } = await loadStores();
-    sync.isFetching.value = true;
+  it("renders the branch, ordering and remote controls when the repo has commits", () => {
     renderToolbar();
 
-    const fetchButton = container.querySelector<HTMLButtonElement>("button[aria-label='fetchAll']");
-    expect(fetchButton?.disabled).toBe(true);
+    expect(container.textContent).toContain("branch:");
+    expect(container.textContent).toContain("commitOrdering:");
+    expect(container.textContent).toContain("showRemoteBranches");
   });
 });

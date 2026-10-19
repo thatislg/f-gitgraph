@@ -13,7 +13,8 @@ const config: WebviewConfig = {
   initialLoadCommits: 300,
   loadMoreCommits: 100,
   locale: "en",
-  showCurrentBranchByDefault: false
+  showCurrentBranchByDefault: false,
+  wheelStyle: "chromatic"
 };
 
 export function setupWebviewTest({ dispatchMessages = false } = {}) {

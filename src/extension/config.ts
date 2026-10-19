@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import type { DateType, DateFormat, GraphStyle } from "@/types";
+import type { DateType, DateFormat, GraphStyle, WheelStyle } from "@/types";
 
 type TabIconColourTheme = "colour" | "grey";
 
@@ -35,6 +35,7 @@ export const config = {
   showStatusBarItem: (): boolean => true,
   showUncommittedChanges: (): boolean => getConfig("showUncommittedChanges", true),
   tabIconColourTheme: (): TabIconColourTheme => getConfig("tabIconColourTheme", "colour"),
+  wheelStyle: (): WheelStyle => getConfig("ui.wheelStyle", "chromatic"),
   gitPath: (): string => vscode.workspace.getConfiguration("git").get("path", null) ?? "git"
 };
 

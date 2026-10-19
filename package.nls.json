@@ -24,5 +24,8 @@
   "config.showUncommittedChanges": "Show uncommitted changes (set to false to decrease load time on large repositories).",
   "config.tabIconColourTheme": "Specifies the colour theme of the icon displayed on the F-GitGraph tab.",
   "config.tabIconColourTheme.colour": "Show a colour icon which suits most Visual Studio Code colour themes",
-  "config.tabIconColourTheme.grey": "Show a grey icon which suits Visual Studio Code colour themes that are predominantly grayscale"
+  "config.tabIconColourTheme.grey": "Show a grey icon which suits Visual Studio Code colour themes that are predominantly grayscale",
+  "config.wheelStyle": "Specifies the visual style of the Cyber Hex-Wheel Command Hub.",
+  "config.wheelStyle.chromatic": "Use the multi-colour Neon Chromatic style with a distinct colour per action.",
+  "config.wheelStyle.monochromatic": "Use the monochromatic Cyber Blue style with a single Laser Cyan accent."
 }

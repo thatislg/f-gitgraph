@@ -13,7 +13,8 @@ it("initializes the webview configuration once", () => {
     initialLoadCommits: 300,
     loadMoreCommits: 100,
     locale: "en",
-    showCurrentBranchByDefault: false
+    showCurrentBranchByDefault: false,
+    wheelStyle: "chromatic"
   };
 
   expect(() => getWebviewConfig()).toThrow("Webview configuration is not initialized");

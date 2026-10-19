@@ -43,6 +43,24 @@ const SIDEBAR_EXPAND_END = 380;
 const SIDEBAR_TOGGLE_DURATION_SECONDS = 0.04;
 const SIDEBAR_TOGGLE_PEAK_GAIN = 0.25;
 
+const MICRO_HAPTIC_FREQUENCY = 1400;
+const MICRO_HAPTIC_DURATION_SECONDS = 0.006;
+const MICRO_HAPTIC_PEAK_GAIN = 0.08;
+
+const PETAL_HOVER_FREQUENCY = 1600;
+const PETAL_HOVER_DURATION_SECONDS = 0.004;
+const PETAL_HOVER_PEAK_GAIN = 0.05;
+
+const IRIS_OPEN_START_FREQUENCY = 380;
+const IRIS_OPEN_END_FREQUENCY = 760;
+const IRIS_OPEN_DURATION_SECONDS = 0.07;
+const IRIS_OPEN_PEAK_GAIN = 0.12;
+
+const IRIS_CLOSE_START_FREQUENCY = 620;
+const IRIS_CLOSE_END_FREQUENCY = 240;
+const IRIS_CLOSE_DURATION_SECONDS = 0.055;
+const IRIS_CLOSE_PEAK_GAIN = 0.12;
+
 /**
  * Bộ trợ giúp phát một nốt sine đơn giản lướt tần số từ `from` đến `to` trong `duration`
  * giây. Dùng chung cho các hiệu ứng vi mô ngắn (chốt công tắc, thu gọn sidebar, lỗi).
@@ -111,6 +129,29 @@ export function playSidebarCollapse(): void {
 /** Phát âm thanh chốt trượt tăng tần số (220Hz → 380Hz) khi mở rộng Sidebar. */
 export function playSidebarExpand(): void {
   playFrequencySweep(SIDEBAR_EXPAND_START, SIDEBAR_EXPAND_END, SIDEBAR_TOGGLE_DURATION_SECONDS, SIDEBAR_TOGGLE_PEAK_GAIN);
+}
+
+/**
+ * Phát xung xúc giác vi mô siêu ngắn (6ms, 1400Hz) khi bánh xe chuyển State 0 → 1
+ * (thức tỉnh màng trập), mang cảm giác chạm tay vào mặt kính bán dẫn.
+ */
+export function playMicroHapticTick(): void {
+  playFrequencySweep(MICRO_HAPTIC_FREQUENCY, MICRO_HAPTIC_FREQUENCY, MICRO_HAPTIC_DURATION_SECONDS, MICRO_HAPTIC_PEAK_GAIN);
+}
+
+/** Phát xung tần số cao (4ms, 1600Hz) khi rê chuột qua một cánh hoa ở State 3. */
+export function playPetalHoverTick(): void {
+  playFrequencySweep(PETAL_HOVER_FREQUENCY, PETAL_HOVER_FREQUENCY, PETAL_HOVER_DURATION_SECONDS, PETAL_HOVER_PEAK_GAIN);
+}
+
+/** Phát âm thanh quét tần số tăng (380Hz → 760Hz) khi bánh xe bung mở State 1 → 2. */
+export function playIrisShutterOpen(): void {
+  playFrequencySweep(IRIS_OPEN_START_FREQUENCY, IRIS_OPEN_END_FREQUENCY, IRIS_OPEN_DURATION_SECONDS, IRIS_OPEN_PEAK_GAIN);
+}
+
+/** Phát âm thanh quét tần số giảm (620Hz → 240Hz) khi bánh xe thu gọn về State 0. */
+export function playIrisShutterClose(): void {
+  playFrequencySweep(IRIS_CLOSE_START_FREQUENCY, IRIS_CLOSE_END_FREQUENCY, IRIS_CLOSE_DURATION_SECONDS, IRIS_CLOSE_PEAK_GAIN);
 }
 
 /**

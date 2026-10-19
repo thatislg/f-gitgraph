@@ -222,6 +222,19 @@
           ],
           "default": "colour",
           "description": "%config.tabIconColourTheme%"
+        },
+        "f-gitgraph.ui.wheelStyle": {
+          "type": "string",
+          "enum": [
+            "chromatic",
+            "monochromatic"
+          ],
+          "enumDescriptions": [
+            "%config.wheelStyle.chromatic%",
+            "%config.wheelStyle.monochromatic%"
+          ],
+          "default": "chromatic",
+          "description": "%config.wheelStyle%"
         }
       }
     }
