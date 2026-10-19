@@ -61,6 +61,8 @@ describe("HexWheelHub", () => {
 
     expect(wheel.wheelStage.value).toBe(1);
     expect(container.querySelector("[data-wheel-emblem][data-armed='true']")).toBeTruthy();
+    expect(container.querySelector("[data-iris]")).toBeTruthy();
+    expect(container.querySelectorAll("[data-iris-wedge]")).toHaveLength(6);
   });
 
   it("expands to State 2 with 7 hexagons on click", async () => {

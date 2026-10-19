@@ -149,6 +149,8 @@ export function refresh() {
 
   requestBranches(repo);
   refreshStatus();
+  refreshSyncStatus(repo);
+  refreshStashList(repo);
   refreshTags(repo);
   void graphWindowStore.loadGraph(repo, selectedBranch.value, commitOrdering.value);
 }
