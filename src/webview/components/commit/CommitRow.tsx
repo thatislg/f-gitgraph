@@ -260,7 +260,7 @@ export function CommitRow({
         </div>
       </td>
       <td class={CELL_CLASS} onMouseEnter={startDwellTimer}>
-        {date.value}
+        {uncommitted ? "" : date.value}
       </td>
       <td class={`${CELL_CLASS} max-w-31`} onMouseEnter={startDwellTimer}>
         {commit.author}

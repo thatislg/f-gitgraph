@@ -4,6 +4,7 @@ import { h, render } from "preact";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import type { GitCommitNode } from "@/types";
+import { UNCOMMITTED_CHANGES } from "@/webview/constants";
 
 import { setupWebviewTest } from "@tests/webview/test-utils";
 
@@ -236,5 +237,35 @@ describe("CommitRow", () => {
     await new Promise((resolve) => setTimeout(resolve, 600));
 
     expect(dwellCalled).toBe(false);
+  });
+
+  it("hides the date column for the uncommitted changes row", () => {
+    const commit: GitCommitNode = {
+      hash: UNCOMMITTED_CHANGES,
+      parentHashes: [],
+      author: "",
+      email: "",
+      date: 0,
+      message: "",
+      refs: []
+    };
+    container = document.createElement("tbody");
+
+    render(
+      h(CommitRow, {
+        commit,
+        isHead: false,
+        headBranch: null,
+        messages: new Map(),
+        colour: undefined,
+        expanded: false,
+        onSelect: undefined
+      }),
+      container
+    );
+
+    // Cột thứ 3 là cột ngày tháng; dòng tổng hợp không có ngày nên phải bỏ trống.
+    const dateCell = container.querySelector("td:nth-child(3)");
+    expect(dateCell?.textContent).toBe("");
   });
 });
