@@ -180,12 +180,12 @@ export function HexWheelHub() {
         <>
           <div
             data-wheel-scrim
-            class="fixed inset-0 z-40"
+            class="fixed inset-0 z-[70]"
             style={{ backdropFilter: "blur(6px)", backgroundColor: "rgba(15, 23, 42, 0.45)" }}
             onClick={() => closeWheel()}
           />
 
-          <div data-wheel-cluster class="z-50" style={clusterPosition}>
+          <div data-wheel-cluster class="z-[80]" style={clusterPosition}>
             <div
               data-wheel-hub
               class="absolute flex cursor-pointer items-center justify-center"

@@ -49,7 +49,6 @@ export function HexagonPetal({
       data-petal={id}
       role="button"
       tabIndex={0}
-      title={label}
       class="absolute flex cursor-pointer items-center justify-center"
       style={{
         width: size,

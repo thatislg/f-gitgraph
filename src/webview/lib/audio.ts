@@ -61,6 +61,47 @@ const IRIS_CLOSE_END_FREQUENCY = 240;
 const IRIS_CLOSE_DURATION_SECONDS = 0.055;
 const IRIS_CLOSE_PEAK_GAIN = 0.12;
 
+let sharedContext: AudioContext | null = null;
+
+/**
+ * Lấy `AudioContext` dùng chung duy nhất cho toàn bộ Webview. Việc tái sử dụng một
+ * context (thay vì tạo mới mỗi lần phát) tránh chạm giới hạn số context đồng thời của
+ * trình duyệt — nguyên nhân khiến âm thanh "lúc có lúc không" — đồng thời tự `resume()`
+ * khi context đang bị tạm ngưng bởi chính sách autoplay.
+ */
+function getAudioContext(): AudioContext | null {
+  const AudioContextCtor = window.AudioContext;
+  if (AudioContextCtor === undefined) {
+    return null;
+  }
+  if (sharedContext === null) {
+    sharedContext = new AudioContextCtor();
+  }
+  if (sharedContext.state === "suspended") {
+    void sharedContext.resume();
+  }
+  return sharedContext;
+}
+
+/**
+ * Mở khóa chính sách autoplay: trình duyệt khởi tạo `AudioContext` ở trạng thái
+ * `suspended` và chỉ cho phép `resume()` trong phạm vi một cử chỉ người dùng. Các âm
+ * thanh hover (không phải cử chỉ) sẽ rớt nếu context chưa từng được resume. Đăng ký
+ * listener một lần để khởi tạo/resume context ngay ở cử chỉ đầu tiên (click hoặc phím).
+ */
+function installAudioUnlock(): void {
+  if (typeof document === "undefined") {
+    return;
+  }
+  const unlock = () => {
+    getAudioContext();
+  };
+  document.addEventListener("pointerdown", unlock, { once: true });
+  document.addEventListener("keydown", unlock, { once: true });
+}
+
+installAudioUnlock();
+
 /**
  * Bộ trợ giúp phát một nốt sine đơn giản lướt tần số từ `from` đến `to` trong `duration`
  * giây. Dùng chung cho các hiệu ứng vi mô ngắn (chốt công tắc, thu gọn sidebar, lỗi).
@@ -75,12 +116,11 @@ function playFrequencySweep(
   if (isAudioMuted.value) {
     return;
   }
-  const AudioContextCtor = window.AudioContext;
-  if (AudioContextCtor === undefined) {
+  const ctx = getAudioContext();
+  if (ctx === null) {
     return;
   }
 
-  const ctx = new AudioContextCtor();
   const start = ctx.currentTime;
   const end = start + duration;
 
@@ -163,12 +203,11 @@ export function playCommitSound(): void {
   if (isAudioMuted.value) {
     return;
   }
-  const AudioContextCtor = window.AudioContext;
-  if (AudioContextCtor === undefined) {
+  const ctx = getAudioContext();
+  if (ctx === null) {
     return;
   }
 
-  const ctx = new AudioContextCtor();
   const start = ctx.currentTime;
   const end = start + COMMIT_DURATION_SECONDS;
 
@@ -198,12 +237,11 @@ export function playPushSuccessSound(): void {
   if (isAudioMuted.value) {
     return;
   }
-  const AudioContextCtor = window.AudioContext;
-  if (AudioContextCtor === undefined) {
+  const ctx = getAudioContext();
+  if (ctx === null) {
     return;
   }
 
-  const ctx = new AudioContextCtor();
   const start = ctx.currentTime;
   const end = start + PUSH_DURATION_SECONDS;
 
@@ -235,12 +273,11 @@ export function playPullSuccessSound(): void {
   if (isAudioMuted.value) {
     return;
   }
-  const AudioContextCtor = window.AudioContext;
-  if (AudioContextCtor === undefined) {
+  const ctx = getAudioContext();
+  if (ctx === null) {
     return;
   }
 
-  const ctx = new AudioContextCtor();
   const start = ctx.currentTime;
   const end = start + PULL_DURATION_SECONDS;
 
