@@ -161,28 +161,28 @@ _Tài liệu tham chiếu thiết kế_: [07_Sidebar_Navigator_Tree_Design.md](.
 
 _Mục tiêu_: Xây dựng cây điều hướng bên trái bao quát toàn bộ tài nguyên của kho Git (Working Tree, Branches, Remotes, Tags, Stashes), hỗ trợ co giãn kích thước (Resizable) và thu gọn mượt mà.
 
-- [ ] **Nhiệm vụ 3.1: Quản lý trạng thái Sidebar trong `src/webview/lib/stores/sidebar.store.ts`**
-  - [ ] **3.1.1**: Tín hiệu cơ sở: `isCollapsed` (boolean), `sidebarWidth` (mặc định 220px, giới hạn từ 160px đến 450px), `expandedSections` (Set chứa id các nhóm đang mở).
-  - [ ] **3.1.2**: Lưu trữ tự động `sidebarWidth` và `isCollapsed` vào `localStorage` của Webview để phục hồi nguyên vẹn khi người dùng khởi động lại VS Code.
+- [x] **Nhiệm vụ 3.1: Quản lý trạng thái Sidebar trong `src/webview/lib/stores/sidebar.store.ts`**
+  - [x] **3.1.1**: Tín hiệu cơ sở: `isCollapsed` (boolean), `sidebarWidth` (mặc định 220px, giới hạn từ 160px đến 450px), `expandedSections` (Set chứa id các nhóm đang mở).
+  - [x] **3.1.2**: Lưu trữ tự động `sidebarWidth` và `isCollapsed` vào `localStorage` của Webview để phục hồi nguyên vẹn khi người dùng khởi động lại VS Code.
 
-- [ ] **Nhiệm vụ 3.2: Xây dựng các Component thành phần của Sidebar**
-  - [ ] **3.2.1**: `src/webview/components/sidebar/SidebarSection.tsx`: Tiêu đề nhóm mang phong cách Monospace in hoa, mũi tên chevron gập mở, huy hiệu số lượng phần tử, nút tạo mới nhanh (`+` trên nhóm Branches).
-  - [ ] **3.2.2**: `src/webview/components/sidebar/SidebarItem.tsx`: Dòng hiển thị từng phần tử:
+- [x] **Nhiệm vụ 3.2: Xây dựng các Component thành phần của Sidebar**
+  - [x] **3.2.1**: `src/webview/components/sidebar/SidebarSection.tsx`: Tiêu đề nhóm mang phong cách Monospace in hoa, mũi tên chevron gập mở, huy hiệu số lượng phần tử, nút tạo mới nhanh (`+` trên nhóm Branches).
+  - [x] **3.2.2**: `src/webview/components/sidebar/SidebarItem.tsx`: Dòng hiển thị từng phần tử:
     - **Mục Working Tree**: Hiển thị `Changes (N)` với huy hiệu biến động, click mở thẳng Staging Area.
     - **Mục Local Branches**: Icon nhánh, tên nhánh, viền tím neon và icon checkmark cho nhánh `HEAD`, huy hiệu số commit chưa push cạnh tên nhánh (ví dụ: `feature/xyz ↑2`).
     - **Mục Remotes**: Phân cấp theo remote (`origin`, `upstream`), bên trong chứa danh sách nhánh remote.
     - **Mục Tags**: Icon nhãn, tên tag.
     - **Mục Stashes**: Icon ngăn xếp, số thứ tự `stash@{N}` và nội dung tóm tắt.
-  - [ ] **3.2.3**: `src/webview/components/sidebar/SidebarNavigator.tsx`: Container bao bọc toàn bộ cây điều hướng, thanh phân cách Resizer kéo thả chuột mượt mà, nút toggle collapse ở góc trên cùng.
+  - [x] **3.2.3**: `src/webview/components/sidebar/SidebarNavigator.tsx`: Container bao bọc toàn bộ cây điều hướng, thanh phân cách Resizer kéo thả chuột mượt mà, nút toggle collapse ở góc trên cùng.
 
-- [ ] **Nhiệm vụ 3.3: Tích hợp hành động tương tác người dùng**
-  - [ ] **3.3.1**: Double-click vào một nhánh cục bộ: Kích hoạt checkout nhánh đó ngay lập tức (`checkoutBranch`).
+- [x] **Nhiệm vụ 3.3: Tích hợp hành động tương tác người dùng**
+  - [x] **3.3.1**: Double-click vào một nhánh cục bộ: Kích hoạt checkout nhánh đó ngay lập tức (`checkoutBranch`).
   - [ ] **3.3.2**: Click chuột phải trên nhánh/tag/stash: Mở Context Menu tương ứng đã hoàn thiện ở Phase 1.
   - [ ] **3.3.3**: Click vào một stash: Mở Inspector xem chi tiết các tệp trong bản lưu trữ tạm.
 
-- [ ] **Nhiệm vụ 3.4 (TEST NHÓM 3): Bộ Unit Tests Cho Sidebar Navigator**
-  - [ ] **3.4.1**: Tạo `tests/webview/lib/stores/sidebar.store.test.ts`: Test kéo dãn độ rộng, giới hạn min/max, toggle collapse và lưu localStorage.
-  - [ ] **3.4.2**: Tạo `tests/webview/components/sidebar/SidebarNavigator.test.ts`: Test render cây 5 nhóm, double-click checkout, bấm `+` tạo nhánh.
+- [x] **Nhiệm vụ 3.4 (TEST NHÓM 3): Bộ Unit Tests Cho Sidebar Navigator**
+  - [x] **3.4.1**: Tạo `tests/webview/lib/stores/sidebar.store.test.ts`: Test kéo dãn độ rộng, giới hạn min/max, toggle collapse và lưu localStorage.
+  - [x] **3.4.2**: Tạo `tests/webview/components/sidebar/SidebarNavigator.test.ts`: Test render cây 5 nhóm, double-click checkout, bấm `+` tạo nhánh.
 
 ---
 
@@ -308,3 +308,9 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 5 bư�
   - Mở rộng âm thanh (`playPushSuccessSound`/`playPullSuccessSound`), `actions.ts`, handler/dispatcher mạng-stash và l10n (~20 key); thay thế & xóa `MainHeader.tsx`.
   - 31 unit test mới trên 5 tệp; 4 cổng chẩn đoán (typecheck/lint/compile/test) đạt 100% PASS (backend 148, extension 27, webview 152).
   - Ghi nhận 4 `[DEV_BUG]` (timing/assertion test + `no-shadow`), 0 `[DESIGN_DEFECT]` — DDR = 0%, IBR = 100%.
+- **2026-10-19**: Hoàn tất **Nhóm Việc 3** (Cây Điều Hướng Left Sidebar Navigator). Xem báo cáo chi tiết [011_phase3_2_sidebar_report.md](../../04_reports/phase3/011_phase3_2_sidebar_report.md):
+  - Xây dựng `sidebar.store.ts` (9 base signals + 3 computed + 12 dispatcher), `SidebarSection.tsx`, `SidebarItem.tsx`, `SidebarNavigator.tsx` (WAI-ARIA tree nav), `SidebarResizer.tsx`.
+  - Mở rộng âm thanh (`playSwitch`/`playTick`/`playError`/`playStash`/`playSidebarCollapse`/`playSidebarExpand`), handler/dispatcher checkout/stash; tích hợp `SidebarNavigator` vào `App.tsx`.
+  - 47 unit test mới trên 2 tệp (store 37 + component 10); 4 cổng chẩn đoán đạt 100% PASS (backend 148, extension 27, webview 197).
+  - Ghi nhận 9 `[DEV_BUG]` (6 import-order + focus test + guard `scrollIntoView` + assertion), 0 `[DESIGN_DEFECT]` — DDR = 0%, IBR = 100%.
+  - **Ghi chú**: 3.3.2 (Context Menu chuột phải) và 3.3.3 (Inspector stash) được hoãn sang Nhóm Việc 5; `stashApply` không tồn tại trong backend (chỉ `pop`/`drop`), `createBranchAction` chỉ mở modal (defer modal component).

@@ -6,6 +6,7 @@ import { handleCommitResult } from "./handler/commit-result";
 import { handleHeadCommit } from "./handler/head-commit";
 import { handleLoadBranches } from "./handler/load-branches";
 import { handleRefresh } from "./handler/refresh";
+import { handleCheckoutBranch, handleSidebarStash } from "./handler/sidebar-action";
 import { handleSyncAction } from "./handler/sync-action";
 import { handleStashList, handleSyncStatus } from "./handler/sync-query";
 import { handleViewDiff } from "./handler/view-diff";
@@ -19,7 +20,7 @@ type Handlers = {
 
 const handlers: Handlers = {
   addTag: handleActionResult,
-  checkoutBranch: handleActionResult,
+  checkoutBranch: handleCheckoutBranch,
   checkoutCommit: handleActionResult,
   cherrypickCommit: handleActionResult,
   createBranch: handleActionResult,
@@ -41,8 +42,8 @@ const handlers: Handlers = {
   pull: handleSyncAction,
   push: handleSyncAction,
   stashSave: handleSyncAction,
-  stashPop: handleSyncAction,
-  stashDrop: handleSyncAction,
+  stashPop: handleSidebarStash,
+  stashDrop: handleSidebarStash,
   commitDetails: handleCommitDetails,
   commitChanges: handleCommitResult,
   commitAndPush: handleCommitResult,

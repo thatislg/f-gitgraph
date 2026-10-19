@@ -23,6 +23,96 @@ const PULL_PEAK_FREQUENCY = 440;
 const PULL_DURATION_SECONDS = 0.12;
 const PULL_PEAK_GAIN = 0.5;
 
+const SWITCH_START_FREQUENCY = 440;
+const SWITCH_PEAK_FREQUENCY = 880;
+const SWITCH_DURATION_SECONDS = 0.06;
+const SWITCH_PEAK_GAIN = 0.35;
+
+const TICK_FREQUENCY = 1200;
+const TICK_DURATION_SECONDS = 0.015;
+const TICK_PEAK_GAIN = 0.05;
+
+const ERROR_FREQUENCY = 180;
+const ERROR_DURATION_SECONDS = 0.18;
+const ERROR_PEAK_GAIN = 0.3;
+
+const SIDEBAR_COLLAPSE_START = 380;
+const SIDEBAR_COLLAPSE_END = 220;
+const SIDEBAR_EXPAND_START = 220;
+const SIDEBAR_EXPAND_END = 380;
+const SIDEBAR_TOGGLE_DURATION_SECONDS = 0.04;
+const SIDEBAR_TOGGLE_PEAK_GAIN = 0.25;
+
+/**
+ * Bộ trợ giúp phát một nốt sine đơn giản lướt tần số từ `from` đến `to` trong `duration`
+ * giây. Dùng chung cho các hiệu ứng vi mô ngắn (chốt công tắc, thu gọn sidebar, lỗi).
+ */
+function playFrequencySweep(
+  from: number,
+  to: number,
+  duration: number,
+  peakGain: number,
+  type: OscillatorType = "sine"
+): void {
+  if (isAudioMuted.value) {
+    return;
+  }
+  const AudioContextCtor = window.AudioContext;
+  if (AudioContextCtor === undefined) {
+    return;
+  }
+
+  const ctx = new AudioContextCtor();
+  const start = ctx.currentTime;
+  const end = start + duration;
+
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(from, start);
+  oscillator.frequency.exponentialRampToValueAtTime(to, end);
+
+  gain.gain.setValueAtTime(peakGain, start);
+  gain.gain.exponentialRampToValueAtTime(0.001, end);
+
+  oscillator.connect(gain);
+  gain.connect(ctx.destination);
+
+  oscillator.start(start);
+  oscillator.stop(end);
+}
+
+/** Phát âm thanh chốt công tắc cơ học (440Hz → 880Hz) khi checkout nhánh thành công. */
+export function playSwitch(): void {
+  playFrequencySweep(SWITCH_START_FREQUENCY, SWITCH_PEAK_FREQUENCY, SWITCH_DURATION_SECONDS, SWITCH_PEAK_GAIN);
+}
+
+/** Phát âm thanh tích tắc vi mô 1200Hz (âm lượng nhỏ) khi định vị commit trên đồ thị. */
+export function playTick(): void {
+  playFrequencySweep(TICK_FREQUENCY, TICK_FREQUENCY, TICK_DURATION_SECONDS, TICK_PEAK_GAIN);
+}
+
+/** Phát âm thanh cảnh báo lỗi tần số thấp khi một tác vụ Git thất bại. */
+export function playError(): void {
+  playFrequencySweep(ERROR_FREQUENCY, ERROR_FREQUENCY, ERROR_DURATION_SECONDS, ERROR_PEAK_GAIN, "square");
+}
+
+/** Phát âm thanh lật trang tài liệu khi thao tác stash thành công. */
+export function playStash(): void {
+  playFrequencySweep(520, 680, 0.06, 0.2, "triangle");
+}
+
+/** Phát âm thanh chốt trượt giảm tần số (380Hz → 220Hz) khi thu gọn Sidebar. */
+export function playSidebarCollapse(): void {
+  playFrequencySweep(SIDEBAR_COLLAPSE_START, SIDEBAR_COLLAPSE_END, SIDEBAR_TOGGLE_DURATION_SECONDS, SIDEBAR_TOGGLE_PEAK_GAIN);
+}
+
+/** Phát âm thanh chốt trượt tăng tần số (220Hz → 380Hz) khi mở rộng Sidebar. */
+export function playSidebarExpand(): void {
+  playFrequencySweep(SIDEBAR_EXPAND_START, SIDEBAR_EXPAND_END, SIDEBAR_TOGGLE_DURATION_SECONDS, SIDEBAR_TOGGLE_PEAK_GAIN);
+}
+
 /**
  * Phát âm thanh chốt cơ khí (Mechanical latch click) khi commit thành công: hai bộ dao
  * động sóng sine tần số cao (1200Hz & 850Hz) với phong bì biên độ suy giảm lũy thừa
