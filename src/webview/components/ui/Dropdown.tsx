@@ -168,7 +168,7 @@ export function Dropdown({
           </Icon>
         </button>
         {open && (
-          <div class="absolute right-0 top-full z-10 mt-1 flex max-h-72 w-max min-w-full max-w-96 flex-col rounded-md border border-line bg-menu text-menu-fg shadow-md">
+          <div class="absolute left-0 top-full z-40 mt-1 flex max-h-72 w-max min-w-full max-w-96 flex-col rounded-md border border-line bg-menu text-menu-fg shadow-md">
             <input
               ref={inputRef}
               type="text"
