@@ -189,7 +189,12 @@ export function HexWheelHub() {
             <div
               data-wheel-hub
               class="absolute flex cursor-pointer items-center justify-center"
-              style={{ left: HALF - HUB_RADIUS, top: HALF - HUB_RADIUS }}
+              style={{
+                left: HALF - HUB_RADIUS,
+                top: HALF - HUB_RADIUS,
+                width: HUB_RADIUS * 2,
+                height: HUB_RADIUS * 2
+              }}
               onClick={() => closeWheel()}
             >
               <HexagonShape

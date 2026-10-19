@@ -63,12 +63,7 @@ export function GlobalToolbar({ repos }: { repos: Array<GitRepo> }) {
 
   return (
     <header class="flex min-h-10 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-3 py-1">
-      {/* Cụm trái: Trạm chỉ huy bánh xe lục giác */}
-      <div class="flex items-center gap-1.5">
-        <HexWheelDockTrigger />
-      </div>
-
-      {/* Cụm giữa: điều khiển workspace kế thừa MainHeader */}
+      {/* Cụm trái: điều khiển workspace kế thừa MainHeader */}
       {(repos.length > 1 || !noCommits) && (
         <div class="flex flex-wrap items-center gap-4">
           {repos.length > 1 && (
@@ -113,6 +108,11 @@ export function GlobalToolbar({ repos }: { repos: Array<GitRepo> }) {
           )}
         </div>
       )}
+
+      {/* Cụm giữa: Trạm chỉ huy bánh xe lục giác */}
+      <div class="flex items-center gap-1.5">
+        <HexWheelDockTrigger />
+      </div>
 
       {/* Cụm phải: chỉ báo & tiện ích */}
       <div class="flex items-center gap-2">
