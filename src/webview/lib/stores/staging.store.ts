@@ -7,6 +7,8 @@ import type {
 } from "@/backend/queries/workspaceStatus";
 import type { StagingFile } from "@/webview/components/staging/StagingFileItem";
 import { runAction, requestHeadCommit } from "@/webview/lib/actions";
+import { commitHead } from "@/webview/lib/stores";
+import { aheadCount, upstreamBranch } from "@/webview/lib/stores/sync.store";
 
 /**
  * Kho trạng thái tập trung của phân vùng Staging & Commit Composer, được mô hình hóa
@@ -103,6 +105,29 @@ export const commitButtonLabel = computed(() => {
   return `Commit ${count} ${count === 1 ? "file" : "files"}`;
 });
 
+/**
+ * Điều kiện an toàn cho phép bật chế độ Amend. Chỉ trả về `true` khi kho có commit
+ * HEAD và commit đó chưa bị đẩy lên remote (tức `upstreamBranch` rỗng hoặc `aheadCount`
+ * lớn hơn 0), phòng ngừa lỗi phân nhánh 1 ahead / 1 behind và crash Git CLI.
+ */
+export const canAmend = computed(() => {
+  if (commitHead.value === null) {
+    return false;
+  }
+  return !(upstreamBranch.value !== null && aheadCount.value === 0);
+});
+
+/** Chuỗi lý do vô hiệu hóa checkbox Amend, dùng làm tooltip (`title`); `undefined` khi khả dụng. */
+export const amendDisabledReason = computed<string | undefined>(() => {
+  if (commitHead.value === null) {
+    return "Cannot amend: Repository has no commits yet";
+  }
+  if (upstreamBranch.value !== null && aheadCount.value === 0) {
+    return "Cannot amend: Latest commit has already been pushed to remote";
+  }
+  return undefined;
+});
+
 // --- Hàm điều phối hành động (Store Action Dispatchers) ---
 
 /** Chuẩn hóa bản ghi tệp từ Backend về hình dạng `StagingFile` dùng cho UI. */
@@ -180,6 +205,11 @@ export function confirmDiscard(): void {
  */
 export function setAmend(value: boolean): void {
   if (value === isAmend.value) {
+    return;
+  }
+
+  // Chặn kích hoạt Amend ngoài luồng khi chưa đủ điều kiện an toàn.
+  if (value && !canAmend.value) {
     return;
   }
 

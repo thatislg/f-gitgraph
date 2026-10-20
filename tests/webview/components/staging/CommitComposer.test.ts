@@ -3,6 +3,7 @@
 import { h, render } from "preact";
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
+import { commitHead } from "@/webview/lib/stores";
 import {
   commitDescription,
   commitSubject,
@@ -13,6 +14,7 @@ import {
   isSign,
   stagedFiles
 } from "@/webview/lib/stores/staging.store";
+import { aheadCount, upstreamBranch } from "@/webview/lib/stores/sync.store";
 
 import { setupWebviewTest } from "@tests/webview/test-utils";
 
@@ -33,6 +35,9 @@ function resetStore() {
   isCommitting.value = false;
   headCommitSubject.value = "";
   headCommitDescription.value = "";
+  commitHead.value = null;
+  upstreamBranch.value = null;
+  aheadCount.value = 0;
 }
 
 beforeEach(resetStore);
@@ -108,6 +113,7 @@ describe("CommitComposer", () => {
   });
 
   it("fills the subject from the HEAD commit when Amend is enabled", () => {
+    commitHead.value = "abc123";
     commitSubject.value = "draft subject";
     headCommitSubject.value = "previous subject";
     headCommitDescription.value = "previous body";
@@ -120,5 +126,37 @@ describe("CommitComposer", () => {
 
     expect(commitSubject.value).toBe("previous subject");
     expect(commitDescription.value).toBe("previous body");
+  });
+
+  it("disables the Amend checkbox and shows a tooltip when there is no HEAD commit", () => {
+    commitHead.value = null;
+    renderComposer();
+
+    const amend = container.querySelector<HTMLInputElement>("[data-amend-checkbox]");
+    expect(amend?.disabled).toBe(true);
+    expect(amend?.getAttribute("title")).toBe("Cannot amend: Repository has no commits yet");
+  });
+
+  it("disables the Amend checkbox and shows a tooltip when HEAD is already pushed", () => {
+    commitHead.value = "abc123";
+    upstreamBranch.value = "origin/main";
+    aheadCount.value = 0;
+    renderComposer();
+
+    const amend = container.querySelector<HTMLInputElement>("[data-amend-checkbox]");
+    expect(amend?.disabled).toBe(true);
+    expect(amend?.getAttribute("title")).toBe(
+      "Cannot amend: Latest commit has already been pushed to remote"
+    );
+  });
+
+  it("enables the Amend checkbox without a tooltip when amend is allowed", () => {
+    commitHead.value = "abc123";
+    upstreamBranch.value = null;
+    renderComposer();
+
+    const amend = container.querySelector<HTMLInputElement>("[data-amend-checkbox]");
+    expect(amend?.disabled).toBe(false);
+    expect(amend?.hasAttribute("title")).toBe(false);
   });
 });

@@ -2,6 +2,8 @@ import { useEffect, useRef } from "preact/hooks";
 
 import { Checkbox } from "@/webview/components/ui/Checkbox";
 import {
+  amendDisabledReason,
+  canAmend,
   canCommit,
   commit,
   commitAndPush,
@@ -118,6 +120,8 @@ export function CommitComposer() {
           label="Amend previous commit"
           data-amend-checkbox
           checked={amend}
+          disabled={!canAmend.value}
+          title={amendDisabledReason.value}
           onChange={(event) => setAmend(event.currentTarget.checked)}
         />
         <Checkbox
