@@ -69,21 +69,21 @@ Tài liệu này ghi nhận tổng quan mục tiêu, danh mục tệp tin tác �
 
 
 ### 🧩 Nhóm Việc 5: Chuẩn Hóa Tương Tác Hai Tầng (Hướng B) & Khung Xem Trước Commit Đồng Bộ
-- [ ] **Task 5.1**: Viết Unit Test bổ sung tại `tests/webview/components/HexWheelBrandEmblem.test.ts` và `tests/webview/components/HexWheelHub.test.ts` kiểm thử:
+- [x] **Task 5.1**: Viết Unit Test bổ sung tại `tests/webview/components/HexWheelBrandEmblem.test.ts` và `tests/webview/components/HexWheelHub.test.ts` kiểm thử:
   - Nhấp chuột trái vào 6 icon lục giác vệ tinh nhỏ ở State 1 gọi trực tiếp `executePetalAction(id)` và co thẳng về State 0.
   - Nhấp chuột trái vào Logo F-GitGraph trung tâm ở State 1 gọi `openWheel()` để bung nở State 2 (Expanded Honeycomb Hub).
   - Kiểm tra tính cách ly vùng chạm (Hitbox Isolation) giữa Logo tâm ($14\text{px}$) và 6 vệ tinh ($13\text{px}$, khoảng cách đệm $3\text{px}$).
-- [ ] **Task 5.2**: Nâng cấp component `HexWheelBrandEmblem.tsx` cho State 1:
+- [x] **Task 5.2**: Nâng cấp component `HexWheelBrandEmblem.tsx` cho State 1:
   - Mở khóa tương tác chuột (`pointer-events: auto`) cho 6 icon lục giác nhỏ vệ tinh.
   - Gắn sự kiện `onClick` gọi thẳng `executePetalAction(petal.id)` kèm `e.stopPropagation()`.
   - Bổ sung hiệu ứng vi phát quang (Micro Neon Glow) khi hover icon nhỏ; loại bỏ hoàn toàn tooltip văn bản để giữ trải nghiệm thuần icon tối giản cho Pro Users.
 
-- [ ] **Task 5.3**: Cập nhật cơ chế điều phối tại `HexWheelHub.tsx`:
+- [x] **Task 5.3**: Cập nhật cơ chế điều phối tại `HexWheelHub.tsx`:
   - Phân định rạch ròi: click vào Logo tâm mở State 2 (Expanded Honeycomb Hub), click vào icon vệ tinh chạy lệnh Git nhanh.
-- [ ] **Task 5.4**: Chuẩn hóa ranh giới kỹ thuật cho phase riêng biệt tiếp theo:
+- [x] **Task 5.4**: Chuẩn hóa ranh giới kỹ thuật cho phase riêng biệt tiếp theo:
   - Tách độc lập tính năng bảng xem trước danh sách commit đồng bộ sang tài liệu thiết kế riêng: `11_Sync_Commit_List_Inspector_Design.md` (chuẩn bị cho phase mở rộng sau Radial Command Hub).
 
-- [ ] **Task 5.5**: Kiểm thử hồi quy và toàn vẹn chất lượng:
+- [x] **Task 5.5**: Kiểm thử hồi quy và toàn vẹn chất lượng:
   - Chạy `npm run typecheck`, `oxlint`, và bộ kiểm thử Vitest bảo đảm không hồi quy và đạt 100% tiêu chí đỗ.
 
 ---
@@ -104,4 +104,15 @@ Tài liệu này ghi nhận tổng quan mục tiêu, danh mục tệp tin tác �
    - Tất cả các unit test mới cho hình học, store và component đều xanh (Pass).
 5. **Tách bạch hoàn hảo tương tác hai tầng (Hướng B)**:
    - Người dùng có thể thực thi ngay tác vụ Git chỉ với 1 click tại State 1 (Quick Mode) hoặc click vào Logo tâm để mở Cockpit đầy đủ (State 2 & 3).
+
+---
+
+## 4. Nhật Ký Tiến Độ Triển Khai (Worklog & Activity Log)
+
+- **2026-10-20**: Hoàn tất **Nhóm Việc 5** (Chuẩn Hóa Tương Tác Hai Tầng Hướng B & Ranh Giới Khung Xem Trước Commit Đồng Bộ):
+  - Nâng cấp `HexWheelBrandEmblem.tsx` State 1: mở khóa `pointer-events: auto` cho 6 icon vệ tinh, gắn `onClick` chạy thẳng `executePetalAction(petal.id)` kèm `e.stopPropagation()`, bổ sung `role="button"`/`tabIndex`/`aria-label` cho trợ năng, và hiệu ứng Micro Neon Glow khi hover (CSS `[data-iris-icon]:hover` tại `styles.css`).
+  - Giữ nguyên cơ chế logo tâm → `openWheel()` (State 2) qua `onClick` của trigger trong `HexWheelHub.tsx`; ranh giới hai tầng được phân định rạch ròi nhờ `stopPropagation` ở icon vệ tinh, không cần thay đổi `HexWheelHub.tsx`.
+  - Chuẩn hóa ranh giới tính năng bảng xem trước commit đồng bộ sang tài liệu thiết kế riêng `11_Sync_Commit_List_Inspector_Design.md` (đã tồn tại độc lập).
+  - 7 unit test mới (6 `HexWheelBrandEmblem.test.ts` + 1 `HexWheelHub.test.ts`); 4 cổng chẩn đoán (typecheck/lint/compile/test) đạt 100% PASS (backend 163, extension 29, webview 291).
+  - Ghi nhận 0 `[DESIGN_DEFECT]`, 0 `[DEV_BUG]`, 0 `[ENV_TOOL_ISSUE]`.
 
