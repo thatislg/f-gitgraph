@@ -1,61 +1,39 @@
+import { Icon } from "@/webview/components/ui/Icons";
 import { aheadCount, behindCount } from "@/webview/lib/stores/sync.store";
 import { wheelStyle } from "@/webview/lib/stores/wheel.store";
-import { EMBLEM_RADIUS, PETAL_LAYOUT } from "@/webview/utils/hexGeometry";
+import { EMBLEM_RADIUS, PETAL_LAYOUT, petalCenters } from "@/webview/utils/hexGeometry";
 
 import { FGitGraphLogo } from "./FGitGraphLogo";
 import { HexagonShape } from "./HexagonShape";
-import { MONO_ACTIVE, MONO_BASE_BORDER, PETAL_COLORS } from "./petalMeta";
+import { MONO_ACTIVE, MONO_BASE_BORDER, PETAL_COLORS, PETAL_ICONS } from "./petalMeta";
 
 type HexWheelBrandEmblemProps = {
-  /** `true` ở State 1 (Armed): biểu tượng xoay nhẹ và phân rã thành 6 múi rẻ quạt. */
+  /** `true` ở State 1 (Armed): biểu tượng xoay nhẹ và bao quanh bởi 6 icon tác vụ. */
   armed?: boolean;
 };
 
 const EMBLEM_SIZE = EMBLEM_RADIUS * 2;
 
-/** Bán kính ngoài của vành 6 múi rẻ quạt ở State 1 (tổng đường kính 36px). */
-const IRIS_OUTER = 18;
-/** Bán kính trong của vành múi rẻ quạt (bám sát viền biểu tượng 14px). */
-const IRIS_INNER = EMBLEM_RADIUS;
-/** Khe hở góc (độ) giữa hai múi rẻ quạt liền kề để đọc rõ 6 múi riêng biệt. */
-const IRIS_GAP_DEG = 6;
+/** Bán kính quỹ đạo (tâm emblem → tâm icon) của 6 icon chức năng ở State 1.
+ *  Phải ≥ EMBLEM_RADIUS(14) + IRIS_NODE_RADIUS(13) = 27 để icon không chèn vào emblem. */
+const IRIS_ORBIT = 30;
+/** Bán kính node lục giác chứa icon ở State 1. */
+const IRIS_NODE_RADIUS = 13;
+/** Độ dịch xuống của toàn bộ emblem (kèm cụm icon) để tránh bị cắt phần trên. */
+const IRIS_OFFSET_Y = 36;
+/** Bán kính nền đục (backdrop) bao trùm cụm icon, che chữ đồng bộ phía sau. */
+const IRIS_BACKDROP_RADIUS = IRIS_ORBIT + IRIS_NODE_RADIUS + 10;
 
-/**
- * Sinh đường path SVG cho một múi rẻ quạt vành khuyên (annular sector) tâm `(0, 0)`,
- * góc tâm `centerDeg`, nửa cung `halfSpanDeg`, bán kính trong `r1` và ngoài `r2`.
- */
-function annularSectorPath(centerDeg: number, halfSpanDeg: number, r1: number, r2: number): string {
-  const a1 = (centerDeg - halfSpanDeg) * (Math.PI / 180);
-  const a2 = (centerDeg + halfSpanDeg) * (Math.PI / 180);
-  const o1 = polarPoint(r2, a1);
-  const o2 = polarPoint(r2, a2);
-  const i2 = polarPoint(r1, a2);
-  const i1 = polarPoint(r1, a1);
-  const sweep = a2 - a1 > Math.PI ? 1 : 0;
-  return [
-    `M ${f3(o1.x)} ${f3(o1.y)}`,
-    `A ${f3(r2)} ${f3(r2)} 0 ${sweep} 1 ${f3(o2.x)} ${f3(o2.y)}`,
-    `L ${f3(i2.x)} ${f3(i2.y)}`,
-    `A ${f3(r1)} ${f3(r1)} 0 ${sweep} 0 ${f3(i1.x)} ${f3(i1.y)}`,
-    "Z"
-  ].join(" ");
-}
-
-function polarPoint(radius: number, angle: number): { x: number; y: number } {
-  return { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
-}
-
-function f3(n: number): string {
-  return n.toFixed(3);
-}
+/** Tọa độ tâm (độ lệch từ tâm emblem) của 6 icon tác vụ ở State 1. */
+const irisCenters = petalCenters(IRIS_ORBIT);
 
 /**
  * Biểu tượng nghỉ State 0 của trạm chỉ huy: F-GitGraph Emblem cao đúng 28px trong khung
  * lục giác mỏng, kèm chấm sáng nhịp thở báo hiệu ahead/behind theo thời gian thực.
  *
- * Ở State 1 (Armed), biểu tượng xoay nhẹ 30° và phân rã thành 6 múi rẻ quạt lục giác với
- * vạch màu Neon vi mô tương ứng từng tác vụ tương lai (Cam Push, Xanh Pull, Xanh lơ Fetch,
- * Hồng Pop, Tím Stash, Vàng Refresh).
+ * Ở State 1 (Armed), biểu tượng xoay nhẹ 30° và hiện 6 icon tác vụ (Push, Pull, Fetch,
+ * Pop, Stash, Refresh) bao quanh, không kèm nhãn chữ. Mỗi icon nằm trong node lục giác
+ * nhỏ mang đúng màu Neon của tác vụ tương lai.
  *
  * Tham khảo thiết kế:
  * docs/02_design/phase3/10_WheelConcepts.md (Mục 4.1 & 4.2).
@@ -67,46 +45,74 @@ export function HexWheelBrandEmblem({ armed = false }: HexWheelBrandEmblemProps)
   const hasAhead = aheadCount.value > 0;
   const hasBehind = behindCount.value > 0;
 
-  const halfSpanDeg = 30 - IRIS_GAP_DEG / 2;
-  const irisSize = IRIS_OUTER * 2;
-
   return (
     <span
       data-wheel-emblem
       data-armed={armed ? "true" : undefined}
       class="relative inline-flex select-none items-center justify-center"
-      style={{ width: EMBLEM_SIZE, height: EMBLEM_SIZE }}
+      style={{
+        width: EMBLEM_SIZE,
+        height: EMBLEM_SIZE,
+        transition: "transform 0.12s cubic-bezier(0.2, 0, 0, 1)",
+        transform: armed ? `translateY(${IRIS_OFFSET_Y}px)` : undefined,
+        zIndex: armed ? 50 : undefined
+      }}
     >
       {armed && (
-        <svg
-          data-iris
-          width={irisSize}
-          height={irisSize}
-          viewBox={`${-IRIS_OUTER} ${-IRIS_OUTER} ${irisSize} ${irisSize}`}
-          class="pointer-events-none absolute"
+        <HexagonShape
+          radius={IRIS_BACKDROP_RADIUS}
+          fill="rgba(15, 23, 42, 0.95)"
+          stroke={isMono ? MONO_ACTIVE : "rgba(168, 85, 247, 0.55)"}
+          strokeWidth={1}
           style={{
-            left: (EMBLEM_SIZE - irisSize) / 2,
-            top: (EMBLEM_SIZE - irisSize) / 2,
-            animation: "f-gitgraph-iris-arm 0.12s cubic-bezier(0.2, 0, 0, 1)"
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            filter: "drop-shadow(0 0 14px rgba(15, 23, 42, 0.9))",
+            pointerEvents: "none"
           }}
-          aria-hidden="true"
-          focusable="false"
+        />
+      )}
+      {armed && (
+        <div
+          data-iris
+          class="pointer-events-none absolute inset-0"
+          style={{ animation: "f-gitgraph-iris-arm 0.12s cubic-bezier(0.2, 0, 0, 1)" }}
         >
-          {PETAL_LAYOUT.map((petal) => {
+          {PETAL_LAYOUT.map((petal, index) => {
+            const center = irisCenters[index]!;
             const color = isMono ? MONO_ACTIVE : PETAL_COLORS[petal.id];
+            const nodeSize = IRIS_NODE_RADIUS * 2;
             return (
-              <path
+              <span
                 key={petal.id}
-                data-iris-wedge={petal.id}
-                d={annularSectorPath(petal.angleDegrees, halfSpanDeg, IRIS_INNER, IRIS_OUTER)}
-                fill={color}
-                fill-opacity="0.35"
-                stroke={color}
-                stroke-width="1"
-              />
+                data-iris-icon={petal.id}
+                class="absolute flex items-center justify-center"
+                style={{
+                  left: EMBLEM_RADIUS + center.x - IRIS_NODE_RADIUS,
+                  top: EMBLEM_RADIUS + center.y - IRIS_NODE_RADIUS,
+                  width: nodeSize,
+                  height: nodeSize,
+                  color
+                }}
+              >
+                <HexagonShape
+                  radius={IRIS_NODE_RADIUS}
+                  stroke={color}
+                  strokeWidth={1.5}
+                  fill={`${color}26`}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    filter: `drop-shadow(0 0 6px ${color}) drop-shadow(0 0 2px ${color})`
+                  }}
+                />
+                <Icon>{PETAL_ICONS[petal.id]}</Icon>
+              </span>
             );
           })}
-        </svg>
+        </div>
       )}
 
       <span

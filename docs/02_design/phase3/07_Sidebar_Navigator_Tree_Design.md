@@ -709,6 +709,80 @@ Xử lý logic khi người dùng nhấp vào nút `+` trên dòng tiêu đề c
 
 ---
 
+#### 13. Hàm `checkoutRemoteBranchAction(remoteName: string, branchName: string): Promise<void>`
+
+##### Mục Tiêu & Trách Nhiệm Nghiệp Vụ:
+Xử lý logic nghiệp vụ khi người dùng nhấp đúp hoặc nhấn Enter vào một nhánh từ xa (`remote-branch`) trong phân nhóm `REMOTES` để tạo hoặc chuyển sang nhánh cục bộ theo dõi tương ứng (`tracking branch`), bảo đảm kiểm tra tính toàn vẹn danh bạ nhánh và ngăn chặn xung đột ghi đè.
+
+##### Bảng Đặc Tả Hợp Đồng I/O (Black-Box Contract):
+
+| Tham Số / Giá Trị | Kiểu Dữ Liệu | Bắt Buộc? | Mặc Định | Ràng Buộc & Dải Giá Trị Hợp Lệ |
+| :--- | :--- | :---: | :---: | :--- |
+| `remoteName` | string | Có | - | Tên remote hợp lệ (ví dụ `"origin"`, `"upstream"`) |
+| `branchName` | string | Có | - | Tên nhánh từ xa (ví dụ `"main"`, `"feat-login"`) |
+| **Giá Trị Trả Về** | Promise<void> | - | - | Bất đồng bộ; giải phóng khóa Mutex khi hoàn tất |
+
+##### Tiền Điều Kiện & Bộ Lọc Phòng Vệ:
+1. Kiểm tra khóa Mutex: Nếu `isCheckingOut.value === true`, lập tức thoát hàm nhằm tránh gửi lệnh liên tiếp gây nghẽn tiến trình Git.
+2. Kiểm tra chuỗi rỗng: Nếu `remoteName` hoặc `branchName` là chuỗi rỗng sau khi loại bỏ khoảng trắng, thoát hàm an toàn.
+
+##### Quy Trình Các Bước Xử Lý Cụ Thể Từng Bước:
+1. *Bước 1 (Kiểm tra xung đột tên nhánh cục bộ)*:
+   - Đối soát tên `branchName` với danh sách nhánh cục bộ trong `branchList.value`:
+     - **Trường Hợp 1: Nhánh cục bộ cùng tên đã tồn tại**:
+       - Mở hộp thoại Cyber-Lab Modal:
+         - Tiêu đề: *"Local Branch Already Exists"*
+         - Nội dung: *"A local branch named '<branchName>' already exists. Would you like to switch to it, or checkout as a detached HEAD?"*
+         - Các nút lựa chọn: `[Switch to Existing Branch]`, `[Checkout Detached]`, `[Cancel]`.
+         - Nếu người dùng chọn `Switch to Existing Branch`: Chuyển tiếp sang `checkoutBranchAction(branchName)`.
+     - **Trường Hợp 2: Nhánh cục bộ chưa tồn tại (Happy Path)**:
+       - Tiến hành tự động tạo nhánh local tracking branch ở Bước 2.
+2. *Bước 2 (Bật cờ khóa & Kích hoạt phản xạ lạc quan Optimistic UI)*:
+   - Gán `isCheckingOut.value = true`.
+   - Cập nhật tạm thời con trỏ `headBranch.value = branchName` để đổi ngay viền tím Neon trên Sidebar trong 16ms.
+3. *Bước 3 (Gửi lệnh Action RPC xuống Backend Mutator)*:
+   - Phát lệnh: `vscode.postMessage({ command: "checkoutBranch", repo: selectedRepo.value, branchName: branchName, remoteBranch: remoteName + "/" + branchName })`.
+   - Backend thực thi `git checkout -b <branchName> --track <remoteName>/<branchName>`.
+4. *Bước 4 (Tiếp nhận kết quả & Phục hồi nếu lỗi)*:
+   - Nếu thành công: Phát âm thanh chuyển công tắc `audio.playSwitch()`, kích hoạt quy trình làm mới có mục tiêu `refreshAfterCheckout()`.
+   - Nếu thất bại: Khôi phục lại nhánh HEAD cũ (Rollback), phát âm thanh lỗi `audio.playError()` và mở dialog cảnh báo đỏ.
+5. *Bước 5 (Giải phóng cờ khóa trong khối finally)*:
+   - Luôn đặt lại `isCheckingOut.value = false`.
+
+---
+
+#### 14. Giải Thuật Tối Ưu Hóa Tốc Độ Chuyển Nhánh & Triệt Tiêu Cơn Bão Refresh Kép (Zero-Jank Branch Switching Protocol)
+
+##### Mục Tiêu & Trách Nhiệm Nghiệp Vụ:
+Triệt tiêu hoàn toàn độ trễ 500ms - 1500ms khi chuyển đổi nhánh cục bộ trên hệ điều hành Windows, loại bỏ hiện tượng spawn hơn 10 tiến trình `git.exe` dồn dập do xung đột giữa lệnh gọi làm mới thủ công và trình lắng nghe biến động hệ thống tệp `.git/HEAD`.
+
+##### Quy Trình Điều Phối 4 Tầng Từng Bước:
+1. *Tầng 1 (Phản xạ giao diện lạc quan 16ms - Optimistic UI)*:
+   - Ngay tại nhịp nhấn chuột hoặc Enter:
+     - Ghi nhận trạng thái HEAD hiện tại vào biến đệm phục hồi: `previousHead = headBranch.value`.
+     - Cập nhật trực tiếp tín hiệu `headBranch.value = targetBranchName`.
+     - Giao diện Sidebar chuyển viền tím Neon `#a855f7` và biểu tượng checkmark sang nhánh mục tiêu ngay trong chu kỳ vẽ kế tiếp của GPU (16ms ở tần số 60Hz), mang lại cảm giác phản hồi tức thì cho người dùng.
+2. *Tầng 2 (Khóa tạm thời bộ quan sát hệ thống tệp - Watcher Mute Protocol)*:
+   - Trước khi gửi lệnh `git checkout`:
+     - Gửi thông điệp RPC hoặc kích hoạt cờ `muteDepth++` tại bộ quan sát `git-repo.watcher.ts`.
+     - Bộ quan sát bỏ qua mọi biến động liên quan đến file `.git/HEAD` và `.git/index` trong vòng $300\text{ms}$ kể từ khi lệnh checkout bắt đầu.
+     - Triệt tiêu 100% việc watcher tự phát gửi lệnh `refresh` thứ hai lên Webview.
+3. *Tầng 3 (Quy trình làm mới có mục tiêu sau Checkout - Targeted Refresh)*:
+   - Khi nhận kết quả checkout thành công từ Backend:
+     - Tuyệt đối **không gọi** hàm `refresh()` toàn thể (vốn chạy đồng loạt 6 truy vấn Git nặng nề gồm cả `stashList` và `listTags`).
+     - Chỉ thực thi hàm làm mới có mục tiêu `refreshAfterCheckout()` gồm đúng 3 tác vụ tối giản:
+       1. `workspaceStatus`: Nạp lại trạng thái thay đổi tệp Working Tree của nhánh mới.
+       2. `syncStatus`: Nạp lại số đếm ahead/behind so với upstream tương ứng.
+       3. `loadGraph()`: Cập nhật lại vị trí đỉnh HEAD trên đồ thị DAG.
+     - Cắt giảm hơn 50% số lượng tiến trình con `git.exe` bị spawn, rút ngắn thời gian hoàn tất nghiệp vụ xuống dưới $150\text{ms}$.
+4. *Tầng 4 (Cơ chế phục hồi an toàn Rollback On Failure)*:
+   - Nếu Git CLI trả về mã lỗi (xung đột tệp chưa lưu, lỗi reflock):
+     - Lập tức khôi phục `headBranch.value = previousHead`.
+     - Đưa viền tím Neon trở về nhánh cũ.
+     - Hiển thị hộp thoại giải thích lỗi chi tiết và phát âm thanh cảnh báo.
+
+---
+
 ## 4. Đặc Tả Tương Tác Người Dùng & Điều Phối Hành Động Cây Phân Cấp
 
 ### 4.1. Tương Tác Chuột & Menu Ngữ Cảnh Từng Nhóm
@@ -792,3 +866,4 @@ Mọi tệp kiểm thử cho Nhóm Việc 3 bắt buộc đặt tên với đuô
 | **v1.2.0** | 2026-10-19 | Nâng cấp thiết kế | AI Architect | **Chi tiết hóa Mục 3.2 & Bổ sung WAI-ARIA Tree Navigation**: Bổ sung cờ `commitToStorage` trong `setSidebarWidth`, đồng bộ `isSidebarCollapsed` với Design 06, bổ sung ma trận phím mũi tên 4 chiều. |
 | **v1.3.0** | 2026-10-19 | Đại tu chuyên sâu | AI Architect | **Đại tu chuyên sâu toàn diện Mục 3.2 (Quy Trình Xử Lý Cụ Thể Từng Bước Của 12 Hàm Điều Phối Store)**: <br>1. **Sơ đồ kiến trúc đa nhánh Mermaid**: Minh họa trực quan 3 luồng xử lý độc lập: Zero-Jank Resizing (60-144fps vs LocalStorage), Checkout nhánh kèm bẫy xung đột Working Tree và gợi ý Auto-Stash, Điều phối thao tác Stash 3 chế độ (`pop`, `drop`, `apply`) kèm bẫy xung đột merge.<br>2. **Đặc tả chi tiết 12 hàm điều phối**: Nâng cấp toàn bộ 12 hàm theo cấu trúc 5 tầng chuẩn mực (Mục tiêu, Bảng hợp đồng I/O hộp đen, Bộ lọc phòng vệ, Quy trình xử lý cụ thể từng bước, Bẫy ngoại lệ và phục hồi lỗi).<br>3. **Bổ sung các giải thuật nghiệp vụ cốt lõi**: Bẫy tiêu điểm vô hình khi thu gọn Sidebar (`toggleSidebar`), Kiểm tra hợp lệ tên nhánh Git thời gian thực (`createBranchAction`), Định vị cuộn mượt mà đồ thị DAG (`locateCommitOnGraphAction`), Bẫy xung đột merge tự động điều hướng sang Staging Area (`handleStashAction`).<br>4. **Bổ sung tín hiệu cơ sở điều phối**: Thêm `isStashOperating`, `isCreateBranchModalOpen`, `branchCreationBaseCommit`. Mở rộng ma trận kiểm thử đơn vị bao phủ toàn diện 12 hàm điều phối. |
 | **v1.4.0** | 2026-10-19 | Đồng bộ hóa | AI Architect | **Liên kết nguồn dữ liệu cho phân nhóm TAGS**: Xác định rõ ràng nguồn dữ liệu cho prop `tags` là tín hiệu phản ứng `tagList` được cung cấp qua truy vấn RPC `listTags` (đặc tả tại Design 05 Mục 3.3), khắc phục lỗ hổng thiết kế thiếu nguồn dữ liệu backend. |
+| **v1.5.0** | 2026-10-20 | Nâng cấp tương tác & Hiệu năng | AI Architect | **Bổ sung tương tác Remotes & Tối ưu tốc độ chuyển nhánh**: Bổ sung hàm `checkoutRemoteBranchAction` (tạo local tracking branch khi double-click), Context Menu cho nhánh remote, giải thuật Optimistic UI 16ms và giao thức khóa tạm thời File Watcher (`muteDepth`) triệt tiêu Double Refresh Storm. |

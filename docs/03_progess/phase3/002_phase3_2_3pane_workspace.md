@@ -69,9 +69,15 @@ Mọi công việc triển khai trong Chặng 3.2 bắt buộc đối soát và 
 | **UI Component** | `src/webview/components/search/SearchFilterBar.tsx` | Thanh tìm kiếm commit (`Ctrl + F`), hỗ trợ bộ lọc message/author/hash, nút chuyển hướng Next/Prev. |
 | **UI Component** | `src/webview/components/layout/WorkspaceLayout.tsx` | Bố cục tổng thể 3 phân vùng co giãn linh hoạt, tích hợp `ResizeObserver` chống lệch đồ thị. |
 | **UI Realtime** | `src/webview/lib/dispatcher.ts` | Đăng ký 100% action mạng/stash vào map `handlers` để kích hoạt `refresh()` và `refreshStatus()`. |
+| **Backend Core** | `src/extension/mutator/gitCliMutator.ts` | Bổ sung: `checkoutRemoteBranch`, `deleteRemoteBranch` hỗ trợ tương tác nhánh từ xa an toàn. |
+| **Backend Watcher**| `src/extension/watchers/git-repo.watcher.ts` | Tích hợp cơ chế khóa tạm thời (`muteDepth`) khi checkout chủ động nhằm triệt tiêu Double Refresh Storm. |
+| **UI Actions** | `src/webview/lib/actions.ts` | Bổ sung hàm làm mới có mục tiêu `refreshAfterCheckout()` thay cho `refresh()` toàn thể, giảm tải tiến trình Git. |
+| **Backend Test** | `tests/backend/mutator/remoteMutator.test.ts` | Unit test cho các phương thức mutator: `checkoutRemoteBranch`, `deleteRemoteBranch`. |
 | **UI Test** | `tests/webview/lib/stores/sync.store.test.ts` | Unit test store tín hiệu `sync.store.ts` (tính toán nhãn nút, cập nhật trạng thái loading). |
 | **UI Test** | `tests/webview/components/toolbar/GlobalToolbar.test.ts` | Unit test thanh công cụ: render nút, click gọi action, hiển thị badge ahead/behind. |
 | **UI Test** | `tests/webview/components/sidebar/SidebarNavigator.test.ts` | Unit test render cây 5 nhóm, double-click checkout nhánh, nút toggle collapse. |
+| **UI Test** | `tests/webview/components/sidebar/RemoteBranchInteraction.test.ts` | Unit test tương tác phân vùng REMOTES (double-click checkout, Context Menu, tách nguồn nạp độc lập). |
+| **UI Test** | `tests/webview/performance/BranchSwitchPerformance.test.ts` | Benchmark hiệu năng chuyển nhánh: Optimistic UI 16ms, khử trùng lặp refresh watcher. |
 | **UI Test** | `tests/webview/components/search/SearchFilterBar.test.ts` | Unit test phím tắt `Ctrl + F`, lọc commit, đếm kết quả `(N of M)`. |
 | **UI Integr. Test**| `tests/webview/layout/WorkspaceLayout.geometry.test.ts` | Kiểm thử bất biến hình học: Snapshot đường Bézier và tọa độ `HexagonNode` khi co giãn hoặc toggle Sidebar. |
 
@@ -238,9 +244,52 @@ _Mục tiêu_: Ghép nối toàn bộ hệ thống vào bố cục `WorkspaceLay
 
 ---
 
+### 📋 Nhóm Việc 6: Nâng Cấp Tương Tác Phân Vùng Remotes & Tối Ưu Hóa Hiệu Năng Chuyển Nhánh (Remote Interactions & Branch Switching Latency Optimization)
+
+_Tài liệu tham chiếu thiết kế_: [07_Sidebar_Navigator_Tree_Design.md](../../02_design/phase3/07_Sidebar_Navigator_Tree_Design.md).
+
+_Mục tiêu_: Chuyển đổi phân vùng `REMOTES` từ danh sách tĩnh (Read-only) thành không gian tương tác hai chiều hoàn chỉnh (Double-click checkout tracking branch, Context Menu); đồng thời triệt tiêu độ trễ và hiện tượng "Cơn bão làm mới kép" (Double Refresh Storm) khi chuyển đổi `LOCAL BRANCHES`.
+
+- [ ] **Nhiệm vụ 6.1: Hiện thực hóa tương tác toàn diện trên phân vùng REMOTES**
+  - [ ] **6.1.1**: Xây dựng hàm `checkoutRemoteBranchAction(remoteName: string, branchName: string)`:
+    - Khi người dùng nhấp đúp vào nhánh remote (ví dụ `origin/feat-login`): Tự động kiểm tra danh sách nhánh local hiện có (`branchList`).
+    - Nếu nhánh local cùng tên chưa tồn tại: Tự động chạy lệnh checkout tracking branch `git checkout -b <branchName> --track <remoteName>/<branchName>`.
+    - Nếu nhánh local cùng tên đã tồn tại: Mở modal xác nhận cho phép người dùng lựa chọn: *Checkout existing local branch* hoặc *Overwrite tracking upstream*.
+  - [ ] **6.1.2**: Tích hợp Menu ngữ cảnh (Context Menu) cho từng nhánh remote (`SidebarItem` kiểu `"remote-branch"`):
+    - *Checkout as New Local Branch...*: Mở dialog nhập tên nhánh local mới và tự động thiết lập upstream theo dõi.
+    - *Pull into Current Branch*: Kéo commit từ nhánh remote vào nhánh `HEAD` đang mở (`git pull <remoteName> <branchName>`).
+    - *Delete Remote Branch...*: Mở modal cảnh báo màu đỏ xác nhận xóa vĩnh viễn nhánh trên máy chủ từ xa (`git push <remoteName> --delete <branchName>`).
+  - [ ] **6.1.3**: Độc lập hóa nguồn dữ liệu Remotes ở Sidebar:
+    - Bổ sung hoặc điều chỉnh bộ truy vấn nhánh: Danh sách `remotes` trong `SidebarNavigator` luôn được nạp đầy đủ cấu trúc máy chủ (tất cả các remote branches có sẵn), không bị phụ thuộc vào cờ bật/tắt `showRemoteBranch` (vốn chỉ đóng vai trò lọc hiển thị các đường nhánh trên bảng đồ thị DAG ảo hóa).
+
+- [ ] **Nhiệm vụ 6.2: Tối ưu hóa hiệu năng và triệt tiêu độ trễ chuyển đổi nhánh Local Branches**
+  - [ ] **6.2.1**: Phản xạ giao diện lạc quan (Optimistic UI Transition):
+    - Khi người dùng nhấp đúp hoặc kích hoạt checkout nhánh: Lập tức chuyển đổi viền tím Neon `#a855f7` và biểu tượng checkmark sang nhánh mới trong $16\text{ms}$ (1 khung hình GPU) trên cả Sidebar và Toolbar trước khi Git CLI phản hồi.
+    - Khôi phục trạng thái cũ (Rollback) kèm âm báo lỗi nếu tiến trình checkout của Git CLI báo thất bại hoặc xung đột tệp chưa lưu.
+  - [ ] **6.2.2**: Khử trùng lặp sự kiện và khóa tạm thời File Watcher (Watcher Mute & Deduplication):
+    - Tận dụng biến `muteDepth` và `resumeAt` trong `src/extension/watchers/git-repo.watcher.ts` để tạm khóa bộ theo dõi file `.git/HEAD` trong lúc đang thực thi thao tác checkout do người dùng chủ động kích hoạt.
+    - Triệt tiêu hoàn toàn hiện tượng "Cơn bão làm mới kép" (Double Refresh Storm), cắt giảm hơn 50% số lượng tiến trình con `git.exe` bị spawn dồn dập.
+  - [ ] **6.2.3**: Quy trình làm mới có mục tiêu sau Checkout (`refreshAfterCheckout`):
+    - Thay thế việc gọi hàm `refresh()` toàn thể (chạy đồng loạt 6 lệnh Git CLI nặng nề) bằng quy trình chuyên biệt: chỉ cập nhật lại `currentHead`, gửi truy vấn `workspaceStatus` và `syncStatus`, đồng thời gọi `graphWindowStore.loadGraph()`.
+    - Loại bỏ triệt để các truy vấn không bị ảnh hưởng bởi việc đổi nhánh như `stashList` và `listTags`.
+  - [ ] **6.2.4**: Tối ưu chi phí tạo tiến trình trên Windows (Process Spawning Mitigation):
+    - Tinh gọn các đối số Git CLI, khai thác F# Core Engine để lấy nhanh commit HEAD thay vì spawn thêm các tiến trình con Node.js không cần thiết.
+
+- [ ] **Nhiệm vụ 6.3: Cập nhật hợp đồng RPC & Định tuyến Dispatcher**
+  - [ ] **6.3.1**: Cập nhật hợp đồng `src/types/actions.ts`: Khai báo payload cho action `checkoutRemoteBranch` và `deleteRemoteBranch`.
+  - [ ] **6.3.2**: Mở rộng `src/extension/mutator/gitCliMutator.ts`: Hiện thực phương thức `checkoutRemoteBranch(remote, branch, newLocalBranch)` và `deleteRemoteBranch(remote, branch)` với chuẩn bọc an toàn `--`.
+  - [ ] **6.3.3**: Đăng ký tiếp nhận và định tuyến trong `src/extension/services/messageHandler.ts` và router `src/webview/lib/dispatcher.ts`.
+
+- [ ] **Nhiệm vụ 6.4 (TEST NHÓM 6): Bộ Kiểm Thử Song Hành & Đo Đạc Độ Trễ (Latency Benchmark Tests)**
+  - [ ] **6.4.1**: Tạo `tests/backend/mutator/remoteMutator.test.ts`: Test checkout remote tracking branch, tạo nhánh local mới, và xóa remote branch trên kho git giả lập.
+  - [ ] **6.4.2**: Tạo `tests/webview/components/sidebar/RemoteBranchInteraction.test.ts`: Test sự kiện double-click checkout remote, mở context menu, và nạp danh sách độc lập với `showRemoteBranch`.
+  - [ ] **6.4.3**: Tạo `tests/webview/performance/BranchSwitchPerformance.test.ts`: Test Optimistic UI cập nhật trong 16ms, kiểm chứng `git-repo.watcher` không bị kích hoạt refresh kép khi checkout.
+
+---
+
 ## 3. Lộ Trình Triển Khai Tuần Tự Từng Bước Kèm Kiểm Thử (TDD Phasing Roadmap)
 
-Toàn bộ quy trình lập trình được tiến hành theo thứ tự 5 bước khép kín chuẩn "Contract-First", viết code song hành với viết test và chạy test pass 100% trước khi chuyển bước:
+Toàn bộ quy trình lập trình được tiến hành theo thứ tự 6 bước khép kín chuẩn "Contract-First", viết code song hành với viết test và chạy test pass 100% trước khi chuyển bước:
 
 ```
 [Bước 1: Nền Tảng Backend & RPC Contracts (Contract-First)]
@@ -277,6 +326,14 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 5 bư�
  ├─ Xây dựng WorkspaceLayout.tsx (ResizeObserver)
  ├─ Đo đạc tính bất biến hình học khi co giãn Sidebar (Zero Layout Shift)
  └─ VIẾT VÀ CHẠY TEST: WorkspaceLayout.geometry.test.ts & Toàn bộ test suite (PASS 100%)
+       │
+       ▼
+[Bước 6: Tương Tác Remotes & Tối Ưu Tốc Độ Chuyển Nhánh]
+ ├─ Bổ sung checkoutRemoteBranch & deleteRemoteBranch trong GitCliMutator.ts
+ ├─ Double-click checkout & Context Menu cho Remote branches trong SidebarNavigator.tsx
+ ├─ Triệt tiêu Double Refresh Storm: muteWatcher + refreshAfterCheckout() có mục tiêu
+ ├─ Optimistic UI 16ms cập nhật viền tím Neon HEAD tức thì
+ └─ VIẾT VÀ CHẠY TEST: remoteMutator.test.ts, RemoteBranchInteraction.test.ts, BranchSwitchPerformance.test.ts (PASS 100%)
 ```
 
 ---
@@ -289,6 +346,8 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 5 bư�
 4. **Tìm kiếm tức thì**: Thanh tìm kiếm `Ctrl + F` lọc nhanh commit theo Message, Author, Hash, có highlight và điều hướng chuyển dòng mượt mà.
 5. **Bảo toàn hình học tuyệt đối (Zero Layout Shift)**: Mở, đóng hoặc kéo dãn Sidebar không làm xô lệch bất kỳ pixel tọa độ nào của các nút lục giác `HexagonNode` và đường cong Bézier nhân F# Core.
 6. **Độ phủ kiểm thử tự động**: Toàn bộ các tệp test `*.test.ts` mới viết độc lập cho từng nhóm việc đều vượt qua 100% (Green), không có lỗi typecheck TypeScript, lint warning hay compile error.
+7. **Tương tác Remotes hoàn thiện**: Nhấp đúp vào nhánh remote kích hoạt checkout tracking branch chuẩn xác; chuột phải hiển thị đầy đủ menu tác vụ Checkout, Pull, Delete remote branch; danh sách remotes hiển thị độc lập với cờ lọc đồ thị.
+8. **Hiệu năng chuyển nhánh tối ưu**: Viền tím Neon HEAD phản hồi lạc quan tức thì (< 16ms); triệt tiêu hoàn toàn Double Refresh Storm từ File Watcher, cắt giảm >50% số lượng tiến trình Git CLI spawn khi chuyển nhánh.
 
 ---
 
@@ -332,3 +391,8 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 5 bư�
   - Refactor `App.tsx` (bọc `WorkspaceLayout`), `CommitTable.tsx` (cuộn căn giữa `scrollRequest` + highlight), `CommitRow.tsx` (props `dimmed`/`activeMatch`); khắc phục lỗi khối giữa bị dồn trái (`flex-1 min-w-0`).
   - 42 unit test mới trên 4 tệp (26 + 10 + 4 + 2); 4 cổng chẩn đoán đạt 100% PASS (backend 159, extension 29, webview 240).
   - Ghi nhận 7 `[DEV_BUG]` (3 import-order + 1 TS narrowing + 3 test data/logic/timing), 0 `[DESIGN_DEFECT]` — DDR = 0%, IBR = 100%.
+- **2026-10-20**: Bổ sung thiết kế **Nhóm Việc 6: Nâng Cấp Tương Tác Phân Vùng Remotes & Tối Ưu Hóa Hiệu Năng Chuyển Nhánh (Remote Interactions & Branch Switching Latency Optimization)**:
+  - Phân tích và khắc phục 2 khiếm khuyết lớn trong trải nghiệm người dùng: Phân vùng `REMOTES` chỉ là danh sách tĩnh thiếu tương tác hai chiều, và việc chuyển `LOCAL BRANCHES` bị chậm do Double Refresh Storm và chi phí spawn tiến trình trên Windows.
+  - Thiết kế giải pháp kỹ thuật toàn diện: Tương tác double-click / Context Menu cho Remotes, Optimistic UI (16ms), cơ chế khóa tạm thời File Watcher (`muteWatcher`), và quy trình làm mới có mục tiêu `refreshAfterCheckout()`.
+  - Mở rộng bảng kiểm kê tệp tin tác động, hợp đồng RPC (`checkoutRemoteBranch`, `deleteRemoteBranch`) và ma trận kiểm thử hiệu năng song hành.
+

@@ -106,12 +106,6 @@ async function main() {
     await webview.rebuild();
     await webview.dispose();
   }
-
-  // Sao chép tài nguyên âm thanh tĩnh vào `out/` để webview nạp qua `asWebviewUri`.
-  const soundSrc = path.join(__dirname, "resources", "sound", "wheelturn.mp3");
-  const soundDest = path.join(__dirname, "out", "wheelturn.mp3");
-  fs.mkdirSync(path.dirname(soundDest), { recursive: true });
-  fs.copyFileSync(soundSrc, soundDest);
 }
 
 main().catch((e) => {
