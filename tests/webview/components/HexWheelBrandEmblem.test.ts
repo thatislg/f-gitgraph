@@ -5,10 +5,10 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/webview/lib/stores/wheel.store", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/webview/lib/stores/wheel.store")>();
-  return { ...actual, executePetalAction: vi.fn() };
+  return { ...actual, executePetalAction: vi.fn(), disarmWheel: vi.fn() };
 });
 
-import { executePetalAction } from "@/webview/lib/stores/wheel.store";
+import { disarmWheel, executePetalAction } from "@/webview/lib/stores/wheel.store";
 
 let HexWheelBrandEmblem: typeof import("@/webview/components/wheel/HexWheelBrandEmblem").HexWheelBrandEmblem;
 let container: HTMLDivElement;
@@ -24,9 +24,9 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function renderEmblem(armed: boolean): HTMLDivElement {
+function renderEmblem(armed: boolean, onOpenWheel?: () => void): HTMLDivElement {
   container = document.createElement("div");
-  render(h(HexWheelBrandEmblem, { armed }), container);
+  render(h(HexWheelBrandEmblem, onOpenWheel ? { armed, onOpenWheel } : { armed }), container);
   return container;
 }
 
@@ -74,6 +74,21 @@ describe("HexWheelBrandEmblem (State 1 Quick Mode)", () => {
     expect(icon?.style.pointerEvents).toBe("auto");
   });
 
+  it("opens the wheel when the center logo is clicked", () => {
+    const onOpenWheel = vi.fn();
+    renderEmblem(true, onOpenWheel);
+    const center = container.querySelector("[data-wheel-center]");
+    center?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(onOpenWheel).toHaveBeenCalledTimes(1);
+  });
+
+  it("disarms only when the pointer leaves the outer hexagon region", () => {
+    renderEmblem(true);
+    const region = container.querySelector("[data-iris-region]");
+    region?.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    expect(disarmWheel).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps a 3px hitbox gap between the 14px logo and 13px satellites", () => {
     renderEmblem(true);
     const emblem = container.querySelector<HTMLElement>("[data-wheel-emblem]");
@@ -81,10 +96,11 @@ describe("HexWheelBrandEmblem (State 1 Quick Mode)", () => {
 
     const emblemHalf = px(emblem?.style.width) / 2;
     const iconHalf = px(icon?.style.width) / 2;
-    // `left`/`top` inline là `EMBLEM_RADIUS + center - IRIS_NODE_RADIUS` nên tâm icon
-    // lệch đúng `(left - 1, top - 1)` so với tâm emblem.
-    const centerX = px(icon?.style.left) - 1;
-    const centerY = px(icon?.style.top) - 1;
+    // Vệ tinh neo theo vùng hover `IRIS_REGION_SIZE` (tâm trùng tâm emblem):
+    // `left = IRIS_BACKDROP_RADIUS + center - IRIS_NODE_RADIUS` nên tâm icon lệch đúng
+    // `(left - (53 - 13), top - (53 - 13)) = (left - 40, top - 40)` so với tâm emblem.
+    const centerX = px(icon?.style.left) - 40;
+    const centerY = px(icon?.style.top) - 40;
     const distance = Math.hypot(centerX, centerY);
     const gap = distance - emblemHalf - iconHalf;
 

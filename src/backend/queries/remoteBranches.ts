@@ -50,7 +50,10 @@ export async function remoteBranches(
   repo: string
 ): Promise<QueryResult<"remoteBranches">> {
   try {
-    const summary = await git.branch(["-r"]);
+    // Dùng `-a` (thay vì `-r`) vì simple-git trả nhánh remote dạng rút gọn `origin/main`
+    // khi dùng `-r` (thiếu tiền tố `remotes/`), khiến `parseRemoteGroups` lọc sạch toàn bộ
+    // nhánh. Với `-a`, tên nhánh remote mang đầy đủ tiền tố `remotes/` đúng như hợp đồng.
+    const summary = await git.branch(["-a"]);
     return { repo, remotes: parseRemoteGroups(summary.all) };
   } catch {
     return { repo, remotes: [] };

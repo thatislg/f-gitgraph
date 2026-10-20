@@ -8,7 +8,6 @@ import {
   activePetalTooltip,
   armWheel,
   closeWheel,
-  disarmWheel,
   executePetalAction,
   floatingOrigin,
   focusPetal,
@@ -211,14 +210,15 @@ export function HexWheelHub() {
         data-wheel-trigger
         class="inline-flex"
         onMouseEnter={() => armWheel()}
-        onMouseLeave={() => disarmWheel()}
-        onClick={() => {
-          if (wheelStage.value === 1) {
-            openWheel();
-          }
-        }}
       >
-        <HexWheelBrandEmblem armed={stage === 1} />
+        <HexWheelBrandEmblem
+          armed={stage === 1}
+          onOpenWheel={() => {
+            if (wheelStage.value === 1) {
+              openWheel();
+            }
+          }}
+        />
       </span>
 
       {expanded && (

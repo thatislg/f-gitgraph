@@ -72,7 +72,8 @@ describe("HexWheelHub", () => {
     const trigger = container.querySelector("[data-wheel-trigger]");
     trigger?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await flushEffects();
-    trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    const centerLogo = container.querySelector("[data-wheel-center]");
+    centerLogo?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await flushEffects();
 
     expect(wheel.wheelStage.value).toBe(2);
