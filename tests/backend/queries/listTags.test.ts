@@ -58,11 +58,16 @@ describe("listTags", () => {
 
   it("lists tags sorted by creatordate (newest first)", async () => {
     const repo = track(makeRepo());
-    git(["tag", "v0.1.0"], repo); // points to the initial commit
+    git(["commit", "--amend", "--no-edit", "--date", "2026-01-01T00:00:00Z"], repo, {
+      GIT_COMMITTER_DATE: "2026-01-01T00:00:00Z"
+    });
+    git(["tag", "v0.1.0"], repo); // points to the initial commit (Jan 1)
     fs.writeFileSync(path.join(repo, "f2"), "y");
     git(["add", "."], repo);
-    git(["commit", "-m", "second"], repo);
-    git(["tag", "v1.0.0"], repo); // points to the newer commit
+    git(["commit", "-m", "second", "--date", "2026-01-02T00:00:00Z"], repo, {
+      GIT_COMMITTER_DATE: "2026-01-02T00:00:00Z"
+    });
+    git(["tag", "v1.0.0"], repo); // points to the newer commit (Jan 2)
 
     const result = await listTags(simpleGit(repo));
     expect(result.tags[0]).toBe("v1.0.0");

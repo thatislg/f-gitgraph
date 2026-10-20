@@ -2,8 +2,8 @@ import * as cp from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-export function git(args: string[], cwd: string) {
-  cp.execFileSync("git", args, { cwd, stdio: "pipe" });
+export function git(args: string[], cwd: string, env?: NodeJS.ProcessEnv) {
+  cp.execFileSync("git", args, { cwd, stdio: "pipe", env: { ...process.env, ...env } });
 }
 
 export function makeRepo(): string {
