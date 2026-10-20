@@ -12,6 +12,7 @@ import {
   isCheckingOut,
   isCreateBranchModalOpen,
   isSidebarCollapsed,
+  selectedItemId,
   sidebarWidth
 } from "@/webview/lib/stores/sidebar.store";
 
@@ -40,6 +41,7 @@ function resetStore() {
   expandedSectionIds.value = new Set(ALL_SECTION_IDS);
   isCheckingOut.value = false;
   isCreateBranchModalOpen.value = false;
+  selectedItemId.value = null;
   branchList.value = undefined;
   headBranch.value = "main";
   localStorage.clear();
@@ -93,13 +95,26 @@ describe("SidebarNavigator", () => {
     expect(container.querySelectorAll("section")).toHaveLength(5);
   });
 
-  it("đánh dấu nhánh HEAD bằng checkmark, các nhánh thường không có", () => {
+  it("đánh dấu nhánh HEAD bằng chữ in đậm + viền trái, phần tử được chọn bằng checkmark", () => {
     renderNavigator();
     const head = container.querySelector('[data-item-id="branch:main"]');
     const feature = container.querySelector('[data-item-id="branch:feature/x"]');
 
-    expect(head?.querySelectorAll("svg").length).toBe(2);
+    // Nhánh HEAD in đậm nhưng không mang checkmark (chưa có lựa chọn nào).
+    expect(head?.getAttribute("style")).toContain("font-weight: 700");
+    expect(head?.querySelectorAll("svg").length).toBe(1);
     expect(feature?.querySelectorAll("svg").length).toBe(1);
+  });
+
+  it("chọn một item sẽ gắn checkmark (single-selection), item khác không có", () => {
+    selectedItemId.value = "branch:feature/x";
+    renderNavigator();
+
+    const feature = container.querySelector('[data-item-id="branch:feature/x"]');
+    const head = container.querySelector('[data-item-id="branch:main"]');
+
+    expect(feature?.querySelectorAll("svg").length).toBe(2);
+    expect(head?.querySelectorAll("svg").length).toBe(1);
   });
 
   it("hiển thị số commit chưa push ↑2 màu hổ phách", () => {

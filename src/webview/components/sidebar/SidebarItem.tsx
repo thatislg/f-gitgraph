@@ -1,9 +1,10 @@
 import { selectedItemId } from "@/webview/lib/stores/sidebar.store";
 
 /**
- * Dòng hiển thị một phần tử riêng lẻ trong cây điều hướng Sidebar. Hỗ trợ làm nổi bật
- * nhánh HEAD đang checkout bằng viền trái tím Neon `#a855f7` + icon checkmark, hiển thị
- * số commit chưa push `↑N` màu hổ phách, và đánh dấu phần tử đang được chọn.
+ * Dòng hiển thị một phần tử riêng lẻ trong cây điều hướng Sidebar. Làm nổi bật nhánh
+ * HEAD đang checkout bằng chữ in đậm + viền trái tím Neon `#a855f7`, hiển thị số commit
+ * chưa push `↑N` màu hổ phách, và đánh dấu phần tử đang được chọn (single-selection)
+ * bằng icon checkmark — áp dụng đồng nhất cho local branch, remote branch, tag và stash.
  *
  * Tham khảo thiết kế:
  * docs/02_design/phase3/07_Sidebar_Navigator_Tree_Design.md (Mục 2.3).
@@ -80,7 +81,7 @@ export function SidebarItem({
 
       <span class="flex-1 truncate">{label}</span>
 
-      {isHead && (
+      {isSelected && (
         <svg
           width="12"
           height="12"

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { Icon } from "@/webview/components/ui/Icons";
+import { playPetalHoverTick } from "@/webview/lib/audio";
 import { aheadCount, behindCount } from "@/webview/lib/stores/sync.store";
 import { disarmWheel, executePetalAction, wheelStyle } from "@/webview/lib/stores/wheel.store";
 import { EMBLEM_RADIUS, PETAL_LAYOUT, petalCenters } from "@/webview/utils/hexGeometry";
@@ -57,8 +58,9 @@ const irisCenters = petalCenters(IRIS_ORBIT);
 export function HexWheelBrandEmblem({ armed = false, onOpenWheel }: HexWheelBrandEmblemProps) {
   const isMono = wheelStyle.value === "monochromatic";
   const borderColour = isMono ? MONO_BASE_BORDER : "rgba(168, 85, 247, 0.7)";
-  /** Vệ tinh đang nhận hover ở State 1; dùng để làm mờ các vệ tinh còn lại (hội tụ trường nét). */
-  const [hoveredId, setHoveredId] = useState<PetalActionId | null>(null);
+  /** Phần tử đang nhận hover ở State 1 (`petal` hoặc `"center"`); dùng để làm mờ
+   *  các phần tử còn lại theo hiệu ứng hội tụ trường nét giống State 2/3. */
+  const [hoveredId, setHoveredId] = useState<PetalActionId | "center" | null>(null);
 
   useEffect(() => {
     if (!armed) {
@@ -144,7 +146,10 @@ export function HexWheelBrandEmblem({ armed = false, onOpenWheel }: HexWheelBran
                       opacity: dimmed ? 0.28 : 1,
                       filter: dimmed ? "saturate(0.5)" : undefined
                     }}
-                    onMouseEnter={() => setHoveredId(petal.id)}
+                    onMouseEnter={() => {
+                      setHoveredId(petal.id);
+                      playPetalHoverTick();
+                    }}
                     onMouseLeave={() => setHoveredId((current) => (current === petal.id ? null : current))}
                     onClick={(event) => {
                       event.stopPropagation();
@@ -185,6 +190,8 @@ export function HexWheelBrandEmblem({ armed = false, onOpenWheel }: HexWheelBran
             transition: "transform 0.12s cubic-bezier(0.2, 0, 0, 1)"
           }}
           onClick={() => onOpenWheel?.()}
+          onMouseEnter={() => setHoveredId("center")}
+          onMouseLeave={() => setHoveredId(null)}
         >
           <HexagonShape
             radius={EMBLEM_RADIUS}
