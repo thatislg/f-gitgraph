@@ -150,7 +150,9 @@ export function HexWheelBrandEmblem({ armed = false, onOpenWheel }: HexWheelBran
                       setHoveredId(petal.id);
                       playPetalHoverTick();
                     }}
-                    onMouseLeave={() => setHoveredId((current) => (current === petal.id ? null : current))}
+                    onMouseLeave={() =>
+                      setHoveredId((current) => (current === petal.id ? null : current))
+                    }
                     onClick={(event) => {
                       event.stopPropagation();
                       executePetalAction(petal.id);

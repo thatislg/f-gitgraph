@@ -2,6 +2,7 @@ import { computed, signal } from "@preact/signals";
 
 import type { StashRecord, SyncStatusResult } from "@/types";
 import { runAction } from "@/webview/lib/actions";
+import { startOperation } from "@/webview/lib/stores/loading.store";
 
 /**
  * Kho trạng thái đồng bộ mạng (Sync) của thanh công cụ đỉnh, mô hình hóa theo kiến
@@ -91,6 +92,7 @@ export function fetch(prune = true): void {
     return;
   }
   isFetching.value = true;
+  startOperation("fetch");
   runAction({ command: "fetchAll", prune });
 }
 
@@ -100,6 +102,7 @@ export function pull(mode: "merge" | "rebase" = "merge"): void {
     return;
   }
   isPulling.value = true;
+  startOperation("pull");
   runAction({ command: "pull", mode });
 }
 
@@ -109,6 +112,7 @@ export function push(forceWithLease = false): void {
     return;
   }
   isPushing.value = true;
+  startOperation("push");
   runAction({ command: "push", forceWithLease });
 }
 
@@ -118,6 +122,7 @@ export function stash(message?: string, includeUntracked = false): void {
     return;
   }
   isStashing.value = true;
+  startOperation("stash");
   runAction(
     message !== undefined
       ? { command: "stashSave", message, includeUntracked }
@@ -131,5 +136,6 @@ export function pop(index = 0): void {
     return;
   }
   isStashing.value = true;
+  startOperation("pop");
   runAction({ command: "stashPop", index });
 }

@@ -14,6 +14,7 @@ Tài liệu này đặc tả chi tiết kiến trúc tầng Backend, quy trình 
 ## 1. Tầm Nhìn, Mục Tiêu & Ranh Giới An Toàn Dữ Liệu 4 Tầng
 
 ### 1.1. Mục Tiêu Cốt Lõi
+
 1. **Nền tảng mạng độc lập và toàn vẹn**: Cho phép F-GitGraph thực thi đầy đủ các tác vụ mạng Git cốt lõi (`fetch`, `pull`, `push`) ngay trong Webview mà không làm gián đoạn luồng hiển thị đồ thị và không phụ thuộc vào terminal ngoài.
 2. **Quản lý ngăn xếp lưu trữ tạm (Stash Management)**: Cung cấp khả năng lưu nhanh (Save), khôi phục (Pop), xóa (Drop) các biến động mã nguồn, bảo vệ cả tệp untracked.
 3. **Bộ đếm lệch đồng bộ siêu tốc (High-Performance Ahead/Behind Counter)**: Tính toán số lượng commit chênh lệch giữa Local Branch và Upstream Branch với thời gian thực thi dưới 50ms, cung cấp dữ liệu tức thời cho các huy hiệu Neon trên Top Toolbar và Sidebar.
@@ -52,6 +53,7 @@ flowchart TD
 ```
 
 ### 1.3. Các Nguyên Tắc An Toàn Bắt Buộc
+
 - **Bảo toàn cơ chế xác thực gốc**: Toàn bộ thao tác kết nối máy chủ từ xa (Remote) phải ủy thác 100% cho tiến trình Git CLI gốc của hệ điều hành. Điều này bảo đảm tự động kế thừa:
   - Trình quản lý chứng thực cá nhân (Git Credential Manager trên Windows / Keychain trên macOS / Secret Service trên Linux).
   - Trình quản lý khóa SSH (SSH Agent, khóa SSH mặc định).
@@ -69,12 +71,12 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 
 ### Bảng Từ Điển Dữ Liệu Đối Tượng Trả Về Chung (`MutatorResult`):
 
-| Tên Trường | Kiểu Dữ Liệu | Mô Tả Ý Nghĩa |
-| :--- | :--- | :--- |
-| `ok` | boolean | Trạng thái thực thi: `true` nếu lệnh thành công (exitCode = 0); `false` nếu lệnh thất bại hoặc phát sinh xung đột. |
+| Tên Trường | Kiểu Dữ Liệu   | Mô Tả Ý Nghĩa                                                                                                        |
+| :--------- | :------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `ok`       | boolean        | Trạng thái thực thi: `true` nếu lệnh thành công (exitCode = 0); `false` nếu lệnh thất bại hoặc phát sinh xung đột.   |
 | `exitCode` | number \| null | Mã thoát của tiến trình (0 khi thành công, số nguyên dương khi thất bại, `null` nếu tiến trình không thể khởi chạy). |
-| `stdout` | string | Toàn bộ dữ liệu xuất ra luồng chuẩn (Standard Output) từ tiến trình Git. |
-| `stderr` | string | Toàn bộ dữ liệu lỗi (Standard Error) từ Git, đã được chuẩn hóa thành tiếng Anh thân thiện nếu `ok === false`. |
+| `stdout`   | string         | Toàn bộ dữ liệu xuất ra luồng chuẩn (Standard Output) từ tiến trình Git.                                             |
+| `stderr`   | string         | Toàn bộ dữ liệu lỗi (Standard Error) từ Git, đã được chuẩn hóa thành tiếng Anh thân thiện nếu `ok === false`.        |
 
 ---
 
@@ -88,13 +90,13 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
   - Khi thành công (`ok = true`): `exitCode = 0`, `stdout` chứa báo cáo danh sách branch/tag được nạp về.
   - Khi thất bại (`ok = false`): `exitCode != 0`, `stderr` chứa thông báo lỗi tiếng Anh đã qua chuẩn hóa (ví dụ lỗi mất mạng, không thể kết nối remote).
 - **Quy Trình Các Bước Xử Lý Cụ Thể**:
-  1. *Bước 1 (Chuẩn bị tham số)*: Khởi tạo mảng tham số gồm hai phần tử `fetch` và `--all`. Nếu `prune === true`, bổ sung thêm cờ `--prune` vào cuối mảng.
-  2. *Bước 2 (Thực thi tiến trình)*: Gọi phương thức nội bộ `this.run(args)` để khởi chạy tiến trình `git` trong thư mục kho làm việc hiện tại (`this.options.repoPath`).
-  3. *Bước 3 (Chuẩn hóa kết quả)*: Đưa đối tượng kết quả qua phương thức `this.normalizeError(result)` để nhận diện và chuyển đổi thông báo lỗi mạng sang tiếng Anh chuẩn mực nếu có.
-  4. *Bước 4 (Trả kết quả)*: Trả về đối tượng `MutatorResult` đã chuẩn hóa.
+  1. _Bước 1 (Chuẩn bị tham số)_: Khởi tạo mảng tham số gồm hai phần tử `fetch` và `--all`. Nếu `prune === true`, bổ sung thêm cờ `--prune` vào cuối mảng.
+  2. _Bước 2 (Thực thi tiến trình)_: Gọi phương thức nội bộ `this.run(args)` để khởi chạy tiến trình `git` trong thư mục kho làm việc hiện tại (`this.options.repoPath`).
+  3. _Bước 3 (Chuẩn hóa kết quả)_: Đưa đối tượng kết quả qua phương thức `this.normalizeError(result)` để nhận diện và chuyển đổi thông báo lỗi mạng sang tiếng Anh chuẩn mực nếu có.
+  4. _Bước 4 (Trả kết quả)_: Trả về đối tượng `MutatorResult` đã chuẩn hóa.
 - **Trường Hợp Biên & Ngoại Lệ**:
   - Khi kho chưa cấu hình bất kỳ remote nào: Git CLI in thông báo rỗng hoặc cảnh báo nhẹ và thoát với mã 0 $\rightarrow$ Phương thức trả về `ok = true`.
-  - Khi mất kết nối mạng: Chuẩn hóa thành thông báo: *"Unable to connect to the remote Git server. Please check your internet connection or remote URL."*
+  - Khi mất kết nối mạng: Chuẩn hóa thành thông báo: _"Unable to connect to the remote Git server. Please check your internet connection or remote URL."_
 
 ---
 
@@ -108,15 +110,15 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
   - Khi thành công (`ok = true`): `exitCode = 0`, `stdout` chứa báo cáo cập nhật fast-forward hoặc `"Already up to date."`.
   - Khi thất bại hoặc xung đột (`ok = false`): `exitCode != 0`, `stderr` chứa thông báo tiếng Anh chuẩn hóa về xung đột hoặc lỗi đè tệp chưa commit.
 - **Quy Trình Các Bước Xử Lý Cụ Thể**:
-  1. *Bước 1 (Xác định cờ lệnh)*:
+  1. _Bước 1 (Xác định cờ lệnh)_:
      - Nếu `mode === "rebase"`: Tạo mảng tham số gồm `pull` và `--rebase`.
      - Nếu `mode === "merge"`: Tạo mảng tham số gồm `pull` và `--no-rebase` (bắt buộc truyền `--no-rebase` để ghi đè trường hợp cấu hình người dùng đặt `pull.rebase = true`).
-  2. *Bước 2 (Thực thi tiến trình)*: Gọi `this.run(args)`.
-  3. *Bước 3 (Kiểm tra xung đột)*:
+  2. _Bước 2 (Thực thi tiến trình)_: Gọi `this.run(args)`.
+  3. _Bước 3 (Kiểm tra xung đột)_:
      - Nếu tiến trình trả về mã thoát khác 0:
-       - Kiểm tra nếu `stdout` hoặc `stderr` chứa từ khóa `CONFLICT`: Xác nhận xảy ra xung đột mã nguồn. Git đã dừng lại ở trạng thái xung đột để người dùng xử lý. Gán `result.stderr` bằng thông điệp tiếng Anh: *"Merge conflict detected. Please resolve conflicts in your working tree."* (nếu merge) hoặc *"Rebase conflict detected. Please resolve conflicts or abort the rebase."* (nếu rebase).
-       - Kiểm tra nếu chứa mẫu chuỗi `Your local changes to the following files would be overwritten`: Gán thông điệp: *"Your local changes would be overwritten by pull. Please commit or stash your changes before pulling."*
-  4. *Bước 4 (Chuẩn hóa & Trả kết quả)*: Gọi `this.normalizeError(result)` và trả về.
+       - Kiểm tra nếu `stdout` hoặc `stderr` chứa từ khóa `CONFLICT`: Xác nhận xảy ra xung đột mã nguồn. Git đã dừng lại ở trạng thái xung đột để người dùng xử lý. Gán `result.stderr` bằng thông điệp tiếng Anh: _"Merge conflict detected. Please resolve conflicts in your working tree."_ (nếu merge) hoặc _"Rebase conflict detected. Please resolve conflicts or abort the rebase."_ (nếu rebase).
+       - Kiểm tra nếu chứa mẫu chuỗi `Your local changes to the following files would be overwritten`: Gán thông điệp: _"Your local changes would be overwritten by pull. Please commit or stash your changes before pulling."_
+  4. _Bước 4 (Chuẩn hóa & Trả kết quả)_: Gọi `this.normalizeError(result)` và trả về.
 - **Trường Hợp Biên & Ngoại Lệ**:
   - Tuyệt đối không tự động kích hoạt `git merge --abort` hay `git rebase --abort` khi có xung đột, nhằm bảo tồn trạng thái tệp xung đột cho Webview hiển thị.
 
@@ -128,31 +130,31 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 - **Đặc Tả Đầu Vào (Input)**:
   - Tham số `options`: Đối tượng tùy chọn, có cấu trúc chi tiết như bảng sau:
 
-| Tên Thuộc Tính | Kiểu Dữ Liệu | Bắt Buộc? | Mặc Định | Mô Tả Ý Nghĩa |
-| :--- | :--- | :---: | :---: | :--- |
-| `forceWithLease` | boolean | Không | `false` | Bật cờ `--force-with-lease` ép đẩy an toàn |
-| `remote` | string | Không | `undefined` | Tên remote đích (ví dụ `"origin"`) |
-| `branch` | string | Không | `undefined` | Tên nhánh đích (ví dụ `"main"`) |
-| `setUpstream` | boolean | Không | `false` | Bật cờ `-u` (`--set-upstream`) khi nhánh chưa liên kết |
+| Tên Thuộc Tính   | Kiểu Dữ Liệu | Bắt Buộc? |  Mặc Định   | Mô Tả Ý Nghĩa                                          |
+| :--------------- | :----------- | :-------: | :---------: | :----------------------------------------------------- |
+| `forceWithLease` | boolean      |   Không   |   `false`   | Bật cờ `--force-with-lease` ép đẩy an toàn             |
+| `remote`         | string       |   Không   | `undefined` | Tên remote đích (ví dụ `"origin"`)                     |
+| `branch`         | string       |   Không   | `undefined` | Tên nhánh đích (ví dụ `"main"`)                        |
+| `setUpstream`    | boolean      |   Không   |   `false`   | Bật cờ `-u` (`--set-upstream`) khi nhánh chưa liên kết |
 
 - **Đặc Tả Đầu Ra (Output)**:
   - Khi thành công (`ok = true`): `exitCode = 0`, `stdout`/`stderr` chứa báo cáo cập nhật ref từ Git.
   - Khi thất bại (`ok = false`): `exitCode != 0`, `stderr` chứa thông báo tiếng Anh chuẩn hóa về lỗi từ chối đẩy (non-fast-forward rejected) hoặc lỗi quyền truy cập.
 - **Quy Trình Các Bước Xử Lý Cụ Thể**:
-  1. *Bước 1 (Khởi tạo mảng tham số)*: Bắt đầu với mảng chứa một phần tử duy nhất `push`.
-  2. *Bước 2 (Ghép cờ an toàn & upstream)*:
+  1. _Bước 1 (Khởi tạo mảng tham số)_: Bắt đầu với mảng chứa một phần tử duy nhất `push`.
+  2. _Bước 2 (Ghép cờ an toàn & upstream)_:
      - Nếu `options.forceWithLease === true`: Thêm phần tử `"--force-with-lease"`.
      - Nếu `options.setUpstream === true`: Thêm phần tử `"-u"`.
-  3. *Bước 3 (Xác thực refname)*:
+  3. _Bước 3 (Xác thực refname)_:
      - Nếu có truyền cả `remote` và `branch`:
        - Gọi `this.isValidRefName(options.branch, "branch")`. Nếu không hợp lệ, dừng ngay và trả về `{ ok: false, exitCode: null, stdout: "", stderr: "Invalid branch name: " + options.branch }`.
        - Thêm `options.remote` và `options.branch` vào mảng tham số.
      - Nếu không truyền remote/branch: Giữ nguyên lệnh `git push` để Git tự đẩy nhánh hiện tại theo cấu hình mặc định.
-  4. *Bước 4 (Thực thi & Chuẩn hóa)*:
+  4. _Bước 4 (Thực thi & Chuẩn hóa)_:
      - Gọi `this.run(args)`.
      - Chuyển qua `this.normalizeError(result)`.
-     - Nếu phát hiện lỗi `[rejected]` (non-fast-forward): Gán thông điệp: *"Push rejected: the remote branch contains work that you do not have locally. Please pull before pushing."*
-  5. *Bước 5 (Trả kết quả)*: Trả về đối tượng `MutatorResult`.
+     - Nếu phát hiện lỗi `[rejected]` (non-fast-forward): Gán thông điệp: _"Push rejected: the remote branch contains work that you do not have locally. Please pull before pushing."_
+  5. _Bước 5 (Trả kết quả)_: Trả về đối tượng `MutatorResult`.
 
 ---
 
@@ -166,11 +168,11 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
   - Khi thành công (`ok = true`): `exitCode = 0`, `stdout` chứa xác nhận lưu stash hoặc `"No local changes to save"`.
   - Khi thất bại (`ok = false`): `exitCode != 0`, `stderr` chứa thông báo lỗi.
 - **Quy Trình Các Bước Xử Lý Cụ Thể**:
-  1. *Bước 1 (Tạo mảng tham số gốc)*: Khởi tạo mảng chứa `stash` và `push`.
-  2. *Bước 2 (Thêm cờ untracked)*: Nếu `includeUntracked === true`, thêm cờ `"-u"`.
-  3. *Bước 3 (Thêm thông điệp mô tả)*: Nếu `message` tồn tại và sau khi cắt khoảng trắng có độ dài lớn hơn 0, thêm cờ `"-m"` và giá trị chuỗi đã cắt khoảng trắng.
-  4. *Bước 4 (Ký tự phân cách an toàn)*: Bổ sung phần tử `"--"` vào cuối mảng tham số.
-  5. *Bước 5 (Thực thi)*: Gọi `this.run(args)`. Nếu Git trả về `No local changes to save` với mã thoát 0, vẫn ghi nhận `ok = true`. Chuyển tiếp qua `this.normalizeError(result)` và trả về.
+  1. _Bước 1 (Tạo mảng tham số gốc)_: Khởi tạo mảng chứa `stash` và `push`.
+  2. _Bước 2 (Thêm cờ untracked)_: Nếu `includeUntracked === true`, thêm cờ `"-u"`.
+  3. _Bước 3 (Thêm thông điệp mô tả)_: Nếu `message` tồn tại và sau khi cắt khoảng trắng có độ dài lớn hơn 0, thêm cờ `"-m"` và giá trị chuỗi đã cắt khoảng trắng.
+  4. _Bước 4 (Ký tự phân cách an toàn)_: Bổ sung phần tử `"--"` vào cuối mảng tham số.
+  5. _Bước 5 (Thực thi)_: Gọi `this.run(args)`. Nếu Git trả về `No local changes to save` với mã thoát 0, vẫn ghi nhận `ok = true`. Chuyển tiếp qua `this.normalizeError(result)` và trả về.
 
 ---
 
@@ -184,12 +186,12 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
   - Khi thành công (`ok = true`): `exitCode = 0`, `stdout` chứa danh sách tệp được khôi phục và dòng xác nhận xóa bản stash khỏi ngăn xếp.
   - Khi thất bại / xung đột (`ok = false`): `exitCode != 0`, `stderr` chứa thông báo lỗi tiếng Anh chuẩn hóa.
 - **Quy Trình Các Bước Xử Lý Cụ Thể**:
-  1. *Bước 1 (Chuẩn hóa selector)*: Tạo chuỗi định danh bản stash mục tiêu: `"stash@{" + validIndex + "}"`.
-  2. *Bước 2 (Thực thi)*: Gọi `this.run(["stash", "pop", targetStash])`.
-  3. *Bước 3 (Bắt lỗi chuyên biệt)*:
-     - Nếu lỗi chứa một trong các chuỗi `is not a valid reference`, `is not a stash-like commit` hoặc `No stash entries found`: Gán thông báo tiếng Anh: *"Stash entry 'stash@{" + validIndex + "}' does not exist or has already been dropped."*
-     - Nếu phát hiện `CONFLICT`: Gán thông báo: *"Conflict encountered while applying stash. Stash entry was preserved."*
-  4. *Bước 4 (Chuẩn hóa & Trả kết quả)*: Gọi `this.normalizeError(result)` và trả về.
+  1. _Bước 1 (Chuẩn hóa selector)_: Tạo chuỗi định danh bản stash mục tiêu: `"stash@{" + validIndex + "}"`.
+  2. _Bước 2 (Thực thi)_: Gọi `this.run(["stash", "pop", targetStash])`.
+  3. _Bước 3 (Bắt lỗi chuyên biệt)_:
+     - Nếu lỗi chứa một trong các chuỗi `is not a valid reference`, `is not a stash-like commit` hoặc `No stash entries found`: Gán thông báo tiếng Anh: _"Stash entry 'stash@{" + validIndex + "}' does not exist or has already been dropped."_
+     - Nếu phát hiện `CONFLICT`: Gán thông báo: _"Conflict encountered while applying stash. Stash entry was preserved."_
+  4. _Bước 4 (Chuẩn hóa & Trả kết quả)_: Gọi `this.normalizeError(result)` và trả về.
 
 ---
 
@@ -202,9 +204,9 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
   - Khi thành công (`ok = true`): `exitCode = 0`, `stdout` chứa xác nhận đã xóa bản stash.
   - Khi thất bại (`ok = false`): `exitCode != 0`, `stderr` chứa thông báo lỗi bản stash không tồn tại.
 - **Quy Trình Các Bước Xử Lý Cụ Thể**:
-  1. *Bước 1 (Chuẩn hóa selector)*: Tạo chuỗi `"stash@{" + validIndex + "}"`.
-  2. *Bước 2 (Thực thi)*: Gọi `this.run(["stash", "drop", targetStash])`.
-  3. *Bước 3 (Chuẩn hóa)*: Gọi `this.normalizeError(result)` và trả về kết quả.
+  1. _Bước 1 (Chuẩn hóa selector)_: Tạo chuỗi `"stash@{" + validIndex + "}"`.
+  2. _Bước 2 (Thực thi)_: Gọi `this.run(["stash", "drop", targetStash])`.
+  3. _Bước 3 (Chuẩn hóa)_: Gọi `this.normalizeError(result)` và trả về kết quả.
 
 ---
 
@@ -220,12 +222,12 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 
 #### Bảng Từ Điển Dữ Liệu Đối Tượng Trả Về (`SyncStatusResult`):
 
-| Tên Thuộc Tính | Kiểu Dữ Liệu | Ràng Buộc / Miền Giá Trị | Mô Tả Ý Nghĩa |
-| :--- | :--- | :---: | :--- |
-| `ahead` | number | Số nguyên $\ge 0$ | Số lượng commit cục bộ đã tạo nhưng chưa đẩy lên remote |
-| `behind` | number | Số nguyên $\ge 0$ | Số lượng commit mới trên remote mà máy cục bộ chưa kéo về |
-| `upstream` | string \| null | Chuỗi ref hoặc `null` | Tên nhánh remote tracking tương ứng (ví dụ `"origin/main"`) |
-| `isDetached` | boolean | `true` hoặc `false` | Đánh dấu kho có đang ở trạng thái Detached HEAD hay không |
+| Tên Thuộc Tính | Kiểu Dữ Liệu   | Ràng Buộc / Miền Giá Trị | Mô Tả Ý Nghĩa                                               |
+| :------------- | :------------- | :----------------------: | :---------------------------------------------------------- |
+| `ahead`        | number         |    Số nguyên $\ge 0$     | Số lượng commit cục bộ đã tạo nhưng chưa đẩy lên remote     |
+| `behind`       | number         |    Số nguyên $\ge 0$     | Số lượng commit mới trên remote mà máy cục bộ chưa kéo về   |
+| `upstream`     | string \| null |  Chuỗi ref hoặc `null`   | Tên nhánh remote tracking tương ứng (ví dụ `"origin/main"`) |
+| `isDetached`   | boolean        |   `true` hoặc `false`    | Đánh dấu kho có đang ở trạng thái Detached HEAD hay không   |
 
 #### Quy Trình Xử Lý Thuật Toán 3 Bước Chi Tiết:
 
@@ -265,18 +267,18 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 
 #### Bảng Từ Điển Dữ Liệu Đối Tượng Bản Ghi Stash (`StashRecord`):
 
-| Tên Thuộc Tính | Kiểu Dữ Liệu | Ràng Buộc | Mô Tả Ý Nghĩa |
-| :--- | :--- | :---: | :--- |
-| `index` | number | Số nguyên $\ge 0$ | Chỉ số thứ tự của bản stash trong ngăn xếp (0 là mới nhất) |
-| `hash` | string | Chuỗi Hex 7 ký tự | Mã băm commit rút gọn đại diện cho bản stash |
-| `message` | string | Chuỗi UTF-8 | Tiêu đề thông điệp tóm tắt của bản stash |
-| `date` | string | Chuỗi thời gian | Thời gian tạo tương đối (ví dụ `"10 minutes ago"`) |
+| Tên Thuộc Tính | Kiểu Dữ Liệu |     Ràng Buộc     | Mô Tả Ý Nghĩa                                              |
+| :------------- | :----------- | :---------------: | :--------------------------------------------------------- |
+| `index`        | number       | Số nguyên $\ge 0$ | Chỉ số thứ tự của bản stash trong ngăn xếp (0 là mới nhất) |
+| `hash`         | string       | Chuỗi Hex 7 ký tự | Mã băm commit rút gọn đại diện cho bản stash               |
+| `message`      | string       |    Chuỗi UTF-8    | Tiêu đề thông điệp tóm tắt của bản stash                   |
+| `date`         | string       |  Chuỗi thời gian  | Thời gian tạo tương đối (ví dụ `"10 minutes ago"`)         |
 
 #### Bảng Đối Tượng Kết Quả (`StashListResult`):
 
-| Tên Thuộc Tính | Kiểu Dữ Liệu | Mô Tả Ý Nghĩa |
-| :--- | :--- | :--- |
-| `stashes` | Mảng các đối tượng `StashRecord` | Danh sách toàn bộ các bản lưu trữ tạm sắp xếp từ mới nhất đến cũ nhất |
+| Tên Thuộc Tính | Kiểu Dữ Liệu                     | Mô Tả Ý Nghĩa                                                         |
+| :------------- | :------------------------------- | :-------------------------------------------------------------------- |
+| `stashes`      | Mảng các đối tượng `StashRecord` | Danh sách toàn bộ các bản lưu trữ tạm sắp xếp từ mới nhất đến cũ nhất |
 
 #### Quy Trình Xử Lý Thuật Toán Bóc Tách Byte NUL Chi Tiết:
 
@@ -290,10 +292,10 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
    - Tách chuỗi `stdout` thành mảng các dòng bằng ký tự ngắt dòng `\n`.
    - Lặp qua từng dòng (bỏ qua các dòng rỗng):
      - Tách dòng hiện tại thành mảng các token phân cách bởi byte NUL (`\0`).
-     - *Trích xuất chỉ số index*: Đọc `tokens[0]` (có dạng `stash@{N}`). Sử dụng biểu thức chính quy `^stash@\{(\d+)\}$`. Nếu khớp, ép kiểu `parseInt(match[1], 10)`; nếu không khớp, sử dụng chỉ số vòng lặp hiện tại.
-     - *Trích xuất mã hash*: Đọc `tokens[1]`, cắt khoảng trắng đầu cuối.
-     - *Trích xuất thông điệp message*: Đọc `tokens[2]`, cắt khoảng trắng đầu cuối (bảo toàn nguyên vẹn Unicode tiếng Việt).
-     - *Trích xuất thời gian date*: Đọc `tokens[3]`, cắt khoảng trắng đầu cuối.
+     - _Trích xuất chỉ số index_: Đọc `tokens[0]` (có dạng `stash@{N}`). Sử dụng biểu thức chính quy `^stash@\{(\d+)\}$`. Nếu khớp, ép kiểu `parseInt(match[1], 10)`; nếu không khớp, sử dụng chỉ số vòng lặp hiện tại.
+     - _Trích xuất mã hash_: Đọc `tokens[1]`, cắt khoảng trắng đầu cuối.
+     - _Trích xuất thông điệp message_: Đọc `tokens[2]`, cắt khoảng trắng đầu cuối (bảo toàn nguyên vẹn Unicode tiếng Việt).
+     - _Trích xuất thời gian date_: Đọc `tokens[3]`, cắt khoảng trắng đầu cuối.
      - Tạo đối tượng `StashRecord` và đẩy vào mảng `stashes`.
 4. **Bước 4 (Trả kết quả)**:
    - Trả về đối tượng `{ stashes }`.
@@ -311,18 +313,18 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 
 #### Bảng Từ Điển Dữ Liệu Tham Số Đầu Vào (`ListTagsInput`):
 
-| Tên Thuộc Tính | Kiểu Dữ Liệu | Bắt Buộc? | Mặc Định | Ràng Buộc & Mô Tả Ý Nghĩa |
-| :--- | :--- | :---: | :---: | :--- |
-| `sort` | string | Không | `"creatordate"` | Tiêu chí sắp xếp: `"creatordate"` (mốc mới nhất lên đầu qua cờ `--sort=-creatordate`) hoặc `"name"` (theo thứ tự từ điển A-Z). |
+| Tên Thuộc Tính | Kiểu Dữ Liệu | Bắt Buộc? |    Mặc Định     | Ràng Buộc & Mô Tả Ý Nghĩa                                                                                                      |
+| :------------- | :----------- | :-------: | :-------------: | :----------------------------------------------------------------------------------------------------------------------------- |
+| `sort`         | string       |   Không   | `"creatordate"` | Tiêu chí sắp xếp: `"creatordate"` (mốc mới nhất lên đầu qua cờ `--sort=-creatordate`) hoặc `"name"` (theo thứ tự từ điển A-Z). |
 
 - **Đặc Tả Đầu Ra (Output)**:
   - Trả về đối tượng `TagListResult` (được định nghĩa trực tiếp tại `src/types/queries.ts` chuẩn Contract-First).
 
 #### Bảng Đối Tượng Kết Quả (`TagListResult`):
 
-| Tên Thuộc Tính | Kiểu Dữ Liệu | Ràng Buộc | Mô Tả Ý Nghĩa |
-| :--- | :--- | :---: | :--- |
-| `tags` | Mảng các chuỗi (`Array<string>`) | Phần tử không rỗng, không chứa khoảng trắng thừa | Danh sách tên toàn bộ các release tag trong kho (ví dụ `["v1.1.0", "v1.0.0", "v0.9.0"]`), tương thích trực tiếp 100% với prop `tags` của `SidebarNavigator.tsx`. |
+| Tên Thuộc Tính | Kiểu Dữ Liệu                     |                    Ràng Buộc                     | Mô Tả Ý Nghĩa                                                                                                                                                    |
+| :------------- | :------------------------------- | :----------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tags`         | Mảng các chuỗi (`Array<string>`) | Phần tử không rỗng, không chứa khoảng trắng thừa | Danh sách tên toàn bộ các release tag trong kho (ví dụ `["v1.1.0", "v1.0.0", "v0.9.0"]`), tương thích trực tiếp 100% với prop `tags` của `SidebarNavigator.tsx`. |
 
 #### Quy Trình Xử Lý Thuật Toán Bóc Tách Chi Tiết:
 
@@ -347,6 +349,7 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
    - Trả về đối tượng `{ tags }`.
 
 #### Trường Hợp Biên & Ranh Giới An Toàn:
+
 - **Kho chưa có tag nào**: `git tag --list` trả về chuỗi rỗng $\rightarrow$ Kết quả là `{ tags: [] }`, giao diện Sidebar tự động hiển thị nhãn `No tags` (Design 07 Mục 2.1).
 - **Tag phân cấp thư mục (Hierarchical Tags)**: Các tag có cấu trúc thư mục như `release/v1.0.0` hoặc `build/2026-10-19` được giữ nguyên vẹn chuỗi, không bị hiểu nhầm thành nhánh remote.
 - **Tag chứa ký tự đặc biệt**: Tag có tiền tố `v`, ký tự gạch dưới, dấu gạch ngang, dấu cộng (ví dụ `v1.0.0+build123`) được bảo toàn tuyệt đối.
@@ -358,16 +361,16 @@ Mọi phương thức ghi trong `GitCliMutator` bắt buộc tuân thủ chuẩn
 
 Toàn bộ thông báo lỗi trả về cho tầng Giao diện Webview **bắt buộc sử dụng tiếng Anh chuẩn mực làm ngôn ngữ chính thức**. Bảng đối chiếu quy tắc nhận diện chuỗi và câu thông báo chuẩn hóa:
 
-| STT | Chuỗi Nhận Diện Trong `stderr` / `stdout` Của Git | Thông Báo Chuẩn Hóa Tiếng Anh Trả Về UI (Official UI Error) | Giải Thích Nghiệp Vụ (Tham Khảo Kỹ Thuật) |
-| :-: | :--- | :--- | :--- |
-| 1 | `Could not resolve host` / `Failed to connect` / `Network is unreachable` | *"Unable to connect to the remote Git server. Please check your internet connection or remote URL."* | Lỗi mất mạng Internet hoặc sai địa chỉ máy chủ remote. |
-| 2 | `Permission denied (publickey)` / `Authentication failed` / `Invalid username or password` | *"Git authentication failed. Please verify your SSH key or Personal Access Token."* | Lỗi sai thông tin đăng nhập hoặc SSH key bị máy chủ từ chối. |
-| 3 | `[rejected]` ... `(non-fast-forward)` / `Updates were rejected because the remote contains work` | *"Push rejected: the remote branch contains work that you do not have locally. Please pull before pushing."* | Lỗi remote đã có commit mới hơn, bắt buộc pull về trước. |
-| 4 | `CONFLICT (content): Merge conflict in` / `Automatic merge failed; fix conflicts` | *"Merge conflict detected. Please resolve conflicts in your working tree."* | Xung đột nội dung tệp khi chạy lệnh Pull ở chế độ Merge. |
-| 5 | `error: could not apply` / `Resolve all conflicts manually` | *"Rebase conflict detected. Please resolve conflicts or abort the rebase."* | Xung đột nội dung tệp khi chạy lệnh Pull ở chế độ Rebase. |
-| 6 | `error: Your local changes to the following files would be overwritten by merge` | *"Your local changes would be overwritten by pull. Please commit or stash your changes before pulling."* | Có tệp chưa commit bị trùng với tệp pull về. |
-| 7 | `error: stash@{N} is not a valid reference` / `fatal: 'stash@{` ... `}' is not a stash-like commit` / `No stash entries found` | *"The specified stash entry does not exist or has already been dropped."* | Chỉ số stash yêu cầu pop hoặc drop không tồn tại trong ngăn xếp. |
-| 8 | `Another git process seems to be running` / `index.lock': File exists` | *"The repository is locked by another Git process. Please wait a few seconds or check your terminal."* | Xung đột tệp khóa `.git/index.lock` do tiến trình Git khác đang chạy. |
+| STT | Chuỗi Nhận Diện Trong `stderr` / `stdout` Của Git                                                                              | Thông Báo Chuẩn Hóa Tiếng Anh Trả Về UI (Official UI Error)                                                  | Giải Thích Nghiệp Vụ (Tham Khảo Kỹ Thuật)                             |
+| :-: | :----------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------- |
+|  1  | `Could not resolve host` / `Failed to connect` / `Network is unreachable`                                                      | _"Unable to connect to the remote Git server. Please check your internet connection or remote URL."_         | Lỗi mất mạng Internet hoặc sai địa chỉ máy chủ remote.                |
+|  2  | `Permission denied (publickey)` / `Authentication failed` / `Invalid username or password`                                     | _"Git authentication failed. Please verify your SSH key or Personal Access Token."_                          | Lỗi sai thông tin đăng nhập hoặc SSH key bị máy chủ từ chối.          |
+|  3  | `[rejected]` ... `(non-fast-forward)` / `Updates were rejected because the remote contains work`                               | _"Push rejected: the remote branch contains work that you do not have locally. Please pull before pushing."_ | Lỗi remote đã có commit mới hơn, bắt buộc pull về trước.              |
+|  4  | `CONFLICT (content): Merge conflict in` / `Automatic merge failed; fix conflicts`                                              | _"Merge conflict detected. Please resolve conflicts in your working tree."_                                  | Xung đột nội dung tệp khi chạy lệnh Pull ở chế độ Merge.              |
+|  5  | `error: could not apply` / `Resolve all conflicts manually`                                                                    | _"Rebase conflict detected. Please resolve conflicts or abort the rebase."_                                  | Xung đột nội dung tệp khi chạy lệnh Pull ở chế độ Rebase.             |
+|  6  | `error: Your local changes to the following files would be overwritten by merge`                                               | _"Your local changes would be overwritten by pull. Please commit or stash your changes before pulling."_     | Có tệp chưa commit bị trùng với tệp pull về.                          |
+|  7  | `error: stash@{N} is not a valid reference` / `fatal: 'stash@{` ... `}' is not a stash-like commit` / `No stash entries found` | _"The specified stash entry does not exist or has already been dropped."_                                    | Chỉ số stash yêu cầu pop hoặc drop không tồn tại trong ngăn xếp.      |
+|  8  | `Another git process seems to be running` / `index.lock': File exists`                                                         | _"The repository is locked by another Git process. Please wait a few seconds or check your terminal."_       | Xung đột tệp khóa `.git/index.lock` do tiến trình Git khác đang chạy. |
 
 ---
 
@@ -377,24 +380,24 @@ Hợp đồng dữ liệu giao tiếp giữa Webview và Extension Host được
 
 ### 5.1. Bảng Đặc Tả Hợp Đồng Action Requests (`src/types/actions.ts`)
 
-| Tên Action | Danh Sách Thuộc Tính Payload | Kiểu Dữ Liệu | Bắt Buộc? | Quy Tắc Kiểm Định (Validation) & Mô Tả |
-| :--- | :--- | :--- | :---: | :--- |
-| **`fetchAll`** | `prune` | boolean | Có | Bắt buộc kiểu boolean. Khi `true`, dọn dẹp các tracking branch đã bị xóa trên remote. |
-| **`pull`** | `mode` | string | Có | Chỉ chấp nhận giá trị chuỗi `"merge"` hoặc `"rebase"`. |
-| **`push`** | `forceWithLease`<br>`remote`<br>`branch`<br>`setUpstream` | boolean<br>string<br>string<br>boolean | Không<br>Không<br>Không<br>Không | Tùy chọn ép đẩy an toàn; tên remote và branch đích; cờ đặt upstream `-u`. |
-| **`stashSave`** | `message`<br>`includeUntracked` | string<br>boolean | Không<br>Có | Nội dung mô tả bản stash; cờ bắt buộc xác định có lưu tệp untracked hay không. |
-| **`stashPop`** | `index` | number | Có | Số nguyên không âm ($\ge 0$) chỉ định vị trí bản stash cần khôi phục. |
-| **`stashDrop`** | `index` | number | Có | Số nguyên không âm ($\ge 0$) chỉ định vị trí bản stash cần xóa bỏ. |
+| Tên Action      | Danh Sách Thuộc Tính Payload                              | Kiểu Dữ Liệu                           |            Bắt Buộc?             | Quy Tắc Kiểm Định (Validation) & Mô Tả                                                |
+| :-------------- | :-------------------------------------------------------- | :------------------------------------- | :------------------------------: | :------------------------------------------------------------------------------------ |
+| **`fetchAll`**  | `prune`                                                   | boolean                                |                Có                | Bắt buộc kiểu boolean. Khi `true`, dọn dẹp các tracking branch đã bị xóa trên remote. |
+| **`pull`**      | `mode`                                                    | string                                 |                Có                | Chỉ chấp nhận giá trị chuỗi `"merge"` hoặc `"rebase"`.                                |
+| **`push`**      | `forceWithLease`<br>`remote`<br>`branch`<br>`setUpstream` | boolean<br>string<br>string<br>boolean | Không<br>Không<br>Không<br>Không | Tùy chọn ép đẩy an toàn; tên remote và branch đích; cờ đặt upstream `-u`.             |
+| **`stashSave`** | `message`<br>`includeUntracked`                           | string<br>boolean                      |           Không<br>Có            | Nội dung mô tả bản stash; cờ bắt buộc xác định có lưu tệp untracked hay không.        |
+| **`stashPop`**  | `index`                                                   | number                                 |                Có                | Số nguyên không âm ($\ge 0$) chỉ định vị trí bản stash cần khôi phục.                 |
+| **`stashDrop`** | `index`                                                   | number                                 |                Có                | Số nguyên không âm ($\ge 0$) chỉ định vị trí bản stash cần xóa bỏ.                    |
 
 ---
 
 ### 5.2. Bảng Đặc Tả Hợp Đồng Query Requests (`src/types/queries.ts`)
 
-| Tên Query | Cấu Trúc Tham Số Yêu Cầu (Request) | Cấu Trúc Dữ Liệu Phản Hồi (Response) | Mô Tả Nghiệp Vụ |
-| :--- | :--- | :--- | :--- |
-| **`syncStatus`** | `repo`: string (đường dẫn kho) | `ahead`: number ($\ge 0$)<br>`behind`: number ($\ge 0$)<br>`upstream`: string \| null<br>`isDetached`: boolean | Truy vấn số đếm chênh lệch commit giữa HEAD và nhánh upstream theo dõi. |
-| **`stashList`** | `repo`: string (đường dẫn kho) | `stashes`: Mảng các đối tượng gồm:<br>- `index`: number<br>- `hash`: string<br>- `message`: string<br>- `date`: string | Truy vấn toàn bộ danh sách các bản lưu trữ tạm trong kho mã nguồn. |
-| **`listTags`** | `repo`: string (đường dẫn kho)<br>`sort`?: `"creatordate"` \| `"name"` | `tags`: Mảng các chuỗi (`Array<string>`) | Truy vấn toàn bộ danh sách tên các release tag trong kho mã nguồn, cung cấp dữ liệu trực tiếp cho Sidebar Navigator (Design 07). |
+| Tên Query        | Cấu Trúc Tham Số Yêu Cầu (Request)                                     | Cấu Trúc Dữ Liệu Phản Hồi (Response)                                                                                   | Mô Tả Nghiệp Vụ                                                                                                                  |
+| :--------------- | :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
+| **`syncStatus`** | `repo`: string (đường dẫn kho)                                         | `ahead`: number ($\ge 0$)<br>`behind`: number ($\ge 0$)<br>`upstream`: string \| null<br>`isDetached`: boolean         | Truy vấn số đếm chênh lệch commit giữa HEAD và nhánh upstream theo dõi.                                                          |
+| **`stashList`**  | `repo`: string (đường dẫn kho)                                         | `stashes`: Mảng các đối tượng gồm:<br>- `index`: number<br>- `hash`: string<br>- `message`: string<br>- `date`: string | Truy vấn toàn bộ danh sách các bản lưu trữ tạm trong kho mã nguồn.                                                               |
+| **`listTags`**   | `repo`: string (đường dẫn kho)<br>`sort`?: `"creatordate"` \| `"name"` | `tags`: Mảng các chuỗi (`Array<string>`)                                                                               | Truy vấn toàn bộ danh sách tên các release tag trong kho mã nguồn, cung cấp dữ liệu trực tiếp cho Sidebar Navigator (Design 07). |
 
 ---
 
@@ -421,21 +424,21 @@ Trong bộ điều phối tin nhắn trung tâm `src/extension/services/messageH
 
 Mọi tệp kiểm thử cho Nhóm Việc 1 bắt buộc đặt tên với đuôi `*.test.ts`, vận hành độc lập trên runner `vitest` và chạy thử nghiệm trên repository Git thật được khởi tạo trong thư mục tạm (`tmpdir`):
 
-| Tệp Kiểm Thử Độc Lập | Module Mục Tiêu | Kịch Bản Kiểm Thử Chi Tiết Bắt Buộc |
-| :--- | :--- | :--- |
-| `tests/backend/mutator/syncMutator.test.ts` | `src/extension/mutator/gitCliMutator.ts` | 1. **`fetchAll`**: Tạo remote giả lập cục bộ, thực thi `fetchAll(true)`, xác nhận cờ `--prune` hoạt động và trả về `ok: true`.<br>2. **`pull` Merge**: Khởi tạo commit trên upstream, gọi `pull('merge')`, xác nhận commit mới được tích hợp vào HEAD.<br>3. **`pull` Rebase**: Tạo lịch sử phân nhánh, gọi `pull('rebase')`, xác nhận lịch sử commit được xếp thẳng hàng.<br>4. **`pull` Xung đột**: Giả lập sửa cùng 1 dòng trên cả local và remote, gọi `pull('merge')`, xác nhận trả về `ok: false` kèm thông điệp chuẩn hóa tiếng Anh về merge conflict.<br>5. **`push` Thường & Force-with-lease**: Thực thi push thành công commit mới; giả lập commit remote bị lệch, xác nhận `--force-with-lease` bảo vệ và báo lỗi `non-fast-forward` chuẩn hóa tiếng Anh.<br>6. **`stashSave` / `stashPop` / `stashDrop`**: Sửa tệp tracked và tạo tệp untracked, gọi `stashSave("test stash", true)`, xác nhận working tree sạch sẽ 100%; sau đó gọi `stashPop(0)` xác nhận toàn bộ tệp và nội dung khôi phục nguyên vẹn; gọi `stashDrop(0)` xác nhận xóa bản stash. |
-| `tests/backend/queries/syncStatus.test.ts` | `src/backend/queries/syncStatus.ts` | 1. **Kho đồng bộ sạch sẽ**: Nhánh local trùng khớp commit với upstream $\rightarrow$ `ahead = 0, behind = 0, upstream = 'origin/main', isDetached = false`.<br>2. **Nhánh có commit chờ đẩy**: Tạo 3 commit cục bộ $\rightarrow$ `ahead = 3, behind = 0`.<br>3. **Nhánh chậm hơn remote**: Tạo 2 commit trên remote chưa pull $\rightarrow$ `ahead = 0, behind = 2`.<br>4. **Nhánh vừa ahead vừa behind**: Tạo 2 commit local và 3 commit remote $\rightarrow$ `ahead = 2, behind = 3`.<br>5. **Nhánh chưa có upstream**: Tạo nhánh mới không đặt cờ `-u` $\rightarrow$ `upstream = null, ahead = 0, behind = 0`.<br>6. **Trạng thái Detached HEAD**: `git checkout <commitHash>` $\rightarrow$ `isDetached = true`. |
-| `tests/backend/queries/stashList.test.ts` | `src/backend/queries/stashList.ts` | 1. **Danh sách rỗng**: Kho chưa có stash nào $\rightarrow$ Trả về mảng rỗng `[]`.<br>2. **Danh sách nhiều stash**: Cất lần lượt 3 stash với các thông điệp có dấu $\rightarrow$ Bóc tách chính xác 3 phần tử với đúng thứ tự index 0, 1, 2, đúng chuỗi thông điệp và thời gian tương đối.<br>3. **Ký tự đặc biệt**: Thông điệp chứa dấu nháy kép, dấu hai chấm, dấu tab $\rightarrow$ Bóc tách NUL-delimiter không bị gãy chuỗi. |
-| `tests/backend/queries/listTags.test.ts` | `src/backend/queries/listTags.ts` | 1. **Kho chưa có tag nào**: Kho mới tạo $\rightarrow$ Trả về mảng rỗng `{ tags: [] }`.<br>2. **Kho có nhiều tag (sắp xếp creatordate)**: Tạo lần lượt các tag `v0.1.0`, `v0.2.0`, `v1.0.0` qua nhiều commit $\rightarrow$ Tag tạo sau cùng `v1.0.0` xuất hiện ở đầu danh sách.<br>3. **Sắp xếp theo tên từ điển (sort = 'name')**: Truyền tùy chọn `sort: 'name'`, xác nhận kết quả xếp theo thứ tự bảng chữ cái A-Z.<br>4. **Tag phân cấp & ký tự đặc biệt**: Tag chứa dấu gạch chéo (`release/v1.0`), gạch ngang, dấu chấm, tiền tố `v` $\rightarrow$ Bóc tách chính xác 100% tên đầy đủ.<br>5. **Tag lightweight và tag annotated**: Kho chứa cả hai loại tag $\rightarrow$ Liệt kê đầy đủ không bỏ sót.<br>6. **Bẫy ngoại lệ phòng vệ**: Khi lệnh Git CLI thất bại hoặc thư mục không phải kho Git $\rightarrow$ Fallback an toàn về `{ tags: [] }`, không làm sập giao diện. |
-| `tests/extension/services/syncMessageHandler.test.ts` | `src/extension/services/messageHandler.ts` | 1. Định tuyến chính xác action `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` sang `gitMutator`.<br>2. Định tuyến chính xác query `syncStatus`, `stashList`, và `listTags` sang hàm query tương ứng với tham số thực thể `SimpleGit`.<br>3. Xử lý lỗi ném ra từ mutator thành phản hồi lỗi RPC hợp lệ cho Webview. |
+| Tệp Kiểm Thử Độc Lập                                  | Module Mục Tiêu                            | Kịch Bản Kiểm Thử Chi Tiết Bắt Buộc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| :---------------------------------------------------- | :----------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/backend/mutator/syncMutator.test.ts`           | `src/extension/mutator/gitCliMutator.ts`   | 1. **`fetchAll`**: Tạo remote giả lập cục bộ, thực thi `fetchAll(true)`, xác nhận cờ `--prune` hoạt động và trả về `ok: true`.<br>2. **`pull` Merge**: Khởi tạo commit trên upstream, gọi `pull('merge')`, xác nhận commit mới được tích hợp vào HEAD.<br>3. **`pull` Rebase**: Tạo lịch sử phân nhánh, gọi `pull('rebase')`, xác nhận lịch sử commit được xếp thẳng hàng.<br>4. **`pull` Xung đột**: Giả lập sửa cùng 1 dòng trên cả local và remote, gọi `pull('merge')`, xác nhận trả về `ok: false` kèm thông điệp chuẩn hóa tiếng Anh về merge conflict.<br>5. **`push` Thường & Force-with-lease**: Thực thi push thành công commit mới; giả lập commit remote bị lệch, xác nhận `--force-with-lease` bảo vệ và báo lỗi `non-fast-forward` chuẩn hóa tiếng Anh.<br>6. **`stashSave` / `stashPop` / `stashDrop`**: Sửa tệp tracked và tạo tệp untracked, gọi `stashSave("test stash", true)`, xác nhận working tree sạch sẽ 100%; sau đó gọi `stashPop(0)` xác nhận toàn bộ tệp và nội dung khôi phục nguyên vẹn; gọi `stashDrop(0)` xác nhận xóa bản stash. |
+| `tests/backend/queries/syncStatus.test.ts`            | `src/backend/queries/syncStatus.ts`        | 1. **Kho đồng bộ sạch sẽ**: Nhánh local trùng khớp commit với upstream $\rightarrow$ `ahead = 0, behind = 0, upstream = 'origin/main', isDetached = false`.<br>2. **Nhánh có commit chờ đẩy**: Tạo 3 commit cục bộ $\rightarrow$ `ahead = 3, behind = 0`.<br>3. **Nhánh chậm hơn remote**: Tạo 2 commit trên remote chưa pull $\rightarrow$ `ahead = 0, behind = 2`.<br>4. **Nhánh vừa ahead vừa behind**: Tạo 2 commit local và 3 commit remote $\rightarrow$ `ahead = 2, behind = 3`.<br>5. **Nhánh chưa có upstream**: Tạo nhánh mới không đặt cờ `-u` $\rightarrow$ `upstream = null, ahead = 0, behind = 0`.<br>6. **Trạng thái Detached HEAD**: `git checkout <commitHash>` $\rightarrow$ `isDetached = true`.                                                                                                                                                                                                                                                                                                                                              |
+| `tests/backend/queries/stashList.test.ts`             | `src/backend/queries/stashList.ts`         | 1. **Danh sách rỗng**: Kho chưa có stash nào $\rightarrow$ Trả về mảng rỗng `[]`.<br>2. **Danh sách nhiều stash**: Cất lần lượt 3 stash với các thông điệp có dấu $\rightarrow$ Bóc tách chính xác 3 phần tử với đúng thứ tự index 0, 1, 2, đúng chuỗi thông điệp và thời gian tương đối.<br>3. **Ký tự đặc biệt**: Thông điệp chứa dấu nháy kép, dấu hai chấm, dấu tab $\rightarrow$ Bóc tách NUL-delimiter không bị gãy chuỗi.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `tests/backend/queries/listTags.test.ts`              | `src/backend/queries/listTags.ts`          | 1. **Kho chưa có tag nào**: Kho mới tạo $\rightarrow$ Trả về mảng rỗng `{ tags: [] }`.<br>2. **Kho có nhiều tag (sắp xếp creatordate)**: Tạo lần lượt các tag `v0.1.0`, `v0.2.0`, `v1.0.0` qua nhiều commit $\rightarrow$ Tag tạo sau cùng `v1.0.0` xuất hiện ở đầu danh sách.<br>3. **Sắp xếp theo tên từ điển (sort = 'name')**: Truyền tùy chọn `sort: 'name'`, xác nhận kết quả xếp theo thứ tự bảng chữ cái A-Z.<br>4. **Tag phân cấp & ký tự đặc biệt**: Tag chứa dấu gạch chéo (`release/v1.0`), gạch ngang, dấu chấm, tiền tố `v` $\rightarrow$ Bóc tách chính xác 100% tên đầy đủ.<br>5. **Tag lightweight và tag annotated**: Kho chứa cả hai loại tag $\rightarrow$ Liệt kê đầy đủ không bỏ sót.<br>6. **Bẫy ngoại lệ phòng vệ**: Khi lệnh Git CLI thất bại hoặc thư mục không phải kho Git $\rightarrow$ Fallback an toàn về `{ tags: [] }`, không làm sập giao diện.                                                                                                                                                                                 |
+| `tests/extension/services/syncMessageHandler.test.ts` | `src/extension/services/messageHandler.ts` | 1. Định tuyến chính xác action `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop` sang `gitMutator`.<br>2. Định tuyến chính xác query `syncStatus`, `stashList`, và `listTags` sang hàm query tương ứng với tham số thực thể `SimpleGit`.<br>3. Xử lý lỗi ném ra từ mutator thành phản hồi lỗi RPC hợp lệ cho Webview.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ---
 
 ## 8. Lịch Sử Sửa Đổi Thiết Kế (Revision History)
 
-| Phiên Bản | Ngày | Phân Loại | Người Sửa | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật |
-| :---: | :---: | :---: | :---: | :--- |
-| **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả Backend Mutator, Stash & RPC Protocol. |
-| **v1.1.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Tái cấu trúc bộ truy vấn trạng thái sang SimpleGit**: Thay thế giải pháp `child_process.spawn` tự phát bằng `SimpleGit.raw(...)`. Khắc phục lỗ hổng ranh giới bỏ quên cấu hình `gitPath` (lỗi khi người dùng dùng Git Portable) và ngăn chặn triệt để nguy cơ rò rỉ kiểu dữ liệu Node.js (`node:child_process`, `Buffer`) vào môi trường Webview DOM. Định vị kiểu kết quả hợp đồng trực tiếp tại `src/types/queries.ts` chuẩn Contract-First. |
-| **v1.2.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Hiệu chỉnh chuỗi nhận diện lỗi stash không tồn tại**: Git CLI thực tế (2.56.0) trả về `error: stash@{N} is not a valid reference` cho chỉ số stash vượt ngoài ngăn xếp, trong khi `is not a stash-like commit` chỉ xuất hiện khi truyền một tham chiếu không phải stash (ví dụ `HEAD`). Cập nhật chuỗi nhận diện ở Mục 2.5 và Mục 4 (hàng 7) để bắt đúng cả hai trường hợp và `No stash entries found`. |
+| Phiên Bản  |    Ngày    |     Phân Loại     |  Người Sửa   | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :--------: | :--------: | :---------------: | :----------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **v1.0.0** | 2026-10-15 |      Tạo mới      | AI Architect | Khởi tạo tài liệu đặc tả Backend Mutator, Stash & RPC Protocol.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **v1.1.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Tái cấu trúc bộ truy vấn trạng thái sang SimpleGit**: Thay thế giải pháp `child_process.spawn` tự phát bằng `SimpleGit.raw(...)`. Khắc phục lỗ hổng ranh giới bỏ quên cấu hình `gitPath` (lỗi khi người dùng dùng Git Portable) và ngăn chặn triệt để nguy cơ rò rỉ kiểu dữ liệu Node.js (`node:child_process`, `Buffer`) vào môi trường Webview DOM. Định vị kiểu kết quả hợp đồng trực tiếp tại `src/types/queries.ts` chuẩn Contract-First.                                                                         |
+| **v1.2.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Hiệu chỉnh chuỗi nhận diện lỗi stash không tồn tại**: Git CLI thực tế (2.56.0) trả về `error: stash@{N} is not a valid reference` cho chỉ số stash vượt ngoài ngăn xếp, trong khi `is not a stash-like commit` chỉ xuất hiện khi truyền một tham chiếu không phải stash (ví dụ `HEAD`). Cập nhật chuỗi nhận diện ở Mục 2.5 và Mục 4 (hàng 7) để bắt đúng cả hai trường hợp và `No stash entries found`.                                                                                                                |
 | **v1.3.0** | 2026-10-19 | `[DESIGN_DEFECT]` | AI Architect | **Bổ sung đặc tả truy vấn danh sách nhãn phát hành (`listTags`)**: Khắc phục lỗ hổng thiết kế thiếu nguồn dữ liệu backend cho phân nhóm TAGS trên cây điều hướng Sidebar Navigator (Design 07 Mục 2.1 & 2.2). Bổ sung Mục 3.3 đặc tả chi tiết chữ ký hàm `listTags`, hàm phân tích cú pháp thuần `parseTagList`, bảng từ điển dữ liệu I/O Contract-First `TagListResult`, thuật toán bóc tách `git tag --list --sort=-creatordate` an toàn qua `SimpleGit.raw`, ranh giới phòng vệ và ma trận kiểm thử đơn vị song hành. |

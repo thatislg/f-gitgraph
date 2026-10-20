@@ -12,26 +12,27 @@ Tài liệu này ghi nhận tổng quan mục tiêu, danh mục tệp tin tác �
 
 ## 1. Bảng Kiểm Kê Tệp Tin Tác Động (Impacted Files Inventory)
 
-| Phân Loại | Đường Dẫn Tệp Tin | Trách Nhiệm Kỹ Thuật Chính |
-| :--- | :--- | :--- |
-| **Type Definition** | `src/types/queries.ts`<br>`src/types/actions.ts` | Khai báo cấu trúc dữ liệu `SyncCommitRecord`, `SyncCommitListQuery`, `SyncCommitListResult`. |
-| **Backend Query** | `src/backend/queries/syncCommitList.ts` | Truy vấn danh sách commit chênh lệch qua `git log @{u}..HEAD` (outgoing) và `git log HEAD..@{u}` (incoming). |
-| **Extension Host** | `src/extension/services/messageHandler.ts` | Định tuyến và xử lý RPC query `getSyncCommitList` gửi từ Webview. |
-| **Reactive Store** | `src/webview/lib/stores/sync-inspector.store.ts` | Quản lý trạng thái mở/đóng flyout, danh sách commit đang xem, loại hiển thị (`outgoing` \| `incoming`), và cờ bận tải. |
-| **Webview Actions**| `src/webview/lib/actions.ts` | Bổ sung hàm dispatch RPC `requestSyncCommitList(type: 'outgoing' | 'incoming')`. |
-| **Webview UI** | `src/webview/components/wheel/SyncCommitFlyout.tsx` | Khung ngăn kéo Cyber-Lab nổi đóng khung `CornerCrossFrame`, neo tọa độ theo cánh hoa PUSH/PULL. |
-| **Webview UI** | `src/webview/components/wheel/SyncCommitItem.tsx` | Từng dòng hiển thị commit (short hash, avatar/author, subject, relative time). |
-| **Wheel Integration**| `src/webview/components/wheel/HexWheelHub.tsx`<br>`src/webview/components/wheel/HexagonPetal.tsx` | Gắn sự kiện kích hoạt flyout từ cánh hoa `PUSH` (ahead > 0) và `PULL` (behind > 0) tại State 2/3. |
-| **Styling Tokens** | `src/webview/styles.css` | Khai báo token hiệu ứng mờ nền kính, bóng đổ neon cho Flyout Inspector. |
-| **Unit Test** | `tests/backend/queries/syncCommitList.test.ts` | Kiểm thử parser đầu ra `git log`, xử lý danh sách rỗng, ký tự đặc biệt trong commit message. |
-| **Unit Test** | `tests/webview/stores/syncInspectorStore.test.ts` | Kiểm thử chuyển đổi trạng thái mở/đóng, nạp dữ liệu commit, tự động đóng khi đổi repo hoặc đóng bánh xe. |
-| **Unit Test** | `tests/webview/components/wheel/SyncCommitFlyout.test.ts` | Kiểm thử render danh sách commit, định vị tọa độ neo, kích hoạt nút thực thi hành động đồng bộ. |
+| Phân Loại             | Đường Dẫn Tệp Tin                                                                                 | Trách Nhiệm Kỹ Thuật Chính                                                                                             |
+| :-------------------- | :------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------- |
+| **Type Definition**   | `src/types/queries.ts`<br>`src/types/actions.ts`                                                  | Khai báo cấu trúc dữ liệu `SyncCommitRecord`, `SyncCommitListQuery`, `SyncCommitListResult`.                           |
+| **Backend Query**     | `src/backend/queries/syncCommitList.ts`                                                           | Truy vấn danh sách commit chênh lệch qua `git log @{u}..HEAD` (outgoing) và `git log HEAD..@{u}` (incoming).           |
+| **Extension Host**    | `src/extension/services/messageHandler.ts`                                                        | Định tuyến và xử lý RPC query `getSyncCommitList` gửi từ Webview.                                                      |
+| **Reactive Store**    | `src/webview/lib/stores/sync-inspector.store.ts`                                                  | Quản lý trạng thái mở/đóng flyout, danh sách commit đang xem, loại hiển thị (`outgoing` \| `incoming`), và cờ bận tải. |
+| **Webview Actions**   | `src/webview/lib/actions.ts`                                                                      | Bổ sung hàm dispatch RPC `requestSyncCommitList(type: 'outgoing'                                                       | 'incoming')`. |
+| **Webview UI**        | `src/webview/components/wheel/SyncCommitFlyout.tsx`                                               | Khung ngăn kéo Cyber-Lab nổi đóng khung `CornerCrossFrame`, neo tọa độ theo cánh hoa PUSH/PULL.                        |
+| **Webview UI**        | `src/webview/components/wheel/SyncCommitItem.tsx`                                                 | Từng dòng hiển thị commit (short hash, avatar/author, subject, relative time).                                         |
+| **Wheel Integration** | `src/webview/components/wheel/HexWheelHub.tsx`<br>`src/webview/components/wheel/HexagonPetal.tsx` | Gắn sự kiện kích hoạt flyout từ cánh hoa `PUSH` (ahead > 0) và `PULL` (behind > 0) tại State 2/3.                      |
+| **Styling Tokens**    | `src/webview/styles.css`                                                                          | Khai báo token hiệu ứng mờ nền kính, bóng đổ neon cho Flyout Inspector.                                                |
+| **Unit Test**         | `tests/backend/queries/syncCommitList.test.ts`                                                    | Kiểm thử parser đầu ra `git log`, xử lý danh sách rỗng, ký tự đặc biệt trong commit message.                           |
+| **Unit Test**         | `tests/webview/stores/syncInspectorStore.test.ts`                                                 | Kiểm thử chuyển đổi trạng thái mở/đóng, nạp dữ liệu commit, tự động đóng khi đổi repo hoặc đóng bánh xe.               |
+| **Unit Test**         | `tests/webview/components/wheel/SyncCommitFlyout.test.ts`                                         | Kiểm thử render danh sách commit, định vị tọa độ neo, kích hoạt nút thực thi hành động đồng bộ.                        |
 
 ---
 
 ## 2. Kế Hoạch Phân Rã Đầu Việc Chi Tiết (Test-Driven Task Breakdown)
 
 ### 🧩 Nhóm Việc 1: Hợp Đồng Dữ Liệu & Bộ Truy Vấn Danh Sách Commit (Backend Query Tier)
+
 - [ ] **Task 1.1**: Định nghĩa cấu trúc kiểu dữ liệu TypeScript trong `src/types/queries.ts` và `src/types/actions.ts`:
   - `SyncCommitRecord`: `{ hash: string; shortHash: string; author: string; email: string; date: number; subject: string }`.
   - `SyncCommitListQuery`: `{ command: 'getSyncCommitList'; mode: 'outgoing' | 'incoming' | 'diverged' }`.
@@ -44,6 +45,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, danh mục tệp tin tác �
 - [ ] **Task 1.4**: Đăng ký xử lý RPC query `getSyncCommitList` trong `src/extension/services/messageHandler.ts`.
 
 ### 🧩 Nhóm Việc 2: Kho Trạng Thái Phản Ứng `sync-inspector.store.ts` (Reactive Store Tier)
+
 - [ ] **Task 2.1**: Viết Unit Test `tests/webview/stores/syncInspectorStore.test.ts` kiểm thử:
   - Khởi tạo trạng thái ban đầu: `isInspectorOpen` là `false`, `inspectedCommits` và `divergedIncomingCommits` là mảng rỗng.
   - Kích hoạt `openInspector('diverged')`: Gửi yêu cầu RPC, chuyển `isLoading` sang `true`.
@@ -54,6 +56,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, danh mục tệp tin tác �
 - [ ] **Task 2.3**: Bổ sung hàm gửi yêu cầu `requestSyncCommitList(mode)` trong `src/webview/lib/actions.ts` và hàm xử lý phản hồi trong `src/webview/lib/handler/sync-commit-list.ts`.
 
 ### 🧩 Nhóm Việc 3: Component Giao Diện Ngăn Kéo Hướng Tâm (Webview UI Tier)
+
 - [ ] **Task 3.1**: Viết Unit Test `tests/webview/components/wheel/SyncCommitFlyout.test.ts` kiểm thử:
   - Render bảng nổi được bọc trong `CornerCrossFrame` với đinh tán góc `+`.
   - Hiển thị tiêu đề động (ví dụ: `Outgoing Commits (3)`, `Incoming Commits (2)`, hoặc `Branch Diverged (Ahead 1, Behind 1)`).
@@ -71,6 +74,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, danh mục tệp tin tác �
   - Giới hạn chiều cao tối đa `max-h-[280px]` kèm thanh cuộn mỏng Cyber-Lab (`custom-scrollbar`).
 
 ### 🧩 Nhóm Việc 4: Tích Hợp Buồng Lái Bánh Xe & Tương Tác Người Dùng (Integration Tier)
+
 - [ ] **Task 4.1**: Tích hợp nút mở Flyout trên cánh hoa `PUSH` và `PULL` trong `HexagonPetal.tsx`:
   - Ở State 2 & 3: Khi có `aheadCount > 0` hoặc `behindCount > 0`, hiển thị icon xem trước (mắt kính / danh sách nhỏ) cạnh huy hiệu số đếm.
   - Nhấp chuột vào huy hiệu số đếm mở ngay bảng `SyncCommitFlyout`.
@@ -83,6 +87,7 @@ Tài liệu này ghi nhận tổng quan mục tiêu, danh mục tệp tin tác �
   - Light Theme: Tương phản kỹ thuật màu xanh lam blueprint mềm mại, không gây chói lóa.
 
 ### 🧩 Nhóm Việc 5: Kiểm Thử Toàn Diện, Hồi Quy & Nghiệm Thu (Quality & Verification Tier)
+
 - [ ] **Task 5.1**: Kiểm thử bảo đảm bất biến hình học đồ thị DAG (`Zero Layout Shift Guarantee`):
   - Khẳng định 100% tọa độ các nút `HexagonNode` và các cánh hoa của bánh xe không bị xô lệch dù chỉ 1 pixel khi mở hoặc cuộn danh sách commit trong Flyout.
 - [ ] **Task 5.2**: Viết kịch bản kiểm thử E2E / Component Flow:

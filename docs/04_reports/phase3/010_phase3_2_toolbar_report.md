@@ -23,27 +23,27 @@ Thay thế `MainHeader.tsx` di sản bằng `GlobalToolbar.tsx` phong cách Cybe
 
 ## 2. Cấu Trúc Mã Nguồn Tác Động
 
-| File | Nội dung |
-| :--- | :--- |
-| `src/webview/lib/stores/sync.store.ts` | Signals `aheadCount`/`behindCount`/`upstreamBranch`/`isDetached`/`isFetching`/`isPulling`/`isPushing`/`isStashing`/`stashList`; computed `hasPendingSync`/`isNetworkBusy`/`syncStatusText`; dispatcher `loadSyncStatus`/`loadStashList`/`fetch`/`pull`/`push`/`stash`/`pop` (guard `isNetworkBusy` chống gọi trùng). |
-| `src/webview/lib/stores/audio.store.ts` | `isAudioMuted` (đọc/ghi `localStorage` key `f-gitgraph.audioMuted`), `audioToggleTooltip`, `toggleAudio`. |
-| `src/webview/lib/stores/sidebar.store.ts` | `isSidebarCollapsed`, `sidebarToggleTooltip`, `toggleSidebar`. |
-| `src/webview/lib/audio.ts` | Bổ sung `playPushSuccessSound` (2 sine 523.25/783.99Hz lệch 70ms), `playPullSuccessSound` (triangle 330→440→330Hz); `playCommitSound` giờ kiểm `isAudioMuted`. |
-| `src/webview/lib/actions.ts` | Bổ sung `refreshSyncStatus(repo?)`, `refreshStashList(repo?)`. |
-| `src/webview/lib/handler/sync-action.ts` | Handler 6 action mạng/stash: hạ cờ bận, mở lỗi, phát âm (push/pull), gọi `refresh()` + `refreshSyncStatus()` + `refreshStashList()`. |
-| `src/webview/lib/handler/sync-query.ts` | `handleSyncStatus`, `handleStashList`. |
-| `src/webview/lib/dispatcher.ts` | Đăng ký `fetchAll/pull/push/stashSave/stashPop/stashDrop → handleSyncAction`, `syncStatus → handleSyncStatus`, `stashList → handleStashList`. |
-| `src/extension/l10n/webviewL10n.ts` | Bổ sung ~20 key toolbar (`fetchAll`, `pull`, `push`, `stash`, `pop`, `detachedHead`, `tooltip*`...). |
-| `src/webview/components/toolbar/SyncBadge.tsx` | Render `null` khi `count<=0`; capsule Neon với màu hex cố định (inline style theo thiết kế). |
-| `src/webview/components/toolbar/ToolbarDropdownButton.tsx` | Split Button WAI-ARIA (primary 75% / arrow 25%), click-outside capture, anti-flapping 16ms, keyboard xoay vòng modulo, `aria-activedescendant`, dọn listener, tự đóng khi `disabled/isLoading`. |
-| `src/webview/components/toolbar/GlobalToolbar.tsx` | 3 cụm: trái (Fetch/Pull/Push/Stash/Pop/Refresh), giữa (kế thừa 100% 4 điều khiển MainHeader), phải (repo+branch indicator / Detached HEAD badge, Audio toggle, Sidebar toggle). |
-| `src/webview/App.tsx` | Thay `MainHeader` bằng `GlobalToolbar`. |
-| `src/webview/layout/MainHeader.tsx` | **Đã xóa** (component di sản được thay thế). |
-| `tests/webview/lib/stores/sync.store.test.ts` | Unit test sync store (12 test). |
-| `tests/webview/lib/stores/audio.store.test.ts` | Unit test audio store (3 test). |
-| `tests/webview/lib/stores/sidebar.store.test.ts` | Unit test sidebar store (2 test). |
-| `tests/webview/components/toolbar/GlobalToolbar.test.ts` | Unit test render toolbar (6 test). |
-| `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts` | Unit test split button (8 test). |
+| File                                                             | Nội dung                                                                                                                                                                                                                                                                                                             |
+| :--------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/webview/lib/stores/sync.store.ts`                           | Signals `aheadCount`/`behindCount`/`upstreamBranch`/`isDetached`/`isFetching`/`isPulling`/`isPushing`/`isStashing`/`stashList`; computed `hasPendingSync`/`isNetworkBusy`/`syncStatusText`; dispatcher `loadSyncStatus`/`loadStashList`/`fetch`/`pull`/`push`/`stash`/`pop` (guard `isNetworkBusy` chống gọi trùng). |
+| `src/webview/lib/stores/audio.store.ts`                          | `isAudioMuted` (đọc/ghi `localStorage` key `f-gitgraph.audioMuted`), `audioToggleTooltip`, `toggleAudio`.                                                                                                                                                                                                            |
+| `src/webview/lib/stores/sidebar.store.ts`                        | `isSidebarCollapsed`, `sidebarToggleTooltip`, `toggleSidebar`.                                                                                                                                                                                                                                                       |
+| `src/webview/lib/audio.ts`                                       | Bổ sung `playPushSuccessSound` (2 sine 523.25/783.99Hz lệch 70ms), `playPullSuccessSound` (triangle 330→440→330Hz); `playCommitSound` giờ kiểm `isAudioMuted`.                                                                                                                                                       |
+| `src/webview/lib/actions.ts`                                     | Bổ sung `refreshSyncStatus(repo?)`, `refreshStashList(repo?)`.                                                                                                                                                                                                                                                       |
+| `src/webview/lib/handler/sync-action.ts`                         | Handler 6 action mạng/stash: hạ cờ bận, mở lỗi, phát âm (push/pull), gọi `refresh()` + `refreshSyncStatus()` + `refreshStashList()`.                                                                                                                                                                                 |
+| `src/webview/lib/handler/sync-query.ts`                          | `handleSyncStatus`, `handleStashList`.                                                                                                                                                                                                                                                                               |
+| `src/webview/lib/dispatcher.ts`                                  | Đăng ký `fetchAll/pull/push/stashSave/stashPop/stashDrop → handleSyncAction`, `syncStatus → handleSyncStatus`, `stashList → handleStashList`.                                                                                                                                                                        |
+| `src/extension/l10n/webviewL10n.ts`                              | Bổ sung ~20 key toolbar (`fetchAll`, `pull`, `push`, `stash`, `pop`, `detachedHead`, `tooltip*`...).                                                                                                                                                                                                                 |
+| `src/webview/components/toolbar/SyncBadge.tsx`                   | Render `null` khi `count<=0`; capsule Neon với màu hex cố định (inline style theo thiết kế).                                                                                                                                                                                                                         |
+| `src/webview/components/toolbar/ToolbarDropdownButton.tsx`       | Split Button WAI-ARIA (primary 75% / arrow 25%), click-outside capture, anti-flapping 16ms, keyboard xoay vòng modulo, `aria-activedescendant`, dọn listener, tự đóng khi `disabled/isLoading`.                                                                                                                      |
+| `src/webview/components/toolbar/GlobalToolbar.tsx`               | 3 cụm: trái (Fetch/Pull/Push/Stash/Pop/Refresh), giữa (kế thừa 100% 4 điều khiển MainHeader), phải (repo+branch indicator / Detached HEAD badge, Audio toggle, Sidebar toggle).                                                                                                                                      |
+| `src/webview/App.tsx`                                            | Thay `MainHeader` bằng `GlobalToolbar`.                                                                                                                                                                                                                                                                              |
+| `src/webview/layout/MainHeader.tsx`                              | **Đã xóa** (component di sản được thay thế).                                                                                                                                                                                                                                                                         |
+| `tests/webview/lib/stores/sync.store.test.ts`                    | Unit test sync store (12 test).                                                                                                                                                                                                                                                                                      |
+| `tests/webview/lib/stores/audio.store.test.ts`                   | Unit test audio store (3 test).                                                                                                                                                                                                                                                                                      |
+| `tests/webview/lib/stores/sidebar.store.test.ts`                 | Unit test sidebar store (2 test).                                                                                                                                                                                                                                                                                    |
+| `tests/webview/components/toolbar/GlobalToolbar.test.ts`         | Unit test render toolbar (6 test).                                                                                                                                                                                                                                                                                   |
+| `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts` | Unit test split button (8 test).                                                                                                                                                                                                                                                                                     |
 
 ---
 
@@ -80,43 +80,43 @@ Huy hiệu số đếm chênh lệch commit, phát quang Neon theo ngữ cảnh:
 
 ## 4. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/webview/lib/stores/sync.store.test.ts` | ✅ 12/12 pass |
-| `tests/webview/lib/stores/audio.store.test.ts` | ✅ 3/3 pass |
-| `tests/webview/lib/stores/sidebar.store.test.ts` | ✅ 2/2 pass |
-| `tests/webview/components/toolbar/GlobalToolbar.test.ts` | ✅ 6/6 pass |
-| `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts` | ✅ 8/8 pass |
-| Toàn bộ project `backend` | ✅ 148/148 pass |
-| Toàn bộ project `extension` | ✅ 27/27 pass |
-| Toàn bộ project `webview` | ✅ 152/152 pass (tăng +31 so với báo cáo 009) |
-| Typecheck (`pnpm run typecheck`) | ✅ sạch (toàn workspace) |
-| Lint (`pnpm run lint`) | ✅ 0 error / 0 warning |
-| Compile (`pnpm run compile`) | ✅ thành công |
+| Hạng mục                                                         | Kết quả                                       |
+| :--------------------------------------------------------------- | :-------------------------------------------- |
+| `tests/webview/lib/stores/sync.store.test.ts`                    | ✅ 12/12 pass                                 |
+| `tests/webview/lib/stores/audio.store.test.ts`                   | ✅ 3/3 pass                                   |
+| `tests/webview/lib/stores/sidebar.store.test.ts`                 | ✅ 2/2 pass                                   |
+| `tests/webview/components/toolbar/GlobalToolbar.test.ts`         | ✅ 6/6 pass                                   |
+| `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts` | ✅ 8/8 pass                                   |
+| Toàn bộ project `backend`                                        | ✅ 148/148 pass                               |
+| Toàn bộ project `extension`                                      | ✅ 27/27 pass                                 |
+| Toàn bộ project `webview`                                        | ✅ 152/152 pass (tăng +31 so với báo cáo 009) |
+| Typecheck (`pnpm run typecheck`)                                 | ✅ sạch (toàn workspace)                      |
+| Lint (`pnpm run lint`)                                           | ✅ 0 error / 0 warning                        |
+| Compile (`pnpm run compile`)                                     | ✅ thành công                                 |
 
 ---
 
 ## 5. Nhật Ký Lỗi Biên Dịch & Chẩn Đoán (Compilation & Diagnostic Error Log)
 
-| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa | Kết Quả Sau Sửa |
-| :-: | :---: | :--- | :---: | :--- | :---: | :--- | :--- | :---: |
-| 1 | Vòng 1 | `tests/webview/components/toolbar/GlobalToolbar.test.ts` | Unit Test | `AssertionError: expected ... to contain '#06b6d4'` (thực tế `rgb(6, 182, 212)`) | `[DEV_BUG]` | jsdom tuần tự hóa màu hex `#06b6d4`/`#f59e0b` thành `rgb(...)` khi đọc `getAttribute("style")` | Đổi assertion sang giá trị `rgb(6, 182, 212)` / `rgb(245, 158, 11)` | ✅ Đã khắc phục |
-| 2 | Vòng 1 | `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts` | Unit Test | `AssertionError: expected <div role=menu> to be null` (click outside không đóng menu) | `[DEV_BUG]` | Listener click-outside do `useEffect` của Preact đăng ký bất đồng bộ sau render, chưa kịp gắn khi `await flush()` (0ms); đồng thời chưa vượt khoảng chống rung 16ms | Thêm helper `flushEffects()` chờ 150ms trước khi dispatch `mousedown` | ✅ Đã khắc phục |
-| 3 | Vòng 1 | `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts` | Unit Test | `AssertionError: expected <div role=menu> to be null` (window blur không đóng menu) | `[DEV_BUG]` | Listener `window blur` do `useEffect` của Preact chưa kịp đăng ký khi dispatch `blur` | Thêm helper `flushEffects()` chờ 150ms trước khi dispatch `blur` | ✅ Đã khắc phục |
-| 4 | Vòng 2 | `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts` | Lint | `eslint(no-shadow): 'container' is already declared in the upper scope` | `[DEV_BUG]` | Tham số `container` trong 3 helper (`trigger`/`primary`/`focusedIndex`) che khuất biến module-level `container` | Đổi tên tham số sang `containerEl` (khớp quy ước repo: helper dùng biến module trực tiếp) | ✅ Đã khắc phục |
+| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động                                                 | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt                                                           |  Phân Loại  | Nguyên Nhân Gốc                                                                                                                                                     | Giải Pháp Đã Sửa                                                                          | Kết Quả Sau Sửa |
+| :-: | :------------: | :--------------------------------------------------------------- | :------------: | :------------------------------------------------------------------------------------ | :---------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------- | :-------------: |
+|  1  |     Vòng 1     | `tests/webview/components/toolbar/GlobalToolbar.test.ts`         |   Unit Test    | `AssertionError: expected ... to contain '#06b6d4'` (thực tế `rgb(6, 182, 212)`)      | `[DEV_BUG]` | jsdom tuần tự hóa màu hex `#06b6d4`/`#f59e0b` thành `rgb(...)` khi đọc `getAttribute("style")`                                                                      | Đổi assertion sang giá trị `rgb(6, 182, 212)` / `rgb(245, 158, 11)`                       | ✅ Đã khắc phục |
+|  2  |     Vòng 1     | `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts` |   Unit Test    | `AssertionError: expected <div role=menu> to be null` (click outside không đóng menu) | `[DEV_BUG]` | Listener click-outside do `useEffect` của Preact đăng ký bất đồng bộ sau render, chưa kịp gắn khi `await flush()` (0ms); đồng thời chưa vượt khoảng chống rung 16ms | Thêm helper `flushEffects()` chờ 150ms trước khi dispatch `mousedown`                     | ✅ Đã khắc phục |
+|  3  |     Vòng 1     | `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts` |   Unit Test    | `AssertionError: expected <div role=menu> to be null` (window blur không đóng menu)   | `[DEV_BUG]` | Listener `window blur` do `useEffect` của Preact chưa kịp đăng ký khi dispatch `blur`                                                                               | Thêm helper `flushEffects()` chờ 150ms trước khi dispatch `blur`                          | ✅ Đã khắc phục |
+|  4  |     Vòng 2     | `tests/webview/components/toolbar/ToolbarDropdownButton.test.ts` |      Lint      | `eslint(no-shadow): 'container' is already declared in the upper scope`               | `[DEV_BUG]` | Tham số `container` trong 3 helper (`trigger`/`primary`/`focusedIndex`) che khuất biến module-level `container`                                                     | Đổi tên tham số sang `containerEl` (khớp quy ước repo: helper dùng biến module trực tiếp) | ✅ Đã khắc phục |
 
 ### 5.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
-| Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
-| :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **2 vòng** | Vòng 1 (test phát hiện 3 lỗi) → Vòng 2 (lint phát hiện 1 lỗi) → sạch |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **4 lỗi** | $E_{design} + E_{dev}$ |
-| **Số lỗi do Thiết Kế** | $E_{design}$ | **0 lỗi** | Thiết kế v1.3.0 đã đồng bộ trước khi triển khai |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **4 lỗi** | 3 lỗi timing/assertion test + 1 lỗi `no-shadow` |
-| **Số sự cố Môi Trường/Tool** | $E_{env}$ | **0 sự cố** | — |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **0.0%** | $\frac{0}{4} \times 100\%$ |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **100.0%** | $\frac{4}{4} \times 100\%$ |
-| **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend+extension+webview): OK |
+| Chỉ Số Định Lượng                         |   Ký Hiệu    | Giá Trị Thực Tế | Ghi Chú / Đánh Giá                                                               |
+| :---------------------------------------- | :----------: | :-------------: | :------------------------------------------------------------------------------- |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)**   |     $C$      |   **2 vòng**    | Vòng 1 (test phát hiện 3 lỗi) → Vòng 2 (lint phát hiện 1 lỗi) → sạch             |
+| **Tổng số lỗi kỹ thuật**                  | $E_{total}$  |    **4 lỗi**    | $E_{design} + E_{dev}$                                                           |
+| **Số lỗi do Thiết Kế**                    | $E_{design}$ |    **0 lỗi**    | Thiết kế v1.3.0 đã đồng bộ trước khi triển khai                                  |
+| **Số lỗi do Triển Khai (Bug Dev)**        |  $E_{dev}$   |    **4 lỗi**    | 3 lỗi timing/assertion test + 1 lỗi `no-shadow`                                  |
+| **Số sự cố Môi Trường/Tool**              |  $E_{env}$   |   **0 sự cố**   | —                                                                                |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** |  **$DDR$**   |    **0.0%**     | $\frac{0}{4} \times 100\%$                                                       |
+| **TỶ LỆ BUG KHI DEV (IBR)**               |  **$IBR$**   |   **100.0%**    | $\frac{4}{4} \times 100\%$                                                       |
+| **Trạng thái cổng chẩn đoán cuối cùng**   |      -       |  **100% PASS**  | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend+extension+webview): OK |
 
 ---
 
@@ -137,14 +137,14 @@ Vì toàn bộ bất nhất thiết kế đã được xử lý **trước** khi
 
 ## 7. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Kho trạng thái `sync.store.ts` (signals + computed + dispatcher) | ✅ Đạt |
-| Kho tiện ích `audio.store.ts` & `sidebar.store.ts` | ✅ Đạt |
-| `SyncBadge.tsx` (Neon `↓ N`/`↑ N`, ẩn khi sạch) | ✅ Đạt |
-| `ToolbarDropdownButton.tsx` (Split Button WAI-ARIA) | ✅ Đạt |
-| `GlobalToolbar.tsx` (3 cụm, kế thừa 100% MainHeader) | ✅ Đạt |
-| Đăng ký router realtime + âm thanh vi mô + l10n | ✅ Đạt |
-| Unit test UI/store (31 test mới) | ✅ 31/31 |
-| Thay thế & xóa `MainHeader.tsx` | ✅ Đạt |
-| Typecheck + lint + compile + test | ✅ Đạt |
+| Tiêu chí                                                         | Trạng thái |
+| :--------------------------------------------------------------- | :--------: |
+| Kho trạng thái `sync.store.ts` (signals + computed + dispatcher) |   ✅ Đạt   |
+| Kho tiện ích `audio.store.ts` & `sidebar.store.ts`               |   ✅ Đạt   |
+| `SyncBadge.tsx` (Neon `↓ N`/`↑ N`, ẩn khi sạch)                  |   ✅ Đạt   |
+| `ToolbarDropdownButton.tsx` (Split Button WAI-ARIA)              |   ✅ Đạt   |
+| `GlobalToolbar.tsx` (3 cụm, kế thừa 100% MainHeader)             |   ✅ Đạt   |
+| Đăng ký router realtime + âm thanh vi mô + l10n                  |   ✅ Đạt   |
+| Unit test UI/store (31 test mới)                                 |  ✅ 31/31  |
+| Thay thế & xóa `MainHeader.tsx`                                  |   ✅ Đạt   |
+| Typecheck + lint + compile + test                                |   ✅ Đạt   |

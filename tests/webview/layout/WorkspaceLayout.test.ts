@@ -55,13 +55,10 @@ beforeEach(() => {
   MockResizeObserver.instances = [];
   viewportWidth.value = 0;
   vi.stubGlobal("ResizeObserver", MockResizeObserver);
-  vi.stubGlobal(
-    "requestAnimationFrame",
-    (cb: FrameRequestCallback) => {
-      cb(0);
-      return 1;
-    }
-  );
+  vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+    cb(0);
+    return 1;
+  });
   vi.stubGlobal("cancelAnimationFrame", vi.fn());
 });
 

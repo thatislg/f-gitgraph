@@ -141,9 +141,7 @@ describe("registerMessageHandlers (sync & stash routing)", () => {
   it("routes stashList query through the SimpleGit instance", async () => {
     const { post, gitClient, receive } = setup();
     (gitClient.getInstance as ReturnType<typeof vi.fn>).mockReturnValue({
-      raw: vi.fn(() =>
-        Promise.resolve("stash@{0}\x00abc1234\x00test stash\x0010 minutes ago\n")
-      )
+      raw: vi.fn(() => Promise.resolve("stash@{0}\x00abc1234\x00test stash\x0010 minutes ago\n"))
     });
 
     await receive({ command: "stashList", repo: "/repo" });

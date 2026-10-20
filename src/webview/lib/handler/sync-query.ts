@@ -1,5 +1,5 @@
 import type { ResponseMessage } from "@/types";
-import { remoteGroups } from "@/webview/lib/stores";
+import { remoteBranchesLoading, remoteGroups } from "@/webview/lib/stores";
 import { loadSyncStatus, loadStashList, loadTagList } from "@/webview/lib/stores/sync.store";
 
 type SyncStatusMessage = Extract<ResponseMessage, { command: "syncStatus" }>;
@@ -25,4 +25,5 @@ export function handleTagList(msg: TagListMessage): void {
 /** Xử lý phản hồi truy vấn `remoteBranches`: nạp danh sách nhánh remote nhóm theo tên. */
 export function handleRemoteBranches(msg: RemoteBranchesMessage): void {
   remoteGroups.value = msg.remotes;
+  remoteBranchesLoading.value = false;
 }

@@ -150,7 +150,9 @@ export const counterText = computed<string>(() => {
 });
 
 /** `true` khi có một bộ lọc tìm kiếm đang hiệu lực (dùng để làm mờ dòng không khớp). */
-export const hasActiveSearch = computed<boolean>(() => parseSearchQuery(searchQuery.value).length > 0);
+export const hasActiveSearch = computed<boolean>(
+  () => parseSearchQuery(searchQuery.value).length > 0
+);
 
 // --- Cơ chế kẹp chỉ số tự động (Index Clamping & Mutation Sync) ---
 

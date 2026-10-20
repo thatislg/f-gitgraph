@@ -3,6 +3,7 @@ import { useRef } from "preact/hooks";
 import type { StashRecord } from "@/types";
 import { openContextMenu } from "@/webview/lib/actions";
 import { sidebarRemoteBranchMenu } from "@/webview/lib/menus";
+import { remoteBranchesLoading } from "@/webview/lib/stores";
 import {
   checkoutBranchAction,
   checkoutRemoteBranchAction,
@@ -81,9 +82,7 @@ export function SidebarNavigator({
   const remoteBranchCount = remotes.reduce((sum, group) => sum + group.branches.length, 0);
 
   function focusableNodes(): HTMLElement[] {
-    return Array.from(
-      treeRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR) ?? []
-    );
+    return Array.from(treeRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR) ?? []);
   }
 
   function handleKeyDown(event: KeyboardEvent): void {
@@ -124,7 +123,10 @@ export function SidebarNavigator({
           event.preventDefault();
           const sectionId = active.id.slice("section-header-".length);
           const isExpanded = expandedSectionIds.value.has(sectionId);
-          if ((event.key === "ArrowRight" && !isExpanded) || (event.key === "ArrowLeft" && isExpanded)) {
+          if (
+            (event.key === "ArrowRight" && !isExpanded) ||
+            (event.key === "ArrowLeft" && isExpanded)
+          ) {
             toggleSection(sectionId);
           }
         }
@@ -169,11 +171,7 @@ export function SidebarNavigator({
             onClick={toggleSidebar}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path
-                d="M2 3h12v10H2zM9 3v10M14 3v10"
-                stroke="currentColor"
-                stroke-width="1.5"
-              />
+              <path d="M2 3h12v10H2zM9 3v10M14 3v10" stroke="currentColor" stroke-width="1.5" />
             </svg>
           </button>
         </header>
@@ -230,9 +228,16 @@ export function SidebarNavigator({
             badgeCount={remoteBranchCount}
             onToggle={() => toggleSection("remotes")}
           >
-            {remoteBranchCount === 0 && (
-              <span class="block truncate px-5 py-1 text-[11px] text-[#64748b]">No remote branches</span>
-            )}
+            {remoteBranchCount === 0 &&
+              (remoteBranchesLoading.value ? (
+                <span class="block truncate px-5 py-1 text-[11px] text-[#64748b]">
+                  Loading remote branches…
+                </span>
+              ) : (
+                <span class="block truncate px-5 py-1 text-[11px] text-[#64748b]">
+                  No remote branches
+                </span>
+              ))}
             {remotes.map((group) =>
               group.branches.map((branch) => {
                 const label = `${group.name}/${branch}`;
@@ -245,7 +250,11 @@ export function SidebarNavigator({
                     onClick={() => selectItem(`remote:${label}`)}
                     onDoubleClick={() => checkoutRemoteBranchAction(group.name, branch)}
                     onContextMenu={(event) =>
-                      openContextMenu(event, `remote:${label}`, sidebarRemoteBranchMenu(group.name, branch))
+                      openContextMenu(
+                        event,
+                        `remote:${label}`,
+                        sidebarRemoteBranchMenu(group.name, branch)
+                      )
                     }
                   />
                 );
@@ -282,7 +291,9 @@ export function SidebarNavigator({
             onToggle={() => toggleSection("stashes")}
           >
             {stashes.length === 0 && (
-              <span class="block truncate px-5 py-1 text-[11px] text-[#64748b]">No stashes saved</span>
+              <span class="block truncate px-5 py-1 text-[11px] text-[#64748b]">
+                No stashes saved
+              </span>
             )}
             {stashes.map((stash) => (
               <SidebarItem

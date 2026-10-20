@@ -2,13 +2,11 @@ import type { GitRepo } from "@/types";
 
 import { WorkspaceLayout } from "./components/layout/WorkspaceLayout";
 import { SearchFilterBar } from "./components/search/SearchFilterBar";
-import {
-  SidebarNavigator,
-  type BranchItem
-} from "./components/sidebar/SidebarNavigator";
+import { SidebarNavigator, type BranchItem } from "./components/sidebar/SidebarNavigator";
 import { GlobalToolbar } from "./components/toolbar/GlobalToolbar";
 import { ContextMenu } from "./components/ui/ContextMenu";
 import { Dialog } from "./components/ui/Dialog";
+import { LoadingBar } from "./components/ui/LoadingBar";
 import { ScrollShadow } from "./components/ui/ScrollShadow";
 import { GraphView } from "./layout/GraphView";
 import { branchList, headBranch, remoteGroups } from "./lib/stores";
@@ -69,6 +67,7 @@ export function App({ repos }: { repos: Array<GitRepo> }) {
       <ScrollShadow />
       <ContextMenu />
       <Dialog />
+      <LoadingBar />
     </>
   );
 }

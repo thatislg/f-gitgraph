@@ -201,16 +201,13 @@ export function HexWheelHub() {
     return { ...base, position: "fixed" as const, left: origin.x - HALF, top: origin.y - HALF };
   })();
 
-  const activeLayoutIndex = activeId === null ? -1 : PETAL_LAYOUT.findIndex((p) => p.id === activeId);
+  const activeLayoutIndex =
+    activeId === null ? -1 : PETAL_LAYOUT.findIndex((p) => p.id === activeId);
   const activeCenter = activeLayoutIndex >= 0 ? centers[activeLayoutIndex] : undefined;
 
   return (
     <div ref={dockRef} class="relative inline-flex items-center">
-      <span
-        data-wheel-trigger
-        class="inline-flex"
-        onMouseEnter={() => armWheel()}
-      >
+      <span data-wheel-trigger class="inline-flex" onMouseEnter={() => armWheel()}>
         <HexWheelBrandEmblem
           armed={stage === 1}
           onOpenWheel={() => {
@@ -260,7 +257,11 @@ export function HexWheelHub() {
               const id = layout.id;
               const isActive = activeId === id;
               const dimmed = activeId !== null && activeId !== id;
-              const colour = isMono ? (isActive ? MONO_ACTIVE : MONO_BASE_BORDER) : PETAL_COLORS[id];
+              const colour = isMono
+                ? isActive
+                  ? MONO_ACTIVE
+                  : MONO_BASE_BORDER
+                : PETAL_COLORS[id];
 
               return (
                 <HexagonPetal

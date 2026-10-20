@@ -162,16 +162,13 @@ describe("sidebarStore", () => {
   });
 
   describe("lựa chọn item & kiểm tra tiền tố", () => {
-    it.each([
-      "working-tree:changes",
-      "branch:main",
-      "remote:origin/main",
-      "tag:v1.0.0",
-      "stash:0"
-    ])("chấp nhận tiền tố hợp lệ %s", (itemId) => {
-      selectItem(itemId);
-      expect(selectedItemId.value).toBe(itemId);
-    });
+    it.each(["working-tree:changes", "branch:main", "remote:origin/main", "tag:v1.0.0", "stash:0"])(
+      "chấp nhận tiền tố hợp lệ %s",
+      (itemId) => {
+        selectItem(itemId);
+        expect(selectedItemId.value).toBe(itemId);
+      }
+    );
 
     it("từ chối tiền tố không hợp lệ", () => {
       selectItem("bogus:item");

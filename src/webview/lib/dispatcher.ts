@@ -6,9 +6,18 @@ import { handleCommitResult } from "./handler/commit-result";
 import { handleHeadCommit } from "./handler/head-commit";
 import { handleLoadBranches } from "./handler/load-branches";
 import { handleRefresh } from "./handler/refresh";
-import { handleCheckoutBranch, handleCheckoutRemoteBranch, handleSidebarStash } from "./handler/sidebar-action";
+import {
+  handleCheckoutBranch,
+  handleCheckoutRemoteBranch,
+  handleSidebarStash
+} from "./handler/sidebar-action";
 import { handleSyncAction } from "./handler/sync-action";
-import { handleRemoteBranches, handleStashList, handleSyncStatus, handleTagList } from "./handler/sync-query";
+import {
+  handleRemoteBranches,
+  handleStashList,
+  handleSyncStatus,
+  handleTagList
+} from "./handler/sync-query";
 import { handleViewDiff } from "./handler/view-diff";
 import { handleWorkspaceStatus } from "./handler/workspace-status";
 

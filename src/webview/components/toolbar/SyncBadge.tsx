@@ -22,9 +22,7 @@ export function SyncBadge({ direction, count }: SyncBadgeProps) {
     color: isBehind ? "#22d3ee" : "#fbbf24",
     borderColor: isBehind ? "#06b6d4" : "#f59e0b",
     backgroundColor: isBehind ? "rgba(6, 182, 212, 0.15)" : "rgba(245, 158, 11, 0.15)",
-    boxShadow: isBehind
-      ? "0 0 6px rgba(6, 182, 212, 0.4)"
-      : "0 0 6px rgba(245, 158, 11, 0.4)"
+    boxShadow: isBehind ? "0 0 6px rgba(6, 182, 212, 0.4)" : "0 0 6px rgba(245, 158, 11, 0.4)"
   };
 
   return (

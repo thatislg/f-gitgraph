@@ -9,23 +9,59 @@ type FGitGraphLogoProps = {
  */
 export function FGitGraphLogo({ size = 24 }: FGitGraphLogoProps) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      width={size}
-      height={size}
-      aria-hidden="true"
-      focusable="false"
-    >
-      <line x1="6.5" y1="5.5" x2="6.5" y2="18.5" stroke="#00F0FF" stroke-width="1.8" stroke-linecap="round" />
-      <path d="M 6.5 7.5 C 6.5 6.4 7.4 6 9 6 L 17.5 6" fill="none" stroke="#FF007F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-      <path d="M 6.5 15 C 6.5 13.6 7.6 13 9 13 L 14.5 13" fill="none" stroke="#A855F7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-      <polygon points="6.5,16.1 8.58,17.3 8.58,19.7 6.5,20.9 4.42,19.7 4.42,17.3" fill="#0B0F19" stroke="#00F0FF" stroke-width="1.2" />
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" focusable="false">
+      <line
+        x1="6.5"
+        y1="5.5"
+        x2="6.5"
+        y2="18.5"
+        stroke="#00F0FF"
+        stroke-width="1.8"
+        stroke-linecap="round"
+      />
+      <path
+        d="M 6.5 7.5 C 6.5 6.4 7.4 6 9 6 L 17.5 6"
+        fill="none"
+        stroke="#FF007F"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M 6.5 15 C 6.5 13.6 7.6 13 9 13 L 14.5 13"
+        fill="none"
+        stroke="#A855F7"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <polygon
+        points="6.5,16.1 8.58,17.3 8.58,19.7 6.5,20.9 4.42,19.7 4.42,17.3"
+        fill="#0B0F19"
+        stroke="#00F0FF"
+        stroke-width="1.2"
+      />
       <circle cx="6.5" cy="18.5" r="0.8" fill="#00F0FF" />
-      <polygon points="14.5,10.6 16.58,11.8 16.58,14.2 14.5,15.4 12.42,14.2 12.42,11.8" fill="#0B0F19" stroke="#A855F7" stroke-width="1.2" />
+      <polygon
+        points="14.5,10.6 16.58,11.8 16.58,14.2 14.5,15.4 12.42,14.2 12.42,11.8"
+        fill="#0B0F19"
+        stroke="#A855F7"
+        stroke-width="1.2"
+      />
       <circle cx="14.5" cy="13" r="0.8" fill="#A855F7" />
-      <polygon points="17.5,3.6 19.58,4.8 19.58,7.2 17.5,8.4 15.42,7.2 15.42,4.8" fill="#0B0F19" stroke="#FF007F" stroke-width="1.2" />
+      <polygon
+        points="17.5,3.6 19.58,4.8 19.58,7.2 17.5,8.4 15.42,7.2 15.42,4.8"
+        fill="#0B0F19"
+        stroke="#FF007F"
+        stroke-width="1.2"
+      />
       <circle cx="17.5" cy="6" r="0.8" fill="#FF007F" />
-      <polygon points="6.5,3.1 8.58,4.3 8.58,6.7 6.5,7.9 4.42,6.7 4.42,4.3" fill="#0B0F19" stroke="#00F0FF" stroke-width="1.2" />
+      <polygon
+        points="6.5,3.1 8.58,4.3 8.58,6.7 6.5,7.9 4.42,6.7 4.42,4.3"
+        fill="#0B0F19"
+        stroke="#00F0FF"
+        stroke-width="1.2"
+      />
       <circle cx="6.5" cy="5.5" r="0.8" fill="#00F0FF" />
     </svg>
   );

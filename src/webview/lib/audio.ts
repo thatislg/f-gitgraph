@@ -144,7 +144,12 @@ function playFrequencySweep(
 
 /** Phát âm thanh chốt công tắc cơ học (440Hz → 880Hz) khi checkout nhánh thành công. */
 export function playSwitch(): void {
-  playFrequencySweep(SWITCH_START_FREQUENCY, SWITCH_PEAK_FREQUENCY, SWITCH_DURATION_SECONDS, SWITCH_PEAK_GAIN);
+  playFrequencySweep(
+    SWITCH_START_FREQUENCY,
+    SWITCH_PEAK_FREQUENCY,
+    SWITCH_DURATION_SECONDS,
+    SWITCH_PEAK_GAIN
+  );
 }
 
 /** Phát âm thanh tích tắc vi mô 1200Hz (âm lượng nhỏ) khi định vị commit trên đồ thị. */
@@ -154,7 +159,13 @@ export function playTick(): void {
 
 /** Phát âm thanh cảnh báo lỗi tần số thấp khi một tác vụ Git thất bại. */
 export function playError(): void {
-  playFrequencySweep(ERROR_FREQUENCY, ERROR_FREQUENCY, ERROR_DURATION_SECONDS, ERROR_PEAK_GAIN, "square");
+  playFrequencySweep(
+    ERROR_FREQUENCY,
+    ERROR_FREQUENCY,
+    ERROR_DURATION_SECONDS,
+    ERROR_PEAK_GAIN,
+    "square"
+  );
 }
 
 /** Phát âm thanh lật trang tài liệu khi thao tác stash thành công. */
@@ -164,12 +175,22 @@ export function playStash(): void {
 
 /** Phát âm thanh chốt trượt giảm tần số (380Hz → 220Hz) khi thu gọn Sidebar. */
 export function playSidebarCollapse(): void {
-  playFrequencySweep(SIDEBAR_COLLAPSE_START, SIDEBAR_COLLAPSE_END, SIDEBAR_TOGGLE_DURATION_SECONDS, SIDEBAR_TOGGLE_PEAK_GAIN);
+  playFrequencySweep(
+    SIDEBAR_COLLAPSE_START,
+    SIDEBAR_COLLAPSE_END,
+    SIDEBAR_TOGGLE_DURATION_SECONDS,
+    SIDEBAR_TOGGLE_PEAK_GAIN
+  );
 }
 
 /** Phát âm thanh chốt trượt tăng tần số (220Hz → 380Hz) khi mở rộng Sidebar. */
 export function playSidebarExpand(): void {
-  playFrequencySweep(SIDEBAR_EXPAND_START, SIDEBAR_EXPAND_END, SIDEBAR_TOGGLE_DURATION_SECONDS, SIDEBAR_TOGGLE_PEAK_GAIN);
+  playFrequencySweep(
+    SIDEBAR_EXPAND_START,
+    SIDEBAR_EXPAND_END,
+    SIDEBAR_TOGGLE_DURATION_SECONDS,
+    SIDEBAR_TOGGLE_PEAK_GAIN
+  );
 }
 
 /**
@@ -177,7 +198,12 @@ export function playSidebarExpand(): void {
  * (thức tỉnh màng trập), mang cảm giác chạm tay vào mặt kính bán dẫn.
  */
 export function playMicroHapticTick(): void {
-  playFrequencySweep(MICRO_HAPTIC_FREQUENCY, MICRO_HAPTIC_FREQUENCY, MICRO_HAPTIC_DURATION_SECONDS, MICRO_HAPTIC_PEAK_GAIN);
+  playFrequencySweep(
+    MICRO_HAPTIC_FREQUENCY,
+    MICRO_HAPTIC_FREQUENCY,
+    MICRO_HAPTIC_DURATION_SECONDS,
+    MICRO_HAPTIC_PEAK_GAIN
+  );
 }
 
 /** Phát xung kim loại sắc nhưng đầy đặn (14ms, 2000Hz → 600Hz, sóng vuông) khi rê chuột qua một cánh hoa ở State 3. */
@@ -193,12 +219,22 @@ export function playPetalHoverTick(): void {
 
 /** Phát âm thanh quét tần số tăng (380Hz → 760Hz) khi bánh xe bung mở State 1 → 2. */
 export function playIrisShutterOpen(): void {
-  playFrequencySweep(IRIS_OPEN_START_FREQUENCY, IRIS_OPEN_END_FREQUENCY, IRIS_OPEN_DURATION_SECONDS, IRIS_OPEN_PEAK_GAIN);
+  playFrequencySweep(
+    IRIS_OPEN_START_FREQUENCY,
+    IRIS_OPEN_END_FREQUENCY,
+    IRIS_OPEN_DURATION_SECONDS,
+    IRIS_OPEN_PEAK_GAIN
+  );
 }
 
 /** Phát âm thanh quét tần số giảm (620Hz → 240Hz) khi bánh xe thu gọn về State 0. */
 export function playIrisShutterClose(): void {
-  playFrequencySweep(IRIS_CLOSE_START_FREQUENCY, IRIS_CLOSE_END_FREQUENCY, IRIS_CLOSE_DURATION_SECONDS, IRIS_CLOSE_PEAK_GAIN);
+  playFrequencySweep(
+    IRIS_CLOSE_START_FREQUENCY,
+    IRIS_CLOSE_END_FREQUENCY,
+    IRIS_CLOSE_DURATION_SECONDS,
+    IRIS_CLOSE_PEAK_GAIN
+  );
 }
 
 /**
@@ -294,7 +330,10 @@ export function playPullSuccessSound(): void {
   oscillator.type = "triangle";
   oscillator.frequency.setValueAtTime(PULL_START_FREQUENCY, start);
   // Quỹ đạo parabol: lướt lên đỉnh giữa khoảng rồi trượt êm về tần số khởi điểm.
-  oscillator.frequency.exponentialRampToValueAtTime(PULL_PEAK_FREQUENCY, start + PULL_DURATION_SECONDS / 2);
+  oscillator.frequency.exponentialRampToValueAtTime(
+    PULL_PEAK_FREQUENCY,
+    start + PULL_DURATION_SECONDS / 2
+  );
   oscillator.frequency.exponentialRampToValueAtTime(PULL_START_FREQUENCY, end);
 
   gain.gain.setValueAtTime(PULL_PEAK_GAIN, start);

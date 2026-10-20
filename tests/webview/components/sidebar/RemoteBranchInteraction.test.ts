@@ -6,7 +6,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 import { openContextMenu, runAction } from "@/webview/lib/actions";
 import { handleRemoteBranches } from "@/webview/lib/handler/sync-query";
 import { sidebarRemoteBranchMenu } from "@/webview/lib/menus";
-import { remoteGroups, showRemoteBranch } from "@/webview/lib/stores";
+import { remoteBranchesLoading, remoteGroups, showRemoteBranch } from "@/webview/lib/stores";
 import {
   ALL_SECTION_IDS,
   expandedSectionIds,
@@ -39,6 +39,7 @@ function resetStore() {
   expandedSectionIds.value = new Set(ALL_SECTION_IDS);
   isCheckingOut.value = false;
   remoteGroups.value = [];
+  remoteBranchesLoading.value = true;
   showRemoteBranch.value = true;
 }
 

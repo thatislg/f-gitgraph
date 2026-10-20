@@ -46,40 +46,40 @@ Mọi công việc triển khai trong Chặng 3.2 bắt buộc đối soát và 
 
 ### 1.2. Bảng Kiểm Kê Tệp Tin Tác Động (Impacted Files Inventory)
 
-| Phân Loại | Đường Dẫn Tệp Tin | Trách Nhiệm Kỹ Thuật Chính |
-| :--- | :--- | :--- |
-| **Backend Core** | `src/extension/mutator/gitCliMutator.ts` | Bổ sung: `fetchAll`, nâng cấp `pull(mode)`, `push(forceWithLease, remote, branch)`, `stashSave`, `stashPop`, `stashDrop`. |
-| **Backend Query** | `src/backend/queries/syncStatus.ts` | Truy vấn số đếm chênh lệch `git rev-list --left-right --count HEAD...@{u}` (`ahead`, `behind`, `upstream`). |
-| **Backend Query** | `src/backend/queries/stashList.ts` | Bóc tách danh sách ngăn xếp `git stash list --pretty=format:...` thành `StashRecord[]`. |
-| **Backend Query** | `src/backend/queries/listTags.ts` | Bóc tách danh sách release tags `git tag --list --sort=-creatordate` thành `TagListResult`. |
-| **Backend Types** | `src/types/actions.ts` | Khai báo payload cho `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`. |
-| **Backend Types** | `src/types/queries.ts` | Khai báo query payload cho `syncStatus`, `stashList`, và `listTags`. |
-| **Backend IPC** | `src/extension/services/messageHandler.ts` | Đăng ký các action mutate mạng/stash và query sync/stash/tags mới từ Webview. |
-| **Backend Test** | `tests/backend/mutator/syncMutator.test.ts` | Unit test cho các phương thức mutator: `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`. |
-| **Backend Test** | `tests/backend/queries/syncStatus.test.ts` | Unit test bóc tách số đếm ahead/behind khi có upstream, không có upstream, hoặc detached HEAD. |
-| **Backend Test** | `tests/backend/queries/stashList.test.ts` | Unit test bóc tách chuỗi stash list thành mảng đối tượng định kiểu. |
-| **Backend Test** | `tests/backend/queries/listTags.test.ts` | Unit test bóc tách danh sách tag (creatordate, tên từ điển, ký tự đặc biệt, tag rỗng, fallback). |
-| **UI State** | `src/webview/lib/stores/sync.store.ts` | Quản lý trạng thái đồng bộ (`aheadCount`, `behindCount`, `upstreamBranch`, `isFetching`, `isPulling`, `isPushing`). |
-| **UI State** | `src/webview/lib/stores/sidebar.store.ts` | Quản lý trạng thái cây điều hướng: đóng/mở sidebar, độ rộng (width), các node mở rộng (expanded sections). |
-| **UI Component** | `src/webview/components/toolbar/GlobalToolbar.tsx` | Thanh công cụ đỉnh thay thế `MainHeader.tsx`: cụm nút Fetch/Pull/Push kèm badge đếm, nút Stash/Pop, nút Refresh. |
-| **UI Component** | `src/webview/components/toolbar/SyncBadge.tsx` | Huy hiệu số lượng commit chưa đồng bộ (`Pull ↓ 2`, `Push ↑ 1`) phát sáng Neon theo ngữ cảnh. |
-| **UI Component** | `src/webview/components/sidebar/SidebarNavigator.tsx` | Khung điều hướng bên trái có thanh resizer kéo dãn và nút thu gọn/mở rộng nhanh. |
-| **UI Component** | `src/webview/components/sidebar/SidebarSection.tsx` | Khung phân nhóm có thể gập/mở (Collapsible Section) kèm nút tạo mới `+` và huy hiệu đếm. |
-| **UI Component** | `src/webview/components/sidebar/SidebarItem.tsx` | Dòng hiển thị tệp Working Tree, nhánh (HEAD highlight), remote, tag, stash kèm context menu. |
-| **UI Component** | `src/webview/components/search/SearchFilterBar.tsx` | Thanh tìm kiếm commit (`Ctrl + F`), hỗ trợ bộ lọc message/author/hash, nút chuyển hướng Next/Prev. |
-| **UI Component** | `src/webview/components/layout/WorkspaceLayout.tsx` | Bố cục tổng thể 3 phân vùng co giãn linh hoạt, tích hợp `ResizeObserver` chống lệch đồ thị. |
-| **UI Realtime** | `src/webview/lib/dispatcher.ts` | Đăng ký 100% action mạng/stash vào map `handlers` để kích hoạt `refresh()` và `refreshStatus()`. |
-| **Backend Core** | `src/extension/mutator/gitCliMutator.ts` | Bổ sung: `checkoutRemoteBranch`, `deleteRemoteBranch` hỗ trợ tương tác nhánh từ xa an toàn. |
-| **Backend Watcher**| `src/extension/watchers/git-repo.watcher.ts` | Tích hợp cơ chế khóa tạm thời (`muteDepth`) khi checkout chủ động nhằm triệt tiêu Double Refresh Storm. |
-| **UI Actions** | `src/webview/lib/actions.ts` | Bổ sung hàm làm mới có mục tiêu `refreshAfterCheckout()` thay cho `refresh()` toàn thể, giảm tải tiến trình Git. |
-| **Backend Test** | `tests/backend/mutator/remoteMutator.test.ts` | Unit test cho các phương thức mutator: `checkoutRemoteBranch`, `deleteRemoteBranch`. |
-| **UI Test** | `tests/webview/lib/stores/sync.store.test.ts` | Unit test store tín hiệu `sync.store.ts` (tính toán nhãn nút, cập nhật trạng thái loading). |
-| **UI Test** | `tests/webview/components/toolbar/GlobalToolbar.test.ts` | Unit test thanh công cụ: render nút, click gọi action, hiển thị badge ahead/behind. |
-| **UI Test** | `tests/webview/components/sidebar/SidebarNavigator.test.ts` | Unit test render cây 5 nhóm, double-click checkout nhánh, nút toggle collapse. |
-| **UI Test** | `tests/webview/components/sidebar/RemoteBranchInteraction.test.ts` | Unit test tương tác phân vùng REMOTES (double-click checkout, Context Menu, tách nguồn nạp độc lập). |
-| **UI Test** | `tests/webview/performance/BranchSwitchPerformance.test.ts` | Benchmark hiệu năng chuyển nhánh: Optimistic UI 16ms, khử trùng lặp refresh watcher. |
-| **UI Test** | `tests/webview/components/search/SearchFilterBar.test.ts` | Unit test phím tắt `Ctrl + F`, lọc commit, đếm kết quả `(N of M)`. |
-| **UI Integr. Test**| `tests/webview/layout/WorkspaceLayout.geometry.test.ts` | Kiểm thử bất biến hình học: Snapshot đường Bézier và tọa độ `HexagonNode` khi co giãn hoặc toggle Sidebar. |
+| Phân Loại           | Đường Dẫn Tệp Tin                                                  | Trách Nhiệm Kỹ Thuật Chính                                                                                                |
+| :------------------ | :----------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| **Backend Core**    | `src/extension/mutator/gitCliMutator.ts`                           | Bổ sung: `fetchAll`, nâng cấp `pull(mode)`, `push(forceWithLease, remote, branch)`, `stashSave`, `stashPop`, `stashDrop`. |
+| **Backend Query**   | `src/backend/queries/syncStatus.ts`                                | Truy vấn số đếm chênh lệch `git rev-list --left-right --count HEAD...@{u}` (`ahead`, `behind`, `upstream`).               |
+| **Backend Query**   | `src/backend/queries/stashList.ts`                                 | Bóc tách danh sách ngăn xếp `git stash list --pretty=format:...` thành `StashRecord[]`.                                   |
+| **Backend Query**   | `src/backend/queries/listTags.ts`                                  | Bóc tách danh sách release tags `git tag --list --sort=-creatordate` thành `TagListResult`.                               |
+| **Backend Types**   | `src/types/actions.ts`                                             | Khai báo payload cho `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`.                                    |
+| **Backend Types**   | `src/types/queries.ts`                                             | Khai báo query payload cho `syncStatus`, `stashList`, và `listTags`.                                                      |
+| **Backend IPC**     | `src/extension/services/messageHandler.ts`                         | Đăng ký các action mutate mạng/stash và query sync/stash/tags mới từ Webview.                                             |
+| **Backend Test**    | `tests/backend/mutator/syncMutator.test.ts`                        | Unit test cho các phương thức mutator: `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`.                               |
+| **Backend Test**    | `tests/backend/queries/syncStatus.test.ts`                         | Unit test bóc tách số đếm ahead/behind khi có upstream, không có upstream, hoặc detached HEAD.                            |
+| **Backend Test**    | `tests/backend/queries/stashList.test.ts`                          | Unit test bóc tách chuỗi stash list thành mảng đối tượng định kiểu.                                                       |
+| **Backend Test**    | `tests/backend/queries/listTags.test.ts`                           | Unit test bóc tách danh sách tag (creatordate, tên từ điển, ký tự đặc biệt, tag rỗng, fallback).                          |
+| **UI State**        | `src/webview/lib/stores/sync.store.ts`                             | Quản lý trạng thái đồng bộ (`aheadCount`, `behindCount`, `upstreamBranch`, `isFetching`, `isPulling`, `isPushing`).       |
+| **UI State**        | `src/webview/lib/stores/sidebar.store.ts`                          | Quản lý trạng thái cây điều hướng: đóng/mở sidebar, độ rộng (width), các node mở rộng (expanded sections).                |
+| **UI Component**    | `src/webview/components/toolbar/GlobalToolbar.tsx`                 | Thanh công cụ đỉnh thay thế `MainHeader.tsx`: cụm nút Fetch/Pull/Push kèm badge đếm, nút Stash/Pop, nút Refresh.          |
+| **UI Component**    | `src/webview/components/toolbar/SyncBadge.tsx`                     | Huy hiệu số lượng commit chưa đồng bộ (`Pull ↓ 2`, `Push ↑ 1`) phát sáng Neon theo ngữ cảnh.                              |
+| **UI Component**    | `src/webview/components/sidebar/SidebarNavigator.tsx`              | Khung điều hướng bên trái có thanh resizer kéo dãn và nút thu gọn/mở rộng nhanh.                                          |
+| **UI Component**    | `src/webview/components/sidebar/SidebarSection.tsx`                | Khung phân nhóm có thể gập/mở (Collapsible Section) kèm nút tạo mới `+` và huy hiệu đếm.                                  |
+| **UI Component**    | `src/webview/components/sidebar/SidebarItem.tsx`                   | Dòng hiển thị tệp Working Tree, nhánh (HEAD highlight), remote, tag, stash kèm context menu.                              |
+| **UI Component**    | `src/webview/components/search/SearchFilterBar.tsx`                | Thanh tìm kiếm commit (`Ctrl + F`), hỗ trợ bộ lọc message/author/hash, nút chuyển hướng Next/Prev.                        |
+| **UI Component**    | `src/webview/components/layout/WorkspaceLayout.tsx`                | Bố cục tổng thể 3 phân vùng co giãn linh hoạt, tích hợp `ResizeObserver` chống lệch đồ thị.                               |
+| **UI Realtime**     | `src/webview/lib/dispatcher.ts`                                    | Đăng ký 100% action mạng/stash vào map `handlers` để kích hoạt `refresh()` và `refreshStatus()`.                          |
+| **Backend Core**    | `src/extension/mutator/gitCliMutator.ts`                           | Bổ sung: `checkoutRemoteBranch`, `deleteRemoteBranch` hỗ trợ tương tác nhánh từ xa an toàn.                               |
+| **Backend Watcher** | `src/extension/watchers/git-repo.watcher.ts`                       | Tích hợp cơ chế khóa tạm thời (`muteDepth`) khi checkout chủ động nhằm triệt tiêu Double Refresh Storm.                   |
+| **UI Actions**      | `src/webview/lib/actions.ts`                                       | Bổ sung hàm làm mới có mục tiêu `refreshAfterCheckout()` thay cho `refresh()` toàn thể, giảm tải tiến trình Git.          |
+| **Backend Test**    | `tests/backend/mutator/remoteMutator.test.ts`                      | Unit test cho các phương thức mutator: `checkoutRemoteBranch`, `deleteRemoteBranch`.                                      |
+| **UI Test**         | `tests/webview/lib/stores/sync.store.test.ts`                      | Unit test store tín hiệu `sync.store.ts` (tính toán nhãn nút, cập nhật trạng thái loading).                               |
+| **UI Test**         | `tests/webview/components/toolbar/GlobalToolbar.test.ts`           | Unit test thanh công cụ: render nút, click gọi action, hiển thị badge ahead/behind.                                       |
+| **UI Test**         | `tests/webview/components/sidebar/SidebarNavigator.test.ts`        | Unit test render cây 5 nhóm, double-click checkout nhánh, nút toggle collapse.                                            |
+| **UI Test**         | `tests/webview/components/sidebar/RemoteBranchInteraction.test.ts` | Unit test tương tác phân vùng REMOTES (double-click checkout, Context Menu, tách nguồn nạp độc lập).                      |
+| **UI Test**         | `tests/webview/performance/BranchSwitchPerformance.test.ts`        | Benchmark hiệu năng chuyển nhánh: Optimistic UI 16ms, khử trùng lặp refresh watcher.                                      |
+| **UI Test**         | `tests/webview/components/search/SearchFilterBar.test.ts`          | Unit test phím tắt `Ctrl + F`, lọc commit, đếm kết quả `(N of M)`.                                                        |
+| **UI Integr. Test** | `tests/webview/layout/WorkspaceLayout.geometry.test.ts`            | Kiểm thử bất biến hình học: Snapshot đường Bézier và tọa độ `HexagonNode` khi co giãn hoặc toggle Sidebar.                |
 
 ---
 
@@ -254,11 +254,11 @@ _Mục tiêu_: Chuyển đổi phân vùng `REMOTES` từ danh sách tĩnh (Read
   - [x] **6.1.1**: Xây dựng hàm `checkoutRemoteBranchAction(remoteName: string, branchName: string)`:
     - Khi người dùng nhấp đúp vào nhánh remote (ví dụ `origin/feat-login`): Tự động kiểm tra danh sách nhánh local hiện có (`branchList`).
     - Nếu nhánh local cùng tên chưa tồn tại: Tự động chạy lệnh checkout tracking branch `git checkout -b <branchName> --track <remoteName>/<branchName>`.
-    - Nếu nhánh local cùng tên đã tồn tại: Mở modal xác nhận cho phép người dùng lựa chọn: *Checkout existing local branch* hoặc *Overwrite tracking upstream*.
+    - Nếu nhánh local cùng tên đã tồn tại: Mở modal xác nhận cho phép người dùng lựa chọn: _Checkout existing local branch_ hoặc _Overwrite tracking upstream_.
   - [x] **6.1.2**: Tích hợp Menu ngữ cảnh (Context Menu) cho từng nhánh remote (`SidebarItem` kiểu `"remote-branch"`):
-    - *Checkout as New Local Branch...*: Mở dialog nhập tên nhánh local mới và tự động thiết lập upstream theo dõi.
-    - *Pull into Current Branch*: Kéo commit từ nhánh remote vào nhánh `HEAD` đang mở (`git pull <remoteName> <branchName>`).
-    - *Delete Remote Branch...*: Mở modal cảnh báo màu đỏ xác nhận xóa vĩnh viễn nhánh trên máy chủ từ xa (`git push <remoteName> --delete <branchName>`).
+    - _Checkout as New Local Branch..._: Mở dialog nhập tên nhánh local mới và tự động thiết lập upstream theo dõi.
+    - _Pull into Current Branch_: Kéo commit từ nhánh remote vào nhánh `HEAD` đang mở (`git pull <remoteName> <branchName>`).
+    - _Delete Remote Branch..._: Mở modal cảnh báo màu đỏ xác nhận xóa vĩnh viễn nhánh trên máy chủ từ xa (`git push <remoteName> --delete <branchName>`).
   - [x] **6.1.3**: Độc lập hóa nguồn dữ liệu Remotes ở Sidebar:
     - Bổ sung hoặc điều chỉnh bộ truy vấn nhánh: Danh sách `remotes` trong `SidebarNavigator` luôn được nạp đầy đủ cấu trúc máy chủ (tất cả các remote branches có sẵn), không bị phụ thuộc vào cờ bật/tắt `showRemoteBranch` (vốn chỉ đóng vai trò lọc hiển thị các đường nhánh trên bảng đồ thị DAG ảo hóa).
 
@@ -288,8 +288,8 @@ _Mục tiêu_: Chuyển đổi phân vùng `REMOTES` từ danh sách tĩnh (Read
 
 - [x] **Nhiệm vụ 6.5: Bảo Vệ An Toàn Tính Năng Amend Trong Commit Composer (Smart Amend Protection - Hướng 1: Hard Block)**
   - [x] **6.5.1**: Xây dựng tín hiệu dẫn xuất kiểm soát an toàn `canAmend` và `amendDisabledReason` trong `staging.store.ts`:
-    - Khóa tính năng (`canAmend = false`) khi kho chưa có commit nào (`commitHead === null`), tooltip hiển thị: *"Cannot amend: Repository has no commits yet"*.
-    - Khóa tính năng (`canAmend = false`) khi commit HEAD đã được đẩy lên remote (`upstreamBranch !== null && aheadCount === 0`) nhằm triệt tiêu lỗi phân nhánh 1 ahead / 1 behind; tooltip hiển thị: *"Cannot amend: Latest commit has already been pushed to remote"*.
+    - Khóa tính năng (`canAmend = false`) khi kho chưa có commit nào (`commitHead === null`), tooltip hiển thị: _"Cannot amend: Repository has no commits yet"_.
+    - Khóa tính năng (`canAmend = false`) khi commit HEAD đã được đẩy lên remote (`upstreamBranch !== null && aheadCount === 0`) nhằm triệt tiêu lỗi phân nhánh 1 ahead / 1 behind; tooltip hiển thị: _"Cannot amend: Latest commit has already been pushed to remote"_.
     - Kích hoạt (`canAmend = true`) khi kho đã có commit và đang có commit cục bộ chưa push (`aheadCount > 0`) hoặc chưa có upstream remote.
   - [x] **6.5.2**: Tích hợp cơ chế khóa vào `CommitComposer.tsx`:
     - Truyền `disabled={!canAmend.value}` và `title={amendDisabledReason.value}` vào Checkbox `Amend previous commit`.
@@ -418,5 +418,3 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 6 bư�
   - 12 unit test mới trên 3 tệp; 4 cổng chẩn đoán đạt 100% PASS (backend 163, extension 29, webview 284).
   - Ghi nhận 2 `[DEV_BUG]` (useless-assignment + import-order), 0 `[DESIGN_DEFECT]` — DDR = 0%, IBR = 100%.
   - **Ghi chú**: Nhiệm vụ 6.2.4 (Process Spawning Mitigation khai thác F# Core Engine lấy nhanh commit HEAD) được **hoãn** — yêu cầu thay đổi ngoài phạm vi TypeScript, sẽ theo dõi ở nhóm việc sau.
-
-

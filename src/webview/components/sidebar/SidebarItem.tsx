@@ -25,8 +25,10 @@ type SidebarItemProps = {
 
 const TYPE_ICON_PATHS: Record<SidebarItemType, string> = {
   "working-tree": "M3 3h4l2 2h4v8H3V3z",
-  branch: "M5 2v12M5 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM11 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM9 8H5",
-  "remote-branch": "M5 2v12M5 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM11 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM9 8H5",
+  branch:
+    "M5 2v12M5 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM11 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM9 8H5",
+  "remote-branch":
+    "M5 2v12M5 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM11 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM9 8H5",
   tag: "M8 2l6 6-6 6-6-6V2h6zM7 4.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z",
   stash: "M3 3h10v4H3V3zM3 7h10v6H3V7z"
 };

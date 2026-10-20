@@ -187,7 +187,9 @@ export function registerMessageHandlers(
 
   registerAction("fetchAll", (msg) => runMutation(gitMutator.fetchAll(msg.prune)));
   registerAction("pull", (msg) => runMutation(gitMutator.pull(msg.mode)));
-  registerAction("pullRemoteBranch", (msg) => runMutation(gitMutator.pullRemote(msg.remote, msg.branch)));
+  registerAction("pullRemoteBranch", (msg) =>
+    runMutation(gitMutator.pullRemote(msg.remote, msg.branch))
+  );
   registerAction("push", (msg) => runMutation(gitMutator.push(msg)));
   registerAction("stashSave", (msg) =>
     runMutation(gitMutator.stashSave(msg.message, msg.includeUntracked))

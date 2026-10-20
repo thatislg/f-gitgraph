@@ -377,9 +377,7 @@ export function handleStashAction(index: number, mode: "pop" | "drop"): void {
   }
 
   isStashOperating.value = true;
-  runAction(
-    mode === "pop" ? { command: "stashPop", index } : { command: "stashDrop", index }
-  );
+  runAction(mode === "pop" ? { command: "stashPop", index } : { command: "stashDrop", index });
 }
 
 /** Mở modal tạo nhánh mới từ commit cơ sở (mặc định HEAD). */
@@ -432,9 +430,7 @@ export function locateCommitOnGraphAction(commitHash: string, itemId?: string): 
 
   if (index >= 0) {
     playTick();
-    window.dispatchEvent(
-      new CustomEvent("scroll-to-commit", { detail: { index } })
-    );
+    window.dispatchEvent(new CustomEvent("scroll-to-commit", { detail: { index } }));
   }
 }
 

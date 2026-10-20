@@ -31,9 +31,7 @@ const branches = [
   { name: "feature/x", isHead: false, aheadCount: 2, upstream: null }
 ];
 
-const stashes = [
-  { index: 0, hash: "abc123", message: "WIP auth flow", date: "2 minutes ago" }
-];
+const stashes = [{ index: 0, hash: "abc123", message: "WIP auth flow", date: "2 minutes ago" }];
 
 function resetStore() {
   sidebarWidth.value = DEFAULT_SIDEBAR_WIDTH;
@@ -208,7 +206,9 @@ describe("SidebarNavigator", () => {
 
   it("ArrowDown di chuyển tiêu điểm xuống phần tử kế tiếp", () => {
     renderNavigator();
-    const first = container.querySelector<HTMLElement>("#section-header-working-tree") as HTMLElement;
+    const first = container.querySelector<HTMLElement>(
+      "#section-header-working-tree"
+    ) as HTMLElement;
     first.focus();
     dispatchKey(first, "ArrowDown");
 

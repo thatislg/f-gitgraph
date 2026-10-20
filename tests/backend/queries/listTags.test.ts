@@ -38,9 +38,9 @@ describe("parseTagList", () => {
   });
 
   it("preserves hierarchical and special-character tags", () => {
-    expect(parseTagList("release/v1.0.0\nv1.0.0+build123\nv1.0.0-rc.1\nbuild/2026-10-19\n")).toEqual(
-      ["release/v1.0.0", "v1.0.0+build123", "v1.0.0-rc.1", "build/2026-10-19"]
-    );
+    expect(
+      parseTagList("release/v1.0.0\nv1.0.0+build123\nv1.0.0-rc.1\nbuild/2026-10-19\n")
+    ).toEqual(["release/v1.0.0", "v1.0.0+build123", "v1.0.0-rc.1", "build/2026-10-19"]);
   });
 
   it("returns an empty array for empty or whitespace-only input", () => {

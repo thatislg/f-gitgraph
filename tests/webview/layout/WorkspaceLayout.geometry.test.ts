@@ -68,9 +68,9 @@ function snapshotGeometry(): GeometrySnapshot {
     container.querySelectorAll<SVGPolygonElement>(".graph-node-hexagon polygon")
   ).map((el) => el.getAttribute("points") ?? "");
 
-  const nodeOrigins = Array.from(container.querySelectorAll<SVGGElement>(".graph-node-hexagon")).map(
-    (el) => el.getAttribute("style") ?? ""
-  );
+  const nodeOrigins = Array.from(
+    container.querySelectorAll<SVGGElement>(".graph-node-hexagon")
+  ).map((el) => el.getAttribute("style") ?? "");
 
   return { branchPaths, hexagonPoints, nodeOrigins };
 }

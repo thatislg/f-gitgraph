@@ -30,47 +30,47 @@ Triển khai kiến trúc **Smart Amend Protection (Hướng 1: Hard Block)** th
 
 ### Tệp tác động
 
-| File                                             | Thay đổi                                                                          |
-| :----------------------------------------------- | :-------------------------------------------------------------------------------- |
-| `src/webview/lib/stores/staging.store.ts`        | Bổ sung `canAmend`, `amendDisabledReason`; chặn cứng trong `setAmend`.            |
-| `src/webview/components/staging/CommitComposer.tsx` | Gán `disabled` + `title` cho checkbox Amend.                                     |
-| `tests/webview/lib/stores/staging.store.test.ts` | 4 test `canAmend`/`amendDisabledReason` + 2 test chặn `setAmend`.                 |
-| `tests/webview/components/staging/CommitComposer.test.ts` | 3 test trạng thái disabled/tooltip checkbox Amend.                         |
+| File                                                      | Thay đổi                                                               |
+| :-------------------------------------------------------- | :--------------------------------------------------------------------- |
+| `src/webview/lib/stores/staging.store.ts`                 | Bổ sung `canAmend`, `amendDisabledReason`; chặn cứng trong `setAmend`. |
+| `src/webview/components/staging/CommitComposer.tsx`       | Gán `disabled` + `title` cho checkbox Amend.                           |
+| `tests/webview/lib/stores/staging.store.test.ts`          | 4 test `canAmend`/`amendDisabledReason` + 2 test chặn `setAmend`.      |
+| `tests/webview/components/staging/CommitComposer.test.ts` | 3 test trạng thái disabled/tooltip checkbox Amend.                     |
 
 ---
 
 ## 4. Nhật Ký Lỗi Biên Dịch & Chẩn Đoán (Compilation & Diagnostic Error Log)
 
-| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa | Kết Quả Sau Sửa |
-| :-: | :---: | :--- | :--- | :--- | :---: | :--- | :--- | :---: |
-| 1 | Vòng 1 | `tests/webview/lib/stores/staging.store.test.ts` | Lint | `import-js(order)`: `staging.store` phải đứng trước `sync.store` | `[DEV_BUG]` | Đặt nhóm import sai thứ tự | Sắp xếp lại nhóm import | ✅ Đã khắc phục |
-| 2 | Vòng 1 | `tests/webview/components/staging/CommitComposer.test.ts` | Lint | `import-js(order)`: `staging.store` phải đứng trước `sync.store` | `[DEV_BUG]` | Đặt nhóm import sai thứ tự | Sắp xếp lại nhóm import | ✅ Đã khắc phục |
+| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động                                          | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt                                      |  Phân Loại  | Nguyên Nhân Gốc            | Giải Pháp Đã Sửa        | Kết Quả Sau Sửa |
+| :-: | :------------: | :-------------------------------------------------------- | :------------- | :--------------------------------------------------------------- | :---------: | :------------------------- | :---------------------- | :-------------: |
+|  1  |     Vòng 1     | `tests/webview/lib/stores/staging.store.test.ts`          | Lint           | `import-js(order)`: `staging.store` phải đứng trước `sync.store` | `[DEV_BUG]` | Đặt nhóm import sai thứ tự | Sắp xếp lại nhóm import | ✅ Đã khắc phục |
+|  2  |     Vòng 1     | `tests/webview/components/staging/CommitComposer.test.ts` | Lint           | `import-js(order)`: `staging.store` phải đứng trước `sync.store` | `[DEV_BUG]` | Đặt nhóm import sai thứ tự | Sắp xếp lại nhóm import | ✅ Đã khắc phục |
 
 ### 4.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
-| Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
-| :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **2 vòng** | Vòng 1 (lint 2 lỗi) → Vòng 2 (sạch) |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **2 lỗi** | $E_{design} + E_{dev}$ |
-| **Số lỗi do Thiết Kế** | $E_{design}$ | **0 lỗi** | Thiết kế đã được cập nhật sẵn (Design-First-Time-Right) |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **2 lỗi** | 2 lỗi import order trong tệp test mới |
-| **Số sự cố Môi Trường/Tool** | $E_{env}$ | **0 sự cố** | Loại trừ khỏi tỷ lệ |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **0%** | $\frac{0}{2} \times 100\%$ |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **100%** | $\frac{2}{2} \times 100\%$ |
-| **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint: OK \| Compile: OK \| Test: OK |
+| Chỉ Số Định Lượng                         |   Ký Hiệu    | Giá Trị Thực Tế | Ghi Chú / Đánh Giá                                      |
+| :---------------------------------------- | :----------: | :-------------: | :------------------------------------------------------ |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)**   |     $C$      |   **2 vòng**    | Vòng 1 (lint 2 lỗi) → Vòng 2 (sạch)                     |
+| **Tổng số lỗi kỹ thuật**                  | $E_{total}$  |    **2 lỗi**    | $E_{design} + E_{dev}$                                  |
+| **Số lỗi do Thiết Kế**                    | $E_{design}$ |    **0 lỗi**    | Thiết kế đã được cập nhật sẵn (Design-First-Time-Right) |
+| **Số lỗi do Triển Khai (Bug Dev)**        |  $E_{dev}$   |    **2 lỗi**    | 2 lỗi import order trong tệp test mới                   |
+| **Số sự cố Môi Trường/Tool**              |  $E_{env}$   |   **0 sự cố**   | Loại trừ khỏi tỷ lệ                                     |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** |  **$DDR$**   |     **0%**      | $\frac{0}{2} \times 100\%$                              |
+| **TỶ LỆ BUG KHI DEV (IBR)**               |  **$IBR$**   |    **100%**     | $\frac{2}{2} \times 100\%$                              |
+| **Trạng thái cổng chẩn đoán cuối cùng**   |      -       |  **100% PASS**  | Typecheck: OK \| Lint: OK \| Compile: OK \| Test: OK    |
 
 ---
 
 ## 5. Kết Quả Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/webview/lib/stores/staging.store.test.ts` | ✅ 16/16 pass |
-| `tests/webview/components/staging/CommitComposer.test.ts` | ✅ 8/8 pass |
-| `pnpm run test` (backend + extension + webview) | ✅ 459/459 pass |
-| Typecheck (`pnpm run typecheck`) | ✅ sạch (toàn workspace) |
-| Lint (`pnpm run lint`) | ✅ 0 error / 0 warning |
-| Compile (`pnpm run compile`) | ✅ thành công |
+| Hạng mục                                                  | Kết quả                  |
+| :-------------------------------------------------------- | :----------------------- |
+| `tests/webview/lib/stores/staging.store.test.ts`          | ✅ 16/16 pass            |
+| `tests/webview/components/staging/CommitComposer.test.ts` | ✅ 8/8 pass              |
+| `pnpm run test` (backend + extension + webview)           | ✅ 459/459 pass          |
+| Typecheck (`pnpm run typecheck`)                          | ✅ sạch (toàn workspace) |
+| Lint (`pnpm run lint`)                                    | ✅ 0 error / 0 warning   |
+| Compile (`pnpm run compile`)                              | ✅ thành công            |
 
 ---
 

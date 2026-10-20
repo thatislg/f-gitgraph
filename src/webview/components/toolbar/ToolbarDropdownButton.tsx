@@ -131,7 +131,12 @@ export function ToolbarDropdownButton({
 
   function onTriggerKeyDown(event: KeyboardEvent): void {
     if (!isMenuOpen) {
-      if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown" || event.key === "ArrowUp") {
+      if (
+        event.key === "Enter" ||
+        event.key === " " ||
+        event.key === "ArrowDown" ||
+        event.key === "ArrowUp"
+      ) {
         event.preventDefault();
         openMenu(event.key === "ArrowUp" ? itemCount - 1 : 0);
       }
@@ -189,7 +194,12 @@ export function ToolbarDropdownButton({
           {isLoading ? (
             <span class="inline-flex animate-spin" aria-hidden="true">
               <Icon>
-                <path d="M8 1.5A6.5 6.5 0 1 1 1.5 8" fill="none" stroke="currentColor" stroke-width="2" />
+                <path
+                  d="M8 1.5A6.5 6.5 0 1 1 1.5 8"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
               </Icon>
             </span>
           ) : (
@@ -207,7 +217,9 @@ export function ToolbarDropdownButton({
           aria-expanded={isMenuOpen}
           aria-controls={menuId}
           aria-label={ariaLabel}
-          aria-activedescendant={isMenuOpen && focusedIndex >= 0 ? `${id}-item-${focusedIndex}` : undefined}
+          aria-activedescendant={
+            isMenuOpen && focusedIndex >= 0 ? `${id}-item-${focusedIndex}` : undefined
+          }
           disabled={disabled || isLoading}
           onClick={onTriggerClick}
           onKeyDown={onTriggerKeyDown}

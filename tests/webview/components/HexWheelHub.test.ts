@@ -124,9 +124,9 @@ describe("HexWheelHub", () => {
     wheel.openWheel();
     await flushEffects();
 
-    expect(container.querySelector("[data-petal='push'] [data-petal-badge='ahead']")?.textContent).toBe(
-      "↑ 2"
-    );
+    expect(
+      container.querySelector("[data-petal='push'] [data-petal-badge='ahead']")?.textContent
+    ).toBe("↑ 2");
     expect(
       container.querySelector("[data-petal='pull'] [data-petal-badge='behind']")?.textContent
     ).toBe("↓ 3");

@@ -399,10 +399,7 @@ export function refMenu(gitRef: GitRef, isHeadBranch: boolean): Array<ContextMen
  * Cung cấp 3 tác vụ: checkout thành nhánh cục bộ mới, kéo commit vào nhánh hiện tại, và
  * xóa vĩnh viễn nhánh remote trên máy chủ.
  */
-export function sidebarRemoteBranchMenu(
-  remote: string,
-  branch: string
-): Array<ContextMenuEntry> {
+export function sidebarRemoteBranchMenu(remote: string, branch: string): Array<ContextMenuEntry> {
   const ref = `${remote}/${branch}`;
   const source = `remote:${ref}`;
 

@@ -22,22 +22,22 @@ Hoàn thiện nền tảng backend cho thanh công cụ đồng bộ toàn cục
 
 ## 2. Cấu Trúc Mã Nguồn Tác Động
 
-| File | Nội dung |
-| :--- | :--- |
-| `src/extension/mutator/gitCliMutator.ts` | Bổ sung `fetchAll`, nâng cấp `pull(mode)`/`push(options)`, thêm `stashSave`/`stashPop`/`stashDrop`; mở rộng `normalizeError` (lỗi mạng/SSH chuẩn Anh). |
-| `src/backend/queries/syncStatus.ts` | Truy vấn `git rev-list --left-right --count HEAD...@{u}` qua `SimpleGit.raw`, export `parseAheadBehind` (thuần). |
-| `src/backend/queries/stashList.ts` | Truy vấn `git stash list --pretty=format:%gd%x00%h%x00%gs%x00%cr`, export `parseStashList` (thuần). |
-| `src/types/actions.ts` | Khai báo payload cho `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`. |
-| `src/types/queries.ts` | Khai báo query payload `syncStatus`/`stashList` cùng kiểu kết quả `SyncStatusResult`/`StashRecord`/`StashListResult`. |
-| `src/extension/services/messageHandler.ts` | Đăng ký 6 action mutate + 2 query mới. |
-| `src/extension/l10n/webviewL10n.ts` | Bổ sung 6 key lỗi nội địa hóa. |
-| `src/webview/lib/handler/action-result.ts` | Bổ sung 6 entry vào `ERROR_KEY`. |
-| `tests/backend/mutator/syncMutator.test.ts` | Unit test 6 lệnh mạng & stash (7 test). |
-| `tests/backend/queries/syncStatus.test.ts` | Unit test bóc tách ahead/behind (8 test). |
-| `tests/backend/queries/stashList.test.ts` | Unit test bóc tách danh sách stash (6 test). |
-| `tests/extension/services/syncMessageHandler.test.ts` | Unit test định tuyến RPC (5 test). |
-| `tests/backend/gitCliMutator.test.ts` | Sửa assertion `index.lock` sang chuỗi tiếng Anh. |
-| `vitest.config.ts` | Bổ sung `testTimeout`/`hookTimeout` 30s cho project `backend`. |
+| File                                                  | Nội dung                                                                                                                                               |
+| :---------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/extension/mutator/gitCliMutator.ts`              | Bổ sung `fetchAll`, nâng cấp `pull(mode)`/`push(options)`, thêm `stashSave`/`stashPop`/`stashDrop`; mở rộng `normalizeError` (lỗi mạng/SSH chuẩn Anh). |
+| `src/backend/queries/syncStatus.ts`                   | Truy vấn `git rev-list --left-right --count HEAD...@{u}` qua `SimpleGit.raw`, export `parseAheadBehind` (thuần).                                       |
+| `src/backend/queries/stashList.ts`                    | Truy vấn `git stash list --pretty=format:%gd%x00%h%x00%gs%x00%cr`, export `parseStashList` (thuần).                                                    |
+| `src/types/actions.ts`                                | Khai báo payload cho `fetchAll`, `pull`, `push`, `stashSave`, `stashPop`, `stashDrop`.                                                                 |
+| `src/types/queries.ts`                                | Khai báo query payload `syncStatus`/`stashList` cùng kiểu kết quả `SyncStatusResult`/`StashRecord`/`StashListResult`.                                  |
+| `src/extension/services/messageHandler.ts`            | Đăng ký 6 action mutate + 2 query mới.                                                                                                                 |
+| `src/extension/l10n/webviewL10n.ts`                   | Bổ sung 6 key lỗi nội địa hóa.                                                                                                                         |
+| `src/webview/lib/handler/action-result.ts`            | Bổ sung 6 entry vào `ERROR_KEY`.                                                                                                                       |
+| `tests/backend/mutator/syncMutator.test.ts`           | Unit test 6 lệnh mạng & stash (7 test).                                                                                                                |
+| `tests/backend/queries/syncStatus.test.ts`            | Unit test bóc tách ahead/behind (8 test).                                                                                                              |
+| `tests/backend/queries/stashList.test.ts`             | Unit test bóc tách danh sách stash (6 test).                                                                                                           |
+| `tests/extension/services/syncMessageHandler.test.ts` | Unit test định tuyến RPC (5 test).                                                                                                                     |
+| `tests/backend/gitCliMutator.test.ts`                 | Sửa assertion `index.lock` sang chuỗi tiếng Anh.                                                                                                       |
+| `vitest.config.ts`                                    | Bổ sung `testTimeout`/`hookTimeout` 30s cho project `backend`.                                                                                         |
 
 ---
 
@@ -45,14 +45,14 @@ Hoàn thiện nền tảng backend cho thanh công cụ đồng bộ toàn cục
 
 ### 3.1. Nhiệm vụ 1.1 — Mở rộng `GitCliMutator`
 
-| Phương thức | Lệnh Git gốc | Ghi chú an toàn |
-| :--- | :--- | :--- |
-| `fetchAll(prune = true)` | `git fetch --all [--prune]` | `--prune` dọn tracking branch đã bị xóa. |
-| `pull(mode)` | `git pull --no-rebase` / `git pull --rebase` | Tự phát hiện xung đột (`CONFLICT`) và overwrite cục bộ. |
-| `push(options)` | `git push [--force-with-lease] [-u] [remote branch]` | Hỗ trợ `--force-with-lease`, `-u`, chỉ định remote/branch; nhận diện `[rejected]`/`non-fast-forward`. |
-| `stashSave(message?, includeUntracked)` | `git stash push [-u] [-m msg] --` | Ký tự `--` chặn nhầm đường dẫn; `-u` kèm untracked. |
-| `stashPop(index = 0)` | `git stash pop stash@{index}` | Chuẩn hóa `index` (`Math.max(0, Math.floor)`). |
-| `stashDrop(index = 0)` | `git stash drop stash@{index}` | Chuẩn hóa `index` tương tự. |
+| Phương thức                             | Lệnh Git gốc                                         | Ghi chú an toàn                                                                                       |
+| :-------------------------------------- | :--------------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| `fetchAll(prune = true)`                | `git fetch --all [--prune]`                          | `--prune` dọn tracking branch đã bị xóa.                                                              |
+| `pull(mode)`                            | `git pull --no-rebase` / `git pull --rebase`         | Tự phát hiện xung đột (`CONFLICT`) và overwrite cục bộ.                                               |
+| `push(options)`                         | `git push [--force-with-lease] [-u] [remote branch]` | Hỗ trợ `--force-with-lease`, `-u`, chỉ định remote/branch; nhận diện `[rejected]`/`non-fast-forward`. |
+| `stashSave(message?, includeUntracked)` | `git stash push [-u] [-m msg] --`                    | Ký tự `--` chặn nhầm đường dẫn; `-u` kèm untracked.                                                   |
+| `stashPop(index = 0)`                   | `git stash pop stash@{index}`                        | Chuẩn hóa `index` (`Math.max(0, Math.floor)`).                                                        |
+| `stashDrop(index = 0)`                  | `git stash drop stash@{index}`                       | Chuẩn hóa `index` tương tự.                                                                           |
 
 `normalizeError` được mở rộng thêm nhóm lỗi: kết nối mạng (`Could not resolve host`, `Failed to connect`, `Network is unreachable`, `Could not read from remote repository`), xác thực (`Permission denied (publickey)`, `Authentication failed`, `Invalid username or password`), và đổi chuỗi `index.lock` sang tiếng Anh chuẩn.
 
@@ -78,43 +78,43 @@ Hoàn thiện nền tảng backend cho thanh công cụ đồng bộ toàn cục
 
 ## 4. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/backend/mutator/syncMutator.test.ts` | ✅ 7/7 pass |
-| `tests/backend/queries/syncStatus.test.ts` | ✅ 8/8 pass |
-| `tests/backend/queries/stashList.test.ts` | ✅ 6/6 pass |
-| `tests/extension/services/syncMessageHandler.test.ts` | ✅ 5/5 pass |
-| Toàn bộ project `backend` | ✅ 148/148 pass |
-| Toàn bộ project `extension` | ✅ 27/27 pass |
-| Toàn bộ project `webview` | ✅ 121/121 pass |
-| Typecheck (`pnpm run typecheck`) | ✅ sạch (toàn workspace) |
-| Lint (`pnpm run lint`) | ✅ 0 error / 0 warning |
-| Compile (`pnpm run compile`) | ✅ thành công |
+| Hạng mục                                              | Kết quả                  |
+| :---------------------------------------------------- | :----------------------- |
+| `tests/backend/mutator/syncMutator.test.ts`           | ✅ 7/7 pass              |
+| `tests/backend/queries/syncStatus.test.ts`            | ✅ 8/8 pass              |
+| `tests/backend/queries/stashList.test.ts`             | ✅ 6/6 pass              |
+| `tests/extension/services/syncMessageHandler.test.ts` | ✅ 5/5 pass              |
+| Toàn bộ project `backend`                             | ✅ 148/148 pass          |
+| Toàn bộ project `extension`                           | ✅ 27/27 pass            |
+| Toàn bộ project `webview`                             | ✅ 121/121 pass          |
+| Typecheck (`pnpm run typecheck`)                      | ✅ sạch (toàn workspace) |
+| Lint (`pnpm run lint`)                                | ✅ 0 error / 0 warning   |
+| Compile (`pnpm run compile`)                          | ✅ thành công            |
 
 ---
 
 ## 5. Nhật Ký Lỗi Biên Dịch & Chẩn Đoán (Compilation & Diagnostic Error Log)
 
-| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa | Kết Quả Sau Sửa |
-| :-: | :---: | :--- | :---: | :--- | :---: | :--- | :--- | :---: |
-| 1 | Vòng 1 | `docs/02_design/phase3/05_...md` | Typecheck | Bộ truy vấn dùng `child_process.spawn` → kéo `node:child_process`/`Buffer` vào `src/types/queries.ts` dùng chung với Webview (`types: []`) phá typecheck Webview | `[DESIGN_DEFECT]` | Thiết kế chọn `spawn` tự phát, bỏ qua ranh giới kiểu Node.js / Webview | Chuyển sang `SimpleGit.raw(...)`, kế thừa `gitPath`, định vị kiểu kết quả tại `src/types/queries.ts`; cập nhật thiết kế v1.1.0 | ✅ Đã khắc phục |
-| 2 | Vòng 1 | `docs/02_design/phase3/05_...md` (Mục 2.5, 4) | Unit Test | Thiết kế ghi `is not a stash-like commit` nhưng Git 2.56.0 thực tế trả `stash@{N} is not a valid reference` khi chỉ số ngoài ngăn xếp | `[DESIGN_DEFECT]` | Chuỗi nhận diện lỗi stash trong thiết kế không khớp đầu ra Git thực | Bắt cả 3 chuỗi (`is not a valid reference` / `is not a stash-like commit` / `No stash entries found`); cập nhật thiết kế v1.2.0 | ✅ Đã khắc phục |
-| 3 | Vòng 1 | `tests/backend/mutator/syncMutator.test.ts` | Unit Test | `git init --bare` mặc định `HEAD = master` (không tồn tại) → clone không checkout `main` | `[DEV_BUG]` | Bỏ qua nhánh khởi tạo của bare remote | Dùng `git init --bare --initial-branch=main` trong helper test | ✅ Đã khắc phục |
-| 4 | Vòng 1 | `tests/backend/queries/syncStatus.test.ts` | Unit Test | Test `behind` đọc `@{u}` cục bộ nhưng chưa cập nhật tracking ref remote | `[DEV_BUG]` | `rev-list --left-right --count HEAD...@{u}` đọc ref cục bộ, cần `fetch` trước | Thêm `git fetch origin` trước khi assert `behind` | ✅ Đã khắc phục |
-| 5 | Vòng 1 | `vitest.config.ts` | Unit Test | Test mạng/clone/push vượt ngưỡng `hookTimeout`/`testTimeout` mặc định 5s trên Windows | `[ENV_TOOL_ISSUE]` | Độ trễ `CreateProcess` khi spawn `git.exe` cold-start trên Windows | Nâng `testTimeout`/`hookTimeout` lên 30s cho project `backend` | ✅ Đã khắc phục (loại khỏi tỷ lệ) |
+| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động                              | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt                                                                                                                                      |     Phân Loại      | Nguyên Nhân Gốc                                                               | Giải Pháp Đã Sửa                                                                                                                |          Kết Quả Sau Sửa          |
+| :-: | :------------: | :-------------------------------------------- | :------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------: | :---------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------: |
+|  1  |     Vòng 1     | `docs/02_design/phase3/05_...md`              |   Typecheck    | Bộ truy vấn dùng `child_process.spawn` → kéo `node:child_process`/`Buffer` vào `src/types/queries.ts` dùng chung với Webview (`types: []`) phá typecheck Webview | `[DESIGN_DEFECT]`  | Thiết kế chọn `spawn` tự phát, bỏ qua ranh giới kiểu Node.js / Webview        | Chuyển sang `SimpleGit.raw(...)`, kế thừa `gitPath`, định vị kiểu kết quả tại `src/types/queries.ts`; cập nhật thiết kế v1.1.0  |          ✅ Đã khắc phục          |
+|  2  |     Vòng 1     | `docs/02_design/phase3/05_...md` (Mục 2.5, 4) |   Unit Test    | Thiết kế ghi `is not a stash-like commit` nhưng Git 2.56.0 thực tế trả `stash@{N} is not a valid reference` khi chỉ số ngoài ngăn xếp                            | `[DESIGN_DEFECT]`  | Chuỗi nhận diện lỗi stash trong thiết kế không khớp đầu ra Git thực           | Bắt cả 3 chuỗi (`is not a valid reference` / `is not a stash-like commit` / `No stash entries found`); cập nhật thiết kế v1.2.0 |          ✅ Đã khắc phục          |
+|  3  |     Vòng 1     | `tests/backend/mutator/syncMutator.test.ts`   |   Unit Test    | `git init --bare` mặc định `HEAD = master` (không tồn tại) → clone không checkout `main`                                                                         |    `[DEV_BUG]`     | Bỏ qua nhánh khởi tạo của bare remote                                         | Dùng `git init --bare --initial-branch=main` trong helper test                                                                  |          ✅ Đã khắc phục          |
+|  4  |     Vòng 1     | `tests/backend/queries/syncStatus.test.ts`    |   Unit Test    | Test `behind` đọc `@{u}` cục bộ nhưng chưa cập nhật tracking ref remote                                                                                          |    `[DEV_BUG]`     | `rev-list --left-right --count HEAD...@{u}` đọc ref cục bộ, cần `fetch` trước | Thêm `git fetch origin` trước khi assert `behind`                                                                               |          ✅ Đã khắc phục          |
+|  5  |     Vòng 1     | `vitest.config.ts`                            |   Unit Test    | Test mạng/clone/push vượt ngưỡng `hookTimeout`/`testTimeout` mặc định 5s trên Windows                                                                            | `[ENV_TOOL_ISSUE]` | Độ trễ `CreateProcess` khi spawn `git.exe` cold-start trên Windows            | Nâng `testTimeout`/`hookTimeout` lên 30s cho project `backend`                                                                  | ✅ Đã khắc phục (loại khỏi tỷ lệ) |
 
 ### 5.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
-| Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
-| :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **2 vòng** | Vòng 1 (typecheck + test phát hiện 4 lỗi) → Vòng 2 (sửa + re-run đến sạch) |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **4 lỗi** | $E_{design} + E_{dev}$ |
-| **Số lỗi do Thiết Kế** | $E_{design}$ | **2 lỗi** | `spawn` → `SimpleGit`; chuỗi nhận diện lỗi stash |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **2 lỗi** | Bare remote HEAD; thiếu `fetch` trước khi assert `behind` |
-| **Số sự cố Môi Trường/Tool** | $E_{env}$ | **1 sự cố** | Windows `CreateProcess` chậm — loại trừ khỏi tỷ lệ |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **50.0%** | $\frac{2}{4} \times 100\%$ |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **50.0%** | $\frac{2}{4} \times 100\%$ |
-| **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend+extension+webview): OK |
+| Chỉ Số Định Lượng                         |   Ký Hiệu    | Giá Trị Thực Tế | Ghi Chú / Đánh Giá                                                               |
+| :---------------------------------------- | :----------: | :-------------: | :------------------------------------------------------------------------------- |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)**   |     $C$      |   **2 vòng**    | Vòng 1 (typecheck + test phát hiện 4 lỗi) → Vòng 2 (sửa + re-run đến sạch)       |
+| **Tổng số lỗi kỹ thuật**                  | $E_{total}$  |    **4 lỗi**    | $E_{design} + E_{dev}$                                                           |
+| **Số lỗi do Thiết Kế**                    | $E_{design}$ |    **2 lỗi**    | `spawn` → `SimpleGit`; chuỗi nhận diện lỗi stash                                 |
+| **Số lỗi do Triển Khai (Bug Dev)**        |  $E_{dev}$   |    **2 lỗi**    | Bare remote HEAD; thiếu `fetch` trước khi assert `behind`                        |
+| **Số sự cố Môi Trường/Tool**              |  $E_{env}$   |   **1 sự cố**   | Windows `CreateProcess` chậm — loại trừ khỏi tỷ lệ                               |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** |  **$DDR$**   |    **50.0%**    | $\frac{2}{4} \times 100\%$                                                       |
+| **TỶ LỆ BUG KHI DEV (IBR)**               |  **$IBR$**   |    **50.0%**    | $\frac{2}{4} \times 100\%$                                                       |
+| **Trạng thái cổng chẩn đoán cuối cùng**   |      -       |  **100% PASS**  | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend+extension+webview): OK |
 
 ---
 
@@ -127,11 +127,11 @@ Hoàn thiện nền tảng backend cho thanh công cụ đồng bộ toàn cục
 
 ## 7. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| Mở rộng `GitCliMutator` (fetchAll/pull/push/stash) | ✅ Đạt |
-| Bộ truy vấn `syncStatus`/`stashList` thuần | ✅ Đạt |
-| Hợp đồng RPC Contract-First (`actions`/`queries`) | ✅ Đạt |
-| Đăng ký `messageHandler` (6 action + 2 query) | ✅ Đạt |
-| Unit test backend (26 test mới) | ✅ 26/26 |
-| Typecheck + lint + compile | ✅ Đạt |
+| Tiêu chí                                           | Trạng thái |
+| :------------------------------------------------- | :--------: |
+| Mở rộng `GitCliMutator` (fetchAll/pull/push/stash) |   ✅ Đạt   |
+| Bộ truy vấn `syncStatus`/`stashList` thuần         |   ✅ Đạt   |
+| Hợp đồng RPC Contract-First (`actions`/`queries`)  |   ✅ Đạt   |
+| Đăng ký `messageHandler` (6 action + 2 query)      |   ✅ Đạt   |
+| Unit test backend (26 test mới)                    |  ✅ 26/26  |
+| Typecheck + lint + compile                         |   ✅ Đạt   |

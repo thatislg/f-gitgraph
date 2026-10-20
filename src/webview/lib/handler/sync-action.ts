@@ -8,15 +8,10 @@ import {
   refreshSyncStatus
 } from "@/webview/lib/actions";
 import { playPullSuccessSound, playPushSuccessSound } from "@/webview/lib/audio";
+import { finishOperation } from "@/webview/lib/stores/loading.store";
 import { isFetching, isPulling, isPushing, isStashing } from "@/webview/lib/stores/sync.store";
 
-type SyncActionCommand =
-  | "fetchAll"
-  | "pull"
-  | "push"
-  | "stashSave"
-  | "stashPop"
-  | "stashDrop";
+type SyncActionCommand = "fetchAll" | "pull" | "push" | "stashSave" | "stashPop" | "stashDrop";
 
 type SyncActionResponse = Extract<ActionResponse, { command: SyncActionCommand }>;
 
@@ -56,6 +51,7 @@ function releaseBusyFlag(command: SyncActionCommand): void {
  */
 export function handleSyncAction(msg: SyncActionResponse): void {
   releaseBusyFlag(msg.command);
+  finishOperation();
 
   if (msg.status !== null) {
     openErrorDialog(window.l10n[ERROR_KEY[msg.command]], msg.status);

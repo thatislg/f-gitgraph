@@ -146,7 +146,16 @@ describe("search.store computed signals", () => {
   it("bỏ qua các dòng không có metadata", () => {
     windowRows.value = [
       makeRow(makeCommit({ hash: "a1", message: "login" })),
-      { hash: "ghost", metadata: undefined, x: 0, y: 24, lane: 0, color: 0, isMerge: false, isRoot: false }
+      {
+        hash: "ghost",
+        metadata: undefined,
+        x: 0,
+        y: 24,
+        lane: 0,
+        color: 0,
+        isMerge: false,
+        isRoot: false
+      }
     ];
     searchQuery.value = "login";
 

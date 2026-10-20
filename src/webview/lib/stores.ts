@@ -12,6 +12,13 @@ export const headBranch = signal<string | null>(null);
 /** Nhóm nhánh remote theo tên remote (độc lập với cờ `showRemoteBranch`). */
 export const remoteGroups = signal<Array<{ name: string; branches: string[] }>>([]);
 
+/**
+ * `true` khi danh sách nhánh remote đang tải về (chưa nhận phản hồi truy vấn
+ * `remoteBranches`). Tách trạng thái "đang tải" khỏi "đã tải nhưng rỗng" để phân vùng
+ * REMOTES không hiển thị nhầm "No remote branches" khi dữ liệu chưa kịp về.
+ */
+export const remoteBranchesLoading = signal<boolean>(true);
+
 export const commitList = signal<Array<GitCommitNode> | undefined>(undefined);
 /** Hash of the commit that HEAD points to, or `null` when the repo has no commit. */
 export const commitHead = signal<string | null>(null);

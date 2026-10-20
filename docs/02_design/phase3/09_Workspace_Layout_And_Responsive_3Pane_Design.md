@@ -14,6 +14,7 @@ Tài liệu này đặc tả chi tiết kiến trúc tầng Giao diện (Webview
 ## 1. Tầm Nhìn, Mục Tiêu & Cam Kết Bất Biến Hình Học Tuyệt Đối
 
 ### 1.1. Mục Tiêu Cốt Lõi
+
 1. **Hợp nhất không gian làm việc 3 phân vùng (3-Pane Workspace)**: Kết nối liền mạch 3 thành phần giao diện chính thành một thể thống nhất:
    - **Khung Trái (Left Pane)**: Cây điều hướng tài nguyên `<SidebarNavigator />` (chiều rộng $160\text{px} – 450\text{px}$ hoặc thu gọn về $0\text{px}$).
    - **Khung Giữa (Center Pane)**: Bảng đồ thị commit DAG ảo hóa `<CommitTable />` (kết hợp SVG đường cong nhánh Bézier và nút lục giác `HexagonNode`).
@@ -21,6 +22,7 @@ Tài liệu này đặc tả chi tiết kiến trúc tầng Giao diện (Webview
 2. **Thích ứng màn hình thông minh (Responsive Breakpoints)**: Tự động chuyển đổi giữa chế độ Docked Column trên màn hình UltraWide ($> 1440\text{px}$), Overlay nổi trên màn hình tiêu chuẩn ($1024\text{px} – 1440\text{px}$), và tự động thu gọn Sidebar trên màn hình hẹp ($< 1024\text{px}$).
 
 ### 1.2. Cam Kết Bất Biến Hình Học Đồ Thị Tuyệt Đối (Zero Layout Shift Invariance)
+
 - **Đúc kết từ Nguyên Tắc 3 của Phase 3.1**:
   - Việc mở rộng, thu hẹp hoặc đóng mở hoàn toàn Sidebar bên trái **chỉ được phép thay đổi chiều rộng phần nhìn (Viewport Width) của bảng ảo hóa**, tuyệt đối **không được phép làm thay đổi**:
     1. Tọa độ $Y$ của các dòng commit (chiều cao mỗi dòng cố định bất biến $24\text{px}$).
@@ -37,7 +39,7 @@ Tài liệu này đặc tả chi tiết kiến trúc tầng Giao diện (Webview
 flowchart TD
     subgraph ViewportContainer["<WorkspaceLayout /> (100vw x 100vh, Flex-column, Overflow Hidden)"]
         TopBar["<GlobalToolbar /> (Chiều cao cố định 40px)"]
-        
+
         subgraph BodyRow["<WorkspaceBody /> (Flex-1, Flex-row, Chiếm toàn bộ không gian còn lại)"]
             LeftPane["<SidebarContainer /> (Width = sidebarWidth px, min: 160px, max: 450px)"]
             CenterPane["<GraphMainContainer /> (Flex-1, Bọc bởi ResizeObserver)"]
@@ -57,19 +59,19 @@ flowchart TD
 - **Vỏ bọc ngoài cùng (`workspace-layout-root`)**:
   - Chiều rộng: $100\text{vw}$, chiều cao: $100\text{vh}$, `overflow: hidden; display: flex; flex-direction: column`.
   - Phân tầng dọc:
-    - *Tầng 1 (Đỉnh)*: Thanh công cụ `<GlobalToolbar />` với chiều cao cố định $40\text{px}$.
-    - *Tầng 2 (Thân)*: Khung chứa `<WorkspaceBody />` với thuộc tính `flex: 1; display: flex; flex-direction: row; min-height: 0; position: relative`.
+    - _Tầng 1 (Đỉnh)_: Thanh công cụ `<GlobalToolbar />` với chiều cao cố định $40\text{px}$.
+    - _Tầng 2 (Thân)_: Khung chứa `<WorkspaceBody />` với thuộc tính `flex: 1; display: flex; flex-direction: row; min-height: 0; position: relative`.
 
 #### Bảng Thuộc Tính Props Của `WorkspaceLayout`:
 
-| Tên Thuộc Tính | Kiểu Dữ Liệu | Bắt Buộc? | Mặc Định | Ràng Buộc & Mô Tả Ý Nghĩa |
-| :--- | :--- | :---: | :---: | :--- |
-| `sidebar` | Component Con | Có | - | Phần tử cây điều hướng SidebarNavigator bên trái |
-| `graph` | Component Con | Có | - | Phần tử bảng ảo hóa đồ thị CommitTable ở giữa |
-| `toolbar` | Component Con | Có | - | Phần tử thanh công cụ GlobalToolbar ở đỉnh |
-| `inspector` | Component Con \| null | Không | `null` | Phần tử Inspector nổi (StagingArea hoặc CommitDetails) |
-| `isSidebarCollapsed` | boolean | Có | - | Cờ trạng thái thu gọn Sidebar |
-| `sidebarWidth` | number | Có | - | Độ rộng hiện tại của Sidebar tính theo pixel (kẹp trong $[160, 450]$) |
+| Tên Thuộc Tính       | Kiểu Dữ Liệu          | Bắt Buộc? | Mặc Định | Ràng Buộc & Mô Tả Ý Nghĩa                                             |
+| :------------------- | :-------------------- | :-------: | :------: | :-------------------------------------------------------------------- |
+| `sidebar`            | Component Con         |    Có     |    -     | Phần tử cây điều hướng SidebarNavigator bên trái                      |
+| `graph`              | Component Con         |    Có     |    -     | Phần tử bảng ảo hóa đồ thị CommitTable ở giữa                         |
+| `toolbar`            | Component Con         |    Có     |    -     | Phần tử thanh công cụ GlobalToolbar ở đỉnh                            |
+| `inspector`          | Component Con \| null |   Không   |  `null`  | Phần tử Inspector nổi (StagingArea hoặc CommitDetails)                |
+| `isSidebarCollapsed` | boolean               |    Có     |    -     | Cờ trạng thái thu gọn Sidebar                                         |
+| `sidebarWidth`       | number                |    Có     |    -     | Độ rộng hiện tại của Sidebar tính theo pixel (kẹp trong $[160, 450]$) |
 
 ---
 
@@ -98,11 +100,11 @@ flowchart TD
 
 ### Bảng Ma Trận Các Ngưỡng Thích Ứng Màn Hình (Responsive Breakpoints Matrix):
 
-| Ngưỡng Độ Rộng (Viewport Width) | Phân Loại Màn Hình | Hành Vi Bố Cục Sidebar | Hành Vi Bố Cục Inspector (Staging/Details) | Trải Nghiệm Người Dùng Mục Tiêu |
-| :--- | :--- | :--- | :--- | :--- |
-| **Siêu Rộng (> 1440px)** | Màn hình ngoài UltraWide / 4K Desktop | Mở rộng đầy đủ 260px – 320px | Docked Column cố định bên phải (rộng 420px), không che đồ thị | Không gian tối đa: Vừa xem trọn vẹn đồ thị DAG, vừa thao tác Staging cùng lúc. |
-| **Tiêu Chuẩn (1024px – 1440px)** | Laptop 14"-16" / Màn hình Full HD | Mở mặc định 220px (có thể kéo dãn) | Overlay nổi lồng trong `CornerCrossFrame` phát sáng Neon, che một phần bảng | Tối ưu diện tích đồ thị; click mở Inspector khi cần thiết. |
-| **Thu Nhỏ (< 1024px)** | Màn hình hẹp / Split Editor 2 cột | Tự động thu gọn về 0px (`isCollapsed = true`) | Overlay toàn chiều rộng hoặc Drawer ngăn kéo dưới | Tập trung hoàn toàn vào đồ thị; mở Sidebar qua nút nhanh trên Toolbar. |
+| Ngưỡng Độ Rộng (Viewport Width)  | Phân Loại Màn Hình                    | Hành Vi Bố Cục Sidebar                        | Hành Vi Bố Cục Inspector (Staging/Details)                                  | Trải Nghiệm Người Dùng Mục Tiêu                                                |
+| :------------------------------- | :------------------------------------ | :-------------------------------------------- | :-------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| **Siêu Rộng (> 1440px)**         | Màn hình ngoài UltraWide / 4K Desktop | Mở rộng đầy đủ 260px – 320px                  | Docked Column cố định bên phải (rộng 420px), không che đồ thị               | Không gian tối đa: Vừa xem trọn vẹn đồ thị DAG, vừa thao tác Staging cùng lúc. |
+| **Tiêu Chuẩn (1024px – 1440px)** | Laptop 14"-16" / Màn hình Full HD     | Mở mặc định 220px (có thể kéo dãn)            | Overlay nổi lồng trong `CornerCrossFrame` phát sáng Neon, che một phần bảng | Tối ưu diện tích đồ thị; click mở Inspector khi cần thiết.                     |
+| **Thu Nhỏ (< 1024px)**           | Màn hình hẹp / Split Editor 2 cột     | Tự động thu gọn về 0px (`isCollapsed = true`) | Overlay toàn chiều rộng hoặc Drawer ngăn kéo dưới                           | Tập trung hoàn toàn vào đồ thị; mở Sidebar qua nút nhanh trên Toolbar.         |
 
 ---
 
@@ -114,15 +116,15 @@ flowchart TD
 flowchart TD
     Phase1["Pha 1: Sidebar ở độ rộng mặc định 220px<br/>Snapshot: đường nhánh Bézier (branchD_1) & tọa độ nút lục giác (nodes_1)"]
     --> Action1["Kéo dãn Sidebar sang độ rộng 380px (+160px)"]
-    
+
     Action1 --> Phase2["Pha 2: Sidebar ở độ rộng 380px<br/>Snapshot: đường nhánh Bézier (branchD_2) & tọa độ nút lục giác (nodes_2)"]
-    
+
     Phase2 --> Action2["Thu gọn hoàn toàn Sidebar về 0px (Collapsed)"]
-    
+
     Action2 --> Phase3["Pha 3: Sidebar ở độ rộng 0px<br/>Snapshot: đường nhánh Bézier (branchD_3) & tọa độ nút lục giác (nodes_3)"]
-    
+
     Phase3 --> Compare["So sánh toán học:<br/>branchD_1 toEqual branchD_2 toEqual branchD_3<br/>nodes_1 toEqual nodes_2 toEqual nodes_3"]
-    
+
     Compare --> Verdict["Kết luận nghiệm thu: Sai số = 0 pixel (Zero Layout Shift)"]
 ```
 
@@ -144,15 +146,15 @@ flowchart TD
 
 Toàn bộ các thông số kích thước của bố cục được điều khiển tập trung qua hệ thống biến CSS cấp root:
 
-| Tên Biến CSS | Giá Trị Mặc Định | Ràng Buộc Kỹ Thuật | Mô Tả Ý Nghĩa Kỹ Thuật |
-| :--- | :---: | :---: | :--- |
-| `--toolbar-height` | `40px` | Cố định bất biến | Chiều cao cố định của thanh công cụ đỉnh toàn cục |
-| `--sidebar-width` | `220px` | Biến thiên | Chiều rộng hiện tại của cây điều hướng Sidebar bên trái |
-| `--sidebar-min-width` | `160px` | Cận dưới an toàn | Giới hạn chiều rộng tối thiểu cho phép kéo dãn |
-| `--sidebar-max-width` | `450px` | Cận trên an toàn | Giới hạn chiều rộng tối đa cho phép kéo dãn |
-| `--col-graph` | Tính theo số lane | Bất biến F# Core | Chiều rộng cột đồ thị SVG do F# Core điều phối |
-| `--row-height` | `24px` | Cố định bất biến | Chiều cao chuẩn mực bất biến của từng dòng commit |
-| `--inspector-overlay-z` | `40` | Lớp nổi | Chỉ số z-index của bảng Inspector nổi |
+| Tên Biến CSS            | Giá Trị Mặc Định  | Ràng Buộc Kỹ Thuật | Mô Tả Ý Nghĩa Kỹ Thuật                                  |
+| :---------------------- | :---------------: | :----------------: | :------------------------------------------------------ |
+| `--toolbar-height`      |      `40px`       |  Cố định bất biến  | Chiều cao cố định của thanh công cụ đỉnh toàn cục       |
+| `--sidebar-width`       |      `220px`      |     Biến thiên     | Chiều rộng hiện tại của cây điều hướng Sidebar bên trái |
+| `--sidebar-min-width`   |      `160px`      |  Cận dưới an toàn  | Giới hạn chiều rộng tối thiểu cho phép kéo dãn          |
+| `--sidebar-max-width`   |      `450px`      |  Cận trên an toàn  | Giới hạn chiều rộng tối đa cho phép kéo dãn             |
+| `--col-graph`           | Tính theo số lane |  Bất biến F# Core  | Chiều rộng cột đồ thị SVG do F# Core điều phối          |
+| `--row-height`          |      `24px`       |  Cố định bất biến  | Chiều cao chuẩn mực bất biến của từng dòng commit       |
+| `--inspector-overlay-z` |       `40`        |      Lớp nổi       | Chỉ số z-index của bảng Inspector nổi                   |
 
 ---
 
@@ -160,17 +162,16 @@ Toàn bộ các thông số kích thước của bố cục được điều khi
 
 Mọi tệp kiểm thử cho Nhóm Việc 5 bắt buộc đặt tên với đuôi `*.test.ts`, vận hành độc lập trên runner `vitest`:
 
-| Tệp Kiểm Thử Độc Lập | Module Mục Tiêu | Kịch Bản Kiểm Thử Chi Tiết Bắt Buộc |
-| :--- | :--- | :--- |
+| Tệp Kiểm Thử Độc Lập                                    | Module Mục Tiêu                           | Kịch Bản Kiểm Thử Chi Tiết Bắt Buộc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :------------------------------------------------------ | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `tests/webview/layout/WorkspaceLayout.geometry.test.ts` | `WorkspaceLayout.tsx` & `CommitTable.tsx` | 1. **Snapshot ban đầu (Sidebar 220px)**: Ghi lại trọn vẹn mảng thuộc tính `d` của đường nhánh Bézier và tọa độ nút lục giác `HexagonNode`.<br>2. **Mở rộng Sidebar lên 380px**: Cập nhật độ rộng, kích hoạt resize, snapshot lại dữ liệu hình học, assert `toEqual` xác nhận độ lệch bằng 0 pixel.<br>3. **Thu gọn Sidebar về 0px**: Đặt `isCollapsed = true`, snapshot lại dữ liệu hình học, assert `toEqual` xác nhận độ lệch bằng 0 pixel.<br>4. **Bảo toàn chiều cao hàng**: Xác nhận mọi dòng bảng `CommitRow` giữ nguyên chiều cao đúng 24px trong suốt quá trình co giãn. |
-| `tests/webview/layout/WorkspaceLayout.test.ts` | `WorkspaceLayout.tsx` | 1. **Kết xuất đầy đủ**: Render trọn vẹn 3 phân vùng (Toolbar đỉnh, Sidebar trái, Bảng DAG giữa).<br>2. **Tương tác thu gọn Sidebar**: Đảo cờ `isSidebarCollapsed`, xác nhận class co về 0px được kích hoạt trên container Sidebar.<br>3. **ResizeObserver kích hoạt mượt mà**: Mô phỏng thay đổi kích thước container, xác nhận hàm callback cập nhật biến CSS chiều rộng không gian khả dụng.<br>4. **Hiển thị Inspector Overlay**: Khi có prop `inspector`, render đúng vùng phủ overlay nổi không làm lệch cấu trúc DOM của bảng table. |
+| `tests/webview/layout/WorkspaceLayout.test.ts`          | `WorkspaceLayout.tsx`                     | 1. **Kết xuất đầy đủ**: Render trọn vẹn 3 phân vùng (Toolbar đỉnh, Sidebar trái, Bảng DAG giữa).<br>2. **Tương tác thu gọn Sidebar**: Đảo cờ `isSidebarCollapsed`, xác nhận class co về 0px được kích hoạt trên container Sidebar.<br>3. **ResizeObserver kích hoạt mượt mà**: Mô phỏng thay đổi kích thước container, xác nhận hàm callback cập nhật biến CSS chiều rộng không gian khả dụng.<br>4. **Hiển thị Inspector Overlay**: Khi có prop `inspector`, render đúng vùng phủ overlay nổi không làm lệch cấu trúc DOM của bảng table.                                       |
 
 ---
 
 ## 7. Lịch Sử Sửa Đổi Thiết Kế (Revision History)
 
-| Phiên Bản | Ngày | Phân Loại | Người Sửa | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật |
-| :---: | :---: | :---: | :---: | :--- |
-| **v1.0.0** | 2026-10-15 | Tạo mới | AI Architect | Khởi tạo tài liệu đặc tả 3-Pane Workspace Layout & Zero Layout Shift. |
-| **v1.1.0** | 2026-10-19 | Rà soát | AI Architect | **Rà soát tính bất biến hình học & tương thích bố cục 3 phân vùng**: Xác nhận tính tương thích hợp đồng giữa các phân vùng sau khi chuẩn hóa `SyncStatusResult` và `StashRecord` ở Design 05–07. Bảo đảm cam kết Zero Layout Shift (sai số 0 pixel trên đồ thị DAG F# Core) được duy trì nguyên vẹn. |
-
+| Phiên Bản  |    Ngày    | Phân Loại |  Người Sửa   | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật                                                                                                                                                                                                                                                              |
+| :--------: | :--------: | :-------: | :----------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **v1.0.0** | 2026-10-15 |  Tạo mới  | AI Architect | Khởi tạo tài liệu đặc tả 3-Pane Workspace Layout & Zero Layout Shift.                                                                                                                                                                                                                                |
+| **v1.1.0** | 2026-10-19 |  Rà soát  | AI Architect | **Rà soát tính bất biến hình học & tương thích bố cục 3 phân vùng**: Xác nhận tính tương thích hợp đồng giữa các phân vùng sau khi chuẩn hóa `SyncStatusResult` và `StashRecord` ở Design 05–07. Bảo đảm cam kết Zero Layout Shift (sai số 0 pixel trên đồ thị DAG F# Core) được duy trì nguyên vẹn. |

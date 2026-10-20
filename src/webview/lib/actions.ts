@@ -12,6 +12,8 @@ import {
   expandedCommit,
   headBranch,
   inspectorMode,
+  remoteBranchesLoading,
+  remoteGroups,
   repoStates,
   selectedBranch,
   selectedRepo,
@@ -45,6 +47,7 @@ export function selectRepo(repo: string) {
   batch(() => {
     selectedRepo.value = repo;
     branchList.value = undefined;
+    remoteGroups.value = [];
     headBranch.value = null;
     selectedBranch.value = undefined;
     graphWindowStore.clear();
@@ -245,6 +248,7 @@ export function refreshRemoteBranches(repo?: string) {
     return;
   }
 
+  remoteBranchesLoading.value = true;
   vscode.postMessage({ command: "remoteBranches", repo: target });
 }
 

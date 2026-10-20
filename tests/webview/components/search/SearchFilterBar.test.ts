@@ -65,13 +65,10 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  vi.stubGlobal(
-    "requestAnimationFrame",
-    (cb: FrameRequestCallback) => {
-      cb(0);
-      return 1;
-    }
-  );
+  vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+    cb(0);
+    return 1;
+  });
   vi.stubGlobal("cancelAnimationFrame", vi.fn());
   resetStore();
 });

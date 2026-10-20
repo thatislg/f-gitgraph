@@ -20,11 +20,7 @@ import {
   selectedRepo,
   showRemoteBranch
 } from "@/webview/lib/stores";
-import {
-  audioToggleTooltip,
-  isAudioMuted,
-  toggleAudio
-} from "@/webview/lib/stores/audio.store";
+import { audioToggleTooltip, isAudioMuted, toggleAudio } from "@/webview/lib/stores/audio.store";
 import { isGraphInitialized, totalCommits } from "@/webview/lib/stores/graph-window.store";
 import {
   isSidebarCollapsed,
@@ -128,7 +124,12 @@ export function GlobalToolbar({ repos }: { repos: Array<GitRepo> }) {
         ) : (
           <span class="inline-flex items-center gap-1.5 text-sm text-muted" title={repoName}>
             <Icon>
-              <path d="M4 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM8 4v8" fill="none" stroke="currentColor" stroke-width="1.5" />
+              <path
+                d="M4 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM8 4v8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
             </Icon>
             <span class="max-w-32 truncate">{repoName}</span>
             <span class="font-semibold text-[#a855f7]">{headBranch.value ?? ""}</span>
@@ -144,10 +145,20 @@ export function GlobalToolbar({ repos }: { repos: Array<GitRepo> }) {
             {isAudioMuted.value ? (
               <>
                 <path d="M3 6v4h3l4 3V3L6 6z" fill="currentColor" />
-                <path d="M13 6l4 4M17 6l-4 4" fill="none" stroke="currentColor" stroke-width="1.5" />
+                <path
+                  d="M13 6l4 4M17 6l-4 4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
               </>
             ) : (
-              <path d="M3 6v4h3l4 3V3L6 6zM12.5 6.5a3 3 0 0 1 0 3M14.5 5a6 6 0 0 1 0 6" fill="none" stroke="currentColor" stroke-width="1.5" />
+              <path
+                d="M3 6v4h3l4 3V3L6 6zM12.5 6.5a3 3 0 0 1 0 3M14.5 5a6 6 0 0 1 0 6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
             )}
           </Icon>
         </Button>
@@ -159,7 +170,12 @@ export function GlobalToolbar({ repos }: { repos: Array<GitRepo> }) {
         >
           <Icon>
             {isSidebarCollapsed.value ? (
-              <path d="M2 3h12v10H2zM13 3v10M9.5 6v4" fill="none" stroke="currentColor" stroke-width="1.5" />
+              <path
+                d="M2 3h12v10H2zM13 3v10M9.5 6v4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
             ) : (
               <path d="M2 3h12v10H2zM9 3v10" fill="none" stroke="currentColor" stroke-width="1.5" />
             )}

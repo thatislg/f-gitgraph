@@ -75,4 +75,3 @@ Thư mục này lưu trữ toàn bộ hệ thống tài liệu thiết kế kỹ
     - Kiến trúc 3 trạng thái tương tác hoàn chỉnh: State 1 (Collapsed Segmented Emblem), State 2 (Expanded 7-Hex Honeycomb Cluster), State 3 (Depth of Field Focus & Contextual Floating Pill).
     - Hỗ trợ 2 phong cách thẩm mỹ: Neon Chromatic (Đa sắc bán dẫn) và Cyber Blue Monochromatic (Đơn sắc kỹ thuật cao) với bộ token phát quang Neon sắc nét.
     - Kho trạng thái phản ứng `wheel.store.ts` bằng Preact Signals, liên kết 100% với `sync.store.ts`, bảo đảm nguyên tắc Zero Layout Shift đối với đồ thị DAG.
-

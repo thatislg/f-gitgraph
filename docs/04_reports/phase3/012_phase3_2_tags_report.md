@@ -25,19 +25,19 @@ Phạm vi công việc (theo chuẩn **Contract-First / Design-by-Word** — đ�
 
 ## 2. Cấu Trúc Mã Nguồn Tác Động
 
-| File | Nội dung |
-| :--- | :--- |
-| `src/types/queries.ts` | Bổ sung `ListTagsInput` (`sort?: "creatordate" \| "name"`), `TagListResult` (`{ tags: string[] }`) và mục `listTags` trong `QueryPayloads` (request `{ repo, sort? }`, response `TagListResult`). |
-| `src/backend/queries/listTags.ts` | `parseTagList(stdout)` thuần (split `\r?\n`, trim, bỏ dòng rỗng, bảo toàn Unicode/ký tự đặc biệt) + `listTags(git, input?)` qua `SimpleGit.raw(["tag", "--list", "--sort=-creatordate"])`, fallback `{ tags: [] }` khi rỗng/lỗi. |
-| `src/extension/services/messageHandler.ts` | Import `listTags`; đăng ký `bridge.onMessage("listTags", ...)` truyền `{ sort: msg.sort }` khi có. |
-| `src/webview/lib/actions.ts` | Bổ sung `refreshTags(repo?)`; gọi trong `selectRepo` và `refresh` (sau khi thêm/xóa tag qua `handleActionResult`). |
-| `src/webview/lib/stores/sync.store.ts` | Bổ sung tín hiệu `tagList` + hàm nạp `loadTagList(tags)`. |
-| `src/webview/lib/handler/sync-query.ts` | Bổ sung `handleTagList` nạp `msg.tags` vào `sync.store`. |
-| `src/webview/lib/dispatcher.ts` | Đăng ký `listTags → handleTagList`. |
-| `src/webview/App.tsx` | Đổi `tags={[]}` → `tags={tagList.value}`. |
-| `tests/backend/queries/listTags.test.ts` | Unit test backend (11 test). |
-| `tests/extension/services/syncMessageHandler.test.ts` | Bổ sung 2 test định tuyến query `listTags`. |
-| `tests/webview/lib/stores/sync.store.test.ts` | Bổ sung 1 test `loadTagList`. |
+| File                                                  | Nội dung                                                                                                                                                                                                                         |
+| :---------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/types/queries.ts`                                | Bổ sung `ListTagsInput` (`sort?: "creatordate" \| "name"`), `TagListResult` (`{ tags: string[] }`) và mục `listTags` trong `QueryPayloads` (request `{ repo, sort? }`, response `TagListResult`).                                |
+| `src/backend/queries/listTags.ts`                     | `parseTagList(stdout)` thuần (split `\r?\n`, trim, bỏ dòng rỗng, bảo toàn Unicode/ký tự đặc biệt) + `listTags(git, input?)` qua `SimpleGit.raw(["tag", "--list", "--sort=-creatordate"])`, fallback `{ tags: [] }` khi rỗng/lỗi. |
+| `src/extension/services/messageHandler.ts`            | Import `listTags`; đăng ký `bridge.onMessage("listTags", ...)` truyền `{ sort: msg.sort }` khi có.                                                                                                                               |
+| `src/webview/lib/actions.ts`                          | Bổ sung `refreshTags(repo?)`; gọi trong `selectRepo` và `refresh` (sau khi thêm/xóa tag qua `handleActionResult`).                                                                                                               |
+| `src/webview/lib/stores/sync.store.ts`                | Bổ sung tín hiệu `tagList` + hàm nạp `loadTagList(tags)`.                                                                                                                                                                        |
+| `src/webview/lib/handler/sync-query.ts`               | Bổ sung `handleTagList` nạp `msg.tags` vào `sync.store`.                                                                                                                                                                         |
+| `src/webview/lib/dispatcher.ts`                       | Đăng ký `listTags → handleTagList`.                                                                                                                                                                                              |
+| `src/webview/App.tsx`                                 | Đổi `tags={[]}` → `tags={tagList.value}`.                                                                                                                                                                                        |
+| `tests/backend/queries/listTags.test.ts`              | Unit test backend (11 test).                                                                                                                                                                                                     |
+| `tests/extension/services/syncMessageHandler.test.ts` | Bổ sung 2 test định tuyến query `listTags`.                                                                                                                                                                                      |
+| `tests/webview/lib/stores/sync.store.test.ts`         | Bổ sung 1 test `loadTagList`.                                                                                                                                                                                                    |
 
 ---
 
@@ -68,39 +68,39 @@ Phạm vi công việc (theo chuẩn **Contract-First / Design-by-Word** — đ�
 
 ## 4. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/backend/queries/listTags.test.ts` | ✅ 11/11 pass |
-| `tests/extension/services/syncMessageHandler.test.ts` | ✅ 7/7 pass (tăng +2) |
-| `tests/webview/lib/stores/sync.store.test.ts` | ✅ 13/13 pass (tăng +1) |
-| Toàn bộ project `backend` | ✅ 159/159 pass (tăng +11) |
-| Toàn bộ project `extension` | ✅ 29/29 pass (tăng +2) |
-| Toàn bộ project `webview` | ✅ 198/198 pass (tăng +1) |
-| Typecheck (`pnpm run typecheck`) | ✅ sạch (toàn workspace) |
-| Lint (`pnpm run lint`) | ✅ 0 error / 0 warning |
-| Compile (`pnpm run compile`) | ✅ thành công |
+| Hạng mục                                              | Kết quả                    |
+| :---------------------------------------------------- | :------------------------- |
+| `tests/backend/queries/listTags.test.ts`              | ✅ 11/11 pass              |
+| `tests/extension/services/syncMessageHandler.test.ts` | ✅ 7/7 pass (tăng +2)      |
+| `tests/webview/lib/stores/sync.store.test.ts`         | ✅ 13/13 pass (tăng +1)    |
+| Toàn bộ project `backend`                             | ✅ 159/159 pass (tăng +11) |
+| Toàn bộ project `extension`                           | ✅ 29/29 pass (tăng +2)    |
+| Toàn bộ project `webview`                             | ✅ 198/198 pass (tăng +1)  |
+| Typecheck (`pnpm run typecheck`)                      | ✅ sạch (toàn workspace)   |
+| Lint (`pnpm run lint`)                                | ✅ 0 error / 0 warning     |
+| Compile (`pnpm run compile`)                          | ✅ thành công              |
 
 ---
 
 ## 5. Nhật Ký Lỗi Biên Dịch & Chẩn Đoán (Compilation & Diagnostic Error Log)
 
-| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa | Kết Quả Sau Sửa |
-| :-: | :---: | :--- | :---: | :--- | :---: | :--- | :--- | :---: |
-| 1 | Vòng 1 | `src/extension/services/messageHandler.ts` | Lint | `import-js(order): @/backend/queries/listTags should occur before @/backend/queries/loadBranches` | `[DEV_BUG]` | Import `listTags` đặt sau `loadBranches` (sai thứ tự chữ cái: `listTags` < `loadBranches`) | Hoán đổi thứ tự hai dòng import | ✅ Đã khắc phục |
-| 2 | Vòng 1 | `tests/backend/queries/listTags.test.ts` | Lint | `unicorn(no-array-sort): Use Array#toSorted() instead of Array#sort()` | `[DEV_BUG]` | Dùng `Array#sort()` biến đổi mảng gốc trong assertion test tag lightweight/annotated | Thay bằng `toSorted()` trả mảng mới | ✅ Đã khắc phục |
+| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động                           | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt                                                                       |  Phân Loại  | Nguyên Nhân Gốc                                                                            | Giải Pháp Đã Sửa                    | Kết Quả Sau Sửa |
+| :-: | :------------: | :----------------------------------------- | :------------: | :------------------------------------------------------------------------------------------------ | :---------: | :----------------------------------------------------------------------------------------- | :---------------------------------- | :-------------: |
+|  1  |     Vòng 1     | `src/extension/services/messageHandler.ts` |      Lint      | `import-js(order): @/backend/queries/listTags should occur before @/backend/queries/loadBranches` | `[DEV_BUG]` | Import `listTags` đặt sau `loadBranches` (sai thứ tự chữ cái: `listTags` < `loadBranches`) | Hoán đổi thứ tự hai dòng import     | ✅ Đã khắc phục |
+|  2  |     Vòng 1     | `tests/backend/queries/listTags.test.ts`   |      Lint      | `unicorn(no-array-sort): Use Array#toSorted() instead of Array#sort()`                            | `[DEV_BUG]` | Dùng `Array#sort()` biến đổi mảng gốc trong assertion test tag lightweight/annotated       | Thay bằng `toSorted()` trả mảng mới | ✅ Đã khắc phục |
 
 ### 5.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
-| Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
-| :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **2 vòng** | Vòng 1 (lint 2) → Vòng 2 sạch |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **2 lỗi** | $E_{design} + E_{dev}$ |
-| **Số lỗi do Thiết Kế** | $E_{design}$ | **0 lỗi** | Thiết kế v1.3.0 đã bổ sung trước khi triển khai |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **2 lỗi** | 1 import-order + 1 `no-array-sort` |
-| **Số sự cố Môi Trường/Tool** | $E_{env}$ | **0 sự cố** | — |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **0.0%** | $\frac{0}{2} \times 100\%$ |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **100.0%** | $\frac{2}{2} \times 100\%$ |
-| **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend 159 + extension 29 + webview 198): OK |
+| Chỉ Số Định Lượng                         |   Ký Hiệu    | Giá Trị Thực Tế | Ghi Chú / Đánh Giá                                                                              |
+| :---------------------------------------- | :----------: | :-------------: | :---------------------------------------------------------------------------------------------- |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)**   |     $C$      |   **2 vòng**    | Vòng 1 (lint 2) → Vòng 2 sạch                                                                   |
+| **Tổng số lỗi kỹ thuật**                  | $E_{total}$  |    **2 lỗi**    | $E_{design} + E_{dev}$                                                                          |
+| **Số lỗi do Thiết Kế**                    | $E_{design}$ |    **0 lỗi**    | Thiết kế v1.3.0 đã bổ sung trước khi triển khai                                                 |
+| **Số lỗi do Triển Khai (Bug Dev)**        |  $E_{dev}$   |    **2 lỗi**    | 1 import-order + 1 `no-array-sort`                                                              |
+| **Số sự cố Môi Trường/Tool**              |  $E_{env}$   |   **0 sự cố**   | —                                                                                               |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** |  **$DDR$**   |    **0.0%**     | $\frac{0}{2} \times 100\%$                                                                      |
+| **TỶ LỆ BUG KHI DEV (IBR)**               |  **$IBR$**   |   **100.0%**    | $\frac{2}{2} \times 100\%$                                                                      |
+| **Trạng thái cổng chẩn đoán cuối cùng**   |      -       |  **100% PASS**  | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend 159 + extension 29 + webview 198): OK |
 
 ---
 
@@ -114,12 +114,12 @@ Phạm vi công việc (theo chuẩn **Contract-First / Design-by-Word** — đ�
 
 ## 7. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| `ListTagsInput` / `TagListResult` (Contract-First) | ✅ Đạt |
-| `src/backend/queries/listTags.ts` (`parseTagList` + `listTags`) | ✅ Đạt |
-| Đăng ký query handler `listTags` trong `messageHandler.ts` | ✅ Đạt |
-| Chuỗi Webview `refreshTags` → `tagList` → `handleTagList` → dispatcher | ✅ Đạt |
-| Nối `App.tsx` `tags={tagList.value}` | ✅ Đạt |
-| Unit test backend (11) + extension (2) + webview (1) | ✅ 14/14 |
-| Typecheck + lint + compile + test | ✅ Đạt |
+| Tiêu chí                                                               | Trạng thái |
+| :--------------------------------------------------------------------- | :--------: |
+| `ListTagsInput` / `TagListResult` (Contract-First)                     |   ✅ Đạt   |
+| `src/backend/queries/listTags.ts` (`parseTagList` + `listTags`)        |   ✅ Đạt   |
+| Đăng ký query handler `listTags` trong `messageHandler.ts`             |   ✅ Đạt   |
+| Chuỗi Webview `refreshTags` → `tagList` → `handleTagList` → dispatcher |   ✅ Đạt   |
+| Nối `App.tsx` `tags={tagList.value}`                                   |   ✅ Đạt   |
+| Unit test backend (11) + extension (2) + webview (1)                   |  ✅ 14/14  |
+| Typecheck + lint + compile + test                                      |   ✅ Đạt   |

@@ -20,19 +20,19 @@ Hoàn thiện hai nhóm việc khép kín chu kỳ Phase 3.2 theo chuẩn **Cont
 
 ## 2. Cấu Trúc Mã Nguồn Tác Động
 
-| File | Nội dung |
-| :--- | :--- |
-| `src/webview/lib/stores/search.store.ts` | **Mới.** Kho trạng thái tìm kiếm: `parseSearchQuery` (thuần), `matchesCommit` (thuần, logic AND), 4 tín hiệu cơ sở + 5 tín hiệu dẫn xuất + `effect` auto-clamp, 6 dispatcher (`setQuery`/`nextMatch`/`prevMatch`/`openSearch`/`closeSearch`/`clearQuery`) + `dispatchScrollToRow`. |
-| `src/webview/components/search/SearchFilterBar.tsx` | **Mới.** Thanh tìm kiếm nổi: bắt `Ctrl/Cmd+F` toàn cục, focus+select qua `requestAnimationFrame`, `Enter`/`Shift+Enter`/`Esc`, nút Clear/Prev/Next/Close, bộ đếm `counterText`. |
-| `src/webview/lib/stores/layout.store.ts` | **Mới.** Tín hiệu `viewportWidth` (chiều rộng vùng đồ thị khả dụng). |
-| `src/webview/components/layout/WorkspaceLayout.tsx` | **Mới.** Bố cục 3 phân vùng; khung giữa `flex-1 min-w-0` (fix lỗi dồn trái); `ResizeObserver` + `requestAnimationFrame` → `viewportWidth`. |
-| `src/webview/App.tsx` | Refactor: bọc `WorkspaceLayout` (toolbar/sidebar/graph), đặt `SearchFilterBar` trong graph pane. |
-| `src/webview/components/commit/CommitTable.tsx` | Thêm effect cuộn `scrollRequest` (căn giữa `rowIndex*ROW_HEIGHT - viewport/2 + ROW_HEIGHT/2`), tính `searchActive`/`matchingIndexSet`/`activeHash`, truyền `dimmed`/`activeMatch` xuống `CommitRow`. |
-| `src/webview/components/commit/CommitRow.tsx` | Thêm props `dimmed`/`activeMatch` (optional): opacity 0.55 cho dòng không khớp, outline neon tím cho dòng khớp đang focus. |
-| `tests/webview/lib/stores/search.store.test.ts` | **Mới.** 26 test (`parseSearchQuery`/`matchesCommit`/computed/dispatcher/clamping). |
-| `tests/webview/components/search/SearchFilterBar.test.ts` | **Mới.** 10 test theo ma trận Mục 7. |
-| `tests/webview/layout/WorkspaceLayout.test.ts` | **Mới.** 4 test (cấu trúc 3 phân vùng, flex-class, ResizeObserver, cleanup). |
-| `tests/webview/layout/WorkspaceLayout.geometry.test.ts` | **Mới.** 2 test nghiệm thu bất biến hình học (Zero Layout Shift). |
+| File                                                      | Nội dung                                                                                                                                                                                                                                                                           |
+| :-------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/webview/lib/stores/search.store.ts`                  | **Mới.** Kho trạng thái tìm kiếm: `parseSearchQuery` (thuần), `matchesCommit` (thuần, logic AND), 4 tín hiệu cơ sở + 5 tín hiệu dẫn xuất + `effect` auto-clamp, 6 dispatcher (`setQuery`/`nextMatch`/`prevMatch`/`openSearch`/`closeSearch`/`clearQuery`) + `dispatchScrollToRow`. |
+| `src/webview/components/search/SearchFilterBar.tsx`       | **Mới.** Thanh tìm kiếm nổi: bắt `Ctrl/Cmd+F` toàn cục, focus+select qua `requestAnimationFrame`, `Enter`/`Shift+Enter`/`Esc`, nút Clear/Prev/Next/Close, bộ đếm `counterText`.                                                                                                    |
+| `src/webview/lib/stores/layout.store.ts`                  | **Mới.** Tín hiệu `viewportWidth` (chiều rộng vùng đồ thị khả dụng).                                                                                                                                                                                                               |
+| `src/webview/components/layout/WorkspaceLayout.tsx`       | **Mới.** Bố cục 3 phân vùng; khung giữa `flex-1 min-w-0` (fix lỗi dồn trái); `ResizeObserver` + `requestAnimationFrame` → `viewportWidth`.                                                                                                                                         |
+| `src/webview/App.tsx`                                     | Refactor: bọc `WorkspaceLayout` (toolbar/sidebar/graph), đặt `SearchFilterBar` trong graph pane.                                                                                                                                                                                   |
+| `src/webview/components/commit/CommitTable.tsx`           | Thêm effect cuộn `scrollRequest` (căn giữa `rowIndex*ROW_HEIGHT - viewport/2 + ROW_HEIGHT/2`), tính `searchActive`/`matchingIndexSet`/`activeHash`, truyền `dimmed`/`activeMatch` xuống `CommitRow`.                                                                               |
+| `src/webview/components/commit/CommitRow.tsx`             | Thêm props `dimmed`/`activeMatch` (optional): opacity 0.55 cho dòng không khớp, outline neon tím cho dòng khớp đang focus.                                                                                                                                                         |
+| `tests/webview/lib/stores/search.store.test.ts`           | **Mới.** 26 test (`parseSearchQuery`/`matchesCommit`/computed/dispatcher/clamping).                                                                                                                                                                                                |
+| `tests/webview/components/search/SearchFilterBar.test.ts` | **Mới.** 10 test theo ma trận Mục 7.                                                                                                                                                                                                                                               |
+| `tests/webview/layout/WorkspaceLayout.test.ts`            | **Mới.** 4 test (cấu trúc 3 phân vùng, flex-class, ResizeObserver, cleanup).                                                                                                                                                                                                       |
+| `tests/webview/layout/WorkspaceLayout.geometry.test.ts`   | **Mới.** 2 test nghiệm thu bất biến hình học (Zero Layout Shift).                                                                                                                                                                                                                  |
 
 ---
 
@@ -66,45 +66,45 @@ Hoàn thiện hai nhóm việc khép kín chu kỳ Phase 3.2 theo chuẩn **Cont
 
 ## 4. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/webview/lib/stores/search.store.test.ts` | ✅ 26/26 pass |
-| `tests/webview/components/search/SearchFilterBar.test.ts` | ✅ 10/10 pass |
-| `tests/webview/layout/WorkspaceLayout.test.ts` | ✅ 4/4 pass |
-| `tests/webview/layout/WorkspaceLayout.geometry.test.ts` | ✅ 2/2 pass |
-| Toàn bộ project `backend` | ✅ 159/159 pass (không đổi) |
-| Toàn bộ project `extension` | ✅ 29/29 pass (không đổi) |
-| Toàn bộ project `webview` | ✅ 240/240 pass (tăng +42) |
-| Typecheck (`pnpm run typecheck`) | ✅ sạch (toàn workspace) |
-| Lint (`pnpm run lint`) | ✅ 0 error / 0 warning |
-| Compile (`pnpm run compile`) | ✅ thành công |
+| Hạng mục                                                  | Kết quả                     |
+| :-------------------------------------------------------- | :-------------------------- |
+| `tests/webview/lib/stores/search.store.test.ts`           | ✅ 26/26 pass               |
+| `tests/webview/components/search/SearchFilterBar.test.ts` | ✅ 10/10 pass               |
+| `tests/webview/layout/WorkspaceLayout.test.ts`            | ✅ 4/4 pass                 |
+| `tests/webview/layout/WorkspaceLayout.geometry.test.ts`   | ✅ 2/2 pass                 |
+| Toàn bộ project `backend`                                 | ✅ 159/159 pass (không đổi) |
+| Toàn bộ project `extension`                               | ✅ 29/29 pass (không đổi)   |
+| Toàn bộ project `webview`                                 | ✅ 240/240 pass (tăng +42)  |
+| Typecheck (`pnpm run typecheck`)                          | ✅ sạch (toàn workspace)    |
+| Lint (`pnpm run lint`)                                    | ✅ 0 error / 0 warning      |
+| Compile (`pnpm run compile`)                              | ✅ thành công               |
 
 ---
 
 ## 5. Nhật Ký Lỗi Biên Dịch & Chẩn Đoán (Compilation & Diagnostic Error Log)
 
-| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa | Kết Quả Sau Sửa |
-| :-: | :---: | :--- | :---: | :--- | :---: | :--- | :--- | :---: |
-| 1 | Vòng 1 | `src/webview/components/commit/CommitTable.tsx` | Lint | `import-js(order): @/webview/lib/stores/graph-window.store should occur before search.store` | `[DEV_BUG]` | Thứ tự import sai chữ cái (`graph-window` < `search`) | Hoán đổi hai khối import | ✅ Đã khắc phục |
-| 2 | Vòng 1 | `src/webview/App.tsx` | Lint | `import-js(order): ./components/layout/WorkspaceLayout before ./components/sidebar/SidebarNavigator` | `[DEV_BUG]` | Import `WorkspaceLayout` (layout) đặt sau `SidebarNavigator` (sidebar) | Sắp xếp lại theo chữ cái thư mục | ✅ Đã khắc phục |
-| 3 | Vòng 1 | `src/webview/App.tsx` | Lint | `import-js(order): ./components/search/SearchFilterBar before ./components/sidebar/SidebarNavigator` | `[DEV_BUG]` | Import `SearchFilterBar` (search) đặt sau `SidebarNavigator` (sidebar) | Sắp xếp lại theo chữ cái thư mục | ✅ Đã khắc phục |
-| 4 | Vòng 1 | `tests/webview/lib/stores/search.store.test.ts` | Typecheck | `TS2339: Property 'rowIndex' does not exist on type 'never'` (3 vị trí) | `[DEV_BUG]` | TS control-flow narrowing: sau `scrollRequest.value = null`, `?.rowIndex` bị thu hẹp về `never` | Thêm helper `scrollRow()` đọc qua hàm (tránh narrowing) | ✅ Đã khắc phục |
-| 5 | Vòng 1 | `tests/webview/lib/stores/search.store.test.ts` | Test | `matchesCommit(author:Nam fix)` kỳ vọng true nhưng nhận false | `[DEV_BUG]` | Dữ liệu mock sai: subject/description không chứa chuỗi `"fix"` | Đổi điều kiện test sang `author:Nam login` (có trong subject) | ✅ Đã khắc phục |
-| 6 | Vòng 1 | `tests/webview/lib/stores/search.store.test.ts` | Test | `dispatchScrollToRow` timestamp: `later.rowIndex` nhận 2 thay vì 0 | `[DEV_BUG]` | Logic test sai (nextMatch tăng chỉ số khiến rowIndex đổi) | Viết lại bằng 1 kết quả duy nhất + assert tham chiếu mới `not.toBe` | ✅ Đã khắc phục |
-| 7 | Vòng 1 | `tests/webview/components/search/SearchFilterBar.test.ts` | Test | `Ctrl+F`/`Cmd+F` không mở thanh (isSearchOpen vẫn false) | `[DEV_BUG]` | Preact lập lịch `useEffect` bất đồng bộ; listener toàn cục chưa đăng ký khi dispatch | Bọc render trong `act()` từ `preact/test-utils` để flush effect đồng bộ | ✅ Đã khắc phục |
+| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động                                          | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt                                                                          |  Phân Loại  | Nguyên Nhân Gốc                                                                                 | Giải Pháp Đã Sửa                                                        | Kết Quả Sau Sửa |
+| :-: | :------------: | :-------------------------------------------------------- | :------------: | :--------------------------------------------------------------------------------------------------- | :---------: | :---------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------------: |
+|  1  |     Vòng 1     | `src/webview/components/commit/CommitTable.tsx`           |      Lint      | `import-js(order): @/webview/lib/stores/graph-window.store should occur before search.store`         | `[DEV_BUG]` | Thứ tự import sai chữ cái (`graph-window` < `search`)                                           | Hoán đổi hai khối import                                                | ✅ Đã khắc phục |
+|  2  |     Vòng 1     | `src/webview/App.tsx`                                     |      Lint      | `import-js(order): ./components/layout/WorkspaceLayout before ./components/sidebar/SidebarNavigator` | `[DEV_BUG]` | Import `WorkspaceLayout` (layout) đặt sau `SidebarNavigator` (sidebar)                          | Sắp xếp lại theo chữ cái thư mục                                        | ✅ Đã khắc phục |
+|  3  |     Vòng 1     | `src/webview/App.tsx`                                     |      Lint      | `import-js(order): ./components/search/SearchFilterBar before ./components/sidebar/SidebarNavigator` | `[DEV_BUG]` | Import `SearchFilterBar` (search) đặt sau `SidebarNavigator` (sidebar)                          | Sắp xếp lại theo chữ cái thư mục                                        | ✅ Đã khắc phục |
+|  4  |     Vòng 1     | `tests/webview/lib/stores/search.store.test.ts`           |   Typecheck    | `TS2339: Property 'rowIndex' does not exist on type 'never'` (3 vị trí)                              | `[DEV_BUG]` | TS control-flow narrowing: sau `scrollRequest.value = null`, `?.rowIndex` bị thu hẹp về `never` | Thêm helper `scrollRow()` đọc qua hàm (tránh narrowing)                 | ✅ Đã khắc phục |
+|  5  |     Vòng 1     | `tests/webview/lib/stores/search.store.test.ts`           |      Test      | `matchesCommit(author:Nam fix)` kỳ vọng true nhưng nhận false                                        | `[DEV_BUG]` | Dữ liệu mock sai: subject/description không chứa chuỗi `"fix"`                                  | Đổi điều kiện test sang `author:Nam login` (có trong subject)           | ✅ Đã khắc phục |
+|  6  |     Vòng 1     | `tests/webview/lib/stores/search.store.test.ts`           |      Test      | `dispatchScrollToRow` timestamp: `later.rowIndex` nhận 2 thay vì 0                                   | `[DEV_BUG]` | Logic test sai (nextMatch tăng chỉ số khiến rowIndex đổi)                                       | Viết lại bằng 1 kết quả duy nhất + assert tham chiếu mới `not.toBe`     | ✅ Đã khắc phục |
+|  7  |     Vòng 1     | `tests/webview/components/search/SearchFilterBar.test.ts` |      Test      | `Ctrl+F`/`Cmd+F` không mở thanh (isSearchOpen vẫn false)                                             | `[DEV_BUG]` | Preact lập lịch `useEffect` bất đồng bộ; listener toàn cục chưa đăng ký khi dispatch            | Bọc render trong `act()` từ `preact/test-utils` để flush effect đồng bộ | ✅ Đã khắc phục |
 
 ### 5.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
-| Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
-| :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **2 vòng** | Vòng 1 (lint 3 + typecheck 1 + test 3) → Vòng 2 sạch |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **7 lỗi** | $E_{design} + E_{dev}$ |
-| **Số lỗi do Thiết Kế** | $E_{design}$ | **0 lỗi** | Thiết kế v1.2.0 (Design 08) & v1.1.0 (Design 09) đã chuẩn trước khi triển khai |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **7 lỗi** | 3 import-order + 1 TS narrowing + 3 test data/logic/timing |
-| **Số sự cố Môi Trường/Tool** | $E_{env}$ | **0 sự cố** | — |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **0.0%** | $\frac{0}{7} \times 100\%$ |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **100.0%** | $\frac{7}{7} \times 100\%$ |
-| **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend 159 + extension 29 + webview 240): OK |
+| Chỉ Số Định Lượng                         |   Ký Hiệu    | Giá Trị Thực Tế | Ghi Chú / Đánh Giá                                                                              |
+| :---------------------------------------- | :----------: | :-------------: | :---------------------------------------------------------------------------------------------- |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)**   |     $C$      |   **2 vòng**    | Vòng 1 (lint 3 + typecheck 1 + test 3) → Vòng 2 sạch                                            |
+| **Tổng số lỗi kỹ thuật**                  | $E_{total}$  |    **7 lỗi**    | $E_{design} + E_{dev}$                                                                          |
+| **Số lỗi do Thiết Kế**                    | $E_{design}$ |    **0 lỗi**    | Thiết kế v1.2.0 (Design 08) & v1.1.0 (Design 09) đã chuẩn trước khi triển khai                  |
+| **Số lỗi do Triển Khai (Bug Dev)**        |  $E_{dev}$   |    **7 lỗi**    | 3 import-order + 1 TS narrowing + 3 test data/logic/timing                                      |
+| **Số sự cố Môi Trường/Tool**              |  $E_{env}$   |   **0 sự cố**   | —                                                                                               |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** |  **$DDR$**   |    **0.0%**     | $\frac{0}{7} \times 100\%$                                                                      |
+| **TỶ LỆ BUG KHI DEV (IBR)**               |  **$IBR$**   |   **100.0%**    | $\frac{7}{7} \times 100\%$                                                                      |
+| **Trạng thái cổng chẩn đoán cuối cùng**   |      -       |  **100% PASS**  | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend 159 + extension 29 + webview 240): OK |
 
 ---
 
@@ -118,11 +118,11 @@ Hoàn thiện hai nhóm việc khép kín chu kỳ Phase 3.2 theo chuẩn **Cont
 
 ## 7. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| `search.store.ts` (parse + match + signals + dispatcher + clamping) | ✅ Đạt |
-| `SearchFilterBar.tsx` (Ctrl/Cmd+F, Next/Prev, counter, clear/close) | ✅ Đạt |
-| `WorkspaceLayout.tsx` (3 phân vùng + ResizeObserver + fix dồn trái) | ✅ Đạt |
-| Highlight dimmed/activeMatch trên `CommitRow` + cuộn căn giữa `CommitTable` | ✅ Đạt |
-| Unit test Nhóm 4 (26 + 10) + Nhóm 5 (4 + 2) | ✅ 42/42 |
-| Typecheck + lint + compile + test | ✅ Đạt |
+| Tiêu chí                                                                    | Trạng thái |
+| :-------------------------------------------------------------------------- | :--------: |
+| `search.store.ts` (parse + match + signals + dispatcher + clamping)         |   ✅ Đạt   |
+| `SearchFilterBar.tsx` (Ctrl/Cmd+F, Next/Prev, counter, clear/close)         |   ✅ Đạt   |
+| `WorkspaceLayout.tsx` (3 phân vùng + ResizeObserver + fix dồn trái)         |   ✅ Đạt   |
+| Highlight dimmed/activeMatch trên `CommitRow` + cuộn căn giữa `CommitTable` |   ✅ Đạt   |
+| Unit test Nhóm 4 (26 + 10) + Nhóm 5 (4 + 2)                                 |  ✅ 42/42  |
+| Typecheck + lint + compile + test                                           |   ✅ Đạt   |

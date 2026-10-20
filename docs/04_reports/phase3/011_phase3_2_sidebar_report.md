@@ -23,19 +23,19 @@ Xây dựng cây điều hướng bên trái bao quát toàn bộ tài nguyên k
 
 ## 2. Cấu Trúc Mã Nguồn Tác Động
 
-| File | Nội dung |
-| :--- | :--- |
-| `src/webview/lib/stores/sidebar.store.ts` | 9 base signals (`sidebarWidth`/`isSidebarCollapsed`/`expandedSectionIds`/`selectedItemId`/`isResizing`/`isCheckingOut`/`isStashOperating`/`isCreateBranchModalOpen`/`branchCreationBaseCommit`); 3 computed (`effectiveSidebarWidth`/`sidebarToggleTooltip`/`isAnySectionExpanded`); 12 dispatcher (`setSidebarWidth`/`toggleSidebar`/`toggleSection`/`expandAllSections`/`collapseAllSections`/`selectItem`/`initSidebarStore`/`checkoutBranchAction`/`openWorkingTreeAction`/`handleStashAction`/`createBranchAction`/`validateBranchName`/`locateCommitOnGraphAction`). Kẹp `[160, 450]`px, lưu `localStorage` phòng vệ 4 tầng. |
-| `src/webview/lib/handler/sidebar-action.ts` | `handleCheckoutBranch` (giải mutex + `playSwitch`/`playError`), `handleSidebarStash` (giải mutex + `playStash`). |
-| `src/webview/lib/dispatcher.ts` | Đổi `checkoutBranch → handleCheckoutBranch`, `stashPop`/`stashDrop → handleSidebarStash`. |
-| `src/webview/lib/audio.ts` | Bổ sung `playSwitch`/`playTick`/`playError`/`playStash`/`playSidebarCollapse`/`playSidebarExpand` + helper `playFrequencySweep` (đều tôn trọng `isAudioMuted`). |
-| `src/webview/components/sidebar/SidebarSection.tsx` | Accordion: chevron xoay 90°, badge đếm, nút `+` (stopPropagation). |
-| `src/webview/components/sidebar/SidebarItem.tsx` | Item: highlight HEAD (`#a855f7` + checkmark), `↑N` hổ phách, `aria-selected`, `tabIndex=-1` cho điều hướng bàn phím. |
-| `src/webview/components/sidebar/SidebarNavigator.tsx` | Container: header `WORKSPACE` + nút thu gọn, 5 `SidebarSection`, `SidebarResizer`, WAI-ARIA tree keyboard (Arrow 4 chiều/Home/End/Enter). |
-| `src/webview/components/sidebar/SidebarResizer.tsx` | Kéo dãn `mousedown`/`mousemove`/`mouseup`, kẹp `[160, 450]`, ghi đĩa tại `mouseup`. |
-| `src/webview/App.tsx` | Tích hợp `<SidebarNavigator />` cạnh trái `GraphView`. |
-| `tests/webview/lib/stores/sidebar.store.test.ts` | Unit test store (37 test). |
-| `tests/webview/components/sidebar/SidebarNavigator.test.ts` | Unit test component (10 test). |
+| File                                                        | Nội dung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| :---------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/webview/lib/stores/sidebar.store.ts`                   | 9 base signals (`sidebarWidth`/`isSidebarCollapsed`/`expandedSectionIds`/`selectedItemId`/`isResizing`/`isCheckingOut`/`isStashOperating`/`isCreateBranchModalOpen`/`branchCreationBaseCommit`); 3 computed (`effectiveSidebarWidth`/`sidebarToggleTooltip`/`isAnySectionExpanded`); 12 dispatcher (`setSidebarWidth`/`toggleSidebar`/`toggleSection`/`expandAllSections`/`collapseAllSections`/`selectItem`/`initSidebarStore`/`checkoutBranchAction`/`openWorkingTreeAction`/`handleStashAction`/`createBranchAction`/`validateBranchName`/`locateCommitOnGraphAction`). Kẹp `[160, 450]`px, lưu `localStorage` phòng vệ 4 tầng. |
+| `src/webview/lib/handler/sidebar-action.ts`                 | `handleCheckoutBranch` (giải mutex + `playSwitch`/`playError`), `handleSidebarStash` (giải mutex + `playStash`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `src/webview/lib/dispatcher.ts`                             | Đổi `checkoutBranch → handleCheckoutBranch`, `stashPop`/`stashDrop → handleSidebarStash`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `src/webview/lib/audio.ts`                                  | Bổ sung `playSwitch`/`playTick`/`playError`/`playStash`/`playSidebarCollapse`/`playSidebarExpand` + helper `playFrequencySweep` (đều tôn trọng `isAudioMuted`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `src/webview/components/sidebar/SidebarSection.tsx`         | Accordion: chevron xoay 90°, badge đếm, nút `+` (stopPropagation).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `src/webview/components/sidebar/SidebarItem.tsx`            | Item: highlight HEAD (`#a855f7` + checkmark), `↑N` hổ phách, `aria-selected`, `tabIndex=-1` cho điều hướng bàn phím.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `src/webview/components/sidebar/SidebarNavigator.tsx`       | Container: header `WORKSPACE` + nút thu gọn, 5 `SidebarSection`, `SidebarResizer`, WAI-ARIA tree keyboard (Arrow 4 chiều/Home/End/Enter).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `src/webview/components/sidebar/SidebarResizer.tsx`         | Kéo dãn `mousedown`/`mousemove`/`mouseup`, kẹp `[160, 450]`, ghi đĩa tại `mouseup`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `src/webview/App.tsx`                                       | Tích hợp `<SidebarNavigator />` cạnh trái `GraphView`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `tests/webview/lib/stores/sidebar.store.test.ts`            | Unit test store (37 test).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `tests/webview/components/sidebar/SidebarNavigator.test.ts` | Unit test component (10 test).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 ---
 
@@ -77,45 +77,45 @@ Xây dựng cây điều hướng bên trái bao quát toàn bộ tài nguyên k
 
 ## 4. Kiểm Thử
 
-| Hạng mục | Kết quả |
-| :--- | :--- |
-| `tests/webview/lib/stores/sidebar.store.test.ts` | ✅ 37/37 pass |
-| `tests/webview/components/sidebar/SidebarNavigator.test.ts` | ✅ 10/10 pass |
-| Toàn bộ project `backend` | ✅ 148/148 pass |
-| Toàn bộ project `extension` | ✅ 27/27 pass |
-| Toàn bộ project `webview` | ✅ 197/197 pass (tăng +45 so với báo cáo 010) |
-| Typecheck (`pnpm run typecheck`) | ✅ sạch (toàn workspace) |
-| Lint (`pnpm run lint`) | ✅ 0 error / 0 warning |
-| Compile (`pnpm run compile`) | ✅ thành công |
+| Hạng mục                                                    | Kết quả                                       |
+| :---------------------------------------------------------- | :-------------------------------------------- |
+| `tests/webview/lib/stores/sidebar.store.test.ts`            | ✅ 37/37 pass                                 |
+| `tests/webview/components/sidebar/SidebarNavigator.test.ts` | ✅ 10/10 pass                                 |
+| Toàn bộ project `backend`                                   | ✅ 148/148 pass                               |
+| Toàn bộ project `extension`                                 | ✅ 27/27 pass                                 |
+| Toàn bộ project `webview`                                   | ✅ 197/197 pass (tăng +45 so với báo cáo 010) |
+| Typecheck (`pnpm run typecheck`)                            | ✅ sạch (toàn workspace)                      |
+| Lint (`pnpm run lint`)                                      | ✅ 0 error / 0 warning                        |
+| Compile (`pnpm run compile`)                                | ✅ thành công                                 |
 
 ---
 
 ## 5. Nhật Ký Lỗi Biên Dịch & Chẩn Đoán (Compilation & Diagnostic Error Log)
 
-| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt | Phân Loại | Nguyên Nhân Gốc | Giải Pháp Đã Sửa | Kết Quả Sau Sửa |
-| :-: | :---: | :--- | :---: | :--- | :---: | :--- | :--- | :---: |
-| 1 | Vòng 1 | `src/webview/lib/stores/sidebar.store.ts` | Lint | `import-js(order): @/webview/lib/actions should occur before @/webview/lib/audio` | `[DEV_BUG]` | Thứ tự import `audio` đặt trước `actions` (sai thứ tự chữ cái) | Hoán đổi vị trí hai dòng import | ✅ Đã khắc phục |
-| 2 | Vòng 1 | `src/webview/lib/handler/sidebar-action.ts` | Lint | `import-js(order): no empty line within import group` | `[DEV_BUG]` | Dòng trống thừa giữa `@/types` và `@/webview/lib/audio` (cùng nhóm `@/**`) | Xóa dòng trống | ✅ Đã khắc phục |
-| 3 | Vòng 1 | `tests/webview/lib/stores/sidebar.store.test.ts` | Lint | `import-js(order): sidebar.store should occur after stores/graph-window.store` | `[DEV_BUG]` | Sắp xếp import `sidebar.store` trước `stores`/`graph-window.store` | Đổi thứ tự theo alphabetize | ✅ Đã khắc phục |
-| 4 | Vòng 1 | `tests/webview/components/sidebar/SidebarNavigator.test.ts` | Lint | `import-js(order): sidebar.store should occur after stores` | `[DEV_BUG]` | Import `sidebar.store` đặt trước `stores` | Đổi thứ tự theo alphabetize | ✅ Đã khắc phục |
-| 5 | Vòng 1 | `tests/webview/components/sidebar/SidebarNavigator.test.ts` | Lint | `import-js(order): @tests/webview/test-utils should occur after @/webview/lib/stores` | `[DEV_BUG]` | pathGroup `@tests/**` (position after) đặt trước `@/**` | Đưa `@tests` xuống sau `@/**` | ✅ Đã khắc phục |
-| 6 | Vòng 1 | `tests/webview/components/sidebar/SidebarNavigator.test.ts` | Unit Test | `AssertionError: expected false to be true` (ArrowRight không mở section) | `[DEV_BUG]` | `container` render rời khỏi `document.body` → jsdom không cập nhật `document.activeElement` khi gọi `focus()` | `appendChild(container)` vào `document.body` trước khi render | ✅ Đã khắc phục |
-| 7 | Vòng 1 | `tests/webview/components/sidebar/SidebarNavigator.test.ts` | Unit Test | `TypeError: target.scrollIntoView is not a function` (lỗi chưa bắt) | `[DEV_BUG]` | `selectItem` gọi `scrollIntoView` không guard; jsdom không hiện thực API này | Guard `typeof target.scrollIntoView === "function"` trước khi cuộn | ✅ Đã khắc phục |
-| 8 | Vòng 1 | `tests/webview/components/sidebar/SidebarNavigator.test.ts` | Unit Test | `AssertionError: expected '' to be 'section-header-branches'` (ArrowDown) | `[DEV_BUG]` | Assertion kỳ vọng sai phần tử kế tiếp (thực tế là item `Changes` chứ không phải header `branches`) | Sửa assertion thành `data-item-id="working-tree:changes"` | ✅ Đã khắc phục |
-| 9 | Vòng 2 | `tests/webview/components/sidebar/SidebarNavigator.test.ts` | Lint | `import-js(order): at least one empty line between import groups` | `[DEV_BUG]` | `newlines-between: always` đòi dòng trống giữa nhóm `@/**` và `@tests/**` sau khi sắp xếp lại | Chèn dòng trống trước import `@tests` | ✅ Đã khắc phục |
+| STT | Chu Kỳ (Cycle) | Tệp Tin Tác Động                                            | Cổng Phát Hiện | Mã Lỗi / Thông Điệp Tóm Tắt                                                           |  Phân Loại  | Nguyên Nhân Gốc                                                                                               | Giải Pháp Đã Sửa                                                   | Kết Quả Sau Sửa |
+| :-: | :------------: | :---------------------------------------------------------- | :------------: | :------------------------------------------------------------------------------------ | :---------: | :------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------- | :-------------: |
+|  1  |     Vòng 1     | `src/webview/lib/stores/sidebar.store.ts`                   |      Lint      | `import-js(order): @/webview/lib/actions should occur before @/webview/lib/audio`     | `[DEV_BUG]` | Thứ tự import `audio` đặt trước `actions` (sai thứ tự chữ cái)                                                | Hoán đổi vị trí hai dòng import                                    | ✅ Đã khắc phục |
+|  2  |     Vòng 1     | `src/webview/lib/handler/sidebar-action.ts`                 |      Lint      | `import-js(order): no empty line within import group`                                 | `[DEV_BUG]` | Dòng trống thừa giữa `@/types` và `@/webview/lib/audio` (cùng nhóm `@/**`)                                    | Xóa dòng trống                                                     | ✅ Đã khắc phục |
+|  3  |     Vòng 1     | `tests/webview/lib/stores/sidebar.store.test.ts`            |      Lint      | `import-js(order): sidebar.store should occur after stores/graph-window.store`        | `[DEV_BUG]` | Sắp xếp import `sidebar.store` trước `stores`/`graph-window.store`                                            | Đổi thứ tự theo alphabetize                                        | ✅ Đã khắc phục |
+|  4  |     Vòng 1     | `tests/webview/components/sidebar/SidebarNavigator.test.ts` |      Lint      | `import-js(order): sidebar.store should occur after stores`                           | `[DEV_BUG]` | Import `sidebar.store` đặt trước `stores`                                                                     | Đổi thứ tự theo alphabetize                                        | ✅ Đã khắc phục |
+|  5  |     Vòng 1     | `tests/webview/components/sidebar/SidebarNavigator.test.ts` |      Lint      | `import-js(order): @tests/webview/test-utils should occur after @/webview/lib/stores` | `[DEV_BUG]` | pathGroup `@tests/**` (position after) đặt trước `@/**`                                                       | Đưa `@tests` xuống sau `@/**`                                      | ✅ Đã khắc phục |
+|  6  |     Vòng 1     | `tests/webview/components/sidebar/SidebarNavigator.test.ts` |   Unit Test    | `AssertionError: expected false to be true` (ArrowRight không mở section)             | `[DEV_BUG]` | `container` render rời khỏi `document.body` → jsdom không cập nhật `document.activeElement` khi gọi `focus()` | `appendChild(container)` vào `document.body` trước khi render      | ✅ Đã khắc phục |
+|  7  |     Vòng 1     | `tests/webview/components/sidebar/SidebarNavigator.test.ts` |   Unit Test    | `TypeError: target.scrollIntoView is not a function` (lỗi chưa bắt)                   | `[DEV_BUG]` | `selectItem` gọi `scrollIntoView` không guard; jsdom không hiện thực API này                                  | Guard `typeof target.scrollIntoView === "function"` trước khi cuộn | ✅ Đã khắc phục |
+|  8  |     Vòng 1     | `tests/webview/components/sidebar/SidebarNavigator.test.ts` |   Unit Test    | `AssertionError: expected '' to be 'section-header-branches'` (ArrowDown)             | `[DEV_BUG]` | Assertion kỳ vọng sai phần tử kế tiếp (thực tế là item `Changes` chứ không phải header `branches`)            | Sửa assertion thành `data-item-id="working-tree:changes"`          | ✅ Đã khắc phục |
+|  9  |     Vòng 2     | `tests/webview/components/sidebar/SidebarNavigator.test.ts` |      Lint      | `import-js(order): at least one empty line between import groups`                     | `[DEV_BUG]` | `newlines-between: always` đòi dòng trống giữa nhóm `@/**` và `@tests/**` sau khi sắp xếp lại                 | Chèn dòng trống trước import `@tests`                              | ✅ Đã khắc phục |
 
 ### 5.1. Bảng Thống Kê Định Lượng (Defect & Reliability Metrics)
 
-| Chỉ Số Định Lượng | Ký Hiệu | Giá Trị Thực Tế | Ghi Chú / Đánh Giá |
-| :--- | :---: | :---: | :--- |
-| **Tổng số chu kỳ sửa lỗi (Fix Cycles)** | $C$ | **3 vòng** | Vòng 1 (lint 5 + test 3) → Vòng 2 (lint 1) → Vòng 3 sạch |
-| **Tổng số lỗi kỹ thuật** | $E_{total}$ | **9 lỗi** | $E_{design} + E_{dev}$ |
-| **Số lỗi do Thiết Kế** | $E_{design}$ | **0 lỗi** | Thiết kế v1.3.0 đã đồng bộ trước khi triển khai |
-| **Số lỗi do Triển Khai (Bug Dev)** | $E_{dev}$ | **9 lỗi** | 6 lỗi import-order + 1 lỗi focus test + 1 lỗi guard `scrollIntoView` + 1 lỗi assertion |
-| **Số sự cố Môi Trường/Tool** | $E_{env}$ | **0 sự cố** | — |
-| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** | **$DDR$** | **0.0%** | $\frac{0}{9} \times 100\%$ |
-| **TỶ LỆ BUG KHI DEV (IBR)** | **$IBR$** | **100.0%** | $\frac{9}{9} \times 100\%$ |
-| **Trạng thái cổng chẩn đoán cuối cùng** | - | **100% PASS** | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend 148 + extension 27 + webview 197): OK |
+| Chỉ Số Định Lượng                         |   Ký Hiệu    | Giá Trị Thực Tế | Ghi Chú / Đánh Giá                                                                              |
+| :---------------------------------------- | :----------: | :-------------: | :---------------------------------------------------------------------------------------------- |
+| **Tổng số chu kỳ sửa lỗi (Fix Cycles)**   |     $C$      |   **3 vòng**    | Vòng 1 (lint 5 + test 3) → Vòng 2 (lint 1) → Vòng 3 sạch                                        |
+| **Tổng số lỗi kỹ thuật**                  | $E_{total}$  |    **9 lỗi**    | $E_{design} + E_{dev}$                                                                          |
+| **Số lỗi do Thiết Kế**                    | $E_{design}$ |    **0 lỗi**    | Thiết kế v1.3.0 đã đồng bộ trước khi triển khai                                                 |
+| **Số lỗi do Triển Khai (Bug Dev)**        |  $E_{dev}$   |    **9 lỗi**    | 6 lỗi import-order + 1 lỗi focus test + 1 lỗi guard `scrollIntoView` + 1 lỗi assertion          |
+| **Số sự cố Môi Trường/Tool**              |  $E_{env}$   |   **0 sự cố**   | —                                                                                               |
+| **TỶ LỆ LỖI PHẢI SỬA CỦA THIẾT KẾ (DDR)** |  **$DDR$**   |    **0.0%**     | $\frac{0}{9} \times 100\%$                                                                      |
+| **TỶ LỆ BUG KHI DEV (IBR)**               |  **$IBR$**   |   **100.0%**    | $\frac{9}{9} \times 100\%$                                                                      |
+| **Trạng thái cổng chẩn đoán cuối cùng**   |      -       |  **100% PASS**  | Typecheck: OK \| Lint: OK \| Compile: OK \| Test (backend 148 + extension 27 + webview 197): OK |
 
 ---
 
@@ -133,12 +133,12 @@ Trong quá trình rà soát trước triển khai, các bất nhất giữa Desi
 
 ## 7. Kết Luận
 
-| Tiêu chí | Trạng thái |
-| :--- | :---: |
-| `sidebar.store.ts` (9 signals + 3 computed + 12 dispatcher) | ✅ Đạt |
-| `SidebarSection.tsx` / `SidebarItem.tsx` / `SidebarResizer.tsx` | ✅ Đạt |
-| `SidebarNavigator.tsx` (header + 5 nhóm + WAI-ARIA tree nav) | ✅ Đạt |
-| Mở rộng âm thanh + handler/dispatcher checkout/stash | ✅ Đạt |
-| Tích hợp `SidebarNavigator` vào `App.tsx` | ✅ Đạt |
-| Unit test store (37) + component (10) | ✅ 47/47 |
-| Typecheck + lint + compile + test | ✅ Đạt |
+| Tiêu chí                                                        | Trạng thái |
+| :-------------------------------------------------------------- | :--------: |
+| `sidebar.store.ts` (9 signals + 3 computed + 12 dispatcher)     |   ✅ Đạt   |
+| `SidebarSection.tsx` / `SidebarItem.tsx` / `SidebarResizer.tsx` |   ✅ Đạt   |
+| `SidebarNavigator.tsx` (header + 5 nhóm + WAI-ARIA tree nav)    |   ✅ Đạt   |
+| Mở rộng âm thanh + handler/dispatcher checkout/stash            |   ✅ Đạt   |
+| Tích hợp `SidebarNavigator` vào `App.tsx`                       |   ✅ Đạt   |
+| Unit test store (37) + component (10)                           |  ✅ 47/47  |
+| Typecheck + lint + compile + test                               |   ✅ Đạt   |

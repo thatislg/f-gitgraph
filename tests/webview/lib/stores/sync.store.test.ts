@@ -7,6 +7,7 @@ vi.mock("@/webview/lib/actions", () => ({
 }));
 
 import { runAction } from "@/webview/lib/actions";
+import { activeOperation, finishOperation } from "@/webview/lib/stores/loading.store";
 import {
   aheadCount,
   behindCount,
@@ -42,6 +43,7 @@ function resetStore() {
   isStashing.value = false;
   stashList.value = [];
   tagList.value = [];
+  finishOperation();
 }
 
 describe("syncStore", () => {
@@ -108,24 +110,28 @@ describe("syncStore", () => {
   it("fetch sets isFetching and dispatches fetchAll", () => {
     fetch();
     expect(isFetching.value).toBe(true);
+    expect(activeOperation.value?.kind).toBe("fetch");
     expect(runAction).toHaveBeenCalledWith({ command: "fetchAll", prune: true });
   });
 
   it("pull defaults to merge mode", () => {
     pull();
     expect(isPulling.value).toBe(true);
+    expect(activeOperation.value?.kind).toBe("pull");
     expect(runAction).toHaveBeenCalledWith({ command: "pull", mode: "merge" });
   });
 
   it("push dispatches forceWithLease false by default", () => {
     push();
     expect(isPushing.value).toBe(true);
+    expect(activeOperation.value?.kind).toBe("push");
     expect(runAction).toHaveBeenCalledWith({ command: "push", forceWithLease: false });
   });
 
   it("stash omits message when undefined and includes it when provided", () => {
     stash();
     expect(isStashing.value).toBe(true);
+    expect(activeOperation.value?.kind).toBe("stash");
     expect(runAction).toHaveBeenCalledWith({ command: "stashSave", includeUntracked: false });
 
     vi.mocked(runAction).mockClear();
@@ -141,6 +147,7 @@ describe("syncStore", () => {
   it("pop dispatches stashPop with the given index", () => {
     pop(1);
     expect(isStashing.value).toBe(true);
+    expect(activeOperation.value?.kind).toBe("pop");
     expect(runAction).toHaveBeenCalledWith({ command: "stashPop", index: 1 });
   });
 

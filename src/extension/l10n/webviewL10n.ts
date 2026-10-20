@@ -36,6 +36,15 @@ export function getWebviewLocalizedStrings() {
     tooltipPullRebase: vscode.l10n.t("Replay local commits on top of upstream branch"),
     tooltipPushStandard: vscode.l10n.t("Publish local commits to tracking branch"),
     tooltipPushForce: vscode.l10n.t("Safely overwrite remote branch with lease protection"),
+
+    // Blocking loading overlay (gerund labels shown while an operation runs)
+    loadingFetch: vscode.l10n.t("Fetching remotes"),
+    loadingPull: vscode.l10n.t("Pulling changes"),
+    loadingPush: vscode.l10n.t("Pushing commits"),
+    loadingStash: vscode.l10n.t("Stashing changes"),
+    loadingPop: vscode.l10n.t("Applying stash"),
+    loadingElapsed: vscode.l10n.t("{0} s"),
+
     close: vscode.l10n.t("Close"),
     loadMore: vscode.l10n.t("Load More Commits"),
     showAll: vscode.l10n.t("Show All"),

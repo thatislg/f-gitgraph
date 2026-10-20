@@ -38,6 +38,7 @@ Tài liệu này định hình cấu trúc sơ bộ và ranh giới kiến trúc
 ## 3. Khái Niệm Giao Diện & Dữ Liệu Hiển Thị
 
 Mỗi mục commit trong bảng xem trước sẽ bao gồm:
+
 - **Mã băm ngắn (Short Hash)**: 7 ký tự kèm màu sắc nhánh.
 - **Tác giả & Avatar vi mô**: Tên người tạo commit.
 - **Tiêu đề commit (Summary)**: Dòng thông điệp đầu tiên.
@@ -59,10 +60,10 @@ Bảng xem trước được neo theo cạnh ngoài của cánh hoa `PUSH` hoặ
 
 ### 4.2. Góc Pha & Vị Trí Cánh Hoa Nguồn
 
-| Cánh Hoa | Góc Pha | Vị Trí Tương Đối Tâm Hub | Hướng Bung Flyout |
-| :--- | :---: | :--- | :--- |
-| **PUSH** (outgoing) | $270^\circ$ | Trên đỉnh hub, tâm lệch $(0, -76)$ | Bay thẳng lên trên (căn giữa trục dọc) |
-| **PULL** (incoming) | $330^\circ$ | Góc đông bắc, tâm lệch $(+65.82, -38)$ | Bay chéo sang góc đông bắc |
+| Cánh Hoa            |   Góc Pha   | Vị Trí Tương Đối Tâm Hub               | Hướng Bung Flyout                      |
+| :------------------ | :---------: | :------------------------------------- | :------------------------------------- |
+| **PUSH** (outgoing) | $270^\circ$ | Trên đỉnh hub, tâm lệch $(0, -76)$     | Bay thẳng lên trên (căn giữa trục dọc) |
+| **PULL** (incoming) | $330^\circ$ | Góc đông bắc, tâm lệch $(+65.82, -38)$ | Bay chéo sang góc đông bắc             |
 
 ### 4.3. Quy Tắc Neo Tọa Độ Flyout
 
@@ -84,21 +85,21 @@ Hợp đồng dữ liệu giao tiếp giữa Webview và Extension Host tuân th
 
 ### 5.1. Bảng Từ Điển Dữ Liệu Bản Ghi Commit (`SyncCommitRecord`)
 
-| Tên Thuộc Tính | Kiểu Dữ Liệu | Ràng Buộc | Mô Tả Ý Nghĩa |
-| :--- | :--- | :---: | :--- |
-| `hash` | string | Chuỗi Hex SHA-1 đầy đủ 40 ký tự | Mã băm commit duy nhất, dùng cho đối chiếu và truy vết. |
-| `shortHash` | string | Chuỗi Hex rút gọn 7 ký tự | Mã băm ngắn hiển thị trên giao diện (Monospace). |
-| `author` | string | Chuỗi UTF-8, có thể rỗng | Tên hiển thị của tác giả commit. |
-| `email` | string | Chuỗi UTF-8, có thể rỗng | Địa chỉ email tác giả (dùng cho avatar vi mô). |
-| `date` | number | Số nguyên, mốc Unix giây | Thời gian tác giả commit, dùng để tính thời gian tương đối. |
-| `subject` | string | Chuỗi UTF-8 | Dòng tiêu đề (dòng đầu tiên) của thông điệp commit. |
+| Tên Thuộc Tính | Kiểu Dữ Liệu |            Ràng Buộc            | Mô Tả Ý Nghĩa                                               |
+| :------------- | :----------- | :-----------------------------: | :---------------------------------------------------------- |
+| `hash`         | string       | Chuỗi Hex SHA-1 đầy đủ 40 ký tự | Mã băm commit duy nhất, dùng cho đối chiếu và truy vết.     |
+| `shortHash`    | string       |    Chuỗi Hex rút gọn 7 ký tự    | Mã băm ngắn hiển thị trên giao diện (Monospace).            |
+| `author`       | string       |    Chuỗi UTF-8, có thể rỗng     | Tên hiển thị của tác giả commit.                            |
+| `email`        | string       |    Chuỗi UTF-8, có thể rỗng     | Địa chỉ email tác giả (dùng cho avatar vi mô).              |
+| `date`         | number       |    Số nguyên, mốc Unix giây     | Thời gian tác giả commit, dùng để tính thời gian tương đối. |
+| `subject`      | string       |           Chuỗi UTF-8           | Dòng tiêu đề (dòng đầu tiên) của thông điệp commit.         |
 
 ### 5.2. Bảng Đặc Tả Hợp Đồng Query Request & Response
 
-| Hạng Mục | Cấu Trúc | Mô Tả Nghiệp Vụ |
-| :--- | :--- | :--- |
-| **Request** | `command: 'getSyncCommitList'`<br>`repo`: string (đường dẫn kho)<br>`mode`: `'outgoing' \| 'incoming' \| 'diverged'` | Yêu cầu lấy danh sách commit chênh lệch cần đẩy (`outgoing`), cần kéo (`incoming`), hoặc cả hai phía khi phân kỳ (`diverged`). |
-| **Response** | `mode`: `'outgoing' \| 'incoming' \| 'diverged'`<br>`commits`: `SyncCommitRecord[]`<br>`incomingCommits?`: `SyncCommitRecord[]`<br>`totalCount`: number ($\ge 0$) | Trả về danh sách commit; ở chế độ `diverged`, `commits` chứa outgoing và `incomingCommits` chứa danh sách remote bị lệch. |
+| Hạng Mục     | Cấu Trúc                                                                                                                                                          | Mô Tả Nghiệp Vụ                                                                                                                |
+| :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| **Request**  | `command: 'getSyncCommitList'`<br>`repo`: string (đường dẫn kho)<br>`mode`: `'outgoing' \| 'incoming' \| 'diverged'`                                              | Yêu cầu lấy danh sách commit chênh lệch cần đẩy (`outgoing`), cần kéo (`incoming`), hoặc cả hai phía khi phân kỳ (`diverged`). |
+| **Response** | `mode`: `'outgoing' \| 'incoming' \| 'diverged'`<br>`commits`: `SyncCommitRecord[]`<br>`incomingCommits?`: `SyncCommitRecord[]`<br>`totalCount`: number ($\ge 0$) | Trả về danh sách commit; ở chế độ `diverged`, `commits` chứa outgoing và `incomingCommits` chứa danh sách remote bị lệch.      |
 
 ### 5.3. Phạm Vi Commit Chênh Lệch (Revision Range)
 
@@ -137,21 +138,21 @@ Kho trạng thái `sync-inspector.store.ts` quản lý vòng đời mở/đóng 
 
 ### 6.1. Bảng Tín Hiệu & Trạng Thái
 
-| Tín Hiệu | Kiểu Dữ Liệu | Giá Trị Khởi Tạo | Mô Tả Ý Nghĩa |
-| :--- | :--- | :---: | :--- |
-| `isInspectorOpen` | `Signal<boolean>` | `false` | Cờ cho biết flyout đang mở hay đóng. |
-| `flyoutType` | `Signal<'outgoing' \| 'incoming' \| 'diverged'>` | `'outgoing'` | Loại flyout đang hiển thị (outgoing = Push, incoming = Pull, diverged = cả hai). |
-| `inspectedCommits` | `Signal<SyncCommitRecord[]>` | `[]` | Danh sách commit outgoing đang được xem trước. |
-| `divergedIncomingCommits` | `Signal<SyncCommitRecord[]>` | `[]` | Danh sách commit incoming trên remote khi ở trạng thái phân kỳ `diverged`. |
-| `isLoading` | `Signal<boolean>` | `false` | Cờ bận tải khi truy vấn RPC đang chạy. |
+| Tín Hiệu                  | Kiểu Dữ Liệu                                     | Giá Trị Khởi Tạo | Mô Tả Ý Nghĩa                                                                    |
+| :------------------------ | :----------------------------------------------- | :--------------: | :------------------------------------------------------------------------------- |
+| `isInspectorOpen`         | `Signal<boolean>`                                |     `false`      | Cờ cho biết flyout đang mở hay đóng.                                             |
+| `flyoutType`              | `Signal<'outgoing' \| 'incoming' \| 'diverged'>` |   `'outgoing'`   | Loại flyout đang hiển thị (outgoing = Push, incoming = Pull, diverged = cả hai). |
+| `inspectedCommits`        | `Signal<SyncCommitRecord[]>`                     |       `[]`       | Danh sách commit outgoing đang được xem trước.                                   |
+| `divergedIncomingCommits` | `Signal<SyncCommitRecord[]>`                     |       `[]`       | Danh sách commit incoming trên remote khi ở trạng thái phân kỳ `diverged`.       |
+| `isLoading`               | `Signal<boolean>`                                |     `false`      | Cờ bận tải khi truy vấn RPC đang chạy.                                           |
 
 ### 6.2. Bảng Hàm Điều Phối (Store Action Dispatchers)
 
-| Hàm | Tham Số | Quy Trình Xử Lý |
-| :--- | :--- | :--- |
-| `openInspector(mode)` | `mode: 'outgoing' \| 'incoming' \| 'diverged'` | Gán `flyoutType = mode`, làm sạch danh sách commit cũ, bật `isInspectorOpen = true` và `isLoading = true`, rồi gửi RPC `getSyncCommitList` với `mode` tương ứng. |
-| `loadSyncCommitList(result)` | `{ mode, commits, incomingCommits? }` | Chỉ chấp nhận phản hồi khi `result.mode` khớp `flyoutType` hiện tại; gán `inspectedCommits = commits`, gán `divergedIncomingCommits` nếu có, và tắt `isLoading = false`. |
-| `closeInspector()` | Không | Đặt lại trạng thái sạch: `isInspectorOpen = false`, `isLoading = false`, `inspectedCommits = []`, `divergedIncomingCommits = []`. |
+| Hàm                          | Tham Số                                        | Quy Trình Xử Lý                                                                                                                                                          |
+| :--------------------------- | :--------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openInspector(mode)`        | `mode: 'outgoing' \| 'incoming' \| 'diverged'` | Gán `flyoutType = mode`, làm sạch danh sách commit cũ, bật `isInspectorOpen = true` và `isLoading = true`, rồi gửi RPC `getSyncCommitList` với `mode` tương ứng.         |
+| `loadSyncCommitList(result)` | `{ mode, commits, incomingCommits? }`          | Chỉ chấp nhận phản hồi khi `result.mode` khớp `flyoutType` hiện tại; gán `inspectedCommits = commits`, gán `divergedIncomingCommits` nếu có, và tắt `isLoading = false`. |
+| `closeInspector()`           | Không                                          | Đặt lại trạng thái sạch: `isInspectorOpen = false`, `isLoading = false`, `inspectedCommits = []`, `divergedIncomingCommits = []`.                                        |
 
 ### 6.3. Quy Tắc Tự Động Đóng
 
@@ -195,18 +196,17 @@ Phần này trực tiếp giải quyết bài toán thực tế: **"Biết commi
 2. **Bấm chuột ra ngoài**: Nhấp vào lớp màn mờ (scrim) phía sau sẽ đóng flyout trước nếu đang mở, ngược lại đóng bánh xe.
 3. **Chủ đề Dark & Light**: Outgoing viền Neon Cam `#f97316`, Incoming viền Neon Xanh lá `#10b981`, Diverged viền kép Cam/Đỏ kỹ thuật; Light Theme dùng phổ xanh lam blueprint mềm mại, không gây chói lóa.
 
-
 ---
 
 ## 8. Ma Trận Kiểm Thử Đơn Vị Song Hành & Kịch Bản E2E
 
 ### 8.1. Ma Trận Kiểm Thử Đơn Vị
 
-| Tệp Kiểm Thử | Module Mục Tiêu | Kịch Bản Kiểm Thử Bắt Buộc |
-| :--- | :--- | :--- |
-| `tests/backend/queries/syncCommitList.test.ts` | `src/backend/queries/syncCommitList.ts` | 1. **Parser 1 commit**: bóc tách đúng 6 trường từ chuỗi NUL thành một `SyncCommitRecord`.<br>2. **Parser nhiều commit**: bảo toàn thứ tự và đủ số lượng bản ghi.<br>3. **Danh sách rỗng**: chuỗi rỗng/khoảng trắng trả về `[]`.<br>4. **Ký tự đặc biệt**: tiêu đề chứa dấu nháy kép, dấu hai chấm và Unicode tiếng Việt không gãy chuỗi.<br>5. **Phạm vi outgoing/incoming**: `syncRange('outgoing')` = `@{u}..HEAD`, `syncRange('incoming')` = `HEAD..@{u}`.<br>6. **Tích hợp repo thật**: tạo commit cục bộ → outgoing liệt kê đúng commit; tạo commit remote rồi fetch → incoming liệt kê đúng commit.<br>7. **Bẫy lỗi**: kho không có upstream trả về `commits: []` không ném ngoại lệ. |
-| `tests/webview/stores/syncInspectorStore.test.ts` | `src/webview/lib/stores/sync-inspector.store.ts` | 1. **Khởi tạo**: `isInspectorOpen = false`, `inspectedCommits = []`.<br>2. **Mở flyout**: `openInspector('outgoing')` bật `isLoading = true` và gửi RPC.<br>3. **Nhận phản hồi**: `loadSyncCommitList` nạp commit, tắt `isLoading`.<br>4. **Chống phản hồi lỗi thời**: phản hồi khác `mode` bị bỏ qua.<br>5. **Đóng**: `closeInspector()` đặt lại trạng thái sạch.<br>6. **Tự động đóng**: gọi `closeWheel()` kéo theo flyout đóng. |
-| `tests/webview/components/wheel/SyncCommitFlyout.test.ts` | `src/webview/components/wheel/SyncCommitFlyout.tsx` | 1. **Khung đinh tán**: render trong `CornerCrossFrame` có 4 đinh tán `+`.<br>2. **Tiêu đề động**: `Outgoing Commits (3)` hoặc `Incoming Commits (2)`.<br>3. **Trạng thái tải**: hiển thị Loading Skeleton khi `isLoading = true`.<br>4. **Trạng thái rỗng**: hiển thị Empty State khi không có commit.<br>5. **Nút xác nhận**: bấm `Push Now`/`Pull Now` kích hoạt hành động đồng bộ và đóng flyout. |
+| Tệp Kiểm Thử                                              | Module Mục Tiêu                                     | Kịch Bản Kiểm Thử Bắt Buộc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :-------------------------------------------------------- | :-------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tests/backend/queries/syncCommitList.test.ts`            | `src/backend/queries/syncCommitList.ts`             | 1. **Parser 1 commit**: bóc tách đúng 6 trường từ chuỗi NUL thành một `SyncCommitRecord`.<br>2. **Parser nhiều commit**: bảo toàn thứ tự và đủ số lượng bản ghi.<br>3. **Danh sách rỗng**: chuỗi rỗng/khoảng trắng trả về `[]`.<br>4. **Ký tự đặc biệt**: tiêu đề chứa dấu nháy kép, dấu hai chấm và Unicode tiếng Việt không gãy chuỗi.<br>5. **Phạm vi outgoing/incoming**: `syncRange('outgoing')` = `@{u}..HEAD`, `syncRange('incoming')` = `HEAD..@{u}`.<br>6. **Tích hợp repo thật**: tạo commit cục bộ → outgoing liệt kê đúng commit; tạo commit remote rồi fetch → incoming liệt kê đúng commit.<br>7. **Bẫy lỗi**: kho không có upstream trả về `commits: []` không ném ngoại lệ. |
+| `tests/webview/stores/syncInspectorStore.test.ts`         | `src/webview/lib/stores/sync-inspector.store.ts`    | 1. **Khởi tạo**: `isInspectorOpen = false`, `inspectedCommits = []`.<br>2. **Mở flyout**: `openInspector('outgoing')` bật `isLoading = true` và gửi RPC.<br>3. **Nhận phản hồi**: `loadSyncCommitList` nạp commit, tắt `isLoading`.<br>4. **Chống phản hồi lỗi thời**: phản hồi khác `mode` bị bỏ qua.<br>5. **Đóng**: `closeInspector()` đặt lại trạng thái sạch.<br>6. **Tự động đóng**: gọi `closeWheel()` kéo theo flyout đóng.                                                                                                                                                                                                                                                         |
+| `tests/webview/components/wheel/SyncCommitFlyout.test.ts` | `src/webview/components/wheel/SyncCommitFlyout.tsx` | 1. **Khung đinh tán**: render trong `CornerCrossFrame` có 4 đinh tán `+`.<br>2. **Tiêu đề động**: `Outgoing Commits (3)` hoặc `Incoming Commits (2)`.<br>3. **Trạng thái tải**: hiển thị Loading Skeleton khi `isLoading = true`.<br>4. **Trạng thái rỗng**: hiển thị Empty State khi không có commit.<br>5. **Nút xác nhận**: bấm `Push Now`/`Pull Now` kích hoạt hành động đồng bộ và đóng flyout.                                                                                                                                                                                                                                                                                        |
 
 ### 8.2. Kịch Bản E2E / Component Flow
 
@@ -219,7 +219,7 @@ Phần này trực tiếp giải quyết bài toán thực tế: **"Biết commi
 
 ## 9. Lịch Sử Sửa Đổi Thiết Kế (Revision History)
 
-| Phiên Bản | Ngày | Phân Loại | Người Sửa | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật |
-| :---: | :---: | :---: | :---: | :--- |
-| **v1.0.0** | 2026-10-20 | Tạo mới | AI Architect | Khởi tạo bản phác thảo tầm nhìn, ranh giới kiến trúc 4 tầng và khái niệm giao diện cho Sync Commit List Inspector Flyout. |
+| Phiên Bản  |    Ngày    |     Phân Loại     |  Người Sửa   | Nội Dung Thay Đổi & Căn Nguyên Kỹ Thuật                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| :--------: | :--------: | :---------------: | :----------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **v1.0.0** | 2026-10-20 |      Tạo mới      | AI Architect | Khởi tạo bản phác thảo tầm nhìn, ranh giới kiến trúc 4 tầng và khái niệm giao diện cho Sync Commit List Inspector Flyout.                                                                                                                                                                                                                                                                                                                                                    |
 | **v1.1.0** | 2026-10-20 | Hoàn thiện đặc tả | AI Architect | Hoàn thiện 3 đầu việc còn bỏ ngỏ ở Mục 4: đặc tả neo hình học hướng tâm ($270^\circ$/$330^\circ$), hợp đồng dữ liệu RPC `getSyncCommitList` (từ điển `SyncCommitRecord`, thuật toán bóc tách NUL, phạm vi `@{u}..HEAD`/`HEAD..@{u}`), đặc tả kho trạng thái phản ứng, luồng tương tác hai tầng `Esc` và ma trận kiểm thử song hành kèm kịch bản E2E. Đồng bộ tên tín hiệu chuẩn `isInspectorOpen`/`flyoutType`/`inspectedCommits`/`isLoading` thay cho bộ tên sơ bộ ban đầu. |
