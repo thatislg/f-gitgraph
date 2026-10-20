@@ -47,6 +47,10 @@ type QueryPayloads = {
       isRepo: boolean;
     };
   };
+  remoteBranches: {
+    request: { repo: string };
+    response: { repo: string; remotes: Array<{ name: string; branches: string[] }> };
+  };
   workspaceStatus: {
     request: { repo: string };
     response: WorkspaceStatusResult;

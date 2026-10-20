@@ -4,6 +4,7 @@ import { abbrevCommit } from "@/backend/utils/string";
 import type { GitCommitNode, GitRef, GitResetMode } from "@/types";
 import { openFormDialog, openRunningDialog, runAction } from "@/webview/lib/actions";
 import { copyToClipboard } from "@/webview/lib/actions/clipboard";
+import { checkoutRemoteBranchAsNewAction } from "@/webview/lib/stores/sidebar.store";
 import type { ContextMenuEntry } from "@/webview/types";
 import { format } from "@/webview/utils/format";
 
@@ -391,4 +392,48 @@ export function refMenu(gitRef: GitRef, isHeadBranch: boolean): Array<ContextMen
   }
 
   return remoteBranchMenu(gitRef);
+}
+
+/**
+ * Menu ngữ cảnh của một nhánh remote trong phân vùng REMOTES của Sidebar (Nhóm Việc 6.1.2).
+ * Cung cấp 3 tác vụ: checkout thành nhánh cục bộ mới, kéo commit vào nhánh hiện tại, và
+ * xóa vĩnh viễn nhánh remote trên máy chủ.
+ */
+export function sidebarRemoteBranchMenu(
+  remote: string,
+  branch: string
+): Array<ContextMenuEntry> {
+  const ref = `${remote}/${branch}`;
+  const source = `remote:${ref}`;
+
+  return [
+    {
+      title: window.l10n.checkoutAsNewBranch,
+      onClick: () =>
+        openFormDialog({
+          message: format(window.l10n.dialogCreateBranchTitle, <Name>{ref}</Name>),
+          inputs: [{ kind: "ref", value: branch }],
+          action: window.l10n.dialogCreateBranchSubmit,
+          source,
+          onSubmit: ([newLocalBranch]) =>
+            checkoutRemoteBranchAsNewAction(remote, branch, newLocalBranch)
+        })
+    },
+    {
+      title: window.l10n.pullIntoCurrentBranch,
+      onClick: () => runAction({ command: "pullRemoteBranch", remote, branch })
+    },
+    null,
+    {
+      title: window.l10n.deleteRemoteBranch,
+      onClick: () =>
+        openFormDialog({
+          message: format(window.l10n.dialogDeleteRemoteBranchConfirm, <Name>{ref}</Name>),
+          inputs: [],
+          action: window.l10n.deleteRemoteBranch,
+          source,
+          onSubmit: () => runAction({ command: "deleteRemoteBranch", remote, branch })
+        })
+    }
+  ];
 }

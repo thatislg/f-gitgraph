@@ -88,6 +88,9 @@ export function getWebviewLocalizedStrings() {
     unableToStashSave: vscode.l10n.t("Unable to Stash Changes"),
     unableToStashPop: vscode.l10n.t("Unable to Apply Stash"),
     unableToStashDrop: vscode.l10n.t("Unable to Drop Stash"),
+    unableToCheckoutRemoteBranch: vscode.l10n.t("Unable to Checkout Remote Branch"),
+    unableToPullRemoteBranch: vscode.l10n.t("Unable to Pull Remote Branch"),
+    unableToDeleteRemoteBranch: vscode.l10n.t("Unable to Delete Remote Branch"),
     invalidCharacters: vscode.l10n.t("Unable to {0}, one or more invalid characters entered."),
 
     // Actions
@@ -106,6 +109,9 @@ export function getWebviewLocalizedStrings() {
     checkoutBranch: vscode.l10n.t("Checkout Branch"),
     renameBranch: vscode.l10n.t("Rename Branch"),
     deleteBranch: vscode.l10n.t("Delete Branch"),
+    checkoutAsNewBranch: vscode.l10n.t("Checkout as New Local Branch..."),
+    pullIntoCurrentBranch: vscode.l10n.t("Pull into Current Branch"),
+    deleteRemoteBranch: vscode.l10n.t("Delete Remote Branch..."),
 
     typeCommitHash: vscode.l10n.t("Commit Hash"),
     typeTagName: vscode.l10n.t("Tag Name"),
@@ -115,6 +121,7 @@ export function getWebviewLocalizedStrings() {
     labelTag: vscode.l10n.t("the tag"),
     labelBranch: vscode.l10n.t("the branch"),
     labelCurrentBranch: vscode.l10n.t("the current branch"),
+    labelRemoteBranch: vscode.l10n.t("the remote branch"),
 
     // Dialog
     dialogAddTagTitle: vscode.l10n.t("Add tag to commit {0}"),
@@ -142,6 +149,9 @@ export function getWebviewLocalizedStrings() {
     dialogDeleteForceDelete: vscode.l10n.t("Force Delete"),
     dialogRenameBranchTitle: vscode.l10n.t("Enter the new name for the branch {0}:"),
     dialogRenameBranchSubmit: vscode.l10n.t("Rename Branch"),
+    dialogDeleteRemoteBranchConfirm: vscode.l10n.t(
+      "Are you sure you want to permanently delete the remote branch {0}? This action cannot be undone."
+    ),
     dialogPushTagConfirm: vscode.l10n.t("Are you sure you want to push the tag {0}?"),
     dialogYes: vscode.l10n.t("Yes"),
     dialogYesCherryPick: vscode.l10n.t("Yes, cherry pick commit"),

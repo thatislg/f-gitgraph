@@ -127,6 +127,20 @@ describe("SidebarNavigator", () => {
     });
   });
 
+  it("double-click nhánh remote phát checkoutBranch kèm remoteBranch", () => {
+    renderNavigator({ remotes: [{ name: "origin", branches: ["feat-login"] }] });
+    const remote = container.querySelector(
+      '[data-item-id="remote:origin/feat-login"]'
+    ) as HTMLElement;
+    remote.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+
+    expect(runAction).toHaveBeenCalledWith({
+      command: "checkoutBranch",
+      branchName: "feat-login",
+      remoteBranch: "origin/feat-login"
+    });
+  });
+
   it("bấm nút + mở modal tạo nhánh mới", () => {
     renderNavigator();
     const addButton = container.querySelector<HTMLButtonElement>(

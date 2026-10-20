@@ -6,9 +6,11 @@ type ActionPayloads = {
   addTag: { tagName: string; commitHash: string; lightweight: boolean; message: string };
   checkoutBranch: { branchName: string; remoteBranch: string | null };
   checkoutCommit: { commitHash: string };
+  checkoutRemoteBranch: { remote: string; branch: string; newLocalBranch: string };
   cherrypickCommit: { commitHash: string; parentIndex: number };
   createBranch: { commitHash: string; branchName: string };
   deleteBranch: { branchName: string; forceDelete: boolean };
+  deleteRemoteBranch: { remote: string; branch: string };
   deleteTag: { tagName: string };
   mergeBranch: { branchName: string; createNewCommit: boolean };
   mergeCommit: { commitHash: string; createNewCommit: boolean };
@@ -27,6 +29,7 @@ type ActionPayloads = {
   openFile: { filePath: string };
   fetchAll: { prune: boolean };
   pull: { mode: "merge" | "rebase" };
+  pullRemoteBranch: { remote: string; branch: string };
   push: { forceWithLease?: boolean; remote?: string; branch?: string; setUpstream?: boolean };
   stashSave: { message?: string; includeUntracked: boolean };
   stashPop: { index: number };

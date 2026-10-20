@@ -14,6 +14,7 @@ import { commitDetails } from "@/backend/queries/commitDetails";
 import { getHeadCommitMessage } from "@/backend/queries/headCommit";
 import { listTags } from "@/backend/queries/listTags";
 import { loadBranches } from "@/backend/queries/loadBranches";
+import { remoteBranches } from "@/backend/queries/remoteBranches";
 import { getStashList } from "@/backend/queries/stashList";
 import { getSyncStatus } from "@/backend/queries/syncStatus";
 import { getWorkspaceStatus } from "@/backend/queries/workspaceStatus";
@@ -23,7 +24,11 @@ import type { GitCliMutator, MutatorResult } from "@/extension/mutator/gitCliMut
 import { AvatarManager } from "@/extension/services/avatarManager";
 import { encodeDiffDocUri } from "@/extension/services/diffDocProvider";
 import { ExtensionState } from "@/extension/services/extensionState";
-import { selectWatchedRepo } from "@/extension/watchers/git-repo.watcher";
+import {
+  muteGitRepoWatcher,
+  selectWatchedRepo,
+  unmuteGitRepoWatcher
+} from "@/extension/watchers/git-repo.watcher";
 import type { GitFileChangeType, RequestMessage, ResponseMessage } from "@/types";
 
 import type { RepoManager } from "./repoManager";
@@ -118,8 +123,26 @@ export function registerMessageHandlers(
   registerAction("createBranch", (msg) => createBranch(gitClient.getInstance(), msg));
   registerAction("deleteBranch", (msg) => deleteBranch(gitClient.getInstance(), msg));
   registerAction("renameBranch", (msg) => renameBranch(gitClient.getInstance(), msg));
-  registerAction("checkoutBranch", (msg) => checkoutBranch(gitClient.getInstance(), msg));
+  registerAction("checkoutBranch", async (msg) => {
+    // Tạm khóa File Watcher trong lúc checkout để triệt tiêu "Double Refresh Storm".
+    muteGitRepoWatcher();
+    try {
+      await checkoutBranch(gitClient.getInstance(), msg);
+    } finally {
+      unmuteGitRepoWatcher();
+    }
+  });
   registerAction("checkoutCommit", (msg) => checkoutCommit(gitClient.getInstance(), msg));
+  registerAction("checkoutRemoteBranch", async (msg) => {
+    muteGitRepoWatcher();
+    try {
+      await runMutation(
+        gitMutator.checkoutRemoteBranch(msg.remote, msg.branch, msg.newLocalBranch)
+      );
+    } finally {
+      unmuteGitRepoWatcher();
+    }
+  });
   registerAction("cherrypickCommit", (msg) => cherrypickCommit(gitClient.getInstance(), msg));
   registerAction("revertCommit", (msg) => revertCommit(gitClient.getInstance(), msg));
   registerAction("resetToCommit", (msg) => resetToCommit(gitClient.getInstance(), msg));
@@ -164,12 +187,16 @@ export function registerMessageHandlers(
 
   registerAction("fetchAll", (msg) => runMutation(gitMutator.fetchAll(msg.prune)));
   registerAction("pull", (msg) => runMutation(gitMutator.pull(msg.mode)));
+  registerAction("pullRemoteBranch", (msg) => runMutation(gitMutator.pullRemote(msg.remote, msg.branch)));
   registerAction("push", (msg) => runMutation(gitMutator.push(msg)));
   registerAction("stashSave", (msg) =>
     runMutation(gitMutator.stashSave(msg.message, msg.includeUntracked))
   );
   registerAction("stashPop", (msg) => runMutation(gitMutator.stashPop(msg.index)));
   registerAction("stashDrop", (msg) => runMutation(gitMutator.stashDrop(msg.index)));
+  registerAction("deleteRemoteBranch", (msg) =>
+    runMutation(gitMutator.deleteRemoteBranch(msg.remote, msg.branch))
+  );
 
   // --- Query handlers ---
 
@@ -183,6 +210,14 @@ export function registerMessageHandlers(
         repo: msg.repo,
         gitPath: config.gitPath()
       }))
+    });
+  });
+
+  bridge.onMessage("remoteBranches", async (msg) => {
+    setCurrentRepo(msg.repo);
+    bridge.post({
+      command: "remoteBranches",
+      ...(await remoteBranches(gitClient.getInstance(), msg.repo))
     });
   });
 

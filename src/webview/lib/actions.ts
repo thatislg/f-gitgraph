@@ -59,6 +59,7 @@ export function selectRepo(repo: string) {
   refreshSyncStatus(repo);
   refreshStashList(repo);
   refreshTags(repo);
+  refreshRemoteBranches(repo);
   void graphWindowStore.loadGraph(repo, undefined, commitOrdering.value);
 }
 
@@ -152,6 +153,24 @@ export function refresh() {
   refreshSyncStatus(repo);
   refreshStashList(repo);
   refreshTags(repo);
+  refreshRemoteBranches(repo);
+  void graphWindowStore.loadGraph(repo, selectedBranch.value, commitOrdering.value);
+}
+
+/**
+ * Làm mới có mục tiêu sau khi checkout thành công (Nhóm Việc 6.2.3): chỉ nạp lại trạng
+ * thái working tree, số đếm ahead/behind và vị trí HEAD trên đồ thị DAG. Bỏ qua các truy
+ * vấn không bị ảnh hưởng bởi việc đổi nhánh (`stashList`, `listTags`, `loadBranches`) để
+ * cắt giảm số tiến trình Git CLI spawn và triệt tiêu "Double Refresh Storm".
+ */
+export function refreshAfterCheckout() {
+  const repo = selectedRepo.value;
+  if (repo === undefined) {
+    return;
+  }
+
+  refreshStatus();
+  refreshSyncStatus(repo);
   void graphWindowStore.loadGraph(repo, selectedBranch.value, commitOrdering.value);
 }
 
@@ -217,6 +236,16 @@ export function refreshTags(repo?: string) {
   }
 
   vscode.postMessage({ command: "listTags", repo: target });
+}
+
+/** Yêu cầu Backend trả về danh sách nhánh remote nhóm theo tên để cập nhật phân nhóm REMOTES. */
+export function refreshRemoteBranches(repo?: string) {
+  const target = repo ?? selectedRepo.value;
+  if (target === undefined) {
+    return;
+  }
+
+  vscode.postMessage({ command: "remoteBranches", repo: target });
 }
 
 /** Yêu cầu Backend trả về tiêu đề/mô tả của commit HEAD để nạp sẵn khi bật Amend. */

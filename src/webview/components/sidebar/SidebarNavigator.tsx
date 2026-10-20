@@ -1,8 +1,11 @@
 import { useRef } from "preact/hooks";
 
 import type { StashRecord } from "@/types";
+import { openContextMenu } from "@/webview/lib/actions";
+import { sidebarRemoteBranchMenu } from "@/webview/lib/menus";
 import {
   checkoutBranchAction,
+  checkoutRemoteBranchAction,
   createBranchAction,
   effectiveSidebarWidth,
   expandedSectionIds,
@@ -240,6 +243,10 @@ export function SidebarNavigator({
                     type="remote-branch"
                     label={label}
                     onClick={() => selectItem(`remote:${label}`)}
+                    onDoubleClick={() => checkoutRemoteBranchAction(group.name, branch)}
+                    onContextMenu={(event) =>
+                      openContextMenu(event, `remote:${label}`, sidebarRemoteBranchMenu(group.name, branch))
+                    }
                   />
                 );
               })

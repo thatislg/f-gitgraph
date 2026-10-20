@@ -9,6 +9,9 @@ export const selectedRepo = signal<string | undefined>(undefined);
 export const branchList = signal<Array<string> | undefined>(undefined);
 export const headBranch = signal<string | null>(null);
 
+/** Nhóm nhánh remote theo tên remote (độc lập với cờ `showRemoteBranch`). */
+export const remoteGroups = signal<Array<{ name: string; branches: string[] }>>([]);
+
 export const commitList = signal<Array<GitCommitNode> | undefined>(undefined);
 /** Hash of the commit that HEAD points to, or `null` when the repo has no commit. */
 export const commitHead = signal<string | null>(null);

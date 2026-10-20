@@ -1,28 +1,53 @@
 import type { ResponseMessage } from "@/types";
+import { openErrorDialog, refreshAfterCheckout } from "@/webview/lib/actions";
 import { playError, playStash, playSwitch } from "@/webview/lib/audio";
-import { isCheckingOut, isStashOperating } from "@/webview/lib/stores/sidebar.store";
+import { headBranch } from "@/webview/lib/stores";
+import {
+  isCheckingOut,
+  isStashOperating,
+  previousHeadBranch
+} from "@/webview/lib/stores/sidebar.store";
 
-import { handleActionResult } from "./action-result";
 import { handleSyncAction } from "./sync-action";
 
 type CheckoutBranchMessage = Extract<ResponseMessage, { command: "checkoutBranch" }>;
+type CheckoutRemoteBranchMessage = Extract<ResponseMessage, { command: "checkoutRemoteBranch" }>;
 type SidebarStashMessage = Extract<ResponseMessage, { command: "stashPop" | "stashDrop" }>;
 
 /**
- * Xử lý phản hồi checkout nhánh khởi phát từ cây điều hướng Sidebar: giải phóng khóa
- * Mutex, phát âm thanh thành công/lỗi, sau đó ủy thác chuẩn hóa lỗi và làm mới đồ thị
- * cho bộ xử lý kết quả dùng chung.
+ * Hoàn tất một chu kỳ checkout khởi phát từ Sidebar: giải phóng khóa Mutex, phát âm thanh
+ * thành công/lỗi, làm mới có mục tiêu (`refreshAfterCheckout`) khi thành công và phục hồi
+ * nhánh HEAD cũ (Rollback) khi thất bại.
  */
-export function handleCheckoutBranch(msg: CheckoutBranchMessage): void {
+function finishCheckout(status: string | null, errorMessage: string): void {
   isCheckingOut.value = false;
 
-  if (msg.status === null) {
+  if (status === null) {
     playSwitch();
+    refreshAfterCheckout();
   } else {
     playError();
+    // Phục hồi trạng thái lạc quan: đưa viền tím Neon trở về nhánh HEAD cũ.
+    headBranch.value = previousHeadBranch.value;
+    openErrorDialog(errorMessage, status);
   }
+}
 
-  handleActionResult(msg);
+/**
+ * Xử lý phản hồi checkout nhánh khởi phát từ cây điều hướng Sidebar: giải phóng khóa
+ * Mutex, phát âm thanh thành công/lỗi, làm mới có mục tiêu khi thành công và phục hồi
+ * nhánh HEAD cũ khi thất bại.
+ */
+export function handleCheckoutBranch(msg: CheckoutBranchMessage): void {
+  finishCheckout(msg.status, window.l10n.unableToCheckoutBranch);
+}
+
+/**
+ * Xử lý phản hồi checkout nhánh remote thành nhánh cục bộ mới (menu ngữ cảnh), đồng bộ
+ * hành vi với `handleCheckoutBranch` (lạc quan + phục hồi + làm mới có mục tiêu).
+ */
+export function handleCheckoutRemoteBranch(msg: CheckoutRemoteBranchMessage): void {
+  finishCheckout(msg.status, window.l10n.unableToCheckoutRemoteBranch);
 }
 
 /**

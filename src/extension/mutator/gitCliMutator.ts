@@ -273,6 +273,28 @@ export class GitCliMutator {
     return this.run(["checkout", name]);
   }
 
+  /** Tạo nhánh cục bộ mới theo dõi nhánh remote: `git checkout -b <newLocalBranch> --track <remote>/<branch>`. */
+  async checkoutRemoteBranch(
+    remote: string,
+    branch: string,
+    newLocalBranch: string
+  ): Promise<MutatorResult> {
+    if (!(await this.isValidRefName(newLocalBranch, "branch"))) {
+      return { ...INVALID_REF, stderr: `tên nhánh không hợp lệ: ${newLocalBranch}` };
+    }
+    return this.run(["checkout", "-b", newLocalBranch, "--track", `${remote}/${branch}`]);
+  }
+
+  /** Kéo commit từ một nhánh remote cụ thể vào nhánh hiện tại: `git pull <remote> <branch>`. */
+  async pullRemote(remote: string, branch: string): Promise<MutatorResult> {
+    return this.normalizeError(await this.run(["pull", remote, branch]));
+  }
+
+  /** Xóa vĩnh viễn nhánh remote trên máy chủ: `git push <remote> --delete <branch>`. */
+  async deleteRemoteBranch(remote: string, branch: string): Promise<MutatorResult> {
+    return this.run(["push", remote, "--delete", branch]);
+  }
+
   async merge(source: string, createNewCommit = true): Promise<MutatorResult> {
     const args = ["merge", source];
     if (createNewCommit) {

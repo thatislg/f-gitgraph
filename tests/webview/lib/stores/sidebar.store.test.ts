@@ -17,6 +17,7 @@ import {
   MIN_SIDEBAR_WIDTH,
   branchCreationBaseCommit,
   checkoutBranchAction,
+  checkoutRemoteBranchAction,
   collapseAllSections,
   createBranchAction,
   effectiveSidebarWidth,
@@ -250,6 +251,55 @@ describe("sidebarStore", () => {
     it("chặn tên nhánh rỗng sau khi trim", () => {
       headBranch.value = "main";
       checkoutBranchAction("   ");
+      expect(runAction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("checkout nhánh remote", () => {
+    it("phát checkoutBranch với remoteBranch khi nhánh local chưa tồn tại", () => {
+      branchList.value = ["main"];
+      headBranch.value = "main";
+
+      checkoutRemoteBranchAction("origin", "feat-login");
+
+      expect(isCheckingOut.value).toBe(true);
+      expect(runAction).toHaveBeenCalledWith({
+        command: "checkoutBranch",
+        branchName: "feat-login",
+        remoteBranch: "origin/feat-login"
+      });
+    });
+
+    it("chuyển sang nhánh local hiện có khi trùng tên", () => {
+      branchList.value = ["main", "dev"];
+      headBranch.value = "main";
+
+      checkoutRemoteBranchAction("origin", "dev");
+
+      expect(runAction).toHaveBeenCalledWith({
+        command: "checkoutBranch",
+        branchName: "dev",
+        remoteBranch: null
+      });
+    });
+
+    it("chặn khi đang checkout (mutex)", () => {
+      branchList.value = ["main"];
+      headBranch.value = "main";
+      isCheckingOut.value = true;
+
+      checkoutRemoteBranchAction("origin", "feat");
+
+      expect(runAction).not.toHaveBeenCalled();
+    });
+
+    it("chặn khi remoteName hoặc branchName rỗng", () => {
+      branchList.value = ["main"];
+      headBranch.value = "main";
+
+      checkoutRemoteBranchAction("   ", "feat");
+      checkoutRemoteBranchAction("origin", "   ");
+
       expect(runAction).not.toHaveBeenCalled();
     });
   });

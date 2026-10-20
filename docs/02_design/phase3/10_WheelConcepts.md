@@ -446,3 +446,37 @@ Trước khi bàn giao tài liệu này cho kỹ sư hoặc AI coder tiến hàn
 - [x] **Tiêu chí 10**: Ma trận kiểm thử đơn vị song hành bao phủ đầy đủ kịch bản hình học, trạng thái, phím tắt và theme.
 - [x] **Tiêu chí 11**: 100% đầu việc được chia nhỏ dưới dạng hợp đồng hộp đen có Input và Output định kiểu rõ ràng.
 - [x] **Tiêu chí 12**: Cổng xác minh thiết kế (Design Verification Gate) thông qua trọn vẹn.
+
+---
+
+## 12. Phụ Lục Bổ Sung: Chuẩn Hóa Tương Tác Hai Tầng (Hướng B) & Lộ Trình Xem Trước Commit Đồng Bộ
+
+Phần phụ lục này bổ sung chuẩn tương tác nâng cao cho chu trình 4 trạng thái, giải quyết triệt để sự chồng chéo nhận thức giữa State 1 và State 2 mà vẫn bảo toàn 100% kiến trúc hình học đã định hình.
+
+### 12.1. Thiết Kế Tương Tác Hai Tầng Của Hướng B (Dual-Mode Radial Interaction)
+
+Nhằm tối ưu hóa công thái học và phân định rạch ròi mục đích sử dụng giữa hai trạng thái:
+
+1. **Tầng 1: Thao Tác Nhanh Trực Tiếp Tại State 1 (Quick Micro-Actions Cho Pro Users)**
+   - Ở State 1 (Armed Iris Preview), 6 icon lục giác vệ tinh nhỏ ($R_{\text{node}} = 13\text{px}$) nằm trên quỹ đạo $D_{\text{orbit}} = 30\text{px}$ được mở khóa khả năng nhận tương tác con trỏ.
+   - Khi người dùng di chuột vào từng icon nhỏ: Icon đó tăng sáng viền Neon đặc trưng của tác vụ (Micro Neon Glow). Tuyệt đối **không hiển thị tooltip văn bản**, giữ trọn vẹn phong cách Cyber-Lab tối giản và không gây vướng mắt cho người dùng chuyên nghiệp (Pro Users) đã nắm rõ biểu tượng.
+   - Nhấp chuột trái trực tiếp lên bất kỳ icon nhỏ nào trong 6 vệ tinh: Hệ thống lập tức kích hoạt hành động Git tương ứng, bỏ qua bước trung gian và tự động co thẳng về State 0 trong $160\text{ms}$.
+   - Luồng này phục vụ tối đa cho người dùng thành thạo, cho phép thực hiện thao tác Git chỉ với một cú nhấp chuột duy nhất từ thanh công cụ đỉnh.
+
+2. **Tầng 2: Cửa Ngõ Mở Buồng Lái Đầy Đủ (Full Cockpit Entryway)**
+   - Logo F-GitGraph nằm tại tâm của State 1 ($R_{\text{emblem}} = 14\text{px}$) đóng vai trò là công tắc kích hoạt trạm chỉ huy toàn diện.
+   - Chỉ khi người dùng nhấp chuột trái vào chính xác biểu tượng Logo ở trung tâm: Hệ thống mới kích hoạt bung nở sang State 2 (Expanded Honeycomb Hub).
+   - Khi đó, tấm màn mờ (Scrim) toàn màn hình phủ xuống, cụm tổ ong 7 nhân lớn ($D = 76\text{px}$, $R = 34\text{px}$) xuất hiện với đầy đủ nhãn văn bản, huy hiệu số đếm, viên nang ngữ cảnh động (State 3) và menu phân nhánh chuột phải (Merge / Rebase, Force Push).
+
+3. **Bảo Đảm An Toàn Vùng Chạm (Hitbox Isolation Guarantee)**
+   - Khoảng cách từ tâm đến mép ngoài của Logo trung tâm là $14\text{px}$.
+   - Vị trí mép trong gần nhất của 6 node vệ tinh là $30\text{px} - 13\text{px} = 17\text{px}$.
+   - Tồn tại một khoảng đệm an toàn cách ly tuyệt đối rộng $3\text{px}$ giữa Logo tâm và các cánh vệ tinh, bảo đảm $100\%$ không xảy ra hiện tượng click nhầm giữa việc mở buồng lái và thực thi lệnh nhanh.
+
+---
+
+### 12.2. Lộ Trình Mở Rộng: Tách Thành Phase Riêng (Sync Commit List Inspector)
+
+Ý tưởng hiển thị danh sách commit trước khi Push hoặc Pull (tương tự các Git Client cao cấp) đã được tách thành một giai đoạn thiết kế độc lập riêng biệt tiếp nối sau Radial Command Hub:
+👉 **Xem tài liệu thiết kế chuyên biệt**: [11. Thiết Kế Bảng Xem Trước Danh Sách Commit Đồng Bộ (Sync Commit List Inspector Flyout)](./11_Sync_Commit_List_Inspector_Design.md).
+

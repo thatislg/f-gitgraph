@@ -6,9 +6,9 @@ import { handleCommitResult } from "./handler/commit-result";
 import { handleHeadCommit } from "./handler/head-commit";
 import { handleLoadBranches } from "./handler/load-branches";
 import { handleRefresh } from "./handler/refresh";
-import { handleCheckoutBranch, handleSidebarStash } from "./handler/sidebar-action";
+import { handleCheckoutBranch, handleCheckoutRemoteBranch, handleSidebarStash } from "./handler/sidebar-action";
 import { handleSyncAction } from "./handler/sync-action";
-import { handleStashList, handleSyncStatus, handleTagList } from "./handler/sync-query";
+import { handleRemoteBranches, handleStashList, handleSyncStatus, handleTagList } from "./handler/sync-query";
 import { handleViewDiff } from "./handler/view-diff";
 import { handleWorkspaceStatus } from "./handler/workspace-status";
 
@@ -22,9 +22,11 @@ const handlers: Handlers = {
   addTag: handleActionResult,
   checkoutBranch: handleCheckoutBranch,
   checkoutCommit: handleActionResult,
+  checkoutRemoteBranch: handleCheckoutRemoteBranch,
   cherrypickCommit: handleActionResult,
   createBranch: handleActionResult,
   deleteBranch: handleActionResult,
+  deleteRemoteBranch: handleActionResult,
   deleteTag: handleActionResult,
   mergeBranch: handleActionResult,
   mergeCommit: handleActionResult,
@@ -40,6 +42,7 @@ const handlers: Handlers = {
   discardAllChanges: handleActionResult,
   fetchAll: handleSyncAction,
   pull: handleSyncAction,
+  pullRemoteBranch: handleActionResult,
   push: handleSyncAction,
   stashSave: handleSyncAction,
   stashPop: handleSidebarStash,
@@ -53,6 +56,7 @@ const handlers: Handlers = {
   syncStatus: handleSyncStatus,
   stashList: handleStashList,
   listTags: handleTagList,
+  remoteBranches: handleRemoteBranches,
   viewDiff: handleViewDiff,
   workspaceStatus: handleWorkspaceStatus
 };

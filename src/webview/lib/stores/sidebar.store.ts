@@ -52,6 +52,9 @@ export const isResizing = signal<boolean>(false);
 /** Cờ khóa tương tác khi đang gửi lệnh checkout nhánh. */
 export const isCheckingOut = signal<boolean>(false);
 
+/** Nhánh HEAD trước khi checkout lạc quan (dùng để phục hồi khi Git CLI thất bại). */
+export const previousHeadBranch = signal<string | null>(null);
+
 /** Cờ khóa tương tác khi đang thực thi thao tác stash. */
 export const isStashOperating = signal<boolean>(false);
 
@@ -275,7 +278,79 @@ export function checkoutBranchAction(branchName: string): void {
   }
 
   isCheckingOut.value = true;
+  // Phản xạ lạc quan 16ms: chuyển viền tím Neon sang nhánh mục tiêu ngay lập tức.
+  previousHeadBranch.value = headBranch.value;
+  headBranch.value = trimmed;
   runAction({ command: "checkoutBranch", branchName: trimmed, remoteBranch: null });
+}
+
+/**
+ * Xử lý nhấp đúp vào nhánh remote: tạo local tracking branch và chuyển sang nó. Nếu nhánh
+ * local cùng tên đã tồn tại thì chuyển thẳng sang nhánh local đó. Backend thực thi
+ * `git checkout -b <branchName> --track <remoteName>/<branchName>` qua action `checkoutBranch`.
+ */
+export function checkoutRemoteBranchAction(remoteName: string, branchName: string): void {
+  if (isCheckingOut.value) {
+    return;
+  }
+
+  const remote = typeof remoteName === "string" ? remoteName.trim() : "";
+  const branch = typeof branchName === "string" ? branchName.trim() : "";
+  if (remote === "" || branch === "") {
+    return;
+  }
+
+  // Nhánh local cùng tên đã tồn tại: chuyển thẳng sang nhánh local hiện có.
+  if (branchListContains(branch)) {
+    checkoutBranchAction(branch);
+    return;
+  }
+
+  isCheckingOut.value = true;
+  // Phản xạ lạc quan 16ms: chuyển viền tím Neon sang nhánh mục tiêu ngay lập tức.
+  previousHeadBranch.value = headBranch.value;
+  headBranch.value = branch;
+  runAction({
+    command: "checkoutBranch",
+    branchName: branch,
+    remoteBranch: `${remote}/${branch}`
+  });
+}
+
+/**
+ * Tạo nhánh cục bộ mới theo dõi nhánh remote (từ menu ngữ cảnh "Checkout as New Local
+ * Branch..."). Backend thực thi `git checkout -b <newLocalBranch> --track <remote>/<branch>`
+ * qua action `checkoutRemoteBranch`.
+ */
+export function checkoutRemoteBranchAsNewAction(
+  remoteName: string,
+  branchName: string,
+  newLocalBranch: string
+): void {
+  if (isCheckingOut.value) {
+    return;
+  }
+
+  const remote = typeof remoteName === "string" ? remoteName.trim() : "";
+  const branch = typeof branchName === "string" ? branchName.trim() : "";
+  const localBranch = typeof newLocalBranch === "string" ? newLocalBranch.trim() : "";
+  if (remote === "" || branch === "" || localBranch === "") {
+    return;
+  }
+
+  if (localBranch === headBranch.value) {
+    return;
+  }
+
+  isCheckingOut.value = true;
+  previousHeadBranch.value = headBranch.value;
+  headBranch.value = localBranch;
+  runAction({
+    command: "checkoutRemoteBranch",
+    remote,
+    branch,
+    newLocalBranch: localBranch
+  });
 }
 
 /** Mở phân vùng Staging Area khi người dùng chọn mục `WORKING TREE -> Changes`. */
