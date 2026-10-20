@@ -34,32 +34,34 @@ Tài liệu này ghi nhận tổng quan mục tiêu, danh mục tệp tin tác �
 ### 🧩 Nhóm Việc 1: Hợp Đồng Dữ Liệu & Bộ Truy Vấn Danh Sách Commit (Backend Query Tier)
 - [ ] **Task 1.1**: Định nghĩa cấu trúc kiểu dữ liệu TypeScript trong `src/types/queries.ts` và `src/types/actions.ts`:
   - `SyncCommitRecord`: `{ hash: string; shortHash: string; author: string; email: string; date: number; subject: string }`.
-  - `SyncCommitListQuery`: `{ command: 'getSyncCommitList'; mode: 'outgoing' | 'incoming' }`.
-  - `SyncCommitListResult`: `{ mode: 'outgoing' | 'incoming'; commits: SyncCommitRecord[]; totalCount: number }`.
+  - `SyncCommitListQuery`: `{ command: 'getSyncCommitList'; mode: 'outgoing' | 'incoming' | 'diverged' }`.
+  - `SyncCommitListResult`: `{ mode: 'outgoing' | 'incoming' | 'diverged'; commits: SyncCommitRecord[]; incomingCommits?: SyncCommitRecord[]; totalCount: number }`.
 - [ ] **Task 1.2**: Viết Unit Test `tests/backend/queries/syncCommitList.test.ts` kiểm thử:
   - Phân tích chuỗi NUL-delimited của `git log` thành mảng `SyncCommitRecord[]`.
   - Xử lý biên: Danh sách rỗng ($0$ commit), commit có tiêu đề chứa dấu nháy kép, ký tự xuống dòng hoặc unicode tiếng Việt.
-  - Phân định rõ chế độ `outgoing` (`@{u}..HEAD`) và `incoming` (`HEAD..@{u}`).
-- [ ] **Task 1.3**: Triển khai hàm truy vấn `getSyncCommitList(git: SimpleGit, mode: 'outgoing' | 'incoming')` tại `src/backend/queries/syncCommitList.ts`.
+  - Phân định rõ chế độ `outgoing` (`@{u}..HEAD`), `incoming` (`HEAD..@{u}`), và `diverged` (lấy đồng thời cả hai dải).
+- [ ] **Task 1.3**: Triển khai hàm truy vấn `getSyncCommitList(git: SimpleGit, mode: 'outgoing' | 'incoming' | 'diverged')` tại `src/backend/queries/syncCommitList.ts`.
 - [ ] **Task 1.4**: Đăng ký xử lý RPC query `getSyncCommitList` trong `src/extension/services/messageHandler.ts`.
 
 ### 🧩 Nhóm Việc 2: Kho Trạng Thái Phản Ứng `sync-inspector.store.ts` (Reactive Store Tier)
 - [ ] **Task 2.1**: Viết Unit Test `tests/webview/stores/syncInspectorStore.test.ts` kiểm thử:
-  - Khởi tạo trạng thái ban đầu: `isInspectorOpen` là `false`, `inspectedCommits` là mảng rỗng.
-  - Kích hoạt `openInspector('outgoing')`: Gửi yêu cầu RPC, chuyển `isLoading` sang `true`.
-  - Nhận phản hồi `loadSyncCommitList`: Cập nhật mảng commit, tắt `isLoading`.
+  - Khởi tạo trạng thái ban đầu: `isInspectorOpen` là `false`, `inspectedCommits` và `divergedIncomingCommits` là mảng rỗng.
+  - Kích hoạt `openInspector('diverged')`: Gửi yêu cầu RPC, chuyển `isLoading` sang `true`.
+  - Nhận phản hồi `loadSyncCommitList`: Cập nhật mảng commit outgoing và incoming, tắt `isLoading`.
   - Kích hoạt `closeInspector()`: Đặt lại trạng thái sạch.
   - Tự động đóng inspector khi `closeWheel()` được gọi trong `wheel.store.ts`.
-- [ ] **Task 2.2**: Triển khai kho trạng thái `src/webview/lib/stores/sync-inspector.store.ts` bằng Preact Signals.
+- [ ] **Task 2.2**: Triển khai kho trạng thái `src/webview/lib/stores/sync-inspector.store.ts` bằng Preact Signals hỗ trợ `divergedIncomingCommits`.
 - [ ] **Task 2.3**: Bổ sung hàm gửi yêu cầu `requestSyncCommitList(mode)` trong `src/webview/lib/actions.ts` và hàm xử lý phản hồi trong `src/webview/lib/handler/sync-commit-list.ts`.
 
 ### 🧩 Nhóm Việc 3: Component Giao Diện Ngăn Kéo Hướng Tâm (Webview UI Tier)
 - [ ] **Task 3.1**: Viết Unit Test `tests/webview/components/wheel/SyncCommitFlyout.test.ts` kiểm thử:
   - Render bảng nổi được bọc trong `CornerCrossFrame` với đinh tán góc `+`.
-  - Hiển thị tiêu đề động (ví dụ: `Outgoing Commits (3) - origin/main` hoặc `Incoming Commits (2)`).
+  - Hiển thị tiêu đề động (ví dụ: `Outgoing Commits (3)`, `Incoming Commits (2)`, hoặc `Branch Diverged (Ahead 1, Behind 1)`).
+  - Ở chế độ `diverged`: Hiển thị 2 phân khu đối chiếu rõ ràng (Phân khu Local cam vs Phân khu Remote xám/đỏ gạch ngang).
+  - Chân bảng hiển thị 3 nút giải quyết phân kỳ: `Replace Remote (Force Push with Lease)`, `Rebase on Remote`, và `Merge Remote`.
   - Trạng thái đang tải (Loading Skeleton) khi `isLoading` là `true`.
-  - Trạng thái danh sách rỗng (Empty State) khi không có commit nào.
-  - Bấm nút xác nhận ở đáy bảng (ví dụ nút `Push Now` hoặc `Pull Now`) kích hoạt hàm thực thi tương ứng và đóng flyout.
+  - Bấm nút `Replace Remote` kích hoạt `push(true)` và tự động đóng flyout.
+
 - [ ] **Task 3.2**: Triển khai component `SyncCommitItem.tsx` hiển thị từng dòng commit:
   - Mã băm ngắn (Monospace, màu sắc dịu), tên tác giả, tiêu đề commit và thời gian tương đối.
   - Hiệu ứng hover nổi bật từng dòng commit.

@@ -1,6 +1,6 @@
 import { Icon } from "@/webview/components/ui/Icons";
 import { aheadCount, behindCount } from "@/webview/lib/stores/sync.store";
-import { wheelStyle } from "@/webview/lib/stores/wheel.store";
+import { executePetalAction, wheelStyle } from "@/webview/lib/stores/wheel.store";
 import { EMBLEM_RADIUS, PETAL_LAYOUT, petalCenters } from "@/webview/utils/hexGeometry";
 
 import { FGitGraphLogo } from "./FGitGraphLogo";
@@ -33,7 +33,9 @@ const irisCenters = petalCenters(IRIS_ORBIT);
  *
  * Ở State 1 (Armed), biểu tượng xoay nhẹ 30° và hiện 6 icon tác vụ (Push, Pull, Fetch,
  * Pop, Stash, Refresh) bao quanh, không kèm nhãn chữ. Mỗi icon nằm trong node lục giác
- * nhỏ mang đúng màu Neon của tác vụ tương lai.
+ * nhỏ mang đúng màu Neon của tác vụ tương lai. Nhấp chuột vào một icon vệ tinh sẽ chạy
+ * ngay tác vụ Git tương ứng (Quick Mode) và thu gọn về State 0; nhấp vào logo trung tâm
+ * sẽ mở Cockpit đầy đủ (State 2).
  *
  * Tham khảo thiết kế:
  * docs/02_design/phase3/10_WheelConcepts.md (Mục 4.1 & 4.2).
@@ -77,7 +79,7 @@ export function HexWheelBrandEmblem({ armed = false }: HexWheelBrandEmblemProps)
       {armed && (
         <div
           data-iris
-          class="pointer-events-none absolute inset-0"
+          class="absolute inset-0"
           style={{ animation: "f-gitgraph-iris-arm 0.12s cubic-bezier(0.2, 0, 0, 1)" }}
         >
           {PETAL_LAYOUT.map((petal, index) => {
@@ -88,13 +90,21 @@ export function HexWheelBrandEmblem({ armed = false }: HexWheelBrandEmblemProps)
               <span
                 key={petal.id}
                 data-iris-icon={petal.id}
-                class="absolute flex items-center justify-center"
+                role="button"
+                tabIndex={0}
+                aria-label={petal.label}
+                class="absolute flex cursor-pointer items-center justify-center"
                 style={{
                   left: EMBLEM_RADIUS + center.x - IRIS_NODE_RADIUS,
                   top: EMBLEM_RADIUS + center.y - IRIS_NODE_RADIUS,
                   width: nodeSize,
                   height: nodeSize,
-                  color
+                  color,
+                  pointerEvents: "auto"
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  executePetalAction(petal.id);
                 }}
               >
                 <HexagonShape

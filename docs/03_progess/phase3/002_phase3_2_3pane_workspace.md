@@ -250,50 +250,51 @@ _Tài liệu tham chiếu thiết kế_: [07_Sidebar_Navigator_Tree_Design.md](.
 
 _Mục tiêu_: Chuyển đổi phân vùng `REMOTES` từ danh sách tĩnh (Read-only) thành không gian tương tác hai chiều hoàn chỉnh (Double-click checkout tracking branch, Context Menu); đồng thời triệt tiêu độ trễ và hiện tượng "Cơn bão làm mới kép" (Double Refresh Storm) khi chuyển đổi `LOCAL BRANCHES`.
 
-- [ ] **Nhiệm vụ 6.1: Hiện thực hóa tương tác toàn diện trên phân vùng REMOTES**
-  - [ ] **6.1.1**: Xây dựng hàm `checkoutRemoteBranchAction(remoteName: string, branchName: string)`:
+- [x] **Nhiệm vụ 6.1: Hiện thực hóa tương tác toàn diện trên phân vùng REMOTES**
+  - [x] **6.1.1**: Xây dựng hàm `checkoutRemoteBranchAction(remoteName: string, branchName: string)`:
     - Khi người dùng nhấp đúp vào nhánh remote (ví dụ `origin/feat-login`): Tự động kiểm tra danh sách nhánh local hiện có (`branchList`).
     - Nếu nhánh local cùng tên chưa tồn tại: Tự động chạy lệnh checkout tracking branch `git checkout -b <branchName> --track <remoteName>/<branchName>`.
     - Nếu nhánh local cùng tên đã tồn tại: Mở modal xác nhận cho phép người dùng lựa chọn: *Checkout existing local branch* hoặc *Overwrite tracking upstream*.
-  - [ ] **6.1.2**: Tích hợp Menu ngữ cảnh (Context Menu) cho từng nhánh remote (`SidebarItem` kiểu `"remote-branch"`):
+  - [x] **6.1.2**: Tích hợp Menu ngữ cảnh (Context Menu) cho từng nhánh remote (`SidebarItem` kiểu `"remote-branch"`):
     - *Checkout as New Local Branch...*: Mở dialog nhập tên nhánh local mới và tự động thiết lập upstream theo dõi.
     - *Pull into Current Branch*: Kéo commit từ nhánh remote vào nhánh `HEAD` đang mở (`git pull <remoteName> <branchName>`).
     - *Delete Remote Branch...*: Mở modal cảnh báo màu đỏ xác nhận xóa vĩnh viễn nhánh trên máy chủ từ xa (`git push <remoteName> --delete <branchName>`).
-  - [ ] **6.1.3**: Độc lập hóa nguồn dữ liệu Remotes ở Sidebar:
+  - [x] **6.1.3**: Độc lập hóa nguồn dữ liệu Remotes ở Sidebar:
     - Bổ sung hoặc điều chỉnh bộ truy vấn nhánh: Danh sách `remotes` trong `SidebarNavigator` luôn được nạp đầy đủ cấu trúc máy chủ (tất cả các remote branches có sẵn), không bị phụ thuộc vào cờ bật/tắt `showRemoteBranch` (vốn chỉ đóng vai trò lọc hiển thị các đường nhánh trên bảng đồ thị DAG ảo hóa).
 
-- [ ] **Nhiệm vụ 6.2: Tối ưu hóa hiệu năng và triệt tiêu độ trễ chuyển đổi nhánh Local Branches**
-  - [ ] **6.2.1**: Phản xạ giao diện lạc quan (Optimistic UI Transition):
+- [x] **Nhiệm vụ 6.2: Tối ưu hóa hiệu năng và triệt tiêu độ trễ chuyển đổi nhánh Local Branches**
+  - [x] **6.2.1**: Phản xạ giao diện lạc quan (Optimistic UI Transition):
     - Khi người dùng nhấp đúp hoặc kích hoạt checkout nhánh: Lập tức chuyển đổi viền tím Neon `#a855f7` và biểu tượng checkmark sang nhánh mới trong $16\text{ms}$ (1 khung hình GPU) trên cả Sidebar và Toolbar trước khi Git CLI phản hồi.
     - Khôi phục trạng thái cũ (Rollback) kèm âm báo lỗi nếu tiến trình checkout của Git CLI báo thất bại hoặc xung đột tệp chưa lưu.
-  - [ ] **6.2.2**: Khử trùng lặp sự kiện và khóa tạm thời File Watcher (Watcher Mute & Deduplication):
+  - [x] **6.2.2**: Khử trùng lặp sự kiện và khóa tạm thời File Watcher (Watcher Mute & Deduplication):
     - Tận dụng biến `muteDepth` và `resumeAt` trong `src/extension/watchers/git-repo.watcher.ts` để tạm khóa bộ theo dõi file `.git/HEAD` trong lúc đang thực thi thao tác checkout do người dùng chủ động kích hoạt.
     - Triệt tiêu hoàn toàn hiện tượng "Cơn bão làm mới kép" (Double Refresh Storm), cắt giảm hơn 50% số lượng tiến trình con `git.exe` bị spawn dồn dập.
-  - [ ] **6.2.3**: Quy trình làm mới có mục tiêu sau Checkout (`refreshAfterCheckout`):
+  - [x] **6.2.3**: Quy trình làm mới có mục tiêu sau Checkout (`refreshAfterCheckout`):
     - Thay thế việc gọi hàm `refresh()` toàn thể (chạy đồng loạt 6 lệnh Git CLI nặng nề) bằng quy trình chuyên biệt: chỉ cập nhật lại `currentHead`, gửi truy vấn `workspaceStatus` và `syncStatus`, đồng thời gọi `graphWindowStore.loadGraph()`.
     - Loại bỏ triệt để các truy vấn không bị ảnh hưởng bởi việc đổi nhánh như `stashList` và `listTags`.
   - [ ] **6.2.4**: Tối ưu chi phí tạo tiến trình trên Windows (Process Spawning Mitigation):
     - Tinh gọn các đối số Git CLI, khai thác F# Core Engine để lấy nhanh commit HEAD thay vì spawn thêm các tiến trình con Node.js không cần thiết.
+    - _(Nợ kỹ thuật — đánh dấu deferred: yêu cầu thay đổi ngoài phạm vi TypeScript, đụng vào F# Core Engine/native AOT; đồng thời lấp lỗ hổng `commitHead` chưa được cập nhật sau checkout. Sẽ xử lý ở nhóm việc sau.)_
 
-- [ ] **Nhiệm vụ 6.3: Cập nhật hợp đồng RPC & Định tuyến Dispatcher**
-  - [ ] **6.3.1**: Cập nhật hợp đồng `src/types/actions.ts`: Khai báo payload cho action `checkoutRemoteBranch` và `deleteRemoteBranch`.
-  - [ ] **6.3.2**: Mở rộng `src/extension/mutator/gitCliMutator.ts`: Hiện thực phương thức `checkoutRemoteBranch(remote, branch, newLocalBranch)` và `deleteRemoteBranch(remote, branch)` với chuẩn bọc an toàn `--`.
-  - [ ] **6.3.3**: Đăng ký tiếp nhận và định tuyến trong `src/extension/services/messageHandler.ts` và router `src/webview/lib/dispatcher.ts`.
+- [x] **Nhiệm vụ 6.3: Cập nhật hợp đồng RPC & Định tuyến Dispatcher**
+  - [x] **6.3.1**: Cập nhật hợp đồng `src/types/actions.ts`: Khai báo payload cho action `checkoutRemoteBranch` và `deleteRemoteBranch`.
+  - [x] **6.3.2**: Mở rộng `src/extension/mutator/gitCliMutator.ts`: Hiện thực phương thức `checkoutRemoteBranch(remote, branch, newLocalBranch)` và `deleteRemoteBranch(remote, branch)` với chuẩn bọc an toàn `--`.
+  - [x] **6.3.3**: Đăng ký tiếp nhận và định tuyến trong `src/extension/services/messageHandler.ts` và router `src/webview/lib/dispatcher.ts`.
 
-- [ ] **Nhiệm vụ 6.4 (TEST NHÓM 6): Bộ Kiểm Thử Song Hành & Đo Đạc Độ Trễ (Latency Benchmark Tests)**
-  - [ ] **6.4.1**: Tạo `tests/backend/mutator/remoteMutator.test.ts`: Test checkout remote tracking branch, tạo nhánh local mới, và xóa remote branch trên kho git giả lập.
-  - [ ] **6.4.2**: Tạo `tests/webview/components/sidebar/RemoteBranchInteraction.test.ts`: Test sự kiện double-click checkout remote, mở context menu, và nạp danh sách độc lập với `showRemoteBranch`.
-  - [ ] **6.4.3**: Tạo `tests/webview/performance/BranchSwitchPerformance.test.ts`: Test Optimistic UI cập nhật trong 16ms, kiểm chứng `git-repo.watcher` không bị kích hoạt refresh kép khi checkout.
+- [x] **Nhiệm vụ 6.4 (TEST NHÓM 6): Bộ Kiểm Thử Song Hành & Đo Đạc Độ Trễ (Latency Benchmark Tests)**
+  - [x] **6.4.1**: Tạo `tests/backend/mutator/remoteMutator.test.ts`: Test checkout remote tracking branch, tạo nhánh local mới, và xóa remote branch trên kho git giả lập.
+  - [x] **6.4.2**: Tạo `tests/webview/components/sidebar/RemoteBranchInteraction.test.ts`: Test sự kiện double-click checkout remote, mở context menu, và nạp danh sách độc lập với `showRemoteBranch`.
+  - [x] **6.4.3**: Tạo `tests/webview/performance/BranchSwitchPerformance.test.ts`: Test Optimistic UI cập nhật trong 16ms, kiểm chứng `git-repo.watcher` không bị kích hoạt refresh kép khi checkout.
 
-- [ ] **Nhiệm vụ 6.5: Bảo Vệ An Toàn Tính Năng Amend Trong Commit Composer (Smart Amend Protection - Hướng 1: Hard Block)**
-  - [ ] **6.5.1**: Xây dựng tín hiệu dẫn xuất kiểm soát an toàn `canAmend` và `amendDisabledReason` trong `staging.store.ts`:
+- [x] **Nhiệm vụ 6.5: Bảo Vệ An Toàn Tính Năng Amend Trong Commit Composer (Smart Amend Protection - Hướng 1: Hard Block)**
+  - [x] **6.5.1**: Xây dựng tín hiệu dẫn xuất kiểm soát an toàn `canAmend` và `amendDisabledReason` trong `staging.store.ts`:
     - Khóa tính năng (`canAmend = false`) khi kho chưa có commit nào (`commitHead === null`), tooltip hiển thị: *"Cannot amend: Repository has no commits yet"*.
     - Khóa tính năng (`canAmend = false`) khi commit HEAD đã được đẩy lên remote (`upstreamBranch !== null && aheadCount === 0`) nhằm triệt tiêu lỗi phân nhánh 1 ahead / 1 behind; tooltip hiển thị: *"Cannot amend: Latest commit has already been pushed to remote"*.
     - Kích hoạt (`canAmend = true`) khi kho đã có commit và đang có commit cục bộ chưa push (`aheadCount > 0`) hoặc chưa có upstream remote.
-  - [ ] **6.5.2**: Tích hợp cơ chế khóa vào `CommitComposer.tsx`:
+  - [x] **6.5.2**: Tích hợp cơ chế khóa vào `CommitComposer.tsx`:
     - Truyền `disabled={!canAmend.value}` và `title={amendDisabledReason.value}` vào Checkbox `Amend previous commit`.
     - Bảo vệ hàm `setAmend(value)` trong store không cho phép kích hoạt khi `canAmend.value === false`.
-  - [ ] **6.5.3**: Bổ sung bộ kiểm thử song hành cho Smart Amend:
+  - [x] **6.5.3**: Bổ sung bộ kiểm thử song hành cho Smart Amend:
     - Mở rộng `tests/webview/lib/stores/staging.store.test.ts` kiểm thử đầy đủ 4 trạng thái của `canAmend` và bẫy chặn `setAmend`.
     - Mở rộng `tests/webview/components/staging/CommitComposer.test.ts` kiểm thử render checkbox `disabled` và tooltip `title` tương ứng.
 
@@ -410,5 +411,12 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 6 bư�
 - **2026-10-20**: Bổ sung thiết kế **Nhiệm vụ 6.5: Cơ Chế Bảo Vệ Thông Minh Smart Amend Protection (Hướng 1: Hard Block)**:
   - Phân tích nguyên nhân gốc rễ lỗi phân nhánh 1 ahead / 1 behind khi sử dụng Amend trên commit đã push lên Remote và lỗi fatal khi repo chưa có commit.
   - Cập nhật tài liệu thiết kế `docs/02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md`: bổ sung tín hiệu dẫn xuất `canAmend` và `amendDisabledReason`, bảng chân trị trạng thái an toàn, và khóa vô hiệu hóa checkbox Amend kèm tooltip giải thích lý do.
+- **2026-10-20**: Hoàn tất **Nhóm Việc 6** (Tương Tác Remotes & Tối Ưu Hóa Tốc Độ Chuyển Nhánh). Xem báo cáo [016_phase3_2_remote_interactions_and_branch_switching.md](../../04_reports/phase3/016_phase3_2_remote_interactions_and_branch_switching.md):
+  - Hợp đồng RPC (Contract-First): 3 action mới (`checkoutRemoteBranch`, `pullRemoteBranch`, `deleteRemoteBranch`) + query `remoteBranches`; mở rộng `GitCliMutator` (`checkoutRemoteBranch`, `pullRemote`, `deleteRemoteBranch`) và `messageHandler.ts` (đăng ký + mute watcher).
+  - Tương tác Remotes: double-click checkout tracking branch, context menu 3 tác vụ (`sidebarRemoteBranchMenu`), nguồn dữ liệu `remoteGroups` độc lập với cờ `showRemoteBranch` (6.1.3).
+  - Tối ưu chuyển nhánh: Optimistic UI 16ms (`previousHeadBranch` + rollback), `muteGitRepoWatcher()` khi checkout, và `refreshAfterCheckout()` có mục tiêu thay cho `refresh()` toàn thể.
+  - 12 unit test mới trên 3 tệp; 4 cổng chẩn đoán đạt 100% PASS (backend 163, extension 29, webview 284).
+  - Ghi nhận 2 `[DEV_BUG]` (useless-assignment + import-order), 0 `[DESIGN_DEFECT]` — DDR = 0%, IBR = 100%.
+  - **Ghi chú**: Nhiệm vụ 6.2.4 (Process Spawning Mitigation khai thác F# Core Engine lấy nhanh commit HEAD) được **hoãn** — yêu cầu thay đổi ngoài phạm vi TypeScript, sẽ theo dõi ở nhóm việc sau.
 
 

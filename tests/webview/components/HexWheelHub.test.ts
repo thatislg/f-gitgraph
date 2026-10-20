@@ -130,4 +130,21 @@ describe("HexWheelHub", () => {
       container.querySelector("[data-petal='pull'] [data-petal-badge='behind']")?.textContent
     ).toBe("↓ 3");
   });
+
+  it("runs the quick action and collapses to State 0 when a satellite is clicked at State 1", async () => {
+    const { wheel } = await loadStores();
+    renderHub();
+
+    wheel.armWheel();
+    await flushEffects();
+    expect(wheel.wheelStage.value).toBe(1);
+
+    const pushIcon = container.querySelector("[data-iris-icon='push']");
+    pushIcon?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await flushEffects();
+
+    // Quick Mode: chạy lệnh Git nhanh rồi thu gọn về State 0, không bung nở State 2.
+    expect(wheel.wheelStage.value).toBe(0);
+    expect(container.querySelector("[data-wheel-cluster]")).toBeNull();
+  });
 });

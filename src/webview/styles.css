@@ -123,4 +123,18 @@
     animation-range: 0 1px;
     animation-timeline: scroll(root block);
   }
+
+  /* Micro Neon Glow cho 6 icon vệ tinh ở State 1 (Quick Mode): khi rê chuột hoặc lấy
+     tiêu điểm bàn phím, icon phóng nhẹ và sáng bừng lên để báo hiệu có thể nhấp chạy lệnh. */
+  [data-iris-icon] {
+    transition:
+      transform 150ms cubic-bezier(0.4, 0, 0.2, 1),
+      filter 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  [data-iris-icon]:hover,
+  [data-iris-icon]:focus-visible {
+    transform: scale(1.12);
+    filter: brightness(1.35);
+  }
 }
