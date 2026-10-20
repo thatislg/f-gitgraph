@@ -285,6 +285,18 @@ _Mục tiêu_: Chuyển đổi phân vùng `REMOTES` từ danh sách tĩnh (Read
   - [ ] **6.4.2**: Tạo `tests/webview/components/sidebar/RemoteBranchInteraction.test.ts`: Test sự kiện double-click checkout remote, mở context menu, và nạp danh sách độc lập với `showRemoteBranch`.
   - [ ] **6.4.3**: Tạo `tests/webview/performance/BranchSwitchPerformance.test.ts`: Test Optimistic UI cập nhật trong 16ms, kiểm chứng `git-repo.watcher` không bị kích hoạt refresh kép khi checkout.
 
+- [ ] **Nhiệm vụ 6.5: Bảo Vệ An Toàn Tính Năng Amend Trong Commit Composer (Smart Amend Protection - Hướng 1: Hard Block)**
+  - [ ] **6.5.1**: Xây dựng tín hiệu dẫn xuất kiểm soát an toàn `canAmend` và `amendDisabledReason` trong `staging.store.ts`:
+    - Khóa tính năng (`canAmend = false`) khi kho chưa có commit nào (`commitHead === null`), tooltip hiển thị: *"Cannot amend: Repository has no commits yet"*.
+    - Khóa tính năng (`canAmend = false`) khi commit HEAD đã được đẩy lên remote (`upstreamBranch !== null && aheadCount === 0`) nhằm triệt tiêu lỗi phân nhánh 1 ahead / 1 behind; tooltip hiển thị: *"Cannot amend: Latest commit has already been pushed to remote"*.
+    - Kích hoạt (`canAmend = true`) khi kho đã có commit và đang có commit cục bộ chưa push (`aheadCount > 0`) hoặc chưa có upstream remote.
+  - [ ] **6.5.2**: Tích hợp cơ chế khóa vào `CommitComposer.tsx`:
+    - Truyền `disabled={!canAmend.value}` và `title={amendDisabledReason.value}` vào Checkbox `Amend previous commit`.
+    - Bảo vệ hàm `setAmend(value)` trong store không cho phép kích hoạt khi `canAmend.value === false`.
+  - [ ] **6.5.3**: Bổ sung bộ kiểm thử song hành cho Smart Amend:
+    - Mở rộng `tests/webview/lib/stores/staging.store.test.ts` kiểm thử đầy đủ 4 trạng thái của `canAmend` và bẫy chặn `setAmend`.
+    - Mở rộng `tests/webview/components/staging/CommitComposer.test.ts` kiểm thử render checkbox `disabled` và tooltip `title` tương ứng.
+
 ---
 
 ## 3. Lộ Trình Triển Khai Tuần Tự Từng Bước Kèm Kiểm Thử (TDD Phasing Roadmap)
@@ -395,4 +407,8 @@ Toàn bộ quy trình lập trình được tiến hành theo thứ tự 6 bư�
   - Phân tích và khắc phục 2 khiếm khuyết lớn trong trải nghiệm người dùng: Phân vùng `REMOTES` chỉ là danh sách tĩnh thiếu tương tác hai chiều, và việc chuyển `LOCAL BRANCHES` bị chậm do Double Refresh Storm và chi phí spawn tiến trình trên Windows.
   - Thiết kế giải pháp kỹ thuật toàn diện: Tương tác double-click / Context Menu cho Remotes, Optimistic UI (16ms), cơ chế khóa tạm thời File Watcher (`muteWatcher`), và quy trình làm mới có mục tiêu `refreshAfterCheckout()`.
   - Mở rộng bảng kiểm kê tệp tin tác động, hợp đồng RPC (`checkoutRemoteBranch`, `deleteRemoteBranch`) và ma trận kiểm thử hiệu năng song hành.
+- **2026-10-20**: Bổ sung thiết kế **Nhiệm vụ 6.5: Cơ Chế Bảo Vệ Thông Minh Smart Amend Protection (Hướng 1: Hard Block)**:
+  - Phân tích nguyên nhân gốc rễ lỗi phân nhánh 1 ahead / 1 behind khi sử dụng Amend trên commit đã push lên Remote và lỗi fatal khi repo chưa có commit.
+  - Cập nhật tài liệu thiết kế `docs/02_design/phase3/02_Staging_UI_And_Composer_Component_Design.md`: bổ sung tín hiệu dẫn xuất `canAmend` và `amendDisabledReason`, bảng chân trị trạng thái an toàn, và khóa vô hiệu hóa checkbox Amend kèm tooltip giải thích lý do.
+
 

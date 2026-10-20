@@ -251,6 +251,17 @@ Các giá trị dẫn xuất tự động tính toán lại tức thì khi các 
    - `unstagedCount: Computed<number>`: Trả về `unstagedFiles.value.length`.
    - `subjectCounterColor: Computed<string>`: Trả về mã màu cảnh báo dựa trên độ dài chuỗi tiêu đề (Xám nếu $\le 50$, Vàng nếu $51 - 72$, Đỏ nếu $> 72$).
    - `commitButtonLabel: Computed<string>`: Trả về chuỗi hiển thị động trên nút chính (ví dụ: _"Amend commit"_ khi `isAmend` bật, hoặc _"Commit 3 files"_ khi có 3 tệp staged).
+   - `canAmend: Computed<boolean>`: Điều kiện logic cho phép bật/tắt chế độ Amend, trả về `true` khi `commitHead !== null && !(upstreamBranch !== null && aheadCount === 0)`.
+   - `amendDisabledReason: Computed<string | undefined>`: Chuỗi thông điệp giải thích lý do vô hiệu hóa checkbox Amend để gán vào thuộc tính `title` (tooltip) của phần tử DOM.
+
+3. **Bảng Chân Trị Trạng Thái An Toàn Của Chế Độ Amend (`canAmend`)**:
+
+| `commitHead` (Hash HEAD) | `upstreamBranch` (Nhánh Remote) | `aheadCount` (Số commit chưa push) | Giá Trị `canAmend` | Trạng Thái Checkbox & Chú Thích Tooltip (`title`)                                        |
+| :----------------------: | :-----------------------------: | :--------------------------------: | :----------------: | :--------------------------------------------------------------------------------------- |
+|         `null`           |             Bất kỳ              |               Bất kỳ               |    **`false`**     | **Vô hiệu hóa (`disabled`)**: _"Cannot amend: Repository has no commits yet"_            |
+|       Có mã băm SHA      |           Khác `null`           |               $= 0$                |    **`false`**     | **Vô hiệu hóa (`disabled`)**: _"Cannot amend: Latest commit has already been pushed to remote"_ |
+|       Có mã băm SHA      |           Khác `null`           |               $> 0$                |     **`true`**     | **Kích hoạt (Bình thường)**: Cho phép Amend an toàn vì có commit cục bộ chưa push        |
+|       Có mã băm SHA      |             `null`              |               Bất kỳ               |     **`true`**     | **Kích hoạt (Bình thường)**: Cho phép Amend an toàn vì chưa có upstream remote           |
 
 ---
 
@@ -268,6 +279,7 @@ Mọi tương tác từ UI đều thông qua các hàm hành động tập trung
 - `confirmDiscard()`: Đọc tham số từ `discardModalTarget`, gửi thông điệp `discardFileChanges` hoặc `discardAllChanges` tương ứng xuống Backend, sau đó đóng modal.
 - `commit()`: Kiểm tra `canCommit.value === true`, đặt `isCommitting.value = true`, gửi thông điệp `commitChanges` với 4 tham số (tiêu đề, mô tả, amend, sign). Khi nhận phản hồi thành công, làm sạch tiêu đề và mô tả, phát âm thanh vi mô, và đặt lại `isCommitting.value = false`.
 - `commitAndPush()`: Tương tự hàm commit, sau khi hoàn tất tự động kích hoạt thêm lệnh push lên remote tracking branch.
+- `setAmend(value: boolean)`: Đổi trạng thái `isAmend`. Nếu `value === true` nhưng `canAmend.value === false`, hàm lập tức thoát an toàn để ngăn chặn kích hoạt ngoài luồng. Khi bật hợp lệ: lưu bản nháp hiện tại và nạp thông điệp commit HEAD; khi tắt: hoàn trả bản nháp.
 
 ---
 
@@ -325,8 +337,8 @@ Mọi tương tác từ UI đều thông qua các hàm hành động tập trung
 | `StagingFileItem.test.tsx`     | `StagingFileItem`     | - Hiển thị đúng màu nền và ký tự huy hiệu vuông cho cả 5 mã (`A`, `M`, `D`, `R`, `U`).- Cụm nút tác vụ có class ẩn mặc định (`opacity-0`) và class hiển thị khi hover.- Click nút `+` gọi đúng callback `onStage`.- Click nút `-` gọi đúng callback `onUnstage`.- Click nút Discard gọi đúng `onDiscard`.- Click dòng tệp gọi đúng `onDiff`.                       |
 | `DiscardConfirmModal.test.tsx` | `DiscardConfirmModal` | - Hiển thị đúng tên tệp trong nội dung cảnh báo.- Nhấn phím `Esc` kích hoạt gọi `onCancel`.- Click nút Cancel kích hoạt gọi `onCancel`.- Click nút Discard kích hoạt gọi `onConfirm`.                                                                                                                                                                              |
 | `StagingPanel.test.tsx`        | `StagingPanel`        | - Render đúng số lượng dòng tệp ở cả 2 phân khu Staged và Unstaged.- Click nút "Stage All" gọi đúng hành động stage toàn bộ.- Click nút "Unstage All" gọi đúng hành động unstage toàn bộ.- Hiển thị đúng thông báo Empty State khi danh sách không có tệp biến động.                                                                                               |
-| `CommitComposer.test.tsx`      | `CommitComposer`      | - Bộ đếm ký tự hiển thị đúng định dạng `(30/50)` và đổi màu chuẩn xác qua 3 ngưỡng (xám $\rightarrow$ vàng $\rightarrow$ đỏ).- Nút Commit bị disabled khi ô tiêu đề rỗng.- Nút Commit hiển thị đúng số lượng tệp staged (ví dụ: `Commit 3 files`).- Nhấn tổ hợp phím `Ctrl + Enter` kích hoạt gọi hàm commit.- Tích chọn Amend tự động điền nội dung commit trước. |
-| `staging.store.test.ts`        | `stagingStore`        | - Tín hiệu `canCommit` trả về `false` khi danh sách staged rỗng và `isAmend` là `false`.- Tín hiệu `canCommit` trả về `true` khi danh sách staged rỗng NHƯNG `isAmend` là `true` kèm tiêu đề hợp lệ.- Tín hiệu `canCommit` trả về `false` khi `commitSubject` rỗng.- Cập nhật chính xác danh sách tệp khi nhận dữ liệu từ `loadStatus`.                            |
+| `CommitComposer.test.tsx`      | `CommitComposer`      | - Bộ đếm ký tự hiển thị đúng định dạng `(30/50)` và đổi màu chuẩn xác qua 3 ngưỡng (xám $\rightarrow$ vàng $\rightarrow$ đỏ).- Nút Commit bị disabled khi ô tiêu đề rỗng.- Nút Commit hiển thị đúng số lượng tệp staged (ví dụ: `Commit 3 files`).- Nhấn tổ hợp phím `Ctrl + Enter` kích hoạt gọi hàm commit.- Tích chọn Amend tự động điền nội dung commit trước.- Checkbox Amend bị `disabled` và hiển thị đúng tooltip khi `canAmend = false`.- Checkbox Amend được kích hoạt khi `canAmend = true`. |
+| `staging.store.test.ts`        | `stagingStore`        | - Tín hiệu `canCommit` trả về `false` khi danh sách staged rỗng và `isAmend` là `false`.- Tín hiệu `canCommit` trả về `true` khi danh sách staged rỗng NHƯNG `isAmend` là `true` kèm tiêu đề hợp lệ.- Tín hiệu `canCommit` trả về `false` khi `commitSubject` rỗng.- Cập nhật chính xác danh sách tệp khi nhận dữ liệu từ `loadStatus`.- Tín hiệu `canAmend` trả về `false` khi `commitHead === null`.- Tín hiệu `canAmend` trả về `false` khi `upstreamBranch !== null && aheadCount === 0`.- Tín hiệu `canAmend` trả về `true` khi `aheadCount > 0` hoặc chưa có remote tracking. |
 
 ---
 
@@ -336,3 +348,14 @@ Mọi tương tác từ UI đều thông qua các hàm hành động tập trung
 2. **Không Rối Mắt**: Không hiển thị thường trực ma trận icon tác vụ; cơ chế hover-to-reveal hoạt động mượt mà không gây giật layout.
 3. **Phím Tắt Tiện Lợi**: Lập trình viên có thể hoàn thành toàn bộ chu trình soạn thảo và commit chỉ bằng bàn phím (`Ctrl + Enter` để commit, `Esc` để hủy modal).
 4. **Độ Phủ Kiểm Thử**: Toàn bộ 6 tệp test component và store đạt trạng thái PASS 100% trên Vitest.
+
+---
+
+## 7. Lịch Sử Chỉnh Sửa & Khắc Phục Khiếm Khuyết Thiết Kế (Revision History)
+
+- **2026-10-15**: Khởi tạo bản đặc tả thiết kế giao diện Staging & Commit Composer.
+- **2026-10-20**: Khắc phục `[DESIGN_DEFECT]` — Thiếu cơ chế kiểm soát an toàn khi kích hoạt chế độ Amend:
+  - Bổ sung đặc tả kiến trúc **Smart Amend Protection (Hướng 1: Hard Block)** tại Mục 3.3.4 và Mục 4.2.
+  - Tích hợp 2 tín hiệu dẫn xuất phản ứng: `canAmend` và `amendDisabledReason` liên kết chặt chẽ với trạng thái `commitHead`, `upstreamBranch` và `aheadCount` của Git Graph.
+  - Vô hiệu hóa checkbox Amend khi kho chưa có commit hoặc khi commit HEAD đã được đẩy lên Remote, phòng ngừa triệt để lỗi phân nhánh 1 ahead, 1 behind và lỗi crash dòng lệnh Git CLI.
+  - Mở rộng ma trận kiểm thử song hành tại Mục 6.1.

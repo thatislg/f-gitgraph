@@ -13,7 +13,25 @@
   <img src="https://img.shields.io/badge/design-Neo--Brutalist%20Cyber--Lab-06b6d4?style=flat-square" alt="Design">
 </p>
 
-<p>&nbsp;</p>
+<!-- ================= HERO SHOWCASE PREVIEW ================= -->
+<p align="center">
+  <img src="./resources/v1.2.0_Overview.png" width="100%" alt="F-GitGraph v1.2.0 Overview - 3-Pane Workspace & Hexagonal Action Wheel" />
+</p>
+
+<p align="center">
+  <i>⚡ <b>Cyber-Lab 3-Pane Workspace</b> & <b>Hexagonal Radial Action HUD</b> in action.</i>
+</p>
+
+---
+
+## ⚡ What You See (At a Glance)
+
+- ⬡ **Hexagonal Radial Action HUD**: Instant access to Git operations (`Push`, `Pull`, `Fetch`, `Stash`, `Pop`, `Refresh`) directly from the top status bar with real-time status glow.
+- 📁 **Left Workspace Sidebar**: Direct hierarchical navigation for Working Tree changes, Local Branches, Remotes, Tags, and Stashes.
+- 📊 **Center High-Speed DAG**: Hexagonal commit nodes with neon branch lanes and instant commit inspection powered by F# Native AOT.
+- 🔍 **Instant Search & Filters**: Filter commits with `Ctrl+F` and seamlessly switch ordering modes (Topological, Date).
+
+---
 
 ## Overview: The Reborn Era
 
