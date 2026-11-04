@@ -164,13 +164,6 @@ export function HexWheelHub() {
           event.preventDefault();
           closeWheel();
         }
-        return;
-      }
-      if (event.key === " " || event.key === "Spacebar") {
-        if (wheelStage.value === 0 || wheelStage.value === 1) {
-          event.preventDefault();
-          openWheel();
-        }
       }
     }
 

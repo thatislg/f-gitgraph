@@ -101,12 +101,18 @@ describe("HexWheelHub", () => {
     expect(container.querySelector("[data-contextual-pill]")).toBeTruthy();
   });
 
-  it("closes on Escape and opens on Space", async () => {
+  it("closes on Escape when open, and does not open on Space", async () => {
     const { wheel } = await loadStores();
     renderHub();
     await flushEffects();
 
+    // Phím Space không mở bánh xe để tránh xung đột với việc nhập liệu ô text
     document.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    await flushEffects();
+    expect(wheel.wheelStage.value).toBe(0);
+
+    // Khi bánh xe đang mở (stage >= 2), nhấn Escape sẽ thu gọn về State 0
+    wheel.openWheel();
     await flushEffects();
     expect(wheel.wheelStage.value).toBe(2);
 
