@@ -19,6 +19,7 @@ jobs:
   lint-and-typecheck:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -47,6 +48,9 @@ jobs:
     name: Test & Build Native (${{ matrix.os }} - ${{ matrix.rid }})
     needs: lint-and-typecheck
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    env:
+      GIT_TERMINAL_PROMPT: 0
     strategy:
       fail-fast: false
       matrix:
