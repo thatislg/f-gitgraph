@@ -89,7 +89,7 @@ F-GitGraph organizes your repository into an intuitive, responsive, and non-clut
 2. **Left Sidebar Navigator**: Clean hierarchical tree of Working Tree status, Local Branches, Remote tracking branches, Tags, and Stashes with double-click checkout and right-click context menus.
 3. **Center DAG Graph Canvas**: Virtualized infinite scrolling commit table rendering hexagon nodes, branch curves, author avatars, and rich dwell hover popovers without dropping frames.
 4. **Right / Bottom Inspector Pane**:
-   - **Working Tree Mode**: Staging Area (Unstaged vs Staged files, file & hunk staging, discard changes) and Commit Composer (50-char counter, body description, amend toggle, GPG sign toggle).
+   - **Working Tree Mode**: Staging Area (Unstaged vs Staged files, file & hunk staging, discard changes) and Commit Composer (50-char counter, body description, amend toggle, GPG sign toggle). Keyboard-friendly with `Ctrl/Cmd + Enter` quick-commit, `Enter` to navigate from title to description, and zero typing interference (all global triggers strictly isolated from text input).
    - **Commit History Mode**: Overlay Commit Details drawer displaying author metadata, changed files, and integrated `vscode.diff`.
 
 ---

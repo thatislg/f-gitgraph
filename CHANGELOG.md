@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.1] - 2026-11-05
+
+### Fixed
+
+- **Commit UI & Typing Experience**: Removed intrusive global keyboard shortcuts (`Space`, `Alt + W`, `Ctrl + Space` from the radial command hub) that interfered with text entry in the Commit Composer header and description. Typing commit messages, spaces, and search queries is now completely smooth and interruption-free.
+
 ## [1.1.0] - 2026-10-16
 
 ### Added
